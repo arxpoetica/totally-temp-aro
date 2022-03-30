@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import PlanEditorActions from './plan-editor-actions'
+import PlanEditorSelectors from './plan-editor-selectors'
 import { Input } from '../common/forms/Input.jsx'
 
 const fieldOptions = [
@@ -18,17 +19,18 @@ const FiberAnnotations = (props) => {
     fiberAnnotations,
     selectedSubnetId,
     subnetFeatures,
+    rootSubnetIdForChild,
+    subnets
   } = props
 
   const [formValues, setFormValues] = useState({})
   const [formPlaceholders, setFormPlaceHolders] = useState({})
 
   useEffect(() => {
-    const rootSubnetId = getRootSubnetId(selectedSubnetId)
     // this useEffect is for pulling the annotations from state
-    if (selectedFiber.length === 1 && fiberAnnotations[rootSubnetId]) {
+    if (selectedFiber.length === 1 && fiberAnnotations[rootSubnetIdForChild]) {
       // if only one route selected, just set the values
-      const selectedFiberAnnotations = fiberAnnotations[rootSubnetId].find(
+      const selectedFiberAnnotations = fiberAnnotations[rootSubnetIdForChild].find(
         (annotation) =>
           annotation.fromNode === selectedFiber[0].fromNode &&
           annotation.toNode === selectedFiber[0].toNode,
@@ -36,7 +38,7 @@ const FiberAnnotations = (props) => {
       if (selectedFiberAnnotations && selectedFiberAnnotations.annotations) {
         setFormValues(selectedFiberAnnotations.annotations)
       }
-    } else if (selectedFiber.length > 1 && fiberAnnotations[rootSubnetId]) {
+    } else if (selectedFiber.length > 1 && fiberAnnotations[rootSubnetIdForChild]) {
       // if multiple routes are selected, compare the values to see if they match
       // if there is only one value, set it and make it editable
       // if there are multiple values, display the multiple values as a placeholder
@@ -46,7 +48,7 @@ const FiberAnnotations = (props) => {
       // for each selected fiber segment
       selectedFiber.forEach((fiberRoute) => {
         const selectedFiberAnnotations = fiberAnnotations[
-          rootSubnetId
+          rootSubnetIdForChild
         ].find(
           (annotation) =>
             annotation.fromNode === fiberRoute.fromNode &&
@@ -99,33 +101,13 @@ const FiberAnnotations = (props) => {
     setSelectedFiber([])
   }
 
-  function getRootSubnetId(subnetId) {
-    let rootSubnetFeature = subnetFeatures[subnetId]
-    if (rootSubnetFeature) {
-      // adding different checks in this if statement allows the
-      // fiber annotations to display in the side panel for those equipment
-      if (rootSubnetFeature.feature.networkNodeType === "splice_point") {
-        rootSubnetFeature = Object.values(subnetFeatures).find(subnetFeature => {
-          return !subnetFeature.subnetId
-            && subnetFeature.feature.networkNodeType === "central_office"
-            && subnetFeature.feature.objectId === rootSubnetFeature.subnetId
-        })
-      }
-    }
-
-    return rootSubnetFeature
-      && rootSubnetFeature.feature
-      && rootSubnetFeature.feature.objectId;
-  }
-
   function handleChange(event, label) {
     const { value, name } = event.target
     setFormValues({ ...formValues, [name]: { value, label } })
   }
 
   function saveAnnotations() {
-    const rootSubnetId = getRootSubnetId(selectedSubnetId)
-    const subnetAnnotations = fiberAnnotations[rootSubnetId]
+    const subnetAnnotations = fiberAnnotations[rootSubnetIdForChild]
     selectedFiber.forEach((fiberRoute) => {
       if (subnetAnnotations) {
         const annotation = subnetAnnotations.find(
@@ -147,8 +129,8 @@ const FiberAnnotations = (props) => {
     })
 
     setFiberAnnotations(
-      { [rootSubnetId]: subnetAnnotations },
-      rootSubnetId,
+      { [rootSubnetIdForChild]: subnetAnnotations },
+      rootSubnetIdForChild,
     )
   }
 
@@ -156,10 +138,16 @@ const FiberAnnotations = (props) => {
   return (
     <>
       {selectedFiber.length > 0 
-        && subnetFeatures[getRootSubnetId(selectedSubnetId)] 
+        && rootSubnetIdForChild 
+        && subnetFeatures[rootSubnetIdForChild] 
+        && subnetFeatures[rootSubnetIdForChild].feature.networkNodeType === "central_office"
         && (
-          subnetFeatures[getRootSubnetId(selectedSubnetId)].feature.networkNodeType === "central_office"
+        !subnets[selectedSubnetId]
+        || (
+          subnets[selectedSubnetId]
+          && !subnets[selectedSubnetId].parentSubnetId
           )
+        )
         && (
         <div className={'fiber-annotations plan-editor-thumb'}>
           <div className="info">
@@ -215,6 +203,8 @@ const mapStateToProps = (state) => ({
   fiberAnnotations: state.planEditor.fiberAnnotations,
   selectedSubnetId: state.planEditor.selectedSubnetId,
   subnetFeatures: state.planEditor.subnetFeatures,
+  subnets: state.planEditor.subnets,
+  rootSubnetIdForChild: PlanEditorSelectors.getRootSubnetIdForChild(state)
 })
 
 const mapDispatchToProps = (dispatch) => ({

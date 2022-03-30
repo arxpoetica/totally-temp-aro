@@ -4,6 +4,7 @@ import { connect } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import { constants } from './shared'
 import PlanEditorActions from './plan-editor-actions'
+import PlanEditorSelectors from './plan-editor-selectors'
 
 let mapObjects = []
 
@@ -19,6 +20,7 @@ export const FiberMapObjects = (props) => {
     selectedFiber,
     fiberAnnotations,
     layerEquipment,
+    rootSubnetId
   } = props
 
   const conduitStyles = {...layerEquipment.roads, ...layerEquipment.conduits}
@@ -49,7 +51,6 @@ export const FiberMapObjects = (props) => {
       subnetFeatures[selectedSubnetId].feature.dataType === "edge_construction_area"
     ) {
       
-      const rootSubnetId = getRootSubnetId()
       const { subnetLinks, fiberType } = subnets[rootSubnetId].fiber
 
       if (renderedSubnetId !== rootSubnetId || fiberRenderRequired) {
@@ -83,28 +84,6 @@ export const FiberMapObjects = (props) => {
       }
     }
 
-    function getRootSubnetId(subnetId) {
-      let rootSubnetFeature = subnetFeatures[subnetId]
-      if (rootSubnetFeature) {
-        // adding different checks in this if statement allows the
-        // fiber annotations to display in the side panel for those equipment
-        if (rootSubnetFeature.feature.networkNodeType === "splice_point") {
-          rootSubnetFeature = Object.values(subnetFeatures).find(subnetFeature => {
-            return !subnetFeature.subnetId
-              && subnetFeature.feature.networkNodeType === "central_office"
-              && subnetFeature.feature.objectId === rootSubnetFeature.subnetId
-          })
-        }
-      } else {
-        rootSubnetFeature = Object.values(subnetFeatures)
-        .find(feature => !feature.subnetId && !feature.feature.dataType)
-      }
-  
-      return rootSubnetFeature
-        && rootSubnetFeature.feature
-        && rootSubnetFeature.feature.objectId;
-    }
-
     function createMapObject(path, fromNode, toNode, fiberType, conduitType = null) {
       let strokeColor = layerEquipment.cables[fiberType].drawingOptions.strokeStyle
       let strokeWeight = fiberType === 'DISTRIBUTION' ? 2 : 3
@@ -121,10 +100,9 @@ export const FiberMapObjects = (props) => {
       let highlightColor = null
       let highlightWeight = null
       // set color purple if there are annotations
-      const selectedRootSubnetId = getRootSubnetId(selectedSubnetId)
       if (
-        fiberAnnotations[selectedRootSubnetId] &&
-        fiberAnnotations[selectedRootSubnetId].some(
+        fiberAnnotations[rootSubnetId] &&
+        fiberAnnotations[rootSubnetId].some(
           (fiber) => fiber.fromNode === fromNode && fiber.toNode === toNode,
         )
       ){
@@ -254,6 +232,7 @@ const mapStateToProps = (state) => ({
   selectedFiber: state.planEditor.selectedFiber,
   fiberAnnotations: state.planEditor.fiberAnnotations,
   layerEquipment: state.mapLayers.networkEquipment,
+  rootSubnetId: PlanEditorSelectors.getRootSubnetIdForChild(state)
 })
 
 const mapDispatchToProps = (dispatch) => ({
