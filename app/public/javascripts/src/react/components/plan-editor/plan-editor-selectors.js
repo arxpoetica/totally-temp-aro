@@ -29,6 +29,27 @@ const getSelectedPlanThumbInformation = createSelector(
   }
 )
 
+const getRootSubnetIdForChild = createSelector(
+  [getSelectedSubnetId, getSubnetFeatures],
+  (selectedSubnetId, subnetFeatures) => {
+    let rootSubnetFeature = subnetFeatures[selectedSubnetId]
+    if (rootSubnetFeature && rootSubnetFeature.subnetId) {
+        rootSubnetFeature = Object.values(subnetFeatures).find(subnetFeature => {
+          return !subnetFeature.subnetId
+            && subnetFeature.feature.networkNodeType === "central_office"
+            && subnetFeature.feature.objectId === rootSubnetFeature.subnetId
+        })
+    } else {
+      rootSubnetFeature = Object.values(subnetFeatures)
+        .find(feature => !feature.subnetId && !feature.feature.dataType)
+    }
+
+    return rootSubnetFeature
+      && rootSubnetFeature.feature
+      && rootSubnetFeature.feature.objectId;
+  }
+)
+
 const getIsRecalcSettled = createSelector(
   [getIsCalculatingSubnets, getIsCalculatingBoundary, getBoundaryDebounceBySubnetId],
   (isCalculatingSubnets, isCalculatingBoundary, boundaryDebounceBySubnetId) => {
@@ -364,6 +385,7 @@ const PlanEditorSelectors = Object.freeze({
   getLocationCounts,
   getSubnetFeatures,
   getSelectedPlanThumbInformation,
+  getRootSubnetIdForChild
 })
 
 export default PlanEditorSelectors
