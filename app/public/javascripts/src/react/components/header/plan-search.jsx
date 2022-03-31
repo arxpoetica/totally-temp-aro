@@ -654,8 +654,7 @@ export class PlanSearch extends Component {
   }
 
   convertTimeStampToDate(timestamp) {
-    const utcDate = toUTCDate(new Date(timestamp))
-    return new Intl.DateTimeFormat('en-US').format(utcDate)
+    return new Date(timestamp).toLocaleDateString('en-US')
   }
 
   handlePageClick(event) {
