@@ -59,7 +59,7 @@ export const PlanEditor = props => {
   }
 
   return (
-    <div className="aro-plan-editor" style={{paddingRight: '10px'}}>
+    <div className="aro-plan-editor">
 
       {/* certain things shouldn't be visible until drafts are loaded */}
       {isDraftLoadingOrLoaded(draftsState) && <>

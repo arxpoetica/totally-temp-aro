@@ -1,5 +1,5 @@
 .aro-plan-editor {
-  padding: 20px 0;
+  margin: 0 0 12px;
 }
 .aro-plan-editor h2 {
   margin: 0;
@@ -8,22 +8,7 @@
 }
 
 /* ========================= >>>>> plan navigation >>>>> */
-/*
-.plan-navigation .list {
-  display: none;
-  list-style: none;
-  margin: 0;
-  padding: 0 0 0 26px;
-}
-.plan-navigation .list.open { display: block; }
-.plan-navigation > .list { padding: 0; }
 
-.plan-navigation .item {
-  border-top: 1px dashed #dcdcdc;
-}
-
-.plan-navigation > ul > .item:first-child { border: none; }
-*/
 .plan-navigation .header {
   display: flex;
   justify-content: space-between;
@@ -37,11 +22,6 @@
   font-weight: normal;
   flex-wrap: wrap;
 }
-/*
-.plan-navigation .info.no-plus-minus {
-  padding-left: 22px;
-}
-*/
 
 .plan-nav-alert-list {
   padding-left: 20px;
@@ -91,24 +71,7 @@
   height: 18px;
   background-image: url('/svg/alert-panel-warning.svg');
 }
-/* 
-.plan-navigation .content > li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--gray-light);
-  cursor: pointer;
-}
-.plan-navigation .content > li:hover {
-  position: relative;
-  z-index: 5;
-}
-.plan-navigation .text {
-  display: flex;
-  align-items: center;
-}
-*/
+
 .plan-navigation .location,
 .plan-navigation .sm-biz,
 .plan-navigation .md-biz,
