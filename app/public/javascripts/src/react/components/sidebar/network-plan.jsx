@@ -78,11 +78,11 @@ const NetworkPlan = (props) => {
     return title
   }
   return (
-    <div className="network-plan" style={{ paddingBottom: ephemeral && "10px" }}>
+    <div className="network-plan">
       <div
         className="plan-name"
         title={getTitle()}
-        style={{ color: planInProgress ? "#1f7de6" : "black" }}
+        style={{ color: planInProgress ? '#1f7de6' : 'black' }}
       >
         { alertIcon() &&
           <div
@@ -97,7 +97,7 @@ const NetworkPlan = (props) => {
         {getTitle()}
       </div>
       {name &&
-        <div className="plan-metadata" style={{ marginBottom: !planInProgress && "10px" }}>
+        <div className="plan-metadata">
           {userFullName} |
           Created {new Date(createdDate).toLocaleDateString('en-US')} |
           Modified {new Date(updatedDate).toLocaleDateString('en-US')}

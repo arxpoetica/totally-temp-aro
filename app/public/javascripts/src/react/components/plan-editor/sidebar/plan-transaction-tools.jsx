@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import PlanEditorActions from '../plan-editor-actions'
-import { Grid, Button, Menu } from '@mantine/core'
+import { Button, Menu } from '@mantine/core'
 
 const PlanTransactionTools = props => {
 
@@ -13,44 +13,66 @@ const PlanTransactionTools = props => {
 
   return (
 
-    <Grid justify="center">
-      <Grid.Col span={6}>
-        <Button
-          fullWidth
-          variant="default"
-          onClick={() => discardTransaction(transactionId)}
-        >
-          Cancel
-        </Button>
-      </Grid.Col>
-      <Grid.Col span={6}>
-              {/* &nbsp;&nbsp;&gt; */}
-        <Menu
-          control={
-            <Button fullWidth>
-              Commit/Recalculate
-            </Button>
-          }
-          size="xl"
-          styles={{ root: { display: 'block' } }}
-        >
-          <Menu.Item
-            onClick={() => console.log('TODO:')}
-            variant="default"
-          >
-            Recalulate Hubs &amp; Terminals
-          </Menu.Item>
-          <Menu.Item
-            onClick={() => checkAndCommitTransaction(props)}
-            variant="default"
-            disabled={isCommittingTransaction}
-          >
-            Commit all changes &amp; run plan
-          </Menu.Item>
-        </Menu>
-      </Grid.Col>
-    </Grid>
+    <div className="transaction-tools">
+      <div className="state">Is ready or not</div>
 
+      <div className="columns">
+        <div className="column">
+          <Button
+            fullWidth
+            variant="default"
+            onClick={() => discardTransaction(transactionId)}
+          >
+            Cancel
+          </Button>
+        </div>
+
+        <div className="column">
+          {/* &nbsp;&nbsp;&gt; */}
+          <Menu
+            control={
+              <Button fullWidth>
+                Commit Actions
+              </Button>
+            }
+            size="xl"
+            styles={{ root: { display: 'block' } }}
+          >
+            <Menu.Item
+              onClick={() => console.log('TODO:')}
+              variant="default"
+            >
+              Recalulate Hubs &amp; Terminals
+            </Menu.Item>
+            <Menu.Item
+              onClick={() => checkAndCommitTransaction(props)}
+              variant="default"
+              disabled={isCommittingTransaction}
+            >
+              Commit all changes &amp; run plan
+            </Menu.Item>
+          </Menu>
+        </div>
+      </div>
+
+      <style jsx>{`
+        .transaction-tools {
+          margin: 0 0 20px;
+        }
+        .state {
+          margin: 0 0 6px;
+          text-align: center;
+        }
+        .columns {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+        }
+        .column {
+        }
+      `}</style>
+
+    </div>
   )
 }
 
@@ -91,4 +113,3 @@ function checkAndCommitTransaction({
     })
   } else commitTransaction(transactionId)
 }
-

@@ -1,51 +1,37 @@
 .network-plan {
-    white-space: nowrap;
-    padding-left: 10px;
-    padding-right: 10px;
-    display: flex;
-    flex-wrap: wrap;
-    width: 100%;
+  margin: 0 0 12px;
 }
 
 .network-plan .plan-name {
-    font-size: 16px;
-    width: 100%;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    color: black;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
+  width: 100%;
+  margin: 0 0 6px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  color: black;
+  font-size: 16px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
 }
 
 .network-plan .plan-metadata {
-    font-size: 14px;
-    width: 100%;
-    color: grey;
-    padding-bottom: 10px;
+  font-size: 14px;
+  width: 100%;
+  color: grey;
 }
 
 .network-plan .plan-state-icon {
-    width: 32px;
-    height: 32px;
-    background-size: 60%;
-    background-repeat: no-repeat;
-    background-position: 4px 5px;
-    cursor: pointer;
+  width: 32px;
+  height: 32px;
+  background: none no-repeat center transparent;
+  background-size: 60%;
+  cursor: pointer;
 }
 
-.network-plan .partial-fail-plan {
-    background-image: url('/svg/plan-partial-fail.svg');
-}
-
-.network-plan .hard-fail-plan {
-    background-image: url('/svg/plan-hard-fail.svg');
-}
-
-.network-plan .passed-plan {
-    background-image: url('/svg/plan-passed.svg');
-}
-
+.network-plan .partial-fail-plan { background-image: url('/svg/icon-warn.svg'); }
+.network-plan .hard-fail-plan { background-image: url('/svg/icon-error.svg'); }
+.network-plan .passed-plan { background-image: url('/svg/icon-good.svg'); }
 .network-plan .running-plan {
-    background-image: url('/svg/plan-running.svg');
+  background-image: url('/svg/icon-loader.svg');
+  animation: spin 1500ms infinite linear;
 }
