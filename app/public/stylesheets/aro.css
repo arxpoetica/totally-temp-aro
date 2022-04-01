@@ -1067,8 +1067,3 @@ ui-select-font {
 	border-style: solid;
 	border-width: thin;
 }
-
-@keyframes spin {
-  from { transform:rotate(0deg); }
-  to { transform:rotate(360deg); }
-}

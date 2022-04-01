@@ -2,6 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import PlanEditorActions from '../plan-editor-actions'
 import { Button, Menu } from '@mantine/core'
+import { StateIcon } from '../../common/state-icon.jsx'
 
 const PlanTransactionTools = props => {
 
@@ -14,7 +15,9 @@ const PlanTransactionTools = props => {
   return (
 
     <div className="transaction-tools">
-      <div className="state">Is ready or not</div>
+      <div className="state">
+        <StateIcon state="warn" onClick={() => {}} />
+      </div>
 
       <div className="columns">
         <div className="column">
