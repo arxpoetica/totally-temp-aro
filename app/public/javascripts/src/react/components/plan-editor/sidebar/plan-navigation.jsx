@@ -38,7 +38,13 @@ const PlanNavigation = props => {
   const [hoverPosition, setHoverPosition] = useState(null)
 
   function getHoverPosition(featureId) {
-    const node = props.rootDraft.equipment.find(node => node.id === featureId)
+    // get single list of all root draft equipment
+    let allEquipment = [] // should probably put into selector
+    Object.values(props.rootDrafts).forEach(draft => {
+      allEquipment = allEquipment.concat(draft.equipment)
+    })
+    // Ring plans don't have entries for for equipment
+    const node = allEquipment.find(node => node.id === featureId)
     //if (!node || !node.point) return null
     return WktUtils.getGoogleMapLatLngFromWKTPoint(node.point)
   }
@@ -266,7 +272,7 @@ const mapStateToProps = state => {
     selectedSubnetId: state.planEditor.selectedSubnetId,
     subnetFeatures: state.planEditor.subnetFeatures,
     drafts: state.planEditor.drafts,
-    rootDraft: PlanEditorSelectors.getRootDraft(state),
+    rootDrafts: PlanEditorSelectors.getRootDrafts(state),
     iconsByType: MapLayerSelectors.getIconsByType(state),
     map: state.map.googleMaps,
   }

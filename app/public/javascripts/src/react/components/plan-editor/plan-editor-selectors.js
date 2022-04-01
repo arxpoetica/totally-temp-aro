@@ -18,8 +18,12 @@ const getCursorLocationIds = state => state.planEditor.cursorLocationIds
 const getPlanThumbInformation = state => state.planEditor.getPlanThumbInformation
 
 const getDrafts = state => state.planEditor.drafts
-const getRootDraft = createSelector([getDrafts], (drafts) => {
-  return Object.values(drafts).find(draft => !draft.parentSubnetId)
+const getRootDrafts = createSelector([getDrafts], (drafts) => {
+  let rootDrafts = {}
+  for (const [id, draft] of Object.entries(drafts)) {
+    if (!draft.parentSubnetId) rootDrafts[id] = draft
+  }
+  return rootDrafts
 })
 
 const getSelectedPlanThumbInformation = createSelector(
@@ -99,6 +103,7 @@ locationWarnImgByType['3'].src = '/images/map_icons/aro/businesses_large_default
 locationWarnImgByType['4'].src = '/images/map_icons/aro/households_default_alert.png'
 locationWarnImgByType['5'].src = '/images/map_icons/aro/tower_alert.png'
 
+// can now have multiple roots
 const getRootSubnet = createSelector(
   [getSelectedSubnetId, getSubnetFeatures, getSubnets],
   (selectedFeatureId, subnetFeatures, subnets) => {
@@ -358,7 +363,7 @@ const PlanEditorSelectors = Object.freeze({
   getAlertsForSubnetTree,
   locationWarnImgByType,
   getRootSubnet,
-  getRootDraft,
+  getRootDrafts,
   getSelectedSubnetLocations,
   getCursorLocations,
   getLocationCounts,

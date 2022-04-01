@@ -144,7 +144,7 @@ function subscribeToSocket() {
       const unsubscriber = SocketManager.subscribe('SUBNET_DATA', rawData => {
         const data = JSON.parse(utf8decoder.decode(rawData.content))
         // console.log({ name: data.subnetNodeUpdateType, SUBNET_DATA: data, properties: rawData.properties })
-        console.log(data)
+        //console.log(data)
         // asynchronous set up of skeleton from socket data
         switch (data.subnetNodeUpdateType) {
           case DRAFT_STATES.START_INITIALIZATION: break // no op
@@ -157,13 +157,12 @@ function subscribeToSocket() {
                 const draft = klona(ref)
                 draft.nodeSynced = false
                 draft.subnetBoundary = klona(boundaryMap[draft.subnetId] || rootSubnetDetail.subnetBoundary)
-                if (draft.nodeType === 'central_office') {
+                draft.equipment = []
+                if (draft.nodeType === 'central_office') { 
                   draft.equipment = klona(rootSubnetDetail.children)
-                  // for ease, throwing CO on itself for display
-                  draft.equipment.push(klona(rootSubnetDetail.subnetId))
-                } else {
-                  draft.equipment = []
                 }
+                // for ease, throwing CO on itself for display
+                draft.equipment.push(klona(rootSubnetDetail.subnetId))
                 drafts[draft.subnetId] = draft
               }
             })
@@ -903,7 +902,7 @@ function readFeatures (featureIds) {
     let featuresToGet = []
     const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
     featureIds.forEach(featureId => {
-      console.log(featureId)
+      //console.log(featureId)
       if (!state.planEditor.features[typeof featureId === "string" ? featureId : featureId.objectId]) {
         featuresToGet.push(featureId)
       }

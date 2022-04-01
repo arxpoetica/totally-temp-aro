@@ -34,7 +34,7 @@ export const PlanEditor = props => {
     noMetaConstructionAreas,
     noMetaEquipmentTypes,
     transactionId,
-    rootDraft,
+    rootDrafts,
     getFiberAnnotations,
   } = props
 
@@ -45,10 +45,12 @@ export const PlanEditor = props => {
   }, [])
 
   useEffect(() => {
-    if (transactionId && rootDraft && draftsState === "END_INITIALIZATION") {
-      getFiberAnnotations(rootDraft.subnetId)
+    if (transactionId && draftsState === "END_INITIALIZATION") {
+      Object.values(rootDrafts).forEach(draft => {
+        getFiberAnnotations(draft.subnetId) // does this belong in a component or in a controller/action?
+      })
     }
-  }, [transactionId, !!rootDraft, draftsState])
+  }, [transactionId, Object.keys(rootDrafts), draftsState])
 
   function onFeatureFormSave(newValObj, objectId) {
     const { feature } = features[objectId]
@@ -125,7 +127,7 @@ const mapStateToProps = (state) => {
     noMetaEquipmentTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.networkEquipment.planEdit[planType].noMetaData) || [],
     noMetaConstructionAreas: (state.configuration.ui.perspective && state.configuration.ui.perspective.constructionAreas.planEdit[constructionPlanType].noMetaData) || [],
     transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
-    rootDraft: PlanEditorSelectors.getRootDraft(state),
+    rootDrafts: PlanEditorSelectors.getRootDrafts(state),
   }
 }
 
