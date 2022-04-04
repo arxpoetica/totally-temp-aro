@@ -313,7 +313,8 @@ function updateFeatureProperties({ feature, rootSubnetId }) {
       const state = getState()
       const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
 
-      // Do a PUT to send the equipment over to service
+      // Do a PUT to send the equipment over to service 
+      // parentSubnetId SHOULD be the parent BUT terminals are NOT subnets so it would use the CO 
       const url = `/service/plan-transaction/${transactionId}/subnet-equipment?parentSubnetId=${rootSubnetId}`
       const result = await AroHttp.put(url, feature)
 

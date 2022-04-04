@@ -118,6 +118,8 @@ const getRootSubnet = createSelector(
   }
 )
 
+//const getRootSubnetForFeature = create
+
 const getSelectedSubnetLocations = createSelector(
   [getSelectedSubnetId, getSelectedSubnet, getSubnetFeatures, getSubnets],
   (selectedSubnetId, selectedSubnet, subnetFeatures, subnets) => {
@@ -167,23 +169,31 @@ const getCursorLocations = createSelector(
   }
 )
 
+// can now have multiple subnets
 const getAlertsForSubnetTree = createSelector(
-  [getRootSubnet, getSubnets, getSubnetFeatures, getNetworkConfig],
-  (rootSubnet, subnets, subnetFeatures, networkConfig) => {
-    let alerts = {}
-    if (rootSubnet) {
-      let subnetTree = []
+  [getSubnets, getSubnetFeatures, getNetworkConfig],
+  (subnets, subnetFeatures, networkConfig) => {
 
-      // get all children hub subnets
+    // this should theoretically be it's own selector 
+    //  BUT I want to encourage the use of similar functions that get info from the draft
+    let rootSubnets = []
+    Object.values(subnets).forEach(subnet => {
+      if (!subnet.parentSubnetId) rootSubnets.push(subnet)
+    })
+
+    let alerts = {}
+    let subnetList = []
+    rootSubnets.forEach(rootSubnet => {
       const childrenHubSubnets = rootSubnet.children
         .filter(id => subnets[id])
         .map(id => subnets[id])
 
-      subnetTree = [rootSubnet, ...childrenHubSubnets]
-      for (const subnet of subnetTree) {
-        alerts = { ...alerts, ...getAlertsFromSubnet(subnet, subnetFeatures, networkConfig) }
-      }
-    }
+        subnetList = subnetList.concat( [rootSubnet, ...childrenHubSubnets] )
+    })
+    subnetList.forEach(subnet => {
+      alerts = { ...alerts, ...getAlertsFromSubnet(subnet, subnetFeatures, networkConfig) }
+    })
+
     return alerts
   }
 )
@@ -363,6 +373,7 @@ const PlanEditorSelectors = Object.freeze({
   getAlertsForSubnetTree,
   locationWarnImgByType,
   getRootSubnet,
+  //getRootSubnetForFeature,
   getRootDrafts,
   getSelectedSubnetLocations,
   getCursorLocations,
