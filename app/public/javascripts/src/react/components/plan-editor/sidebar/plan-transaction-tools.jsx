@@ -8,13 +8,13 @@ import { StateIcon } from '../../common/state-icon.jsx'
 const PlanTransactionTools = props => {
 
   const {
-    isCommittingTransaction,
     transactionId,
     discardTransaction,
     selectedSubnetId,
-    recalculateSubnets,
-    isRecalcDone,
     fiberAnnotations,
+    isRecalcDone,
+    isCommittingTransaction,
+    recalculateSubnets,
   } = props
 
   const menuItemDisabled = !isRecalcDone || isCommittingTransaction
@@ -127,10 +127,10 @@ const PlanTransactionTools = props => {
 
 const mapStateToProps = state => ({
   transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
-  isCommittingTransaction: state.planEditor.isCommittingTransaction,
-  fiberAnnotations: state.planEditor.fiberAnnotations || {},
   selectedSubnetId: state.planEditor.selectedSubnetId,
+  fiberAnnotations: state.planEditor.fiberAnnotations || {},
   isRecalcDone: PlanEditorSelectors.getIsRecalcDone(state),
+  isCommittingTransaction: state.planEditor.isCommittingTransaction,
 })
 
 const mapDispatchToProps = dispatch => ({
