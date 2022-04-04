@@ -19,19 +19,3 @@
   width: 100%;
   color: grey;
 }
-
-.network-plan .plan-state-icon {
-  width: 32px;
-  height: 32px;
-  background: none no-repeat center transparent;
-  background-size: 60%;
-  cursor: pointer;
-}
-
-.network-plan .partial-fail-plan { background-image: url('/svg/icon-warn.svg'); }
-.network-plan .hard-fail-plan { background-image: url('/svg/icon-error.svg'); }
-.network-plan .passed-plan { background-image: url('/svg/icon-good.svg'); }
-.network-plan .running-plan {
-  background-image: url('/svg/icon-loader.svg');
-  animation: spin 1500ms infinite linear;
-}
