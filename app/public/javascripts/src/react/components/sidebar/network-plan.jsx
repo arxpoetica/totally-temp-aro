@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import AroHttp from '../../common/aro-http'
-import TopProgressBar from './top-progress-bar.jsx'
 import ToolBarActions from '../header/tool-bar-actions'
+import TopProgressBar from './top-progress-bar.jsx'
+import { StateIcon } from '../common/state-icon.jsx'
 import { displayModes } from './constants'
 import './network-plan.css'
 
@@ -37,33 +38,33 @@ const NetworkPlan = (props) => {
     }
   }, [createdBy])
 
-  const alertIcon = () => {
-    let alertClass = "";
+  const getAlertState = () => {
+    let state = ''
     if (planErrors) {
       const hasErrors = Object.values(planErrors).some(errorCategory => {
-        return Object.values(errorCategory).length > 0;
+        return Object.values(errorCategory).length > 0
       })
   
       if (planInProgress) {
-        alertClass = "running-plan"
+        state = 'loading'
       } else if (hasErrors) {
         if (Object.values(planErrors.PRE_VALIDATION).length > 0) {
-          alertClass = "partial-fail-plan"
+          state = 'warn'
         }
         if (Object.values(planErrors.CANCELLED).length > 0) {
-          alertClass = "partial-fail-plan"
+          state = 'warn'
         }
         if (Object.values(planErrors.RUNTIME_EXCEPTION).length > 0) {
-          alertClass = "hard-fail-plan"
+          state = 'error'
         }
-      } else if (planState === "COMPLETED") {
-        alertClass = "passed-plan"
-      } else if (planState === "CANCELED") {
-        alertClass = "partial-fail-plan"
+      } else if (planState === 'COMPLETED') {
+        state = 'good'
+      } else if (planState === 'CANCELED') {
+        state = 'warn'
       }
     }
 
-    return alertClass
+    return state
   }
 
   const getTitle = () => {
@@ -84,9 +85,9 @@ const NetworkPlan = (props) => {
         title={getTitle()}
         style={{ color: planInProgress ? '#1f7de6' : 'black' }}
       >
-        { alertIcon() &&
-          <div
-            className={`plan-state-icon ${alertIcon()}`}
+        {getAlertState() &&
+          <StateIcon
+            state={getAlertState()}
             onClick={() => setSelectedDisplayMode(
               planType === 'RING'
                 ? displayModes.EDIT_RINGS
