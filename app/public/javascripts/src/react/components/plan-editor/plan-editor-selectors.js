@@ -118,8 +118,6 @@ const getRootSubnet = createSelector(
   }
 )
 
-//const getRootSubnetForFeature = create
-
 const getSelectedSubnetLocations = createSelector(
   [getSelectedSubnetId, getSelectedSubnet, getSubnetFeatures, getSubnets],
   (selectedSubnetId, selectedSubnet, subnetFeatures, subnets) => {
@@ -373,7 +371,6 @@ const PlanEditorSelectors = Object.freeze({
   getAlertsForSubnetTree,
   locationWarnImgByType,
   getRootSubnet,
-  //getRootSubnetForFeature,
   getRootDrafts,
   getSelectedSubnetLocations,
   getCursorLocations,

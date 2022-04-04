@@ -307,15 +307,18 @@ function createFeature(feature) {
   }
 }
 
-function updateFeatureProperties({ feature, rootSubnetId }) {
+function updateFeatureProperties(feature) {
   return async(dispatch, getState) => {
+    const state = getState()
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+    let parentSubnetId = null
+    const subnetId = state.planEditor.subnetFeatures[feature.objectId].subnetId
+    if (subnetId) parentSubnetId = state.planEditor.subnets[subnetId].parentSubnetId
     try {
-      const state = getState()
-      const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-
       // Do a PUT to send the equipment over to service 
       // parentSubnetId SHOULD be the parent BUT terminals are NOT subnets so it would use the CO 
-      const url = `/service/plan-transaction/${transactionId}/subnet-equipment?parentSubnetId=${rootSubnetId}`
+      let url = `/service/plan-transaction/${transactionId}/subnet-equipment`
+      if (parentSubnetId) url += `?parentSubnetId=${parentSubnetId}`
       const result = await AroHttp.put(url, feature)
 
       // Decorate the created feature with some default values
@@ -336,6 +339,10 @@ function updateFeatureProperties({ feature, rootSubnetId }) {
       console.error(err)
     }
   }
+}
+// helper
+function getRootSubnetIdForFeature(state, feature) {
+  
 }
 
 function addTransactionFeatures (features) {

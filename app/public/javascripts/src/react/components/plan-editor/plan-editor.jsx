@@ -54,10 +54,7 @@ export const PlanEditor = props => {
 
   function onFeatureFormSave(newValObj, objectId) {
     const { feature } = features[objectId]
-    updateFeatureProperties({
-      feature: { ...feature, networkNodeEquipment: newValObj },
-      rootSubnetId: rootSubnet.subnetNode,
-    })
+    updateFeatureProperties({ ...feature, networkNodeEquipment: newValObj })
   }
 
   return (
@@ -135,7 +132,7 @@ const mapDispatchToProps = dispatch => ({
   unsubscribeFromSocket: () => dispatch(PlanEditorActions.unsubscribeFromSocket()),
   subscribeToSocket: () => dispatch(PlanEditorActions.subscribeToSocket()),
   resumeOrCreateTransaction: () => dispatch(PlanEditorActions.resumeOrCreateTransaction()),
-  updateFeatureProperties: obj => dispatch(PlanEditorActions.updateFeatureProperties(obj)),
+  updateFeatureProperties: feature => dispatch(PlanEditorActions.updateFeatureProperties(feature)),
   getFiberAnnotations: subnetId => dispatch(PlanEditorActions.getFiberAnnotations(subnetId)),
 })
 
