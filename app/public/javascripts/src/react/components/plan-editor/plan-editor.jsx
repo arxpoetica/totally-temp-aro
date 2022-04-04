@@ -6,7 +6,6 @@ import PlanEditorSelectors from './plan-editor-selectors'
 import PlanEditorDrafts from './plan-editor-drafts.jsx'
 import PlanTransactionTools from './sidebar/plan-transaction-tools.jsx'
 import PlanEditorThumbs from './plan-editor-thumbs.jsx'
-import PlanEditorRecalculate from './plan-editor-recalculate.jsx'
 import EquipmentDragger from './equipment-dragger.jsx'
 import EquipmentMapObjects from './equipment-map-objects.jsx'
 import EquipmentBoundaryMapObjects from './equipment-boundary-map-objects.jsx'
@@ -27,7 +26,6 @@ export const PlanEditor = props => {
     resumeOrCreateTransaction,
     features,
     selectedEditFeatureIds,
-    selectedSubnetId,
     equipments,
     rootSubnet,
     updateFeatureProperties,
@@ -70,14 +68,6 @@ export const PlanEditor = props => {
         <FiberMapObjects />
         { /* If we are in "draw boundary mode" for any equipment, render the drawing component */ }
         { isDrawingBoundaryFor ? <BoundaryDrawCreator /> : null }
-
-        { /* We only want PlanEditorRecalculate to show for equipments */ }
-        {
-          selectedSubnetId
-          && features[selectedSubnetId]
-          && features[selectedSubnetId].feature.networkNodeType
-          && <PlanEditorRecalculate />
-        }
         <PlanEditorThumbs />
 
         {selectedEditFeatureIds.map(id => {
@@ -118,7 +108,6 @@ const mapStateToProps = (state) => {
     draftsState: state.planEditor.draftsState,
     features: state.planEditor.features,
     selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
-    selectedSubnetId: state.planEditor.selectedSubnetId,
     equipments: state.mapLayers.networkEquipment.equipments,
     constructionAreas: state.mapLayers.constructionAreas.construction_areas,
     rootSubnet: PlanEditorSelectors.getRootSubnet(state),

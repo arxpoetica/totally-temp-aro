@@ -1,4 +1,6 @@
 .aro-plan-editor {
+  overflow: auto;
+  height: 100%;
   margin: 0 0 12px;
 }
 .aro-plan-editor h2 {
@@ -101,45 +103,6 @@
 
 .plan-navigation .tower {
   background-image: url('/images/map_icons/aro/tower_alert.png');
-}
-
-/* ========================= >>>>> recalculate plan >>>>> */
-
-/* .plan-editor-recalculate {} */
-.plan-editor-recalculate .actions {
-  display: grid;
-  grid-auto-flow: column;
-  grid-gap: 10px;
-  justify-content: center;
-  align-items: center;
-  margin: 0 0 10px;
-}
-.plan-editor-recalculate .checkboxes {
-  display: grid;
-  grid-auto-flow: column;
-  grid-gap: 20px;
-  align-items: center;
-}
-.plan-editor-recalculate label {
-  margin: 0;
-}
-.plan-editor-recalculate .checkboxfill {
-  margin: 0 10px 0 0;
-}
-
-/* ========================= >>>>> plan editor actions >>>>> */
-
-/* .plan-editor-buttons {} */
-.plan-editor-buttons .group {
-  position: relative;
-  display: grid;
-  /* grid-template-columns: 1fr 1fr; */
-  grid-gap: 10px;
-  align-items: center;
-  margin: 0 0 10px;
-}
-.plan-editor-buttons .group .group {
-  margin: 0;
 }
 
 /* ========================= >>>>> plan editor header >>>>> */

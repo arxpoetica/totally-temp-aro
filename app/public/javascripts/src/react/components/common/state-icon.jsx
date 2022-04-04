@@ -6,12 +6,13 @@ import React from 'react'
  * @param {number} onClick
  */
 
-export const StateIcon = ({ state = 'good', onClick }) => <>
+export const StateIcon = ({ state = 'good', onClick = () => {} }) => <>
   <div
     className={`state-icon ${state}`}
     onClick={event => onClick && onClick(event)}
   />
 
+  {/* static styles */}
   <style jsx>{`
     @keyframes state-icon-spin {
       from { transform:rotate(0deg); }
@@ -22,7 +23,6 @@ export const StateIcon = ({ state = 'good', onClick }) => <>
       height: 30px;
       background: none no-repeat center transparent;
       background-size: 60%;
-      cursor: pointer;
     }
     .warn { background-image: url('/svg/icon-warn.svg'); }
     .error { background-image: url('/svg/icon-error.svg'); }
@@ -31,5 +31,9 @@ export const StateIcon = ({ state = 'good', onClick }) => <>
       background-image: url('/svg/icon-loader.svg');
       animation: state-icon-spin 1500ms infinite linear;
     }
+  `}</style>
+  {/* dynamic styles */}
+  <style jsx>{`
+    ${onClick ? '.state-icon { cursor: pointer; }' : ''}
   `}</style>
 </>
