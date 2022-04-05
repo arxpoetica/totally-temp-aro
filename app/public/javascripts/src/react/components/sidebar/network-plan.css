@@ -3,19 +3,21 @@
 }
 
 .network-plan .plan-name {
-  width: 100%;
-  margin: 0 0 6px;
-  text-overflow: ellipsis;
   overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: 0 0 2px;
   color: black;
   font-size: 16px;
   font-weight: bold;
-  display: flex;
-  align-items: center;
+  text-overflow: ellipsis;
 }
 
 .network-plan .plan-metadata {
-  font-size: 14px;
   width: 100%;
   color: grey;
+  font-size: 14px;
+  text-align: center;
 }

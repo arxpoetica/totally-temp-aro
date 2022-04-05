@@ -109,7 +109,7 @@ export const PlanEditor = props => {
         .aro-plan-editor {
           overflow: auto;
           height: 100%;
-          margin: 0 0 12px;
+          margin: -12px 0 12px;
         }
         .body {
           position: relative;

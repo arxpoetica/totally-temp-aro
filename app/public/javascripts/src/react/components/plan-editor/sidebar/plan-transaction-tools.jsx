@@ -133,7 +133,7 @@ const PlanTransactionTools = props => {
           justify-content: center;
           align-items: center;
           gap: 2px;
-          margin: 0 0 6px -6px;
+          margin: 0 0 15px;
           text-align: center;
         }
         .columns {
