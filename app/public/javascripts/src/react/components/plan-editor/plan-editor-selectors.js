@@ -103,21 +103,6 @@ locationWarnImgByType['3'].src = '/images/map_icons/aro/businesses_large_default
 locationWarnImgByType['4'].src = '/images/map_icons/aro/households_default_alert.png'
 locationWarnImgByType['5'].src = '/images/map_icons/aro/tower_alert.png'
 
-// can now have multiple roots
-const getRootSubnet = createSelector(
-  [getSelectedSubnetId, getSubnetFeatures, getSubnets],
-  (selectedFeatureId, subnetFeatures, subnets) => {
-    let rootSubnet = subnetFeatures[selectedFeatureId] || Object.values(subnetFeatures)[0]
-    if (rootSubnet) {
-      while(subnetFeatures[rootSubnet.subnetId]) {
-        rootSubnet = subnetFeatures[rootSubnet.subnetId]
-      }
-      rootSubnet = subnets[rootSubnet.feature.objectId]
-    }
-    return rootSubnet
-  }
-)
-
 const getSelectedSubnetLocations = createSelector(
   [getSelectedSubnetId, getSelectedSubnet, getSubnetFeatures, getSubnets],
   (selectedSubnetId, selectedSubnet, subnetFeatures, subnets) => {
@@ -370,7 +355,6 @@ const PlanEditorSelectors = Object.freeze({
   getIsRecalcSettled,
   getAlertsForSubnetTree,
   locationWarnImgByType,
-  getRootSubnet,
   getRootDrafts,
   getSelectedSubnetLocations,
   getCursorLocations,

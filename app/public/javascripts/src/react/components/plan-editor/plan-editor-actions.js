@@ -230,24 +230,27 @@ function unsubscribeFromSocket() {
 
 function createFeature(feature) {
   return async(dispatch, getState) => {
-
+    
     try {
 
-      const state = getState()
+      let state = getState()
       const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-
+      // find containing subnet
+      //  if no subnet: ? is there not one or is it not loaded? should we be able to add features before a subnet is selected? 
       // creating a feature on a blank plan
-      const rootSubnet = PlanEditorSelectors.getRootSubnet(state)
-      if (!rootSubnet) {
+      let selectedSubnetId = state.planEditor.selectedSubnetId
+      if (selectedSubnetId && state.planEditor.subnetFeatures[selectedSubnetId].subnetId) selectedSubnetId = planEditor.subnetFeatures[selectedSubnetId].subnetId
+      if (!selectedSubnetId) {
         const coordinatesResponse = await dispatch(addSubnets({ coordinates: feature.point.coordinates }))
+        // set selectedSubnetId to return?
       }
 
       const url = `/service/plan-transaction/${transactionId}/subnet_cmd/update-children`
       const commandsBody = { childId: feature, type: 'add' };
       // If it is a ring plan we need to pass in the parentID of the dumby subnet
       // inorder to find the correct ring plan in service
-      if (state.plan.activePlan.planType === "RING" && rootSubnet) {
-        commandsBody.subnetId = rootSubnet.subnetNode;
+      if (state.plan.activePlan.planType === "RING" && selectedSubnetId) {
+        commandsBody.subnetId = selectedSubnetId
       }
       const featureResults = await AroHttp.post(url, {
         commands: [commandsBody]
@@ -259,7 +262,8 @@ function createFeature(feature) {
       const subnetIdsResponse = await dispatch(addSubnets({ subnetIds: updatedSubnetIds }))
 
       // 2. wait for return, and run rest after
-      let subnetsCopy = JSON.parse(JSON.stringify(getState().planEditor.subnets))
+      state = getState() // refresh state
+      let subnetsCopy = JSON.parse(JSON.stringify(state.planEditor.subnets))
       const newFeatures = {}
       // the subnet and equipment updates are not connected, right now we get back two arrays
       // For now I am assuming the relevent subnet is the one with type 'modified'
@@ -268,8 +272,8 @@ function createFeature(feature) {
       // For a standard plan there should always be motified subnets
       // however that is not the case for ring plans as the rootSubnet
       // is not a real and is used to work in the single parent hirearchy so we can just grab that.
-      const modifiedSubnet = state.plan.activePlan.planType === "RING" && rootSubnet
-        ? rootSubnet
+      const modifiedSubnet = state.plan.activePlan.planType === "RING" && selectedSubnetId
+        ? selectedSubnetId
         : subnetUpdates.find(subnet => subnet.type === 'modified');
 
       const subnetId = modifiedSubnet.subnet
