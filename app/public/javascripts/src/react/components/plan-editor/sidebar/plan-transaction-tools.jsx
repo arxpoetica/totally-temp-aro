@@ -1,9 +1,24 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import PlanEditorActions from '../plan-editor-actions'
-import { Button, Menu } from '@mantine/core'
 import PlanEditorSelectors from '../plan-editor-selectors'
+import { Button, Menu } from '@mantine/core'
 import { StateIcon } from '../../common/state-icon.jsx'
+
+const DropdownCaret = () => {
+  return <span>
+    <style jsx>{`
+      span {
+        width: 10px;
+        height: 6px;
+        background-color: white;
+        mask-image: url('/svg/dropdown-caret.svg');
+        mask-repeat: no-repeat;
+        mask-size: contain;
+      }
+    `}</style>
+  </span>
+}
 
 const PlanTransactionTools = props => {
 
@@ -67,8 +82,12 @@ const PlanTransactionTools = props => {
         <div className="column">
           <Menu
             control={
-              <Button fullWidth disabled={menuItemDisabled}>
-                Commit Actions
+              <Button
+                fullWidth
+                rightIcon={<DropdownCaret/>}
+                disabled={menuItemDisabled}
+              >
+                Recalculate / Commit
               </Button>
             }
             size="xl"
@@ -89,7 +108,7 @@ const PlanTransactionTools = props => {
               variant="outline"
               disabled={menuItemDisabled}
             >
-              Commit all changes &amp; run plan
+              Commit Changes &amp; Exit
             </Menu.Item>
 
           </Menu>
@@ -98,6 +117,9 @@ const PlanTransactionTools = props => {
 
       <style jsx>{`
         .transaction-tools {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
           margin: 0 0 20px;
         }
         .state {
@@ -105,16 +127,13 @@ const PlanTransactionTools = props => {
           justify-content: center;
           align-items: center;
           gap: 2px;
-          margin: 0 0 6px;
+          margin: 0 0 6px -6px;
           text-align: center;
         }
-        .text {}
         .columns {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
+          display: flex;
           gap: 12px;
         }
-        .column {}
         .transaction-tools :global(.mantine-Menu-item) {
           border-width: 1px;
           border-style: solid;
