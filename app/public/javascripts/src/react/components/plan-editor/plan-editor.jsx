@@ -35,7 +35,8 @@ export const PlanEditor = props => {
     transactionId,
     rootDraft,
     getFiberAnnotations,
-    isRecalcDone,
+    isChangesSaved,
+    isRecalculating,
     isCommittingTransaction,
   } = props
 
@@ -99,7 +100,7 @@ export const PlanEditor = props => {
         <PlanNavigation />
         <AlertsTooltip />
 
-        {(!isRecalcDone || isCommittingTransaction) &&
+        {(!isChangesSaved || isRecalculating || isCommittingTransaction) &&
           <Overlay opacity={0.75} color="#ffffff" zIndex={5}/>
         }
       </div>
@@ -136,7 +137,8 @@ const mapStateToProps = (state) => {
     noMetaConstructionAreas: (state.configuration.ui.perspective && state.configuration.ui.perspective.constructionAreas.planEdit[constructionPlanType].noMetaData) || [],
     transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
     rootDraft: PlanEditorSelectors.getRootDraft(state),
-    isRecalcDone: PlanEditorSelectors.getIsRecalcDone(state),
+    isChangesSaved: PlanEditorSelectors.getIsChangesSaved(state),
+    isRecalculating: state.planEditor.isRecalculating,
     isCommittingTransaction: state.planEditor.isCommittingTransaction,
   }
 }
