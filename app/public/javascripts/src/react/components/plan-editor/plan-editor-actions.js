@@ -12,6 +12,7 @@ import { batch } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import PlanEditorSelectors from './plan-editor-selectors'
 import { constants } from './shared'
+import { displayModes } from '../sidebar/constants'
 const { DRAFT_STATES, BLOCKER, INCLUSION } = constants
 
 let validSubnetTypes = [
@@ -90,8 +91,7 @@ function clearTransaction (doOpenView = true) {
       if (doOpenView) {
         dispatch({
           type: Actions.TOOL_BAR_SET_SELECTED_DISPLAY_MODE,
-          // TODO: globalize the constants in tool-bar including displayModes
-          payload: 'VIEW',
+          payload: displayModes.ANALYSIS,
         })
       }
     })
@@ -100,24 +100,29 @@ function clearTransaction (doOpenView = true) {
 
 // ToDo: there's only one transaction don't require the ID
 function commitTransaction (transactionId) {
-  return (dispatch, getState) => {
-    const state = getState()
-    if (state.isCommittingTransaction 
-      || state.isEnteringTransaction
-      || state.isCalculatingSubnets
-    ) {
-      return Promise.reject()
-    }
-    return dispatch(recalculateSubnets(transactionId))
-      .then(() => {
-        dispatch(setIsCommittingTransaction(true))
-        return AroHttp.put(`/service/plan-transactions/${transactionId}`)
-          .then(() => dispatch(clearTransaction()))
-          .catch(err => {
-            console.error(err)
-            dispatch(clearTransaction())
-          })
+  return async(dispatch, getState) => {
+    try {
+      const { isCommittingTransaction, isEnteringTransaction, isCalculatingSubnets } = getState()
+      if (isCommittingTransaction || isEnteringTransaction || isCalculatingSubnets) {
+        return Promise.reject()
+      }
+
+      await dispatch(recalculateSubnets(transactionId))
+      dispatch(setIsCommittingTransaction(true))
+      dispatch({
+        type: Actions.TOOL_BAR_SET_SELECTED_DISPLAY_MODE,
+        payload: displayModes.ANALYSIS,
       })
+      await AroHttp.put(`/service/plan-transactions/${transactionId}`)
+      dispatch(clearTransaction())
+
+      const { data: plan } = await AroHttp.get(`/service/v1/plan/ephemeral/latest`)
+      dispatch({ type: Actions.PLAN_SET_ACTIVE_PLAN, payload: { plan } })
+
+    } catch (error) {
+      console.error(error)
+      dispatch(clearTransaction())
+    }
   }
 }
 
