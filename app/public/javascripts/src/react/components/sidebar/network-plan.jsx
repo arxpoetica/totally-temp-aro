@@ -6,6 +6,20 @@ import TopProgressBar from './top-progress-bar.jsx'
 import { StateIcon } from '../common/state-icon.jsx'
 import { displayModes } from './constants'
 
+const displayTimestamp = epoch => {
+  const datetime = new Date(epoch)
+  const language = navigator.language || 'en-US'
+  let display = datetime.toLocaleDateString(language) + ' '
+  display += datetime
+    .toLocaleTimeString(language, {
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+    .split(' ')
+    .join('')
+  return display
+}
+
 const NetworkPlan = (props) => {
   const [userFullName, setUserFullName] = useState("N/A")
   const {
@@ -74,9 +88,9 @@ const NetworkPlan = (props) => {
     } else if (serviceAreas.length > 1) {
       title = 'Multiple - ' + title
     }
-
     return title
   }
+
   return (
     <div className="network-plan">
       <div
@@ -100,7 +114,7 @@ const NetworkPlan = (props) => {
         <div className="plan-metadata">
           {userFullName} |
           Created {new Date(createdDate).toLocaleDateString('en-US')} |
-          Modified {new Date(updatedDate).toLocaleDateString('en-US')}
+          Modified {displayTimestamp(updatedDate)}
         </div>
       }
       {planInProgress && <TopProgressBar /> }
