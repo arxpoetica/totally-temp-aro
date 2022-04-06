@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import PlanEditorActions from './plan-editor-actions'
+import PlanEditorSelectors from './plan-editor-selectors'
 import { Input } from '../common/forms/Input.jsx'
 
 const fieldOptions = [
@@ -18,6 +19,8 @@ const FiberAnnotations = (props) => {
     fiberAnnotations,
     selectedSubnetId,
     subnetFeatures,
+    rootSubnetIdForChild,
+    subnets
   } = props
 
   const [formValues, setFormValues] = useState({})
@@ -25,9 +28,9 @@ const FiberAnnotations = (props) => {
 
   useEffect(() => {
     // this useEffect is for pulling the annotations from state
-    if (selectedFiber.length === 1 && fiberAnnotations[selectedSubnetId]) {
+    if (selectedFiber.length === 1 && fiberAnnotations[rootSubnetIdForChild]) {
       // if only one route selected, just set the values
-      const selectedFiberAnnotations = fiberAnnotations[selectedSubnetId].find(
+      const selectedFiberAnnotations = fiberAnnotations[rootSubnetIdForChild].find(
         (annotation) =>
           annotation.fromNode === selectedFiber[0].fromNode &&
           annotation.toNode === selectedFiber[0].toNode,
@@ -35,7 +38,7 @@ const FiberAnnotations = (props) => {
       if (selectedFiberAnnotations && selectedFiberAnnotations.annotations) {
         setFormValues(selectedFiberAnnotations.annotations)
       }
-    } else if (selectedFiber.length > 1 && fiberAnnotations[selectedSubnetId]) {
+    } else if (selectedFiber.length > 1 && fiberAnnotations[rootSubnetIdForChild]) {
       // if multiple routes are selected, compare the values to see if they match
       // if there is only one value, set it and make it editable
       // if there are multiple values, display the multiple values as a placeholder
@@ -45,7 +48,7 @@ const FiberAnnotations = (props) => {
       // for each selected fiber segment
       selectedFiber.forEach((fiberRoute) => {
         const selectedFiberAnnotations = fiberAnnotations[
-          selectedSubnetId
+          rootSubnetIdForChild
         ].find(
           (annotation) =>
             annotation.fromNode === fiberRoute.fromNode &&
@@ -92,7 +95,7 @@ const FiberAnnotations = (props) => {
       setFormValues({})
       setFormPlaceHolders({})
     }
-  }, [selectedFiber, fiberAnnotations, setFormPlaceHolders, setFormValues])
+  }, [selectedFiber, fiberAnnotations, setFormPlaceHolders, setFormValues, selectedSubnetId])
 
   function deselectFiber() {
     setSelectedFiber([])
@@ -104,7 +107,7 @@ const FiberAnnotations = (props) => {
   }
 
   function saveAnnotations() {
-    const subnetAnnotations = fiberAnnotations[selectedSubnetId]
+    const subnetAnnotations = fiberAnnotations[rootSubnetIdForChild]
     selectedFiber.forEach((fiberRoute) => {
       if (subnetAnnotations) {
         const annotation = subnetAnnotations.find(
@@ -126,8 +129,8 @@ const FiberAnnotations = (props) => {
     })
 
     setFiberAnnotations(
-      { [selectedSubnetId]: subnetAnnotations },
-      selectedSubnetId,
+      { [rootSubnetIdForChild]: subnetAnnotations },
+      rootSubnetIdForChild,
     )
   }
 
@@ -135,8 +138,16 @@ const FiberAnnotations = (props) => {
   return (
     <>
       {selectedFiber.length > 0 
-        && subnetFeatures[selectedSubnetId] 
-        && subnetFeatures[selectedSubnetId].feature.networkNodeType === "central_office" 
+        && rootSubnetIdForChild 
+        && subnetFeatures[rootSubnetIdForChild] 
+        && subnetFeatures[rootSubnetIdForChild].feature.networkNodeType === "central_office"
+        && (
+        !subnets[selectedSubnetId]
+        || (
+          subnets[selectedSubnetId]
+          && !subnets[selectedSubnetId].parentSubnetId
+          )
+        )
         && (
         <div className={'fiber-annotations plan-editor-thumb'}>
           <div className="info">
@@ -192,6 +203,8 @@ const mapStateToProps = (state) => ({
   fiberAnnotations: state.planEditor.fiberAnnotations,
   selectedSubnetId: state.planEditor.selectedSubnetId,
   subnetFeatures: state.planEditor.subnetFeatures,
+  subnets: state.planEditor.subnets,
+  rootSubnetIdForChild: PlanEditorSelectors.getRootSubnetIdForChild(state)
 })
 
 const mapDispatchToProps = (dispatch) => ({

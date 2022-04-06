@@ -108,6 +108,7 @@
 .display-mode-container .display-mode-buttons {
   overflow: auto;
   flex: 0 0 auto;
+  margin: 0 0 12px;
 }
 
 .display-mode-container .display-modes {

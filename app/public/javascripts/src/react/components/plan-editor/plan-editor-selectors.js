@@ -33,10 +33,35 @@ const getSelectedPlanThumbInformation = createSelector(
   }
 )
 
-const getIsRecalcSettled = createSelector(
+const getRootSubnetIdForChild = createSelector(
+  [getSelectedSubnetId, getSubnetFeatures],
+  (selectedSubnetId, subnetFeatures) => {
+    let rootSubnetFeature = subnetFeatures[selectedSubnetId]
+    if (rootSubnetFeature && rootSubnetFeature.subnetId) {
+        rootSubnetFeature = Object.values(subnetFeatures).find(subnetFeature => {
+          return !subnetFeature.subnetId
+            && subnetFeature.feature.networkNodeType === "central_office"
+            && subnetFeature.feature.objectId === rootSubnetFeature.subnetId
+        })
+    } else {
+      rootSubnetFeature = Object.values(subnetFeatures)
+        .find(feature => !feature.subnetId && !feature.feature.dataType)
+    }
+
+    return rootSubnetFeature
+      && rootSubnetFeature.feature
+      && rootSubnetFeature.feature.objectId;
+  }
+)
+
+const getIsRecalcDone = createSelector(
   [getIsCalculatingSubnets, getIsCalculatingBoundary, getBoundaryDebounceBySubnetId],
   (isCalculatingSubnets, isCalculatingBoundary, boundaryDebounceBySubnetId) => {
-    return (!isCalculatingSubnets && !isCalculatingBoundary && (0 === Object.keys(boundaryDebounceBySubnetId).length))
+    return (
+      !isCalculatingSubnets
+      && !isCalculatingBoundary
+      && 0 === Object.keys(boundaryDebounceBySubnetId).length
+    )
   }
 )
 
@@ -352,7 +377,7 @@ const PlanEditorSelectors = Object.freeze({
   getSelectedSubnet,
   getBoundaryLayersList,
   getFocusedEquipmentIds,
-  getIsRecalcSettled,
+  getIsRecalcDone,
   getAlertsForSubnetTree,
   locationWarnImgByType,
   getRootDrafts,
@@ -361,6 +386,7 @@ const PlanEditorSelectors = Object.freeze({
   getLocationCounts,
   getSubnetFeatures,
   getSelectedPlanThumbInformation,
+  getRootSubnetIdForChild
 })
 
 export default PlanEditorSelectors

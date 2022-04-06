@@ -1,6 +1,3 @@
-.aro-plan-editor {
-  padding: 20px 0;
-}
 .aro-plan-editor h2 {
   margin: 0;
   font-size: inherit;
@@ -8,22 +5,7 @@
 }
 
 /* ========================= >>>>> plan navigation >>>>> */
-/*
-.plan-navigation .list {
-  display: none;
-  list-style: none;
-  margin: 0;
-  padding: 0 0 0 26px;
-}
-.plan-navigation .list.open { display: block; }
-.plan-navigation > .list { padding: 0; }
 
-.plan-navigation .item {
-  border-top: 1px dashed #dcdcdc;
-}
-
-.plan-navigation > ul > .item:first-child { border: none; }
-*/
 .plan-navigation .header {
   display: flex;
   justify-content: space-between;
@@ -37,11 +19,6 @@
   font-weight: normal;
   flex-wrap: wrap;
 }
-/*
-.plan-navigation .info.no-plus-minus {
-  padding-left: 22px;
-}
-*/
 
 .plan-nav-alert-list {
   padding-left: 20px;
@@ -91,24 +68,7 @@
   height: 18px;
   background-image: url('/svg/alert-panel-warning.svg');
 }
-/* 
-.plan-navigation .content > li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--gray-light);
-  cursor: pointer;
-}
-.plan-navigation .content > li:hover {
-  position: relative;
-  z-index: 5;
-}
-.plan-navigation .text {
-  display: flex;
-  align-items: center;
-}
-*/
+
 .plan-navigation .location,
 .plan-navigation .sm-biz,
 .plan-navigation .md-biz,
@@ -138,45 +98,6 @@
 
 .plan-navigation .tower {
   background-image: url('/images/map_icons/aro/tower_alert.png');
-}
-
-/* ========================= >>>>> recalculate plan >>>>> */
-
-/* .plan-editor-recalculate {} */
-.plan-editor-recalculate .actions {
-  display: grid;
-  grid-auto-flow: column;
-  grid-gap: 10px;
-  justify-content: center;
-  align-items: center;
-  margin: 0 0 10px;
-}
-.plan-editor-recalculate .checkboxes {
-  display: grid;
-  grid-auto-flow: column;
-  grid-gap: 20px;
-  align-items: center;
-}
-.plan-editor-recalculate label {
-  margin: 0;
-}
-.plan-editor-recalculate .checkboxfill {
-  margin: 0 10px 0 0;
-}
-
-/* ========================= >>>>> plan editor actions >>>>> */
-
-/* .plan-editor-buttons {} */
-.plan-editor-buttons .group {
-  position: relative;
-  display: grid;
-  /* grid-template-columns: 1fr 1fr; */
-  grid-gap: 10px;
-  align-items: center;
-  margin: 0 0 10px;
-}
-.plan-editor-buttons .group .group {
-  margin: 0;
 }
 
 /* ========================= >>>>> plan editor header >>>>> */
