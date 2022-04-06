@@ -143,8 +143,6 @@ function subscribeToSocket() {
 
       const unsubscriber = SocketManager.subscribe('SUBNET_DATA', rawData => {
         const data = JSON.parse(utf8decoder.decode(rawData.content))
-        // console.log({ name: data.subnetNodeUpdateType, SUBNET_DATA: data, properties: rawData.properties })
-        //console.log(data)
         // asynchronous set up of skeleton from socket data
         switch (data.subnetNodeUpdateType) {
           case DRAFT_STATES.START_INITIALIZATION: break // no op
@@ -263,7 +261,7 @@ function createFeature(feature) {
 
       // 2. wait for return, and run rest after
       state = getState() // refresh state
-      let subnetsCopy = JSON.parse(JSON.stringify(state.planEditor.subnets))
+      let subnetsCopy = klona(state.planEditor.subnets)
       const newFeatures = {}
       // the subnet and equipment updates are not connected, right now we get back two arrays
       // For now I am assuming the relevent subnet is the one with type 'modified'
@@ -344,10 +342,6 @@ function updateFeatureProperties(feature) {
     }
   }
 }
-// helper
-function getRootSubnetIdForFeature(state, feature) {
-  
-}
 
 function addTransactionFeatures (features) {
   return {
@@ -374,7 +368,7 @@ function createConstructionArea(constructionArea) {
 
       // Move a parsed copy of the construction area in to the global state for subnets
       const [newSubnet, parsedFeature] = parseAPIConstructionAreasToStore(newFeature)
-      const subnetsCopy = JSON.parse(JSON.stringify(getState().planEditor.subnets))
+      const subnetsCopy = klona(getState().planEditor.subnets)
       subnetsCopy[newFeature.objectId] = newSubnet;
 
       // Move a parsed copoy of the construction area in to the global state for features
@@ -520,8 +514,7 @@ function _updateSubnetFeatures (subnetFeatures) {
     const body = {commands}
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
       .then(result => {
-        //console.log(result) // we do NOT get the child feature back in the result
-        
+        // we do NOT get the child feature back in the result
         dispatch({
           type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
           payload: subnetFeaturesById,
@@ -536,7 +529,7 @@ function _updateSubnetFeatures (subnetFeatures) {
 // helper
 function _spliceLocationFromTerminal (state, locationId, terminalId) {
   let subnetFeature = state.planEditor.subnetFeatures[terminalId]
-  subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
+  subnetFeature = klona(subnetFeature)
   
   let index = subnetFeature.feature.dropLinks.findIndex(dropLink => {
     //planEditor.subnetFeatures["0c9e9415-e5e2-4146-9594-bb3057ca54dc"].feature.dropLinks[0].locationLinks[0].locationId
@@ -571,7 +564,7 @@ function assignLocation (locationId, terminalId) {
     let features = []
 
     let toFeature = state.planEditor.subnetFeatures[terminalId]
-    toFeature = JSON.parse(JSON.stringify(toFeature))
+    toFeature = klona(toFeature)
     let subnetId = toFeature.subnetId
 
     let fromTerminalId = state.planEditor.subnets[subnetId].subnetLocationsById[locationId].parentEquipmentId
@@ -693,7 +686,7 @@ function updatePlanThumbInformation (payload) {
     const state = getState()
     const transactionId = state.planEditor.transaction.id
     const subnet = state.planEditor.subnets[payload.key]
-    const body = JSON.parse(JSON.stringify(state.planEditor.subnetFeatures[payload.key].feature))
+    const body = klona(state.planEditor.subnetFeatures[payload.key].feature)
     const isBlocker = payload.planThumbInformation === BLOCKER.KEY
     body.geometry.type = "Polygon";
     body.geometry.coordinates = subnet.subnetBoundary.polygon.coordinates[0]
@@ -792,8 +785,8 @@ function moveConstructionArea (objectId, newCoordinates) {
   return async (dispatch, getState) => {
     // Take in the new cordinates and move the entire polygon by the difference between them and the old coordinates
     const state = getState()
-    let constructionAreaSubnet = JSON.parse(JSON.stringify(state.planEditor.subnets[objectId]))
-    let constructionAreaFeature = JSON.parse(JSON.stringify(state.planEditor.subnetFeatures[objectId].feature))
+    let constructionAreaSubnet = klona(state.planEditor.subnets[objectId])
+    let constructionAreaFeature = klona(state.planEditor.subnetFeatures[objectId].feature)
     let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
 
     // Finding difference in lat and lng between old and new
@@ -814,11 +807,11 @@ function moveConstructionArea (objectId, newCoordinates) {
     })
 
     // The front end requires a Polygon while the front end requires a MultiPolygon. This is parsing it for the back end but maintaining it as is on the front end.
-    const body = JSON.parse(JSON.stringify(constructionAreaFeature))
+    const body = klona(constructionAreaFeature)
     body.geometry.type = "Polygon";
     body.geometry.coordinates = constructionAreaSubnet.subnetBoundary.polygon.coordinates[0]
     const featurePayload = {};
-    const subnetsCopy = JSON.parse(JSON.stringify(state.planEditor.subnets))
+    const subnetsCopy = klona(state.planEditor.subnets)
     featurePayload[objectId] = { feature: constructionAreaFeature, subnetId: null }
     subnetsCopy[objectId] = constructionAreaSubnet
     
@@ -885,8 +878,8 @@ function deleteConstructionArea (featureId) {
     const state = getState()
     let subnetFeature = state.planEditor.subnetFeatures[featureId]
     let subnet = state.planEditor.subnets[featureId]
-    subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
-    subnet = JSON.parse(JSON.stringify(subnet))
+    subnetFeature = klona(subnetFeature)
+    subnet = klona(subnet)
     let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
 
     await AroHttp.delete(`/service/plan-transaction/${transactionId}/edge-construction-area/${featureId}`)
@@ -914,7 +907,6 @@ function readFeatures (featureIds) {
     let featuresToGet = []
     const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
     featureIds.forEach(featureId => {
-      //console.log(featureId)
       if (!state.planEditor.features[typeof featureId === "string" ? featureId : featureId.objectId]) {
         featuresToGet.push(featureId)
       }
@@ -995,7 +987,7 @@ function getConsructionAreaByRoot (rootSubnet) {
     const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
     const body = { area: rootSubnet.subnetBoundary.polygon }
     const response = await AroHttp.post(`/service/plan-transaction/${transactionId}/cmd-edge-construction-area/search`, body)
-    const subnetsCopy = JSON.parse(JSON.stringify(getState().planEditor.subnets))
+    const subnetsCopy = klona(getState().planEditor.subnets)
     const newFeatures = {};
     response.data.forEach(constructionArea => {
       const [newSubnet, newFeature] = parseAPIConstructionAreasToStore(constructionArea.feature)
@@ -1175,7 +1167,6 @@ function setSelectedSubnetId (selectedSubnetId) {
             // TODO: we need to figure out the proper subnet select workflow
             // FDTs aren't subnets but can be selcted as such
             // that is where the following discrepancy comes from 
-            //console.log(result)
             if (!result) selectedSubnetId = null
             dispatch({
               type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
@@ -1246,7 +1237,7 @@ function recalculateBoundary (subnetId) {
       url = `/service/plan-transaction/${transactionId}/subnet/${subnetId}/boundary`
       method = "post"
     } else {
-      body = JSON.parse(JSON.stringify(state.planEditor.subnetFeatures[subnetId].feature))
+      body = klona(state.planEditor.subnetFeatures[subnetId].feature)
       body.geometry.type = "Polygon";
       body.geometry.coordinates = subnet.subnetBoundary.polygon.coordinates[0]
       url = `/service/plan-transaction/${transactionId}/edge-construction-area`
@@ -1424,7 +1415,7 @@ function parseRecalcEvents (recalcData) {
   // that will manage the subnetFeatures list with changes to a subnet (deleting children etc)
   return async(dispatch, getState) => {
     const { subnetFeatures } = getState().planEditor
-    let newSubnetFeatures = JSON.parse(JSON.stringify(subnetFeatures))
+    let newSubnetFeatures = klona(subnetFeatures)
     let updatedSubnets = {}
 
     const recalcedSubnetIds = [...new Set(recalcData.subnets.map(subnet => subnet.feature.objectId))]
@@ -1441,7 +1432,7 @@ function parseRecalcEvents (recalcData) {
       let subnetId = subnetRecalc.feature.objectId
       // TODO: looks like this needs to be rewritten 
       if (subnets[subnetId]) {
-        const subnetCopy = JSON.parse(JSON.stringify(subnets[subnetId]))
+        const subnetCopy = klona(subnets[subnetId])
 
         // update fiber
         // TODO: create parser for this???
@@ -1604,7 +1595,7 @@ function parseSubnetFeature (feature) {
 
 // helper function
 function unparseSubnetFeature (feature) {
-  feature = JSON.parse(JSON.stringify(feature))
+  feature = klona(feature)
   // --- unfix service typos - eventually this won't be needed --- //
   feature.id = feature.objectId
   delete feature.objectId
@@ -1627,7 +1618,7 @@ function parseAPIConstructionAreasToStore(constructionArea) {
 }
 
 function parseAPIConstructionAreasToSubnet (constructionArea) {
-  const geometry = JSON.parse(JSON.stringify(constructionArea.geometry))
+  const geometry = klona(constructionArea.geometry)
   geometry.type = "MultiPolygon";
   geometry.coordinates = [geometry.coordinates]
   const subnetContents = {
