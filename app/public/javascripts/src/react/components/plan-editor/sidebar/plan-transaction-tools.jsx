@@ -69,7 +69,7 @@ const PlanTransactionTools = props => {
 
     <div className="transaction-tools">
       <div className="state">
-        <StateIcon state={isLoading ? 'loading' : 'good'} />
+        <StateIcon state={isLoading ? 'loading' : 'good'} size="sm"/>
         <div className="text">{stateText}</div>
       </div>
 
@@ -134,6 +134,7 @@ const PlanTransactionTools = props => {
           align-items: center;
           gap: 2px;
           margin: 0 0 15px;
+          font-size: 12px;
           text-align: center;
         }
         .columns {
