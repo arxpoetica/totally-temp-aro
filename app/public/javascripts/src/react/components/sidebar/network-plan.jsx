@@ -12,7 +12,7 @@ const displayTimestamp = epoch => {
   let display = datetime.toLocaleDateString(language) + ' '
   display += datetime
     .toLocaleTimeString(language, {
-      hour: '2-digit',
+      hour: 'numeric',
       minute: '2-digit',
     })
     .split(' ')
