@@ -270,10 +270,11 @@ function createFeature(feature) {
       // For a standard plan there should always be motified subnets
       // however that is not the case for ring plans as the rootSubnet
       // is not a real and is used to work in the single parent hirearchy so we can just grab that.
+      
       const modifiedSubnet = state.plan.activePlan.planType === "RING" && selectedSubnetId
-        ? selectedSubnetId
+        ? subnetsCopy[selectedSubnetId]
         : subnetUpdates.find(subnet => subnet.type === 'modified');
-
+      
       const subnetId = modifiedSubnet.subnet
         ? modifiedSubnet.subnet.id
         : modifiedSubnet.subnetNode
