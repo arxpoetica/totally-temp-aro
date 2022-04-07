@@ -102,7 +102,7 @@ function clearTransaction (doOpenView = true) {
 function commitTransaction (transactionId) {
   return async(dispatch, getState) => {
     try {
-      const { isCommittingTransaction, isEnteringTransaction, isCalculatingSubnets } = getState()
+      const { isCommittingTransaction, isEnteringTransaction, isCalculatingSubnets, plan } = getState()
       if (isCommittingTransaction || isEnteringTransaction || isCalculatingSubnets) {
         return Promise.reject()
       }
@@ -116,8 +116,8 @@ function commitTransaction (transactionId) {
       await AroHttp.put(`/service/plan-transactions/${transactionId}`)
       dispatch(clearTransaction())
 
-      const { data: plan } = await AroHttp.get(`/service/v1/plan/ephemeral/latest`)
-      dispatch({ type: Actions.PLAN_SET_ACTIVE_PLAN, payload: { plan } })
+      const { data } = await AroHttp.get(`/service/v1/plan/${plan.activePlan.id}`)
+      dispatch({ type: Actions.PLAN_SET_ACTIVE_PLAN, payload: { plan: data } })
 
     } catch (error) {
       console.error(error)
