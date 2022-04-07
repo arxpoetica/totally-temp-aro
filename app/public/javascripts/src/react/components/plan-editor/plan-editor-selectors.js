@@ -33,24 +33,27 @@ const getSelectedPlanThumbInformation = createSelector(
   }
 )
 
-const getRootSubnetIdForChild = createSelector(
-  [getSelectedSubnetId, getSubnetFeatures],
-  (selectedSubnetId, subnetFeatures) => {
-    let rootSubnetFeature = subnetFeatures[selectedSubnetId]
-    if (rootSubnetFeature && rootSubnetFeature.subnetId) {
-        rootSubnetFeature = Object.values(subnetFeatures).find(subnetFeature => {
-          return !subnetFeature.subnetId
-            && subnetFeature.feature.networkNodeType === "central_office"
-            && subnetFeature.feature.objectId === rootSubnetFeature.subnetId
-        })
-    } else {
-      rootSubnetFeature = Object.values(subnetFeatures)
-        .find(feature => !feature.subnetId && !feature.feature.dataType)
+// utility 
+//  not sure where this should go, should be exported 
+function getRootOfFeature (drafts, subnetFeatures, featureId) {
+  // use draft
+  let subnetId = featureId
+  if (!drafts[subnetId]) subnetId = subnetFeatures[featureId] ? subnetFeatures[featureId].subnetId : null
+  if (subnetId) {
+    const maxGens = 10000 // avoid infinite loop
+    let gen = 0
+    while (drafts[subnetId].parentSubnetId && gen < maxGens) {
+      gen ++
+      subnetId = drafts[subnetId].parentSubnetId
     }
+  }
+  return subnetId // can return null
+}
 
-    return rootSubnetFeature
-      && rootSubnetFeature.feature
-      && rootSubnetFeature.feature.objectId;
+const getRootSubnetIdForSelected = createSelector(
+  [getSelectedSubnetId, getSubnetFeatures, getDrafts],
+  (selectedSubnetId, subnetFeatures, drafts) => {
+    return getRootOfFeature(drafts, subnetFeatures, selectedSubnetId)
   }
 )
 
@@ -177,7 +180,7 @@ const getCursorLocations = createSelector(
   }
 )
 
-// can now have multiple subnets
+// can have multiple subnets
 const getAlertsForSubnetTree = createSelector(
   [getSubnets, getSubnetFeatures, getNetworkConfig],
   (subnets, subnetFeatures, networkConfig) => {
@@ -386,7 +389,7 @@ const PlanEditorSelectors = Object.freeze({
   getLocationCounts,
   getSubnetFeatures,
   getSelectedPlanThumbInformation,
-  getRootSubnetIdForChild
+  getRootSubnetIdForSelected,
 })
 
 export default PlanEditorSelectors

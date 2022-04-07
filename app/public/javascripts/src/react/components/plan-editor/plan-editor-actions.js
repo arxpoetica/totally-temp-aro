@@ -1092,6 +1092,8 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
           const subnetId = subnet.subnetId.id
           if (!subnet.parentSubnetId) {
             dispatch(getConsructionAreaByRoot(subnet))
+            // TODO: get fiber annotations here
+            dispatch(getFiberAnnotations(subnetId))
           }
           fiberApiPromises.push(
             AroHttp.get(`/service/plan-transaction/${transaction.id}/subnetfeature/${subnetId}`)

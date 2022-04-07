@@ -205,6 +205,7 @@ export const FiberMapObjects = (props) => {
     subnetFeatures,
     fiberRenderRequired,
     setFiberRenderRequired,
+    fiberAnnotations,
     googleMaps,
     deleteMapObjects,
   ])
@@ -232,7 +233,7 @@ const mapStateToProps = (state) => ({
   selectedFiber: state.planEditor.selectedFiber,
   fiberAnnotations: state.planEditor.fiberAnnotations,
   layerEquipment: state.mapLayers.networkEquipment,
-  rootSubnetId: PlanEditorSelectors.getRootSubnetIdForChild(state)
+  rootSubnetId: PlanEditorSelectors.getRootSubnetIdForSelected(state)
 })
 
 const mapDispatchToProps = (dispatch) => ({

@@ -31,9 +31,6 @@ export const PlanEditor = props => {
     updateFeatureProperties,
     noMetaConstructionAreas,
     noMetaEquipmentTypes,
-    transactionId,
-    rootDrafts,
-    getFiberAnnotations,
     isRecalcDone,
     isCommittingTransaction,
   } = props
@@ -43,14 +40,6 @@ export const PlanEditor = props => {
       .then(() => resumeOrCreateTransaction())
     return () => unsubscribeFromSocket()
   }, [])
-
-  useEffect(() => {
-    if (transactionId && draftsState === "END_INITIALIZATION") {
-      Object.values(rootDrafts).forEach(draft => {
-        getFiberAnnotations(draft.subnetId) // does this belong in a component or in a controller/action?
-      })
-    }
-  }, [transactionId, Object.keys(rootDrafts), draftsState])
 
   function onFeatureFormSave(newValObj, objectId) {
     const { feature } = features[objectId]
@@ -131,8 +120,6 @@ const mapStateToProps = (state) => {
     constructionAreas: state.mapLayers.constructionAreas.construction_areas,
     noMetaEquipmentTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.networkEquipment.planEdit[planType].noMetaData) || [],
     noMetaConstructionAreas: (state.configuration.ui.perspective && state.configuration.ui.perspective.constructionAreas.planEdit[constructionPlanType].noMetaData) || [],
-    transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
-    rootDrafts: PlanEditorSelectors.getRootDrafts(state),
     isRecalcDone: PlanEditorSelectors.getIsRecalcDone(state),
     isCommittingTransaction: state.planEditor.isCommittingTransaction,
   }
@@ -143,7 +130,7 @@ const mapDispatchToProps = dispatch => ({
   subscribeToSocket: () => dispatch(PlanEditorActions.subscribeToSocket()),
   resumeOrCreateTransaction: () => dispatch(PlanEditorActions.resumeOrCreateTransaction()),
   updateFeatureProperties: feature => dispatch(PlanEditorActions.updateFeatureProperties(feature)),
-  getFiberAnnotations: subnetId => dispatch(PlanEditorActions.getFiberAnnotations(subnetId)),
+  //getFiberAnnotations: subnetId => dispatch(PlanEditorActions.getFiberAnnotations(subnetId)),
 })
 
 const PlanEditorComponent = wrapComponentWithProvider(reduxStore, PlanEditor, mapStateToProps, mapDispatchToProps)
