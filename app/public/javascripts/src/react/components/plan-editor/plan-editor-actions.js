@@ -128,14 +128,19 @@ function commitTransaction (transactionId) {
 
 // ToDo: there's only one transaction don't require the ID
 function discardTransaction (transactionId) {
-  return dispatch => {
-    dispatch(setIsCommittingTransaction(true))
-    TransactionManager.discardTransaction(transactionId)
-      .then(() => dispatch(clearTransaction()))
-      .catch(err => {
-        console.error(err)
+  return async(dispatch) => {
+    try {
+      dispatch(setIsCommittingTransaction(true))
+      const shouldDiscard = await TransactionManager.discardTransaction(transactionId)
+      if (shouldDiscard) {
         dispatch(clearTransaction())
-      })
+      } else {
+        dispatch(setIsCommittingTransaction(false))
+      }
+    } catch (error) {
+      console.error(error)
+      dispatch(clearTransaction())
+    }
   }
 }
 

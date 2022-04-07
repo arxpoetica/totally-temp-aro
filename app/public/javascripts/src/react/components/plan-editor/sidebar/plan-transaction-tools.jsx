@@ -25,12 +25,10 @@ const PlanTransactionTools = props => {
   const {
     transactionId,
     discardTransaction,
-    selectedSubnetId,
     fiberAnnotations,
     isChangesSaved,
     isRecalculating,
     isCommittingTransaction,
-    recalculateSubnets,
   } = props
 
   const isLoading = !isChangesSaved || isRecalculating || isCommittingTransaction
@@ -44,26 +42,6 @@ const PlanTransactionTools = props => {
       .map(annotations => annotations.length > 0)
       .filter(Boolean)
   ).length > 0
-
-  // TODO: move elsewhere
-  const recalculate = () => {
-    if (hasAnnotations) {
-      swal({
-        title: 'Are you sure you want to recalculate?',
-        text: 'If you have made any changes to the Feeder Fiber route, annotations will be lost.',
-        type: 'warning',
-        showCancelButton: true,
-        closeOnConfirm: true,
-        confirmButtonColor: '#fdbc80',
-        confirmButtonText: 'Yes, recalculate',
-        cancelButtonText: 'Oops, nevermind.',
-      }, (confirm) => {
-        if (confirm) recalculateSubnets(transactionId, [selectedSubnetId])
-      })	
-    } else {
-      recalculateSubnets(transactionId, [selectedSubnetId])
-    }
-  }
 
   return (
 
@@ -81,7 +59,7 @@ const PlanTransactionTools = props => {
             onClick={() => discardTransaction(transactionId)}
             disabled={isLoading}
           >
-            Cancel
+            Discard
           </Button>
         </div>
 
@@ -101,7 +79,7 @@ const PlanTransactionTools = props => {
           >
 
             <Menu.Item
-              onClick={() => recalculate()}
+              onClick={() => recalculate({ ...props, hasAnnotations })}
               variant="outline"
               color={hasAnnotations ? 'red' : undefined}
               disabled={isLoading}
@@ -172,9 +150,9 @@ export default connect(mapStateToProps, mapDispatchToProps)(PlanTransactionTools
 
 function checkAndCommitTransaction({
   isCommittingTransaction,
+  hasAnnotations,
   transactionId,
   commitTransaction,
-  hasAnnotations,
 }) {
   if (isCommittingTransaction) {
     return
@@ -193,4 +171,28 @@ function checkAndCommitTransaction({
       if (confirm) commitTransaction(transactionId)
     })
   } else commitTransaction(transactionId)
+}
+
+function recalculate({
+  hasAnnotations,
+  transactionId,
+  selectedSubnetId,
+  recalculateSubnets,
+}) {
+  if (hasAnnotations) {
+    swal({
+      title: 'Are you sure you want to recalculate?',
+      text: 'If you have made any changes to the Feeder Fiber route, annotations will be lost.',
+      type: 'warning',
+      showCancelButton: true,
+      closeOnConfirm: true,
+      confirmButtonColor: '#fdbc80',
+      confirmButtonText: 'Yes, recalculate',
+      cancelButtonText: 'Oops, nevermind.',
+    }, confirm => {
+      if (confirm) recalculateSubnets(transactionId, [selectedSubnetId])
+    })	
+  } else {
+    recalculateSubnets(transactionId, [selectedSubnetId])
+  }
 }

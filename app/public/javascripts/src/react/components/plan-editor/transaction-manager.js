@@ -107,28 +107,28 @@ export default class TransactionManager {
       })
   }
 
-  static discardTransaction (transactionId) {
+  static discardTransaction(transactionId) {
     return new Promise((resolve, reject) => {
       swal({
         title: 'Discard transaction?',
-        text: `Are you sure you want to discard transaction with ID ${transactionId}`,
+        text: `Are you sure you want to discard and exit transaction with ID ${transactionId}`,
         type: 'warning',
         confirmButtonColor: '#DD6B55',
         confirmButtonText: 'Yes, discard',
         cancelButtonText: 'No',
         showCancelButton: true,
-        closeOnConfirm: true
-      }, (deleteTransaction) => {
+        closeOnConfirm: true,
+      }, deleteTransaction => {
         if (deleteTransaction) {
           // The user has confirmed that the transaction should be deleted
           AroHttp.delete(`/service/plan-transactions/transaction/${transactionId}`)
-            .then(() => resolve())
+            .then(() => resolve(true))
             .catch(err => {
               console.error(err)
               reject(err)
             })
         } else {
-          reject(new Error(`The user does not want to discard the transaction`))
+          resolve(false)
         }
       })
     })
