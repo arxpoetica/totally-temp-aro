@@ -5,7 +5,20 @@ import ToolBarActions from '../header/tool-bar-actions'
 import TopProgressBar from './top-progress-bar.jsx'
 import { StateIcon } from '../common/state-icon.jsx'
 import { displayModes } from './constants'
-import './network-plan.css'
+
+const displayTimestamp = epoch => {
+  const datetime = new Date(epoch)
+  const language = navigator.language || 'en-US'
+  let display = datetime.toLocaleDateString(language) + ' '
+  display += datetime
+    .toLocaleTimeString(language, {
+      hour: 'numeric',
+      minute: '2-digit',
+    })
+    .split(' ')
+    .join('')
+  return display
+}
 
 const NetworkPlan = (props) => {
   const [userFullName, setUserFullName] = useState("N/A")
@@ -75,9 +88,9 @@ const NetworkPlan = (props) => {
     } else if (serviceAreas.length > 1) {
       title = 'Multiple - ' + title
     }
-
     return title
   }
+
   return (
     <div className="network-plan">
       <div
@@ -101,10 +114,34 @@ const NetworkPlan = (props) => {
         <div className="plan-metadata">
           {userFullName} |
           Created {new Date(createdDate).toLocaleDateString('en-US')} |
-          Modified {new Date(updatedDate).toLocaleDateString('en-US')}
+          Modified {displayTimestamp(updatedDate)}
         </div>
       }
       {planInProgress && <TopProgressBar /> }
+
+      <style jsx>{`
+        .network-plan {
+          margin: 0 0 12px;
+        }
+        .plan-name {
+          overflow: hidden;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 100%;
+          margin: 0 0 2px;
+          color: black;
+          font-size: 14px;
+          font-weight: bold;
+          text-overflow: ellipsis;
+        }
+        .plan-metadata {
+          width: 100%;
+          color: grey;
+          font-size: 12px;
+          text-align: center;
+        }
+      `}</style>
     </div>
   )
 }
