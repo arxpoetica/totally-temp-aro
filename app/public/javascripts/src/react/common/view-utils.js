@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react'
 import Constants from './constants.js'
+import moment from 'moment'
 
 // ========================= >>>>> style utils
 
@@ -75,6 +76,10 @@ export const toUTCDate = date => new Date(Date.UTC(
   date.getUTCMonth(),
   date.getUTCDate(),
 ))
+
+// utilize moment for time handling
+export const momentStartDate = startDate => moment(`${startDate}T00:00:00.000`)
+export const momentEndDate = endDate => moment(`${endDate}T23:59:59.000`)
 
 // These two are for formatting for datetime-local and date input elements
 export const getDateString = (date) => date.toISOString().substring(0, 10)
