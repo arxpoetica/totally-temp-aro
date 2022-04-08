@@ -108,7 +108,6 @@ const FiberAnnotations = (props) => {
 
   function saveAnnotations() {
     const subnetAnnotations = fiberAnnotations[rootSubnetIdForChild]
-    console.log(selectedFiber)
     selectedFiber.forEach((fiberRoute) => {
       if (subnetAnnotations) {
         const annotation = subnetAnnotations.find(
@@ -208,7 +207,7 @@ const mapStateToProps = (state) => ({
   selectedSubnetId: state.planEditor.selectedSubnetId,
   subnetFeatures: state.planEditor.subnetFeatures,
   subnets: state.planEditor.subnets,
-  rootSubnetIdForChild: PlanEditorSelectors.getRootSubnetIdForSelected(state)
+  rootSubnetIdForChild: PlanEditorSelectors.getRootSubnetIdForSelected(state),
 })
 
 const mapDispatchToProps = (dispatch) => ({

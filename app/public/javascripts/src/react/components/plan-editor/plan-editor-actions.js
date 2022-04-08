@@ -1330,25 +1330,12 @@ function recalculateSubnets (transactionId, subnetIds = []) {
   }
 }
 
-// TODO: with this we're using state to send messages, 
-//  this is incorrect. It points out a flaw in our architecture, fix.
-function setFiberRenderRequired (bool) {
-  return {
-    type: Actions.PLAN_EDITOR_SET_FIBER_RENDER_REQUIRED,
-    payload: bool,
-  }
-}
-
 function setSelectedFiber (fiberObjects) {
   return (dispatch) => {
     batch(() => {
       dispatch({
         type: Actions.PLAN_EDITOR_SET_FIBER_SELECTION,
         payload: fiberObjects,
-      })
-      dispatch({
-        type: Actions.PLAN_EDITOR_SET_FIBER_RENDER_REQUIRED,
-        payload: true,
       })
     })
   }
@@ -1487,13 +1474,7 @@ function parseRecalcEvents (recalcData) {
         type: Actions.PLAN_EDITOR_ADD_SUBNETS,
         payload: updatedSubnets,
       })
-      dispatch({
-        type: Actions.PLAN_EDITOR_SET_FIBER_RENDER_REQUIRED,
-        payload: true,
-      })
     })
-
-
   }
 }
 
@@ -1696,7 +1677,6 @@ export default {
   recalculateBoundary,
   boundaryChange,
   recalculateSubnets,
-  setFiberRenderRequired,
   setSelectedFiber,
   setFiberAnnotations,
   getFiberAnnotations,
