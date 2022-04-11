@@ -1048,7 +1048,7 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
     if (draftsState !== DRAFT_STATES.END_INITIALIZATION) {
       // semi-silently fail
       console.log(
-        '%cCannot load subnet until drafts are not fully initialized',
+        '%cCannot load subnet until drafts are fully initialized',
         'background-color:red;color:white;padding:8px;',
       )
       return
