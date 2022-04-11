@@ -15,7 +15,7 @@ import PlanNavigation from './sidebar/plan-navigation.jsx'
 import AlertsTooltip from './alerts-tooltip.jsx'
 import BoundaryDrawCreator from './boundary-draw-creator.jsx'
 import AroFeatureEditor from '../common/editor-interface/aro-feature-editor.jsx'
-import { isDraftLoadingOrLoaded } from './shared'
+import { constants, isDraftLoadingOrLoaded } from './shared'
 import './plan-editor.css'
 
 export const PlanEditor = props => {
@@ -45,7 +45,7 @@ export const PlanEditor = props => {
   }, [])
 
   useEffect(() => {
-    if (transactionId && rootDraft && draftsState === "END_INITIALIZATION") {
+    if (transactionId && rootDraft && draftsState === constants.DRAFT_STATES.END_INITIALIZATION) {
       getFiberAnnotations(rootDraft.subnetId)
     }
   }, [transactionId, !!rootDraft, draftsState])
