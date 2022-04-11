@@ -57,7 +57,7 @@ const getRootSubnetIdForSelected = createSelector(
   }
 )
 
-const getIsRecalcDone = createSelector(
+const getIsChangesSaved = createSelector(
   [getIsCalculatingSubnets, getIsCalculatingBoundary, getBoundaryDebounceBySubnetId],
   (isCalculatingSubnets, isCalculatingBoundary, boundaryDebounceBySubnetId) => {
     return (
@@ -380,7 +380,7 @@ const PlanEditorSelectors = Object.freeze({
   getSelectedSubnet,
   getBoundaryLayersList,
   getFocusedEquipmentIds,
-  getIsRecalcDone,
+  getIsChangesSaved,
   getAlertsForSubnetTree,
   locationWarnImgByType,
   getRootDrafts,

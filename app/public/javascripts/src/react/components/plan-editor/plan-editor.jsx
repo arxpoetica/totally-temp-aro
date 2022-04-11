@@ -31,7 +31,8 @@ export const PlanEditor = props => {
     updateFeatureProperties,
     noMetaConstructionAreas,
     noMetaEquipmentTypes,
-    isRecalcDone,
+    isChangesSaved,
+    isRecalculating,
     isCommittingTransaction,
   } = props
 
@@ -86,7 +87,7 @@ export const PlanEditor = props => {
         <PlanNavigation />
         <AlertsTooltip />
 
-        {(!isRecalcDone || isCommittingTransaction) &&
+        {(!isChangesSaved || isRecalculating || isCommittingTransaction) &&
           <Overlay opacity={0.75} color="#ffffff" zIndex={5}/>
         }
       </div>
@@ -95,7 +96,7 @@ export const PlanEditor = props => {
         .aro-plan-editor {
           overflow: auto;
           height: 100%;
-          margin: 0 0 12px;
+          margin: -12px 0 12px;
         }
         .body {
           position: relative;
@@ -120,7 +121,8 @@ const mapStateToProps = (state) => {
     constructionAreas: state.mapLayers.constructionAreas.construction_areas,
     noMetaEquipmentTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.networkEquipment.planEdit[planType].noMetaData) || [],
     noMetaConstructionAreas: (state.configuration.ui.perspective && state.configuration.ui.perspective.constructionAreas.planEdit[constructionPlanType].noMetaData) || [],
-    isRecalcDone: PlanEditorSelectors.getIsRecalcDone(state),
+    isChangesSaved: PlanEditorSelectors.getIsChangesSaved(state),
+    isRecalculating: state.planEditor.isRecalculating,
     isCommittingTransaction: state.planEditor.isCommittingTransaction,
   }
 }
@@ -130,7 +132,6 @@ const mapDispatchToProps = dispatch => ({
   subscribeToSocket: () => dispatch(PlanEditorActions.subscribeToSocket()),
   resumeOrCreateTransaction: () => dispatch(PlanEditorActions.resumeOrCreateTransaction()),
   updateFeatureProperties: feature => dispatch(PlanEditorActions.updateFeatureProperties(feature)),
-  //getFiberAnnotations: subnetId => dispatch(PlanEditorActions.getFiberAnnotations(subnetId)),
 })
 
 const PlanEditorComponent = wrapComponentWithProvider(reduxStore, PlanEditor, mapStateToProps, mapDispatchToProps)

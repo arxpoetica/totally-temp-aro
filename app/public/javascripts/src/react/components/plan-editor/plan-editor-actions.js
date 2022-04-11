@@ -12,6 +12,7 @@ import { batch } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import PlanEditorSelectors from './plan-editor-selectors'
 import { constants } from './shared'
+import { displayModes } from '../sidebar/constants'
 const { DRAFT_STATES, BLOCKER, INCLUSION } = constants
 
 let validSubnetTypes = [
@@ -44,7 +45,7 @@ function resumeOrCreateTransaction() {
       const planId = plan.activePlan.id
       const userId = user.loggedInUser.id
       const sessionId = await SocketManager.getSessionId()
-      const draftExists = draftsState === constants.DRAFT_STATES.END_INITIALIZATION
+      const draftExists = draftsState === DRAFT_STATES.END_INITIALIZATION
       const { data: transactionData }
         = await TransactionManager.resumeOrCreateTransaction(planId, userId, sessionId, draftExists)
 
@@ -90,8 +91,7 @@ function clearTransaction (doOpenView = true) {
       if (doOpenView) {
         dispatch({
           type: Actions.TOOL_BAR_SET_SELECTED_DISPLAY_MODE,
-          // TODO: globalize the constants in tool-bar including displayModes
-          payload: 'VIEW',
+          payload: displayModes.ANALYSIS,
         })
       }
     })
@@ -100,37 +100,47 @@ function clearTransaction (doOpenView = true) {
 
 // ToDo: there's only one transaction don't require the ID
 function commitTransaction (transactionId) {
-  return (dispatch, getState) => {
-    const state = getState()
-    if (state.isCommittingTransaction 
-      || state.isEnteringTransaction
-      || state.isCalculatingSubnets
-    ) {
-      return Promise.reject()
-    }
-    return dispatch(recalculateSubnets(transactionId))
-      .then(() => {
-        dispatch(setIsCommittingTransaction(true))
-        return AroHttp.put(`/service/plan-transactions/${transactionId}`)
-          .then(() => dispatch(clearTransaction()))
-          .catch(err => {
-            console.error(err)
-            dispatch(clearTransaction())
-          })
+  return async(dispatch, getState) => {
+    try {
+      const { isCommittingTransaction, isEnteringTransaction, isCalculatingSubnets, plan } = getState()
+      if (isCommittingTransaction || isEnteringTransaction || isCalculatingSubnets) {
+        return Promise.reject()
+      }
+
+      await dispatch(recalculateSubnets(transactionId))
+      dispatch(setIsCommittingTransaction(true))
+      dispatch({
+        type: Actions.TOOL_BAR_SET_SELECTED_DISPLAY_MODE,
+        payload: displayModes.ANALYSIS,
       })
+      await AroHttp.put(`/service/plan-transactions/${transactionId}`)
+      dispatch(clearTransaction())
+
+      const { data } = await AroHttp.get(`/service/v1/plan/${plan.activePlan.id}`)
+      dispatch({ type: Actions.PLAN_SET_ACTIVE_PLAN, payload: { plan: data } })
+
+    } catch (error) {
+      console.error(error)
+      dispatch(clearTransaction())
+    }
   }
 }
 
 // ToDo: there's only one transaction don't require the ID
 function discardTransaction (transactionId) {
-  return dispatch => {
-    dispatch(setIsCommittingTransaction(true))
-    TransactionManager.discardTransaction(transactionId)
-      .then(() => dispatch(clearTransaction()))
-      .catch(err => {
-        console.error(err)
+  return async(dispatch) => {
+    try {
+      dispatch(setIsCommittingTransaction(true))
+      const shouldDiscard = await TransactionManager.discardTransaction(transactionId)
+      if (shouldDiscard) {
         dispatch(clearTransaction())
-      })
+      } else {
+        dispatch(setIsCommittingTransaction(false))
+      }
+    } catch (error) {
+      console.error(error)
+      dispatch(clearTransaction())
+    }
   }
 }
 
@@ -638,19 +648,24 @@ function stopDrawingBoundary () {
   }
 }
 
-// does this need to be it's own function? it's only used in the recalc subnets function
-function setIsCalculatingSubnets (isCalculatingSubnets) {
+function setIsRecalculating(isRecalculating) {
   return {
-    type: Actions.PLAN_EDITOR_SET_IS_CALCULATING_SUBNETS,
-    payload: isCalculatingSubnets
+    type: Actions.PLAN_EDITOR_SET_IS_RECALCULATING,
+    payload: isRecalculating,
   }
 }
 
-// does this need to be it's own function? it's only used in the recalc boundary function
+function setIsCalculatingSubnets (isCalculatingSubnets) {
+  return {
+    type: Actions.PLAN_EDITOR_SET_IS_CALCULATING_SUBNETS,
+    payload: isCalculatingSubnets,
+  }
+}
+
 function setIsCalculatingBoundary (isCalculatingBoundary) {
   return {
     type: Actions.PLAN_EDITOR_SET_IS_CALCULATING_BOUNDARY,
-    payload: isCalculatingBoundary
+    payload: isCalculatingBoundary,
   }
 }
 
@@ -1026,6 +1041,7 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
   return async (dispatch, getState) => {
 
     const {
+      draftsState,
       transaction,
       subnets: cachedSubnets,
       requestedSubnetIds,
@@ -1033,11 +1049,21 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
       subnetFeatures,
     } = getState().planEditor
 
+    // NOTE: this is a temporary guard against loading subnets
+    // until we fix this up w/ further tuning
+    if (draftsState !== DRAFT_STATES.END_INITIALIZATION) {
+      // semi-silently fail
+      console.log(
+        '%cCannot load subnet until drafts are fully initialized',
+        'background-color:red;color:white;padding:8px;',
+      )
+      return
+    }
+
     let command = {}
     if (coordinates) {
       command.cmdType = 'QUERY_CO_SUBNET'
       command.point = { type: 'Point', coordinates }
-
     } else {
       // this little dance only fetches uncached (or forced to reload) subnets
       const cachedSubnetIds = [...Object.keys(cachedSubnets), ...requestedSubnetIds]
@@ -1126,8 +1152,20 @@ function addSubnetTreeByLatLng([lng, lat]) {
   return async(dispatch, getState) => {
 
     try {
-      const state = getState()
-      let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+      const { draftsState, transaction } = getState().planEditor
+
+      // NOTE: this is a temporary guard against loading subnets
+      // until we fix this up w/ further tuning
+      if (draftsState !== DRAFT_STATES.END_INITIALIZATION) {
+        // semi-silently fail
+        console.log(
+          '%cCannot load subnet until drafts are not fully initialized',
+          'background-color:red;color:white;padding:8px;',
+        )
+        return
+      }
+
+      const transactionId = transaction && transaction.id
       const command = {
         cmdType: 'QUERY_CO_SUBNET',
         point:{ type: 'Point', coordinates: [lng, lat] },
@@ -1194,12 +1232,16 @@ function onMapClick(featureIds, latLng) {
   // TODO: this file is has become a two course meal of spaghetti and return dispatch soup
   //  Corr, fix yer mess!
   return async(dispatch, getState) => {
-    const state = getState()
-    if (!featureIds.length || state.planEditor.subnetFeatures[featureIds[0]]) { 
-      dispatch(selectEditFeaturesById(featureIds))
-    } else {
-      await dispatch(addSubnetTreeByLatLng([latLng.lng(), latLng.lat()]))
-      dispatch(selectEditFeaturesById(featureIds))
+    try {
+      const state = getState()
+      if (!featureIds.length || state.planEditor.subnetFeatures[featureIds[0]]) { 
+        dispatch(selectEditFeaturesById(featureIds))
+      } else {
+        await dispatch(addSubnetTreeByLatLng([latLng.lng(), latLng.lat()]))
+        dispatch(selectEditFeaturesById(featureIds))
+      }
+    } catch (error) {
+      console.log(error)
     }
   }
 }
@@ -1302,31 +1344,36 @@ function boundaryChange (subnetId, geometry) {
   }
 }
 
-function recalculateSubnets (transactionId, subnetIds = []) {
-  return (dispatch, getState) => {
-    const state = getState()
-    if (state.isCalculatingSubnets) return Promise.reject()
-    let activeSubnets = []
-    dispatch(setIsCalculatingSubnets(true))
-    const recalcBody = { subnetIds: activeSubnets }
+function recalculateSubnets(transactionId, subnetIds = []) {
+  return async(dispatch, getState) => {
+    try {
+      const state = getState()
+      if (state.isCalculatingSubnets) return Promise.reject()
+      let activeSubnets = []
+      dispatch(setIsRecalculating(true))
+      dispatch(setIsCalculatingSubnets(true))
+      const recalcBody = { subnetIds: activeSubnets }
 
-    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet-cmd/recalc`, recalcBody)
-      .then(res => {
-        dispatch(setIsCalculatingSubnets(false))
-        batch(() => {
-          // remove annotations from recalculated subnets
-          res.data.subnets.forEach(subnet => {
-            let subnetId = subnet.feature.objectId
-            dispatch(setFiberAnnotations({[subnetId]: []}, subnetId))
-          })
-          // parse changes
-          dispatch(parseRecalcEvents(res.data))
+      const url = `/service/plan-transaction/${transactionId}/subnet-cmd/recalc`
+      const res = await AroHttp.post(url, recalcBody)
+
+      dispatch(setIsCalculatingSubnets(false))
+      dispatch(setIsRecalculating(false))
+      batch(() => {
+        // remove annotations from recalculated subnets
+        res.data.subnets.forEach(subnet => {
+          let subnetId = subnet.feature.objectId
+          dispatch(setFiberAnnotations({[subnetId]: []}, subnetId))
         })
+        // parse changes
+        dispatch(parseRecalcEvents(res.data))
       })
-      .catch(err => {
-        console.error(err)
-        dispatch(setIsCalculatingSubnets(false))
-      })
+
+    } catch (error) {
+      console.error(error)
+      dispatch(setIsCalculatingSubnets(false))
+      dispatch(setIsRecalculating(false))
+    }
   }
 }
 

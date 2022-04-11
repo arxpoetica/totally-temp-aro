@@ -25,46 +25,30 @@ const PlanTransactionTools = props => {
   const {
     transactionId,
     discardTransaction,
-    selectedSubnetId,
     fiberAnnotations,
-    isRecalcDone,
+    isChangesSaved,
+    isRecalculating,
     isCommittingTransaction,
-    recalculateSubnets,
   } = props
 
-  const menuItemDisabled = !isRecalcDone || isCommittingTransaction
+  const isLoading = !isChangesSaved || isRecalculating || isCommittingTransaction
+
+  let stateText = 'changes saved'
+  if (isRecalculating) stateText = 'recalculating...'
+  else if (!isChangesSaved) stateText = 'saving changes...'
+
   const hasAnnotations = (
     Object.values(fiberAnnotations)
       .map(annotations => annotations.length > 0)
       .filter(Boolean)
   ).length > 0
 
-  // TODO: move elsewhere
-  const recalculate = () => {
-    if (hasAnnotations) {
-      swal({
-        title: 'Are you sure you want to recalculate?',
-        text: 'If you have made any changes to the Feeder Fiber route, annotations will be lost.',
-        type: 'warning',
-        showCancelButton: true,
-        closeOnConfirm: true,
-        confirmButtonColor: '#fdbc80',
-        confirmButtonText: 'Yes, recalculate',
-        cancelButtonText: 'Oops, nevermind.',
-      }, (confirm) => {
-        if (confirm) recalculateSubnets(transactionId, [selectedSubnetId])
-      })	
-    } else {
-      recalculateSubnets(transactionId, [selectedSubnetId])
-    }
-  }
-
   return (
 
     <div className="transaction-tools">
       <div className="state">
-        <StateIcon state={isRecalcDone ? 'good' : 'loading'} />
-        <div className="text">{isRecalcDone ? 'changes saved' : 'recalculating...'}</div>
+        <StateIcon state={isLoading ? 'loading' : 'good'} size="sm"/>
+        <div className="text">{stateText}</div>
       </div>
 
       <div className="columns">
@@ -73,9 +57,9 @@ const PlanTransactionTools = props => {
             fullWidth
             variant="default"
             onClick={() => discardTransaction(transactionId)}
-            disabled={menuItemDisabled}
+            disabled={isLoading}
           >
-            Cancel
+            Discard
           </Button>
         </div>
 
@@ -85,7 +69,7 @@ const PlanTransactionTools = props => {
               <Button
                 fullWidth
                 rightIcon={<DropdownCaret/>}
-                disabled={menuItemDisabled}
+                disabled={isLoading}
               >
                 Recalculate / Commit
               </Button>
@@ -95,10 +79,10 @@ const PlanTransactionTools = props => {
           >
 
             <Menu.Item
-              onClick={() => recalculate()}
+              onClick={() => recalculate({ ...props, hasAnnotations })}
               variant="outline"
               color={hasAnnotations ? 'red' : undefined}
-              disabled={menuItemDisabled}
+              disabled={isLoading}
             >
               Recalulate Hubs &amp; Terminals
             </Menu.Item>
@@ -106,7 +90,7 @@ const PlanTransactionTools = props => {
             <Menu.Item
               onClick={() => checkAndCommitTransaction({ ...props, hasAnnotations })}
               variant="outline"
-              disabled={menuItemDisabled}
+              disabled={isLoading}
             >
               Commit Changes &amp; Exit
             </Menu.Item>
@@ -127,7 +111,8 @@ const PlanTransactionTools = props => {
           justify-content: center;
           align-items: center;
           gap: 2px;
-          margin: 0 0 6px -6px;
+          margin: 0 0 15px;
+          font-size: 12px;
           text-align: center;
         }
         .columns {
@@ -148,7 +133,8 @@ const mapStateToProps = state => ({
   transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
   selectedSubnetId: state.planEditor.selectedSubnetId,
   fiberAnnotations: state.planEditor.fiberAnnotations || {},
-  isRecalcDone: PlanEditorSelectors.getIsRecalcDone(state),
+  isChangesSaved: PlanEditorSelectors.getIsChangesSaved(state),
+  isRecalculating: state.planEditor.isRecalculating,
   isCommittingTransaction: state.planEditor.isCommittingTransaction,
 })
 
@@ -164,9 +150,9 @@ export default connect(mapStateToProps, mapDispatchToProps)(PlanTransactionTools
 
 function checkAndCommitTransaction({
   isCommittingTransaction,
+  hasAnnotations,
   transactionId,
   commitTransaction,
-  hasAnnotations,
 }) {
   if (isCommittingTransaction) {
     return
@@ -185,4 +171,28 @@ function checkAndCommitTransaction({
       if (confirm) commitTransaction(transactionId)
     })
   } else commitTransaction(transactionId)
+}
+
+function recalculate({
+  hasAnnotations,
+  transactionId,
+  selectedSubnetId,
+  recalculateSubnets,
+}) {
+  if (hasAnnotations) {
+    swal({
+      title: 'Are you sure you want to recalculate?',
+      text: 'If you have made any changes to the Feeder Fiber route, annotations will be lost.',
+      type: 'warning',
+      showCancelButton: true,
+      closeOnConfirm: true,
+      confirmButtonColor: '#fdbc80',
+      confirmButtonText: 'Yes, recalculate',
+      cancelButtonText: 'Oops, nevermind.',
+    }, confirm => {
+      if (confirm) recalculateSubnets(transactionId, [selectedSubnetId])
+    })	
+  } else {
+    recalculateSubnets(transactionId, [selectedSubnetId])
+  }
 }

@@ -9,6 +9,7 @@ const defaultState = {
   features: {},
   selectedEditFeatureIds: [],
   isDrawingBoundaryFor: null,
+  isRecalculating: false,
   isCalculatingSubnets: false,
   isCalculatingBoundary: false,
   isCreatingObject: false,
@@ -84,39 +85,31 @@ function clearTransactionFeatures (state) {
 }
 
 function setIsDrawingBoundaryFor (state, isDrawingBoundaryFor) {
-  return { ...state,
-    isDrawingBoundaryFor: isDrawingBoundaryFor
-  }
+  return { ...state, isDrawingBoundaryFor }
+}
+
+function setIsRecalculating (state, isRecalculating) {
+  return { ...state, isRecalculating }
 }
 
 function setIsCalculatingSubnets (state, isCalculatingSubnets) {
-  return { ...state,
-    isCalculatingSubnets: isCalculatingSubnets
-  }
+  return { ...state, isCalculatingSubnets }
 }
 
 function setIsCalculatingBoundary (state, isCalculatingBoundary) {
-  return { ...state,
-    isCalculatingBoundary: isCalculatingBoundary
-  }
+  return { ...state, isCalculatingBoundary }
 }
 
 function setIsCreatingObject (state, isCreatingObject) {
-  return { ...state,
-    isCreatingObject: isCreatingObject
-  }
+  return { ...state, isCreatingObject }
 }
 
 function setIsModifyingObject (state, isModifyingObject) {
-  return { ...state,
-    isModifyingObject: isModifyingObject
-  }
+  return { ...state, isModifyingObject }
 }
 
 function setIsDraggingFeatureForDrop (state, isDraggingFeatureForDrop) {
-  return { ...state,
-    isDraggingFeatureForDrop: isDraggingFeatureForDrop
-  }
+  return { ...state, isDraggingFeatureForDrop }
 }
 
 function setPlanThumbInformation (state, planThumbInformation) {
@@ -303,6 +296,9 @@ function planEditorReducer (state = defaultState, { type, payload }) {
 
     case Actions.PLAN_EDITOR_CLEAR_FEATURES:
       return clearTransactionFeatures(state)
+
+    case Actions.PLAN_EDITOR_SET_IS_RECALCULATING:
+      return setIsRecalculating(state, payload)
 
     case Actions.PLAN_EDITOR_SET_IS_CALCULATING_SUBNETS:
       return setIsCalculatingSubnets(state, payload)
