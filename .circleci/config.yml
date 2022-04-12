@@ -19,7 +19,6 @@ jobs:
           name: dependencies
           command: |
             # sudo apt-get install python-dev
-            # sudo npm install -g mocha
 
       - run:
           name: build and register
