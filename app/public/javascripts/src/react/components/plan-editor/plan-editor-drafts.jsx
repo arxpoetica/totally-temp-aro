@@ -15,7 +15,7 @@ const PlanEditorDrafts = props => {
 
   const {
     drafts,
-    rootDraft,
+    rootDrafts,
     googleMaps,
     selectedSubnetId,
     selectEditFeaturesById,
@@ -45,9 +45,8 @@ const PlanEditorDrafts = props => {
       } else if (itemType === 'boundary') {
         isInside = google.maps.geometry.poly.containsLocation(event.latLng, object)
       }
-      if (isInside) equipmentIds.push(itemId)
+      if (isInside && itemId) equipmentIds.push(itemId)
     }
-
     selectionCircle.setMap(null)
 
     const uniqueEquipmentIds = [...new Set(equipmentIds)]
@@ -66,13 +65,18 @@ const PlanEditorDrafts = props => {
   }, [objects])
 
   const draftsArray = Object.values(drafts)
+  // get single list of all root draft equipment
+  let allEquipment = [] // should probably put into selector
+  Object.values(rootDrafts).forEach(draft => {
+    allEquipment = allEquipment.concat(draft.equipment)
+  })
 
   return <>
     {draftsArray.map(draft => {
       const { subnetId, subnetBoundary, nodeSynced } = draft
       const options = { strokeOpacity: nodeSynced ? 1 : 0.5 }
 
-      if (selectedSubnetId !== subnetId) {
+      if (selectedSubnetId !== subnetId) { // do NOT show selected boundary, it's editable and handled elsewhere
         return (
           <Boundary
             key={subnetId}
@@ -87,7 +91,7 @@ const PlanEditorDrafts = props => {
       return null
     })}
 
-    {rootDraft && rootDraft.equipment.map(node => {
+    {allEquipment.map(node => {
       const { id, point, networkNodeType } = node
       const nodeSynced = drafts[id] && drafts[id].nodeSynced
       if (
@@ -114,7 +118,7 @@ const PlanEditorDrafts = props => {
 
 const mapStateToProps = state => ({
   drafts: state.planEditor.drafts,
-  rootDraft: PlanEditorSelectors.getRootDraft(state),
+  rootDrafts: PlanEditorSelectors.getRootDrafts(state), 
   googleMaps: state.map.googleMaps,
   selectedSubnetId: state.planEditor.selectedSubnetId,
   equipments: state.mapLayers.networkEquipment.equipments,

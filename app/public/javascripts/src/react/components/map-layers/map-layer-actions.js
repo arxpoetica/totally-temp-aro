@@ -100,10 +100,6 @@ function setCableConduitVisibility (cableKey, conduitKey, newVisibility) {
         visibility: newVisibility
       }
     })
-    dispatch({
-      type: Actions.PLAN_EDITOR_SET_FIBER_RENDER_REQUIRED,
-      payload: true,
-    })
   }
 }
 

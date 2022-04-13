@@ -18,8 +18,12 @@ const getCursorLocationIds = state => state.planEditor.cursorLocationIds
 const getPlanThumbInformation = state => state.planEditor.getPlanThumbInformation
 
 const getDrafts = state => state.planEditor.drafts
-const getRootDraft = createSelector([getDrafts], (drafts) => {
-  return Object.values(drafts).find(draft => !draft.parentSubnetId)
+const getRootDrafts = createSelector([getDrafts], (drafts) => {
+  let rootDrafts = {}
+  for (const [id, draft] of Object.entries(drafts)) {
+    if (!draft.parentSubnetId) rootDrafts[id] = draft
+  }
+  return rootDrafts
 })
 
 const getSelectedPlanThumbInformation = createSelector(
@@ -29,24 +33,27 @@ const getSelectedPlanThumbInformation = createSelector(
   }
 )
 
-const getRootSubnetIdForChild = createSelector(
-  [getSelectedSubnetId, getSubnetFeatures],
-  (selectedSubnetId, subnetFeatures) => {
-    let rootSubnetFeature = subnetFeatures[selectedSubnetId]
-    if (rootSubnetFeature && rootSubnetFeature.subnetId) {
-        rootSubnetFeature = Object.values(subnetFeatures).find(subnetFeature => {
-          return !subnetFeature.subnetId
-            && subnetFeature.feature.networkNodeType === "central_office"
-            && subnetFeature.feature.objectId === rootSubnetFeature.subnetId
-        })
-    } else {
-      rootSubnetFeature = Object.values(subnetFeatures)
-        .find(feature => !feature.subnetId && !feature.feature.dataType)
+// utility 
+//  not sure where this should go, should be exported 
+function getRootOfFeature (drafts, subnetFeatures, featureId) {
+  // use draft
+  let subnetId = featureId
+  if (!drafts[subnetId]) subnetId = subnetFeatures[featureId] ? subnetFeatures[featureId].subnetId : null
+  if (subnetId) {
+    const maxGens = 10000 // avoid infinite loop
+    let gen = 0
+    while (drafts[subnetId].parentSubnetId && gen < maxGens) {
+      gen ++
+      subnetId = drafts[subnetId].parentSubnetId
     }
+  }
+  return subnetId // can return null
+}
 
-    return rootSubnetFeature
-      && rootSubnetFeature.feature
-      && rootSubnetFeature.feature.objectId;
+const getRootSubnetIdForSelected = createSelector(
+  [getSelectedSubnetId, getSubnetFeatures, getDrafts],
+  (selectedSubnetId, subnetFeatures, drafts) => {
+    return getRootOfFeature(drafts, subnetFeatures, selectedSubnetId)
   }
 )
 
@@ -124,20 +131,6 @@ locationWarnImgByType['3'].src = '/images/map_icons/aro/businesses_large_default
 locationWarnImgByType['4'].src = '/images/map_icons/aro/households_default_alert.png'
 locationWarnImgByType['5'].src = '/images/map_icons/aro/tower_alert.png'
 
-const getRootSubnet = createSelector(
-  [getSelectedSubnetId, getSubnetFeatures, getSubnets],
-  (selectedFeatureId, subnetFeatures, subnets) => {
-    let rootSubnet = subnetFeatures[selectedFeatureId] || Object.values(subnetFeatures)[0]
-    if (rootSubnet) {
-      while(subnetFeatures[rootSubnet.subnetId]) {
-        rootSubnet = subnetFeatures[rootSubnet.subnetId]
-      }
-      rootSubnet = subnets[rootSubnet.feature.objectId]
-    }
-    return rootSubnet
-  }
-)
-
 const getSelectedSubnetLocations = createSelector(
   [getSelectedSubnetId, getSelectedSubnet, getSubnetFeatures, getSubnets],
   (selectedSubnetId, selectedSubnet, subnetFeatures, subnets) => {
@@ -187,23 +180,31 @@ const getCursorLocations = createSelector(
   }
 )
 
+// can have multiple subnets
 const getAlertsForSubnetTree = createSelector(
-  [getRootSubnet, getSubnets, getSubnetFeatures, getNetworkConfig],
-  (rootSubnet, subnets, subnetFeatures, networkConfig) => {
-    let alerts = {}
-    if (rootSubnet) {
-      let subnetTree = []
+  [getSubnets, getSubnetFeatures, getNetworkConfig],
+  (subnets, subnetFeatures, networkConfig) => {
 
-      // get all children hub subnets
+    // this should theoretically be it's own selector 
+    //  BUT I want to encourage the use of similar functions that get info from the draft
+    let rootSubnets = []
+    Object.values(subnets).forEach(subnet => {
+      if (!subnet.parentSubnetId) rootSubnets.push(subnet)
+    })
+
+    let alerts = {}
+    let subnetList = []
+    rootSubnets.forEach(rootSubnet => {
       const childrenHubSubnets = rootSubnet.children
         .filter(id => subnets[id])
         .map(id => subnets[id])
 
-      subnetTree = [rootSubnet, ...childrenHubSubnets]
-      for (const subnet of subnetTree) {
-        alerts = { ...alerts, ...getAlertsFromSubnet(subnet, subnetFeatures, networkConfig) }
-      }
-    }
+        subnetList = subnetList.concat( [rootSubnet, ...childrenHubSubnets] )
+    })
+    subnetList.forEach(subnet => {
+      alerts = { ...alerts, ...getAlertsFromSubnet(subnet, subnetFeatures, networkConfig) }
+    })
+
     return alerts
   }
 )
@@ -382,14 +383,13 @@ const PlanEditorSelectors = Object.freeze({
   getIsChangesSaved,
   getAlertsForSubnetTree,
   locationWarnImgByType,
-  getRootSubnet,
-  getRootDraft,
+  getRootDrafts,
   getSelectedSubnetLocations,
   getCursorLocations,
   getLocationCounts,
   getSubnetFeatures,
   getSelectedPlanThumbInformation,
-  getRootSubnetIdForChild
+  getRootSubnetIdForSelected,
 })
 
 export default PlanEditorSelectors

@@ -153,29 +153,27 @@ function subscribeToSocket() {
 
       const unsubscriber = SocketManager.subscribe('SUBNET_DATA', rawData => {
         const data = JSON.parse(utf8decoder.decode(rawData.content))
-        // console.log({ name: data.subnetNodeUpdateType, SUBNET_DATA: data, properties: rawData.properties })
-
         // asynchronous set up of skeleton from socket data
         switch (data.subnetNodeUpdateType) {
           case DRAFT_STATES.START_INITIALIZATION: break // no op
           case DRAFT_STATES.INITIAL_STRUCTURE_UPDATE:
-            const rootSubnet = data.initialSubnetStructure.rootSubnets[0]
-            const { boundaryMap, rootSubnetDetail, subnetRefs } = rootSubnet
+            let drafts = {}
+            data.initialSubnetStructure.rootSubnets.forEach(rootSubnet => {
+              const { boundaryMap, rootSubnetDetail, subnetRefs } = rootSubnet
 
-            const drafts = {}
-            for (const ref of subnetRefs) {
-              const draft = klona(ref)
-              draft.nodeSynced = false
-              draft.subnetBoundary = klona(boundaryMap[draft.subnetId] || rootSubnetDetail.subnetBoundary)
-              if (draft.nodeType === 'central_office') {
-                draft.equipment = klona(rootSubnetDetail.children)
+              for (const ref of subnetRefs) {
+                const draft = klona(ref)
+                draft.nodeSynced = false
+                draft.subnetBoundary = klona(boundaryMap[draft.subnetId] || rootSubnetDetail.subnetBoundary)
+                draft.equipment = []
+                if (draft.nodeType === 'central_office') { 
+                  draft.equipment = klona(rootSubnetDetail.children)
+                }
                 // for ease, throwing CO on itself for display
                 draft.equipment.push(klona(rootSubnetDetail.subnetId))
-              } else {
-                draft.equipment = []
+                drafts[draft.subnetId] = draft
               }
-              drafts[draft.subnetId] = draft
-            }
+            })
             batch(() => {
               dispatch({ type: Actions.PLAN_EDITOR_SET_DRAFTS, payload: drafts })
               dispatch({ type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION, payload: false })
@@ -240,23 +238,27 @@ function unsubscribeFromSocket() {
 
 function createFeature(feature) {
   return async(dispatch, getState) => {
-
+    
     try {
-      const state = getState()
-      const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
 
+      let state = getState()
+      const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+      // find containing subnet
+      //  if no subnet: ? is there not one or is it not loaded? should we be able to add features before a subnet is selected? 
       // creating a feature on a blank plan
-      const rootSubnet = PlanEditorSelectors.getRootSubnet(state)
-      if (!rootSubnet) {
+      let selectedSubnetId = state.planEditor.selectedSubnetId
+      if (selectedSubnetId && state.planEditor.subnetFeatures[selectedSubnetId].subnetId) selectedSubnetId = planEditor.subnetFeatures[selectedSubnetId].subnetId
+      if (!selectedSubnetId) {
         await dispatch(addSubnets({ coordinates: feature.point.coordinates }))
+        // set selectedSubnetId to return?
       }
 
       const url = `/service/plan-transaction/${transactionId}/subnet_cmd/update-children`
       const commandsBody = { childId: feature, type: 'add' };
       // If it is a ring plan we need to pass in the parentID of the dumby subnet
       // inorder to find the correct ring plan in service
-      if (state.plan.activePlan.planType === "RING" && rootSubnet) {
-        commandsBody.subnetId = rootSubnet.subnetNode;
+      if (state.plan.activePlan.planType === "RING" && selectedSubnetId) {
+        commandsBody.subnetId = selectedSubnetId
       }
       const updateResponse = await AroHttp.post(url, { commands: [commandsBody] })
       const { subnetUpdates, equipmentUpdates } = updateResponse.data
@@ -266,7 +268,8 @@ function createFeature(feature) {
       await dispatch(addSubnets({ subnetIds: updatedSubnetIds }))
 
       // 2. wait for return, and run rest after
-      let subnetsCopy = JSON.parse(JSON.stringify(getState().planEditor.subnets))
+      state = getState() // refresh state
+      let subnetsCopy = klona(state.planEditor.subnets)
       const newFeatures = {}
       // the subnet and equipment updates are not connected, right now we get back two arrays
       // For now I am assuming the relevent subnet is the one with type 'modified'
@@ -275,10 +278,11 @@ function createFeature(feature) {
       // For a standard plan there should always be motified subnets
       // however that is not the case for ring plans as the rootSubnet
       // is not a real and is used to work in the single parent hirearchy so we can just grab that.
-      const modifiedSubnet = state.plan.activePlan.planType === "RING" && rootSubnet
-        ? rootSubnet
+      
+      const modifiedSubnet = state.plan.activePlan.planType === "RING" && selectedSubnetId
+        ? subnetsCopy[selectedSubnetId]
         : subnetUpdates.find(subnet => subnet.type === 'modified');
-
+      
       const subnetId = modifiedSubnet.subnet
         ? modifiedSubnet.subnet.id
         : modifiedSubnet.subnetNode
@@ -338,14 +342,18 @@ function createFeature(feature) {
   }
 }
 
-function updateFeatureProperties({ feature, rootSubnetId }) {
+function updateFeatureProperties(feature) {
   return async(dispatch, getState) => {
+    const state = getState()
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+    let parentSubnetId = null
+    const subnetId = state.planEditor.subnetFeatures[feature.objectId].subnetId
+    if (subnetId) parentSubnetId = state.planEditor.subnets[subnetId].parentSubnetId
     try {
-      const state = getState()
-      const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-
-      // Do a PUT to send the equipment over to service
-      const url = `/service/plan-transaction/${transactionId}/subnet-equipment?parentSubnetId=${rootSubnetId}`
+      // Do a PUT to send the equipment over to service 
+      // parentSubnetId SHOULD be the parent BUT terminals are NOT subnets so it would use the CO 
+      let url = `/service/plan-transaction/${transactionId}/subnet-equipment`
+      if (parentSubnetId) url += `?parentSubnetId=${parentSubnetId}`
       const result = await AroHttp.put(url, feature)
 
       // Decorate the created feature with some default values
@@ -393,7 +401,7 @@ function createConstructionArea(constructionArea) {
 
       // Move a parsed copy of the construction area in to the global state for subnets
       const [newSubnet, parsedFeature] = parseAPIConstructionAreasToStore(newFeature)
-      const subnetsCopy = JSON.parse(JSON.stringify(getState().planEditor.subnets))
+      const subnetsCopy = klona(getState().planEditor.subnets)
       subnetsCopy[newFeature.objectId] = newSubnet;
 
       // Move a parsed copoy of the construction area in to the global state for features
@@ -539,8 +547,7 @@ function _updateSubnetFeatures (subnetFeatures) {
     const body = {commands}
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
       .then(result => {
-        //console.log(result) // we do NOT get the child feature back in the result
-        
+        // we do NOT get the child feature back in the result
         dispatch({
           type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
           payload: subnetFeaturesById,
@@ -555,7 +562,7 @@ function _updateSubnetFeatures (subnetFeatures) {
 // helper
 function _spliceLocationFromTerminal (state, locationId, terminalId) {
   let subnetFeature = state.planEditor.subnetFeatures[terminalId]
-  subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
+  subnetFeature = klona(subnetFeature)
   
   let index = subnetFeature.feature.dropLinks.findIndex(dropLink => {
     //planEditor.subnetFeatures["0c9e9415-e5e2-4146-9594-bb3057ca54dc"].feature.dropLinks[0].locationLinks[0].locationId
@@ -590,7 +597,7 @@ function assignLocation (locationId, terminalId) {
     let features = []
 
     let toFeature = state.planEditor.subnetFeatures[terminalId]
-    toFeature = JSON.parse(JSON.stringify(toFeature))
+    toFeature = klona(toFeature)
     let subnetId = toFeature.subnetId
 
     let fromTerminalId = state.planEditor.subnets[subnetId].subnetLocationsById[locationId].parentEquipmentId
@@ -717,7 +724,7 @@ function updatePlanThumbInformation (payload) {
     const state = getState()
     const transactionId = state.planEditor.transaction.id
     const subnet = state.planEditor.subnets[payload.key]
-    const body = JSON.parse(JSON.stringify(state.planEditor.subnetFeatures[payload.key].feature))
+    const body = klona(state.planEditor.subnetFeatures[payload.key].feature)
     const isBlocker = payload.planThumbInformation === BLOCKER.KEY
     body.geometry.type = "Polygon";
     body.geometry.coordinates = subnet.subnetBoundary.polygon.coordinates[0]
@@ -816,8 +823,8 @@ function moveConstructionArea (objectId, newCoordinates) {
   return async (dispatch, getState) => {
     // Take in the new cordinates and move the entire polygon by the difference between them and the old coordinates
     const state = getState()
-    let constructionAreaSubnet = JSON.parse(JSON.stringify(state.planEditor.subnets[objectId]))
-    let constructionAreaFeature = JSON.parse(JSON.stringify(state.planEditor.subnetFeatures[objectId].feature))
+    let constructionAreaSubnet = klona(state.planEditor.subnets[objectId])
+    let constructionAreaFeature = klona(state.planEditor.subnetFeatures[objectId].feature)
     let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
 
     // Finding difference in lat and lng between old and new
@@ -838,11 +845,11 @@ function moveConstructionArea (objectId, newCoordinates) {
     })
 
     // The front end requires a Polygon while the front end requires a MultiPolygon. This is parsing it for the back end but maintaining it as is on the front end.
-    const body = JSON.parse(JSON.stringify(constructionAreaFeature))
+    const body = klona(constructionAreaFeature)
     body.geometry.type = "Polygon";
     body.geometry.coordinates = constructionAreaSubnet.subnetBoundary.polygon.coordinates[0]
     const featurePayload = {};
-    const subnetsCopy = JSON.parse(JSON.stringify(state.planEditor.subnets))
+    const subnetsCopy = klona(state.planEditor.subnets)
     featurePayload[objectId] = { feature: constructionAreaFeature, subnetId: null }
     subnetsCopy[objectId] = constructionAreaSubnet
     
@@ -909,8 +916,8 @@ function deleteConstructionArea (featureId) {
     const state = getState()
     let subnetFeature = state.planEditor.subnetFeatures[featureId]
     let subnet = state.planEditor.subnets[featureId]
-    subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
-    subnet = JSON.parse(JSON.stringify(subnet))
+    subnetFeature = klona(subnetFeature)
+    subnet = klona(subnet)
     let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
 
     await AroHttp.delete(`/service/plan-transaction/${transactionId}/edge-construction-area/${featureId}`)
@@ -1018,7 +1025,7 @@ function getConsructionAreaByRoot (rootSubnet) {
     const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
     const body = { area: rootSubnet.subnetBoundary.polygon }
     const response = await AroHttp.post(`/service/plan-transaction/${transactionId}/cmd-edge-construction-area/search`, body)
-    const subnetsCopy = JSON.parse(JSON.stringify(getState().planEditor.subnets))
+    const subnetsCopy = klona(getState().planEditor.subnets)
     const newFeatures = {};
     response.data.forEach(constructionArea => {
       const [newSubnet, newFeature] = parseAPIConstructionAreasToStore(constructionArea.feature)
@@ -1133,6 +1140,8 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
           const subnetId = subnet.subnetId.id
           if (!subnet.parentSubnetId) {
             dispatch(getConsructionAreaByRoot(subnet))
+            // TODO: get fiber annotations here
+            dispatch(getFiberAnnotations(subnetId))
           }
           fiberApiPromises.push(
             AroHttp.get(`/service/plan-transaction/${transaction.id}/subnetfeature/${subnetId}`)
@@ -1221,7 +1230,6 @@ function setSelectedSubnetId (selectedSubnetId) {
             // TODO: we need to figure out the proper subnet select workflow
             // FDTs aren't subnets but can be selcted as such
             // that is where the following discrepancy comes from 
-            //console.log(result)
             if (!result) selectedSubnetId = null
             dispatch({
               type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
@@ -1296,7 +1304,7 @@ function recalculateBoundary (subnetId) {
       url = `/service/plan-transaction/${transactionId}/subnet/${subnetId}/boundary`
       method = "post"
     } else {
-      body = JSON.parse(JSON.stringify(state.planEditor.subnetFeatures[subnetId].feature))
+      body = klona(state.planEditor.subnetFeatures[subnetId].feature)
       body.geometry.type = "Polygon";
       body.geometry.coordinates = subnet.subnetBoundary.polygon.coordinates[0]
       url = `/service/plan-transaction/${transactionId}/edge-construction-area`
@@ -1391,25 +1399,12 @@ function recalculateSubnets(transactionId, subnetIds = []) {
   }
 }
 
-// TODO: with this we're using state to send messages, 
-//  this is incorrect. It points out a flaw in our architecture, fix.
-function setFiberRenderRequired (bool) {
-  return {
-    type: Actions.PLAN_EDITOR_SET_FIBER_RENDER_REQUIRED,
-    payload: bool,
-  }
-}
-
 function setSelectedFiber (fiberObjects) {
   return (dispatch) => {
     batch(() => {
       dispatch({
         type: Actions.PLAN_EDITOR_SET_FIBER_SELECTION,
         payload: fiberObjects,
-      })
-      dispatch({
-        type: Actions.PLAN_EDITOR_SET_FIBER_RENDER_REQUIRED,
-        payload: true,
       })
     })
   }
@@ -1479,7 +1474,7 @@ function parseRecalcEvents (recalcData) {
   // that will manage the subnetFeatures list with changes to a subnet (deleting children etc)
   return async(dispatch, getState) => {
     const { subnetFeatures } = getState().planEditor
-    let newSubnetFeatures = JSON.parse(JSON.stringify(subnetFeatures))
+    let newSubnetFeatures = klona(subnetFeatures)
     let updatedSubnets = {}
 
     const recalcedSubnetIds = [...new Set(recalcData.subnets.map(subnet => subnet.feature.objectId))]
@@ -1496,7 +1491,7 @@ function parseRecalcEvents (recalcData) {
       let subnetId = subnetRecalc.feature.objectId
       // TODO: looks like this needs to be rewritten 
       if (subnets[subnetId]) {
-        const subnetCopy = JSON.parse(JSON.stringify(subnets[subnetId]))
+        const subnetCopy = klona(subnets[subnetId])
 
         // update fiber
         // TODO: create parser for this???
@@ -1548,13 +1543,7 @@ function parseRecalcEvents (recalcData) {
         type: Actions.PLAN_EDITOR_ADD_SUBNETS,
         payload: updatedSubnets,
       })
-      dispatch({
-        type: Actions.PLAN_EDITOR_SET_FIBER_RENDER_REQUIRED,
-        payload: true,
-      })
     })
-
-
   }
 }
 
@@ -1659,7 +1648,7 @@ function parseSubnetFeature (feature) {
 
 // helper function
 function unparseSubnetFeature (feature) {
-  feature = JSON.parse(JSON.stringify(feature))
+  feature = klona(feature)
   // --- unfix service typos - eventually this won't be needed --- //
   feature.id = feature.objectId
   delete feature.objectId
@@ -1682,7 +1671,7 @@ function parseAPIConstructionAreasToStore(constructionArea) {
 }
 
 function parseAPIConstructionAreasToSubnet (constructionArea) {
-  const geometry = JSON.parse(JSON.stringify(constructionArea.geometry))
+  const geometry = klona(constructionArea.geometry)
   geometry.type = "MultiPolygon";
   geometry.coordinates = [geometry.coordinates]
   const subnetContents = {
@@ -1757,7 +1746,6 @@ export default {
   recalculateBoundary,
   boundaryChange,
   recalculateSubnets,
-  setFiberRenderRequired,
   setSelectedFiber,
   setFiberAnnotations,
   getFiberAnnotations,
