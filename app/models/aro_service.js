@@ -7,7 +7,8 @@ const logger = createLogger(LOGGER_GROUPS.ARO_SERVICE)
 module.exports = class AROService {
 
   static request (req) {
-    if (process.env.NODE_ENV === 'test') return Promise.resolve({})
+    // TODO: how will we handle this in future testing?
+    // if (process.env.NODE_ENV === 'test') return Promise.resolve({})
     req.timeout = req.timeout || 60 * 60 * 1000 // 30min
     logger.info(`Sending request to aro-service ${JSON.stringify(req, null, 2)}`)
     return new Promise((resolve, reject) => {

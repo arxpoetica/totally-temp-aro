@@ -249,7 +249,7 @@ function createFeature(feature) {
       let selectedSubnetId = state.planEditor.selectedSubnetId
       if (selectedSubnetId && state.planEditor.subnetFeatures[selectedSubnetId].subnetId) selectedSubnetId = planEditor.subnetFeatures[selectedSubnetId].subnetId
       if (!selectedSubnetId) {
-        const coordinatesResponse = await dispatch(addSubnets({ coordinates: feature.point.coordinates }))
+        await dispatch(addSubnets({ coordinates: feature.point.coordinates }))
         // set selectedSubnetId to return?
       }
 
@@ -260,14 +260,12 @@ function createFeature(feature) {
       if (state.plan.activePlan.planType === "RING" && selectedSubnetId) {
         commandsBody.subnetId = selectedSubnetId
       }
-      const featureResults = await AroHttp.post(url, {
-        commands: [commandsBody]
-      })
-      const { subnetUpdates, equipmentUpdates } = featureResults.data
+      const updateResponse = await AroHttp.post(url, { commands: [commandsBody] })
+      const { subnetUpdates, equipmentUpdates } = updateResponse.data
 
       // 1. dispatch addSubnets w/ everything that came back...
       const updatedSubnetIds = subnetUpdates.map((subnet) => subnet.subnet.id)
-      const subnetIdsResponse = await dispatch(addSubnets({ subnetIds: updatedSubnetIds }))
+      await dispatch(addSubnets({ subnetIds: updatedSubnetIds }))
 
       // 2. wait for return, and run rest after
       state = getState() // refresh state
@@ -302,20 +300,44 @@ function createFeature(feature) {
         }
       })
 
-      batch(() => {
-        dispatch({
-          type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
-          payload: newFeatures,
-        })
-        dispatch({
-          type: Actions.PLAN_EDITOR_ADD_SUBNETS,
-          payload: subnetsCopy,
-        })
+      // if we create a new hub, need to add the subnet to the draft
+      const createdHubSubnet = subnetUpdates.find(({ subnet, type }) => {
+        return subnet.networkNodeType === 'fiber_distribution_hub' && type === 'created'
       })
-      } catch (error) {
-        console.error(error)
+      let newDraft, newEquipment
+      if (createdHubSubnet) {
+        const { subnet, subnetBoundary } = createdHubSubnet
+
+        // unfortunately have to make the extra call to get the fault tree
+        const query = 'selectionTypes=FAULT_TREE'
+        const url = `/service/plan-transaction/${transactionId}/subnet/${subnet.id}?${query}`
+        const { data } = await AroHttp.get(url)
+
+        newDraft = {
+          subnetId: subnet.id,
+          nodeType: subnet.networkNodeType,
+          parentSubnetId: data.parentSubnetId,
+          nodeSynced: true,
+          subnetBoundary,
+          equipment: [],
+          faultTreeSummary: data.faultTree.faultTreeSummary,
+        }
+        newEquipment = subnet
       }
 
+      batch(() => {
+        dispatch({ type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES, payload: newFeatures })
+        dispatch({ type: Actions.PLAN_EDITOR_ADD_SUBNETS, payload: subnetsCopy })
+        if (newDraft && newEquipment) {
+          dispatch({ type: Actions.PLAN_EDITOR_ADD_DRAFT, payload: newDraft })
+          const draftClone = klona(state.planEditor.drafts[newDraft.parentSubnetId])
+          draftClone.equipment.push(newEquipment)
+          dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT, payload: draftClone })
+        }
+      })
+    } catch (error) {
+      console.error(error)
+    }
 
   }
 }
