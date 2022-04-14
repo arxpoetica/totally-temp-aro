@@ -1,8 +1,9 @@
+import { batch } from 'react-redux'
 import Actions from '../../../common/actions'
 import AroHttp from '../../../common/aro-http'
 import PlanActions from '../../plan/plan-actions'
 import SelectionActions from '../../selection/selection-actions'
-import { batch } from 'react-redux'
+import { handleError } from '../../../common/notifications'
 
 function runOptimization(inputs, userId) { // shouldn't be getting userId from caller
   return (dispatch, getState) => {
@@ -23,7 +24,7 @@ function runOptimization(inputs, userId) { // shouldn't be getting userId from c
           dispatch(SelectionActions.loadPlanTargetSelectionsFromServer(response.data.planId))
         })
       })
-      .catch(err => console.log(err))
+      .catch(error => handleError(error))
   }
 }
 
@@ -43,8 +44,8 @@ function cancelOptimization(planId, optimizationId) {
       .then((response) => {
         return dispatch({ type: Actions.NETWORK_OPTIMIZATION_CLEAR_OPTIMIZATION_ID })
       })
-      .catch((err) => {
-        console.error(err)
+      .catch(error => {
+        handleError(error)
         dispatch({
           type: Actions.NETWORK_OPTIMIZATION_SET_IS_CANCELING,
           payload: false,
@@ -64,9 +65,7 @@ function loadOptimizationInputs(planId) {
       .then((response) => {
         dispatch(this.setOptimizationInputs(response.data))
       })
-      .catch((err) => {
-        console.error(err)
-      })
+      .catch(error => handleError(error))
   }
 }
 
@@ -168,9 +167,7 @@ function modifyOptimization(plan)  {
         .then((result) => {
           dispatch(PlanActions.setActivePlan(result.data))
         })
-        .catch((err) => {
-          console.log(err)
-        })
+        .catch(error => handleError(error))
     } else {
       // This is not an ephemeral plan. 
       // Show a dialog to the user asking whether to overwrite current plan or save as a new one.
@@ -183,12 +180,10 @@ function modifyOptimization(plan)  {
                 currentPlan.planState = result.data
                 dispatch(PlanActions.setActivePlanState(result.data))
               })
-              .catch(err => console.error(err))
+              .catch(error => handleError(error))
           }
         })
-        .catch((err) => {
-          console.log(err)
-        })
+        .catch(error => handleError(error))
     }
   }
 }
@@ -291,13 +286,7 @@ function getLocationPreview(planId, updatedLocationConstraints) {
       })
 
     } catch (error) {
-      console.log(error)
-      swal({
-        title: 'Error',
-        text: error.data.error,
-        type: 'error'
-      })
-
+      handleError(error)
       dispatch({
         type: Actions.NETWORK_OPTIMIZATION_SET_IS_PREVIEW_LOADING,
         payload: false,
@@ -332,7 +321,7 @@ function getEnumOptions(propertyName) {
         })
       }
     } catch (error) {
-      console.error(error)
+      handleError(error)
     }
   }
 }
