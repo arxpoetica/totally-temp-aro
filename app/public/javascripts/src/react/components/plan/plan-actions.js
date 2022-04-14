@@ -1,3 +1,4 @@
+import { batch } from 'react-redux'
 import Actions from '../../common/actions'
 import CoverageActions from '../coverage/coverage-actions'
 import SelectionActions from '../selection/selection-actions'
@@ -10,7 +11,7 @@ import NetworkOptimizationActions from '../optimization/network-optimization/net
 import UserActions from '../user/user-actions'
 import ToolBarActions from '../header/tool-bar-actions.js'
 import AroHttp from '../../common/aro-http'
-import { batch } from 'react-redux'
+import { handleError } from '../../common/notifications'
 
 function setActivePlanState (planState) {
   return dispatch => {
@@ -57,7 +58,7 @@ function loadPlan (planId) {
   return dispatch => {
     AroHttp.get(`/service/v1/plan/${planId}`)
       .then(result => dispatch(setActivePlan(result.data)))
-      .catch(err => console.error(err))
+      .catch(error => handleError(error))
   }
 }
 
@@ -150,7 +151,7 @@ function loadPlanDataSelectionFromServer (planId) {
           }
         })
       })
-      .catch(err => console.error(err))
+      .catch(error => handleError(error))
   }
 }
 
@@ -245,7 +246,7 @@ function deleteLibraryEntry (dataSource) {
         // wait for success before updating local state, keep in sync
         dispatch(setAllLibraryItems(dataType, updatedLib))
       })
-      .catch((err) => console.error(err))
+      .catch(error => handleError(error))
   }
 }
 
@@ -261,7 +262,7 @@ function clearAllSelectedSA (plan, dataItems, selectedServiceAreas) {
           dispatch(SelectionActions.removePlanTargets(plan.id, { serviceAreas: new Set(invalidServiceAreas) }))
         }
       })
-      .catch(err => console.error(err))
+      .catch(error => handleError(error))
   }
 }
 
@@ -344,7 +345,7 @@ function loadPlanResourceSelectionFromServer (plan) {
         })
         return Promise.resolve()
       })
-      .catch((err) => console.error(err))
+      .catch(error => handleError(error))
   }
 }
 
@@ -452,7 +453,7 @@ function loadProjectConfig (userId, authPermissions) {
         const selectedProjectId = result.data.projectTemplateId
         dispatch(setSelectedProjectId(selectedProjectId))
       })
-      .catch((err) => console.error(err))
+      .catch(error => handleError(error))
   }
 }
 
@@ -463,7 +464,7 @@ function createNewProject (projectName, parentProject, userId, authPermissions) 
         dispatch(loadProjectConfig(userId, authPermissions))
         dispatch(setProjectMode('HOME'))
       })
-      .catch(err => console.error(err))
+      .catch(error => handleError(error))
   }
 }
 
@@ -475,7 +476,7 @@ function deleteProjectConfig (project,userId, authPermissions) {
         dispatch(loadProjectConfig(userId, authPermissions))
         dispatch(setProjectMode('HOME'))
       })
-      .catch(err => console.error(err))
+      .catch(error => handleError(error))
   }
 }
 
@@ -504,7 +505,7 @@ function planSettingsToProject (selectedProjectId, dataItems, resourceItems) {
       .then(() => {
         dispatch(setProjectMode('HOME'))
       })
-      .catch((err) => console.error(err))
+      .catch(error => handleError(error))
   }
 }
 
@@ -563,8 +564,8 @@ function updateDataSourceEditableStatus (isDataSourceEditable, dataSourceKey, lo
             payload: isDataSourceEditable
           })
       })
-      .catch(err => console.error(err))
-      }
+      .catch(error => handleError(error))
+    }
   }
 }
 
@@ -625,7 +626,7 @@ function loadLibraryEntryById (libraryId) {
           }
         })
       })
-      .catch((err) => console.error(err))
+      .catch(error => handleError(error))
   }
 }
 
@@ -652,7 +653,10 @@ function deletePlan (plan) {
               return dispatch(getOrCreateEphemeralPlan())
             })
             .then((ephemeralPlan) => dispatch(setActivePlan(ephemeralPlan.data)))
-            .catch((err) => reject(err))
+            .catch(error => {
+              handleError(error)
+              reject(error)
+            })
         } else {
           resolve()
         }

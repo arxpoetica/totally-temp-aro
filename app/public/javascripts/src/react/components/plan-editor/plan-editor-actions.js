@@ -14,6 +14,7 @@ import PlanEditorSelectors from './plan-editor-selectors'
 import { constants } from './shared'
 import { displayModes } from '../sidebar/constants'
 const { DRAFT_STATES, BLOCKER, INCLUSION } = constants
+import { handleError } from '../../common/notifications'
 
 let validSubnetTypes = [
   'central_office',
@@ -60,7 +61,7 @@ function resumeOrCreateTransaction() {
         })
       })
     } catch (error) {
-      console.error(error)
+      handleError(error)
       dispatch({
         type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
         payload: false,
@@ -120,7 +121,7 @@ function commitTransaction (transactionId) {
       dispatch({ type: Actions.PLAN_SET_ACTIVE_PLAN, payload: { plan: data } })
 
     } catch (error) {
-      console.error(error)
+      handleError(error)
       dispatch(clearTransaction())
     }
   }
@@ -138,7 +139,7 @@ function discardTransaction (transactionId) {
         dispatch(setIsCommittingTransaction(false))
       }
     } catch (error) {
-      console.error(error)
+      handleError(error)
       dispatch(clearTransaction())
     }
   }
@@ -218,7 +219,7 @@ function subscribeToSocket() {
       })
       // console.log('...subscribed to subnet socket channel...')
     } catch (error) {
-      console.error(error)
+      handleError(error)
     }
   }
 }
@@ -230,7 +231,7 @@ function unsubscribeFromSocket() {
       unsubscriber()
       // console.log('...unsubscribed from subnet socket channel...')
     } catch (error) {
-      console.error(error)
+      handleError(error)
     }
     dispatch({ type: Actions.PLAN_EDITOR_CLEAR_SOCKET_UNSUBSCRIBER })
   }
@@ -336,7 +337,7 @@ function createFeature(feature) {
         }
       })
     } catch (error) {
-      console.error(error)
+      handleError(error)
     }
 
   }
@@ -371,7 +372,7 @@ function updateFeatureProperties(feature) {
       })
       return Promise.resolve()
     } catch (error) {
-      console.error(err)
+      handleError(error)
     }
   }
 }
@@ -421,8 +422,8 @@ function createConstructionArea(constructionArea) {
           payload: subnetsCopy,
         })
       })
-    } catch (e) {
-      console.warn(e);
+    } catch (error) {
+      handleError(error)
     }
   }
 }
@@ -555,7 +556,7 @@ function _updateSubnetFeatures (subnetFeatures) {
         dispatch(recalculateSubnets(transactionId, subnetIds))
         
       })
-      .catch(err => console.error(err))
+      .catch(error => handleError(error))
   }
 }
 
@@ -758,9 +759,7 @@ function updatePlanThumbInformation (payload) {
           })
         })
       })
-      .catch(err => {
-        console.error(err)
-      })
+      .catch(error => handleError(error))
   }
 }
 
@@ -815,7 +814,7 @@ function moveFeature (featureId, coordinates) {
           dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT, payload: draftClone })
         }
       })
-      .catch(err => console.error(err))
+      .catch(error => handleError(error))
   }
 }
 
@@ -906,7 +905,7 @@ function deleteFeature (featureId) {
         dispatch(recalculateSubnets(transactionId))
       })
     } catch (error) {
-      console.error(error)
+      handleError(error)
     }
   }
 }
@@ -974,7 +973,7 @@ function readFeatures (featureIds) {
               })
             }
           })
-          .catch(err => console.error(err))
+          .catch(error => handleError(error))
       )
     })
     return Promise.all(promises)
@@ -1146,6 +1145,7 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
           fiberApiPromises.push(
             AroHttp.get(`/service/plan-transaction/${transaction.id}/subnetfeature/${subnetId}`)
               .then(fiberResult => subnet.fiber = fiberResult.data)
+              .catch(error => handleError(error))
           )
         })
 
@@ -1157,13 +1157,14 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
               resolve(subnetIds)
             })
           })
-          .catch(err => {
-            console.error(err)
+          .catch(error => {
+            handleError(error)
             dispatch(setIsCalculatingSubnets(false))
             return Promise.reject()
           })
-      }).catch(err => {
-        console.error(err)
+      })
+      .catch(error => {
+        handleError(error)
         dispatch(setIsCalculatingSubnets(false))
         return Promise.reject()
       })
@@ -1208,7 +1209,7 @@ function addSubnetTreeByLatLng([lng, lat]) {
         return Promise.resolve([])
       }
     } catch (error) {
-      console.error(err)
+      handleError(error)
       dispatch(setIsCalculatingSubnets(false))
       return Promise.reject()
     }
@@ -1235,8 +1236,8 @@ function setSelectedSubnetId (selectedSubnetId) {
               type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
               payload: selectedSubnetId,
             })
-          }).catch(err => {
-            console.error(err)
+          }).catch(error => {
+            handleError(error)
             dispatch({
               type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
               payload: null,
@@ -1263,7 +1264,7 @@ function onMapClick(featureIds, latLng) {
         dispatch(selectEditFeaturesById(featureIds))
       }
     } catch (error) {
-      console.log(error)
+      handleError(error)
     }
   }
 }
@@ -1319,8 +1320,8 @@ function recalculateBoundary (subnetId) {
           await dispatch(addSubnets({ subnetIds: updatedSubnetIds }))
         }
       })
-      .catch(err => {
-        console.error(err)
+      .catch(error => {
+        handleError(error)
         dispatch(setIsCalculatingBoundary(false))
       })
   }
@@ -1395,7 +1396,7 @@ function recalculateSubnets(transactionId, subnetIds = []) {
       })
 
     } catch (error) {
-      console.error(error)
+      handleError(error)
       dispatch(setIsCalculatingSubnets(false))
       dispatch(setIsRecalculating(false))
     }
@@ -1433,9 +1434,7 @@ function getFiberAnnotations (subnetId) {
             payload: { [subnetId]: res.data }
           })
         })
-        .catch((error) => {
-          console.error(error)
-        })
+        .catch((error) => handleError(error))
     }
   }
 }
@@ -1454,9 +1453,7 @@ function setFiberAnnotations (fiberAnnotations, subnetId) {
             payload: fiberAnnotations,
           })
         })
-        .catch((error) => {
-          console.error(error)
-        })
+        .catch((error) => handleError(error))
     }
   }
 }

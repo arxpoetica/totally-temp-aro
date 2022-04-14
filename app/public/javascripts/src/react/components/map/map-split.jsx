@@ -1,3 +1,10 @@
+/**
+ * BIG FAT TODO: some of the functionality in this file belongs in an `App.jsx`
+ * top-level component. As a last part of the React migration, we should create
+ * that top level component and let it handle global stuff like providers and
+ * what-not (like any Mantine providers).
+ */
+
 import React, { useState, useEffect, useRef } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
@@ -23,6 +30,7 @@ import FrontierFooter from '../footer/frontier-footer.jsx'
 import MapSelectorExportLocations from '../map/map-selector-export-locations.jsx'
 import MapSelectorPlanTarget from '../map/map-selector-plan-target.jsx'
 import ErrorBoundary from '../common/ErrorBoundary.jsx'
+import { NotificationsProvider } from '@mantine/notifications'
 
 const transitionTimeMsec = 100
 // This must be the same for the map and sidebar, otherwise animations don't work correctly.
@@ -106,7 +114,7 @@ const MapSplit = (props) => {
   }
 
   return (
-    <>
+    <NotificationsProvider position="top-center">
       {/* First define the container for both the map and the sidebar. */}
       <div className={`app_wrapper_container ${ARO_CLIENT === 'frontier' ? 'footer' : ''}`}>
 
@@ -240,7 +248,7 @@ const MapSplit = (props) => {
           <MapViewToggle />
         </div>
       }
-    </>
+    </NotificationsProvider>
   )
 }
 
