@@ -61,7 +61,7 @@ const PlanEditorHeader = props => {
 
   return (
     <>
-      {Object.keys(features).length && selectedEditFeatureIds.map(id => {
+      {!!Object.keys(features).length && selectedEditFeatureIds.map(id => {
 
         const feature = features[id] && features[id].feature
         if (feature) {
