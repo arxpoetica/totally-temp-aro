@@ -44,7 +44,7 @@ function resumeOrCreateTransaction() {
       const planId = plan.activePlan.id
       const userId = user.loggedInUser.id
       const sessionId = await SocketManager.getSessionId()
-      const draftExists = draftsState === constants.DRAFT_STATES.END_INITIALIZATION
+      const draftExists = draftsState === DRAFT_STATES.END_INITIALIZATION
       const { data: transactionData }
         = await TransactionManager.resumeOrCreateTransaction(planId, userId, sessionId, draftExists)
 
@@ -1020,6 +1020,7 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
   return async (dispatch, getState) => {
 
     const {
+      draftsState,
       transaction,
       subnets: cachedSubnets,
       requestedSubnetIds,
@@ -1027,11 +1028,21 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
       subnetFeatures,
     } = getState().planEditor
 
+    // NOTE: this is a temporary guard against loading subnets
+    // until we fix this up w/ further tuning
+    if (draftsState !== DRAFT_STATES.END_INITIALIZATION) {
+      // semi-silently fail
+      console.log(
+        '%cCannot load subnet until drafts are fully initialized',
+        'background-color:red;color:white;padding:8px;',
+      )
+      return
+    }
+
     let command = {}
     if (coordinates) {
       command.cmdType = 'QUERY_CO_SUBNET'
       command.point = { type: 'Point', coordinates }
-
     } else {
       // this little dance only fetches uncached (or forced to reload) subnets
       const cachedSubnetIds = [...Object.keys(cachedSubnets), ...requestedSubnetIds]
@@ -1118,8 +1129,20 @@ function addSubnetTreeByLatLng([lng, lat]) {
   return async(dispatch, getState) => {
 
     try {
-      const state = getState()
-      let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+      const { draftsState, transaction } = getState().planEditor
+
+      // NOTE: this is a temporary guard against loading subnets
+      // until we fix this up w/ further tuning
+      if (draftsState !== DRAFT_STATES.END_INITIALIZATION) {
+        // semi-silently fail
+        console.log(
+          '%cCannot load subnet until drafts are not fully initialized',
+          'background-color:red;color:white;padding:8px;',
+        )
+        return
+      }
+
+      const transactionId = transaction && transaction.id
       const command = {
         cmdType: 'QUERY_CO_SUBNET',
         point:{ type: 'Point', coordinates: [lng, lat] },
@@ -1187,12 +1210,16 @@ function onMapClick(featureIds, latLng) {
   // TODO: this file is has become a two course meal of spaghetti and return dispatch soup
   //  Corr, fix yer mess!
   return async(dispatch, getState) => {
-    const state = getState()
-    if (!featureIds.length || state.planEditor.subnetFeatures[featureIds[0]]) { 
-      dispatch(selectEditFeaturesById(featureIds))
-    } else {
-      await dispatch(addSubnetTreeByLatLng([latLng.lng(), latLng.lat()]))
-      dispatch(selectEditFeaturesById(featureIds))
+    try {
+      const state = getState()
+      if (!featureIds.length || state.planEditor.subnetFeatures[featureIds[0]]) { 
+        dispatch(selectEditFeaturesById(featureIds))
+      } else {
+        await dispatch(addSubnetTreeByLatLng([latLng.lng(), latLng.lat()]))
+        dispatch(selectEditFeaturesById(featureIds))
+      }
+    } catch (error) {
+      console.log(error)
     }
   }
 }
