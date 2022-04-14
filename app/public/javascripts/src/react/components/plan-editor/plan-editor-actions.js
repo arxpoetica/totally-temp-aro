@@ -1359,9 +1359,12 @@ function boundaryChange (subnetId, geometry) {
     batch(() => {
       dispatch({ type: Actions.PLAN_EDITOR_SET_BOUNDARY_DEBOUNCE, payload: {subnetId, timeoutId} })
       dispatch({ type: Actions.PLAN_EDITOR_UPDATE_SUBNET_BOUNDARY, payload: {subnetId, geometry} })
-      const draftClone = klona(state.planEditor.drafts[subnetId])
-      draftClone.subnetBoundary.polygon = geometry
-      dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT, payload: draftClone })
+      if (state.planEditor.drafts[subnetId]) {
+        // Handle case where the boundary's subnet is not in the drafts (Route Adjusters)
+        const draftClone = klona(state.planEditor.drafts[subnetId])
+        draftClone.subnetBoundary.polygon = geometry
+        dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT, payload: draftClone })
+      }
     })
   }
 }
