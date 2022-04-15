@@ -22,7 +22,7 @@ export class NetworkOptimizationInput extends Component {
           onModify={() => this.onModifyOptimization()}
           onCancel={() => this.onCancelOptimization()}
           isCanceling={this.props.isCanceling}
-          isDisabled={this.props.isCommittingTransaction}
+          isCommittingTransaction={this.props.isCommittingTransaction}
         />
         <NetworkOptimizationInputForm
           handleChange={(newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
