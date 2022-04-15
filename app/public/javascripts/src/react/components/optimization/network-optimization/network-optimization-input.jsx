@@ -22,6 +22,7 @@ export class NetworkOptimizationInput extends Component {
           onModify={() => this.onModifyOptimization()}
           onCancel={() => this.onCancelOptimization()}
           isCanceling={this.props.isCanceling}
+          isDisabled={this.props.isCommittingTransaction}
         />
         <NetworkOptimizationInputForm
           handleChange={(newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
@@ -125,7 +126,8 @@ const mapStateToProps = (state) => ({
   activeFilters: state.optimization.networkOptimization.activeFilters,
   clientName: state.configuration.system.ARO_CLIENT,
   validatedFilters: NetworkOptimizationSelectors.getValidatedFilters(state),
-  additionalOptimizationInputs: NetworkOptimizationSelectors.getAdditionalOptimizationInputs(state)
+  additionalOptimizationInputs: NetworkOptimizationSelectors.getAdditionalOptimizationInputs(state),
+  isCommittingTransaction: state.planEditor.isCommittingTransaction
 })
 
 const mapDispatchToProps = dispatch => ({
