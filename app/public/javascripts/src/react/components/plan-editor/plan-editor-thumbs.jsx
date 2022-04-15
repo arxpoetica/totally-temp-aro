@@ -25,8 +25,8 @@ const PlanEditorHeader = props => {
   useEffect(() => {
     if (Object.keys(features).length) {
       selectedEditFeatureIds.forEach(selectedFeatureId => {
-        let feature = features[selectedFeatureId].feature;
-        if (feature.dataType === "edge_construction_area") {
+        let feature = features[selectedFeatureId] ? features[selectedFeatureId].feature : null
+        if (feature && feature.dataType === "edge_construction_area") {
           const isBlocker = constants.BLOCKER.COST_MULTIPLIER === feature.costMultiplier
           const dropdownValue = isBlocker
             ? constants.BLOCKER.KEY
@@ -39,7 +39,7 @@ const PlanEditorHeader = props => {
         }
       })
     }
-  }, [selectedEditFeatureIds])
+  }, [selectedEditFeatureIds, features])
 
   function onClick(event, objectId) {
     event.stopPropagation()
