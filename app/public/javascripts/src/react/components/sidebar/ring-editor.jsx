@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { useState, useEffect } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import { Collapse, Card, CardHeader, CardBody } from 'reactstrap'
@@ -9,89 +9,80 @@ import NetWorkBuildOutput from './analysis/network-build/network-build-output.js
 import NetworkOptimizationActions from '../optimization/network-optimization/network-optimization-actions'
 import RingEditActions from '../ring-edit/ring-edit-actions'
 
-export class RingEditor extends Component {
-  constructor(props) {
-    super(props)
+const editRingsPanels = Object.freeze({
+  EDIT_RINGS: 'EDIT_RINGS',
+  OUTPUT: 'OUTPUT',
+})
 
-    this.editRingsPanels = Object.freeze({
-      EDIT_RINGS: 'EDIT_RINGS',
-      OUTPUT: 'OUTPUT',
-    })
+export function RingEditor (props) {
+  const [activeEditRingsPanel, setActiveEditRingsPanel] = useState(editRingsPanels.EDIT_RINGS)
 
-    this.state = {
-      activeEditRingsPanel: this.editRingsPanels.EDIT_RINGS,
-    }
-  }
-
-  componentDidMount(){
-    this.props.setIsEditingRing(this.state.activeEditRingsPanel === this.editRingsPanels.EDIT_RINGS)
-  }
-
-  onModifyOptimization() {
-    this.props.modifyOptimization(this.props.activePlan)
-  }
-
-  handleToggleAccordion(eventArg) {
-    const { event } = eventArg.target.dataset
-    const { activeEditRingsPanel } = this.state
-    const newActiveEditRingsPanel = activeEditRingsPanel === event ? this.editRingsPanels.EDIT_RINGS : event // I am not sure why this is the way it is or even if it's correct. Shouldn't it just be newActiveEditRingsPanel = event
-    this.setState({ activeEditRingsPanel: newActiveEditRingsPanel })
-    this.props.setIsEditingRing( (this.editRingsPanels.EDIT_RINGS === newActiveEditRingsPanel) )
-  }
-
-  render() {
-    const { activeEditRingsPanel } = this.state
-    const { planState } = this.props
-    return (
-      <div className="edit-ring-container">
-        <div className="analysis-type">
-          <h4 style={{ textAlign: 'center', marginTop: '20px' }}>Ring Edit</h4>
-          <RingButton onModify={() => this.onModifyOptimization()} />
-        </div>
-
-        {/* Edit Rings Accordion */}
-        <Card
-          className={`card-collapse ${activeEditRingsPanel === this.editRingsPanels.EDIT_RINGS ? 'collapse-show' : ''}`}
-        >
-          <CardHeader
-            data-event={this.editRingsPanels.EDIT_RINGS} onClick={(event) => this.handleToggleAccordion(event)}
-            className={`card-header-dark ${activeEditRingsPanel === this.editRingsPanels.EDIT_RINGS ? 'card-fixed' : ''}`}
-          >
-            Input
-          </CardHeader>
-          <Collapse isOpen={activeEditRingsPanel === this.editRingsPanels.EDIT_RINGS}>
-            <CardBody style={{ padding: '0px' }}>
-              {activeEditRingsPanel === this.editRingsPanels.EDIT_RINGS &&
-                <RingEdit />
-              }
-              {(planState === 'COMPLETED' || planState === 'CANCELED' || planState === 'FAILED') &&
-                <div className='disable-sibling-controls' />
-              }
-            </CardBody>
-          </Collapse>
-        </Card>
-
-        {/* Output Accordion */}
-        <Card
-          className={`card-collapse ${activeEditRingsPanel === this.editRingsPanels.OUTPUT ? 'collapse-show' : ''}`}
-        >
-          <CardHeader
-            data-event={this.editRingsPanels.OUTPUT} onClick={(event) => this.handleToggleAccordion(event)}
-            className={`card-header-dark ${activeEditRingsPanel === this.editRingsPanels.OUTPUT ? 'card-fixed' : ''}`}
-          >
-            Output
-          </CardHeader>
-          <Collapse isOpen={activeEditRingsPanel === this.editRingsPanels.OUTPUT}>
-            <CardBody style={{ padding: '0px', paddingBottom: "15%" }}>
-              {activeEditRingsPanel === this.editRingsPanels.OUTPUT &&
-                <NetWorkBuildOutput reportTypes="['RING']" />
-              }
-            </CardBody>
-          </Collapse>
-        </Card>
-      </div>
+  useEffect(() => {
+    props.setIsEditingRing(
+      activeEditRingsPanel === editRingsPanels.EDIT_RINGS
     )
+  }, [])
+
+  function onModifyOptimization() {
+    props.modifyOptimization(props.activePlan)
   }
+
+  function handleToggleAccordion(eventArg) {
+    const { event } = eventArg.target.dataset
+    const newActiveEditRingsPanel = activeEditRingsPanel === event ? editRingsPanels.EDIT_RINGS : event // I am not sure why this is the way it is or even if it's correct. Shouldn't it just be newActiveEditRingsPanel = event
+    setActiveEditRingsPanel(newActiveEditRingsPanel)
+    props.setIsEditingRing(editRingsPanels.EDIT_RINGS === newActiveEditRingsPanel)
+  }
+
+  return (
+    <div className="edit-ring-container">
+      <div className="analysis-type">
+        <h4 style={{ textAlign: 'center', marginTop: '20px' }}>Ring Edit</h4>
+        <RingButton onModify={() => onModifyOptimization()} />
+      </div>
+
+      {/* Edit Rings Accordion */}
+      <Card
+        className={`card-collapse ${activeEditRingsPanel === editRingsPanels.EDIT_RINGS ? 'collapse-show' : ''}`}
+      >
+        <CardHeader
+          data-event={editRingsPanels.EDIT_RINGS} onClick={(event) => handleToggleAccordion(event)}
+          className={`card-header-dark ${activeEditRingsPanel === editRingsPanels.EDIT_RINGS ? 'card-fixed' : ''}`}
+        >
+          Input
+        </CardHeader>
+        <Collapse isOpen={activeEditRingsPanel === editRingsPanels.EDIT_RINGS}>
+          <CardBody style={{ padding: '0px' }}>
+            {activeEditRingsPanel === editRingsPanels.EDIT_RINGS &&
+              <RingEdit />
+            }
+            {(props.planState === 'COMPLETED' || props.planState === 'CANCELED' || props.planState === 'FAILED') &&
+              <div className='disable-sibling-controls' />
+            }
+          </CardBody>
+        </Collapse>
+      </Card>
+
+      {/* Output Accordion */}
+      <Card
+        className={`card-collapse ${activeEditRingsPanel === editRingsPanels.OUTPUT ? 'collapse-show' : ''}`}
+      >
+        <CardHeader
+          data-event={editRingsPanels.OUTPUT} onClick={(event) => handleToggleAccordion(event)}
+          className={`card-header-dark ${activeEditRingsPanel === editRingsPanels.OUTPUT ? 'card-fixed' : ''}`}
+        >
+          Output
+        </CardHeader>
+        <Collapse isOpen={activeEditRingsPanel === editRingsPanels.OUTPUT}>
+          <CardBody style={{ padding: '0px', paddingBottom: "15%" }}>
+            {activeEditRingsPanel === editRingsPanels.OUTPUT &&
+              <NetWorkBuildOutput reportTypes="['RING']" />
+            }
+          </CardBody>
+        </Collapse>
+      </Card>
+    </div>
+  )
 }
 
 const mapStateToProps = (state) => ({
