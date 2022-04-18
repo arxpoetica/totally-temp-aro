@@ -250,6 +250,13 @@ const MapSplit = (props) => {
           <MapViewToggle />
         </div>
       }
+
+      <style jsx>{`
+        :global(.mantine-Modal-title) {
+          font-size: 18px;
+          font-weight: bold;
+        }
+      `}</style>
     </ModalsProvider>
     </NotificationsProvider>
   )
