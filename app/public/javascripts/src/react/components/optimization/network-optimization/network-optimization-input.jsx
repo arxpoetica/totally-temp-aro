@@ -13,11 +13,14 @@ import NetworkOptimizationSelectors from './network-optimization-selectors'
 import { handleError } from '../../../common/notifications'
 import Constants from '../../../common/constants'
 import DropdownList from 'react-widgets/lib/DropdownList'
+import { useModals } from '@mantine/modals'
 
 export function NetworkOptimizationInput(props) {
 
+  const modals = useModals()
+
   const requestRunOptimization = () => {
-    if (props.transaction && props.transaction.id) {
+    if (props.transactionId) {
       // open a swal
       swal({
         title: 'Unsaved Changes',
@@ -31,7 +34,7 @@ export function NetworkOptimizationInput(props) {
       }, result => {
         if (result) {
           // save transaction
-          props.commitTransaction(props.transaction.id)
+          props.commitTransaction(props.transactionId)
             .then(() => onRunOptimization())
             .catch(error => handleError(error))
         }
@@ -65,7 +68,12 @@ export function NetworkOptimizationInput(props) {
   }
 
   function onModifyOptimization() {
-    props.modifyOptimization(props.activePlan)
+    modals.openContextModal('OptimizationModal', {
+      title: props.transactionId
+        ? 'This plan has uncommitted changes.'
+        : 'Overwrite the existing plan.',
+      size: 'lg',
+    })
   }
 
   return (
@@ -113,7 +121,7 @@ const mapStateToProps = (state) => ({
   optimizationInputs: state.optimization.networkOptimization.optimizationInputs,
   allSelectionModes: NetworkOptimizationSelectors.getAllSelectionModes(state),
   activeSelectionModeId: state.selection.activeSelectionMode.id,
-  transaction: state.planEditor.transaction,
+  transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
   activePlan: state.plan.activePlan,
   networkAnalysisType: state.optimization.networkOptimization.optimizationInputs.analysis_type,
   activeFilters: state.optimization.networkOptimization.activeFilters,
@@ -128,7 +136,6 @@ const mapDispatchToProps = dispatch => ({
   runOptimization: (inputs, userId) => dispatch(NetworkOptimizationActions.runOptimization(inputs, userId)),
   cancelOptimization: (planId, optimizationId) => dispatch(NetworkOptimizationActions.cancelOptimization(planId, optimizationId)),
   setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
-  modifyOptimization: (activePlan) => dispatch(NetworkOptimizationActions.modifyOptimization(activePlan)),
   setActiveFilters: (filters) => dispatch(NetworkOptimizationActions.setActiveFilters(filters)),
 })
 
