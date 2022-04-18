@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
+import moment from "moment"
 import { connect } from 'react-redux'
 import UiActions from '../configuration/ui/ui-actions'
-import { toIsoStartDate, toIsoEndDate } from '../../common/view-utils.js'
-
+import { momentStartDate, momentEndDate } from '../../common/view-utils.js'
 export class Broadcast extends Component {
   constructor(props) {
     super(props)
@@ -94,9 +94,10 @@ export class Broadcast extends Component {
 
   saveBroadcast() {
     const { startDate, endDate } = this.state
-    const compareStart = toIsoStartDate(startDate)
-    const compareEnd = toIsoEndDate(endDate)
-    compareStart.getTime() <= compareEnd.getTime()
+    const compareStart = momentStartDate(startDate)
+    const compareEnd = momentEndDate(endDate)
+
+    compareStart <= compareEnd
       ? this.props.saveConfigurationToServerAndReload('broadcast', this.state) // To update config in ui.settings and reload it.
       : swal({
         title: 'Invalid date range',
