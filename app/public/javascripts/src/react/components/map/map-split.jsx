@@ -13,7 +13,7 @@ import ViewMode from '../sidebar/view/view-mode.jsx'
 import { displayModes, targetSelectionModes } from '../sidebar/constants'
 import AnalysisMode from '../sidebar/analysis/analysis-mode.jsx'
 import RingEditor from '../sidebar/ring-editor.jsx'
-import PlanEditorContainer from '../plan-editor/plan-editor-container.jsx'
+import PlanEditor from '../plan-editor/plan-editor.jsx'
 import AroDebug from '../sidebar/debug/aro-debug.jsx'
 import PlanSettings from '../plan/plan-settings.jsx'
 import UINotifications from '../notification/ui-notifications.jsx'
@@ -187,12 +187,12 @@ const MapSplit = (props) => {
             {/* Add a wrapping div because the expander changes the layout even though it is outside the panel */}
             {!isCollapsed &&
               <>
-                <NetworkPlan />
                 <div className="display-mode-container">
                   <div className="display-mode-buttons">
                     {/* this is necessary to make the display-mode-buttons flow correctly */}
                     <DisplayModeButtons />
                   </div>
+                  <NetworkPlan />
                   <div className="display-modes">
                     {/* Error boundaries are React components that catch JavaScript errors anywhere in their child component tree, 
                       log those errors, and display a fallback UI instead of the component tree that crashed.
@@ -208,7 +208,7 @@ const MapSplit = (props) => {
                       {checkSelectedDisplayMode(displayModes.EDIT_RINGS) && <RingEditor /> }
                     </ErrorBoundary>
                     <ErrorBoundary>
-                      {checkSelectedDisplayMode(displayModes.EDIT_PLAN) && <PlanEditorContainer /> }
+                      {checkSelectedDisplayMode(displayModes.EDIT_PLAN) && <PlanEditor /> }
                     </ErrorBoundary>
                     <ErrorBoundary>
                       {checkSelectedDisplayMode(displayModes.DEBUG) && <AroDebug /> }

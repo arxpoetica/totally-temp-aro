@@ -12,6 +12,7 @@ import { batch } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import PlanEditorSelectors from './plan-editor-selectors'
 import { constants } from './shared'
+import { displayModes } from '../sidebar/constants'
 const { DRAFT_STATES, BLOCKER, INCLUSION } = constants
 
 let validSubnetTypes = [
@@ -90,8 +91,7 @@ function clearTransaction (doOpenView = true) {
       if (doOpenView) {
         dispatch({
           type: Actions.TOOL_BAR_SET_SELECTED_DISPLAY_MODE,
-          // TODO: globalize the constants in tool-bar including displayModes
-          payload: 'VIEW',
+          payload: displayModes.ANALYSIS,
         })
       }
     })
@@ -100,37 +100,47 @@ function clearTransaction (doOpenView = true) {
 
 // ToDo: there's only one transaction don't require the ID
 function commitTransaction (transactionId) {
-  return (dispatch, getState) => {
-    const state = getState()
-    if (state.isCommittingTransaction 
-      || state.isEnteringTransaction
-      || state.isCalculatingSubnets
-    ) {
-      return Promise.reject()
-    }
-    return dispatch(recalculateSubnets(transactionId))
-      .then(() => {
-        dispatch(setIsCommittingTransaction(true))
-        return AroHttp.put(`/service/plan-transactions/${transactionId}`)
-          .then(() => dispatch(clearTransaction()))
-          .catch(err => {
-            console.error(err)
-            dispatch(clearTransaction())
-          })
+  return async(dispatch, getState) => {
+    try {
+      const { isCommittingTransaction, isEnteringTransaction, isCalculatingSubnets, plan } = getState()
+      if (isCommittingTransaction || isEnteringTransaction || isCalculatingSubnets) {
+        return Promise.reject()
+      }
+
+      await dispatch(recalculateSubnets(transactionId))
+      dispatch(setIsCommittingTransaction(true))
+      dispatch({
+        type: Actions.TOOL_BAR_SET_SELECTED_DISPLAY_MODE,
+        payload: displayModes.ANALYSIS,
       })
+      await AroHttp.put(`/service/plan-transactions/${transactionId}`)
+      dispatch(clearTransaction())
+
+      const { data } = await AroHttp.get(`/service/v1/plan/${plan.activePlan.id}`)
+      dispatch({ type: Actions.PLAN_SET_ACTIVE_PLAN, payload: { plan: data } })
+
+    } catch (error) {
+      console.error(error)
+      dispatch(clearTransaction())
+    }
   }
 }
 
 // ToDo: there's only one transaction don't require the ID
 function discardTransaction (transactionId) {
-  return dispatch => {
-    dispatch(setIsCommittingTransaction(true))
-    TransactionManager.discardTransaction(transactionId)
-      .then(() => dispatch(clearTransaction()))
-      .catch(err => {
-        console.error(err)
+  return async(dispatch) => {
+    try {
+      dispatch(setIsCommittingTransaction(true))
+      const shouldDiscard = await TransactionManager.discardTransaction(transactionId)
+      if (shouldDiscard) {
         dispatch(clearTransaction())
-      })
+      } else {
+        dispatch(setIsCommittingTransaction(false))
+      }
+    } catch (error) {
+      console.error(error)
+      dispatch(clearTransaction())
+    }
   }
 }
 
@@ -632,19 +642,24 @@ function stopDrawingBoundary () {
   }
 }
 
-// does this need to be it's own function? it's only used in the recalc subnets function
-function setIsCalculatingSubnets (isCalculatingSubnets) {
+function setIsRecalculating(isRecalculating) {
   return {
-    type: Actions.PLAN_EDITOR_SET_IS_CALCULATING_SUBNETS,
-    payload: isCalculatingSubnets
+    type: Actions.PLAN_EDITOR_SET_IS_RECALCULATING,
+    payload: isRecalculating,
   }
 }
 
-// does this need to be it's own function? it's only used in the recalc boundary function
+function setIsCalculatingSubnets (isCalculatingSubnets) {
+  return {
+    type: Actions.PLAN_EDITOR_SET_IS_CALCULATING_SUBNETS,
+    payload: isCalculatingSubnets,
+  }
+}
+
 function setIsCalculatingBoundary (isCalculatingBoundary) {
   return {
     type: Actions.PLAN_EDITOR_SET_IS_CALCULATING_BOUNDARY,
-    payload: isCalculatingBoundary
+    payload: isCalculatingBoundary,
   }
 }
 
@@ -1325,31 +1340,36 @@ function boundaryChange (subnetId, geometry) {
   }
 }
 
-function recalculateSubnets (transactionId, subnetIds = []) {
-  return (dispatch, getState) => {
-    const state = getState()
-    if (state.isCalculatingSubnets) return Promise.reject()
-    let activeSubnets = []
-    dispatch(setIsCalculatingSubnets(true))
-    const recalcBody = { subnetIds: activeSubnets }
+function recalculateSubnets(transactionId, subnetIds = []) {
+  return async(dispatch, getState) => {
+    try {
+      const state = getState()
+      if (state.isCalculatingSubnets) return Promise.reject()
+      let activeSubnets = []
+      dispatch(setIsRecalculating(true))
+      dispatch(setIsCalculatingSubnets(true))
+      const recalcBody = { subnetIds: activeSubnets }
 
-    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet-cmd/recalc`, recalcBody)
-      .then(res => {
-        dispatch(setIsCalculatingSubnets(false))
-        batch(() => {
-          // remove annotations from recalculated subnets
-          res.data.subnets.forEach(subnet => {
-            let subnetId = subnet.feature.objectId
-            dispatch(setFiberAnnotations({[subnetId]: []}, subnetId))
-          })
-          // parse changes
-          dispatch(parseRecalcEvents(res.data))
+      const url = `/service/plan-transaction/${transactionId}/subnet-cmd/recalc`
+      const res = await AroHttp.post(url, recalcBody)
+
+      dispatch(setIsCalculatingSubnets(false))
+      dispatch(setIsRecalculating(false))
+      batch(() => {
+        // remove annotations from recalculated subnets
+        res.data.subnets.forEach(subnet => {
+          let subnetId = subnet.feature.objectId
+          dispatch(setFiberAnnotations({[subnetId]: []}, subnetId))
         })
+        // parse changes
+        dispatch(parseRecalcEvents(res.data))
       })
-      .catch(err => {
-        console.error(err)
-        dispatch(setIsCalculatingSubnets(false))
-      })
+
+    } catch (error) {
+      console.error(error)
+      dispatch(setIsCalculatingSubnets(false))
+      dispatch(setIsRecalculating(false))
+    }
   }
 }
 

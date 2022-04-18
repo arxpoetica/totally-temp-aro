@@ -5,7 +5,6 @@ import { ToastContainer } from 'react-toastify'
 import MapSplit from '../react/components/map/map-split.jsx'
 import ViewMode from '../react/components/sidebar/view/view-mode.jsx'
 import DisplayModeButtons from '../react/components/sidebar/display-mode-buttons.jsx'
-import PlanEditorContainer from '../react/components/plan-editor/plan-editor-container.jsx'
 import NetworkPlan from '../react/components/sidebar/network-plan.jsx'
 import MapViewToggle from '../react/components/map/map-view-toggle.jsx'
 import MapSelectorPlanTarget from '../react/components/map/map-selector-plan-target.jsx'
@@ -137,7 +136,6 @@ app.component('boundaries', boundaries)
   .component('rMapSplit', react2angular(MapSplit))
   .component('rViewMode', react2angular(ViewMode))
   .component('rDisplayModeButtons', react2angular(DisplayModeButtons))
-  .component('rPlanEditorContainer', react2angular(PlanEditorContainer))
   .component('rNetworkPlan', react2angular(NetworkPlan))
   .component('rMapViewToggle', react2angular(MapViewToggle))
   .component('rMapSelectorPlanTarget', react2angular(MapSelectorPlanTarget))

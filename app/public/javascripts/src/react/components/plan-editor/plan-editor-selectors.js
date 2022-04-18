@@ -29,10 +29,14 @@ const getSelectedPlanThumbInformation = createSelector(
   }
 )
 
-const getIsRecalcSettled = createSelector(
+const getIsChangesSaved = createSelector(
   [getIsCalculatingSubnets, getIsCalculatingBoundary, getBoundaryDebounceBySubnetId],
   (isCalculatingSubnets, isCalculatingBoundary, boundaryDebounceBySubnetId) => {
-    return (!isCalculatingSubnets && !isCalculatingBoundary && (0 === Object.keys(boundaryDebounceBySubnetId).length))
+    return (
+      !isCalculatingSubnets
+      && !isCalculatingBoundary
+      && 0 === Object.keys(boundaryDebounceBySubnetId).length
+    )
   }
 )
 
@@ -354,7 +358,7 @@ const PlanEditorSelectors = Object.freeze({
   getSelectedSubnet,
   getBoundaryLayersList,
   getFocusedEquipmentIds,
-  getIsRecalcSettled,
+  getIsChangesSaved,
   getAlertsForSubnetTree,
   locationWarnImgByType,
   getRootSubnet,

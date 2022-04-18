@@ -373,7 +373,6 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  padding-top: 20px;
 }
 .view-mode-container .collapse-height {
   height: 100%;
@@ -384,3 +383,4 @@
 .road-info > div {
   margin-top: 10px; /*Line  break for each div*/
 }
+
