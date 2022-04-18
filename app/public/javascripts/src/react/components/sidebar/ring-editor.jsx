@@ -6,8 +6,8 @@ import './sidebar.css'
 import RingButton from '../ring-edit/ring-button.jsx'
 import RingEdit from '../ring-edit/ring-edit.jsx'
 import NetWorkBuildOutput from './analysis/network-build/network-build-output.jsx'
-import NetworkOptimizationActions from '../optimization/network-optimization/network-optimization-actions'
 import RingEditActions from '../ring-edit/ring-edit-actions'
+import { useModals } from '@mantine/modals'
 
 const editRingsPanels = Object.freeze({
   EDIT_RINGS: 'EDIT_RINGS',
@@ -16,6 +16,7 @@ const editRingsPanels = Object.freeze({
 
 export function RingEditor (props) {
   const [activeEditRingsPanel, setActiveEditRingsPanel] = useState(editRingsPanels.EDIT_RINGS)
+  const modals = useModals()
 
   useEffect(() => {
     props.setIsEditingRing(
@@ -24,7 +25,12 @@ export function RingEditor (props) {
   }, [])
 
   function onModifyOptimization() {
-    props.modifyOptimization(props.activePlan)
+    modals.openContextModal('OptimizationModal', {
+      title: props.transactionId
+        ? 'This plan has uncommitted changes.'
+        : 'Overwrite the existing plan.',
+      size: 'lg',
+    })
   }
 
   function handleToggleAccordion(eventArg) {
@@ -87,11 +93,10 @@ export function RingEditor (props) {
 
 const mapStateToProps = (state) => ({
   planState: state.plan.activePlan.planState,
-  activePlan: state.plan.activePlan,
+  transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  modifyOptimization: (activePlan) => dispatch(NetworkOptimizationActions.modifyOptimization(activePlan)),
   setIsEditingRing: (isEditingRing) => dispatch(RingEditActions.setIsEditingRing(isEditingRing)),
 })
 
