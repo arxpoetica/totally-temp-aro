@@ -150,60 +150,30 @@ function setNetworkAnalysisType(networkAnalysisType) {
   }
 }
 
-// optimization services
-const modifyDialogResult = Object.freeze({
-  CANCEL: 0,
-  OVERWRITE: 1
-})
-
-function modifyOptimization(plan)  {
-  return dispatch => {
-    const currentPlan = plan
-    if (currentPlan.ephemeral) {
-      // This is an ephemeral plan. 
-      // Don't show any dialogs to the user, simply copy this plan over to a new ephemeral plan
-      const url = `/service/v1/plan-command/copy?source_plan_id=${currentPlan.id}&is_ephemeral=${currentPlan.ephemeral}`
-      return AroHttp.post(url, {})
-        .then((result) => {
-          dispatch(PlanActions.setActivePlan(result.data))
-        })
-        .catch(error => handleError(error))
-    } else {
-      // This is not an ephemeral plan. 
-      // Show a dialog to the user asking whether to overwrite current plan or save as a new one.
-      return showModifyQuestionDialog()
-        .then((resp) => {
-          if (resp === modifyDialogResult.OVERWRITE) {
-            return AroHttp.delete(`/service/v1/plan/${currentPlan.id}/optimization-state`)
-              .then(() => AroHttp.get(`/service/v1/plan/${currentPlan.id}/optimization-state`))
-              .then(result => {
-                currentPlan.planState = result.data
-                dispatch(PlanActions.setActivePlanState(result.data))
-              })
-              .catch(error => handleError(error))
-          }
-        })
-        .catch(error => handleError(error))
+function copyEphemeralPlan(plan) {
+  return async(dispatch) => {
+    try {
+      const { id, ephemeral} = plan
+      const url = '/service/v1/plan-command/copy'
+      const query = `?source_plan_id=${id}&is_ephemeral=${ephemeral}`
+      const result = await AroHttp.post(url + query, {})
+      dispatch(PlanActions.setActivePlan(result.data))
+    } catch (error) {
+      handleError(error)
     }
   }
 }
 
-function showModifyQuestionDialog() {
-  return new Promise((resolve) => {
-    swal({
-      title: '',
-      text: 'You are modifying a plan with a completed analysis. Do you wish to overwrite the existing plan?  Overwriting will clear all results which were previously run.',
-      type: 'info',
-      confirmButtonColor: '#b9b9b9',
-      confirmButtonText: 'Overwrite',
-      cancelButtonColor: '#DD6B55',
-      cancelButtonText: 'Cancel',
-      showCancelButton: true,
-      closeOnConfirm: true
-    }, (wasConfirmClicked) => {
-      resolve(wasConfirmClicked ? modifyDialogResult.OVERWRITE : modifyDialogResult.CANCEL)
-    })
-  })
+function modifyOptimization(plan)  {
+  return async(dispatch) => {
+    try {
+      await AroHttp.delete(`/service/v1/plan/${plan.id}/optimization-state`)
+      const result = AroHttp.get(`/service/v1/plan/${plan.id}/optimization-state`)
+      dispatch(PlanActions.setActivePlanState(result.data))
+    } catch (error) {
+      handleError(error)
+    }
+  }
 }
 
 function loadFilters() {
@@ -332,6 +302,7 @@ export default {
   runOptimization,
   cancelOptimization,
   setNetworkAnalysisType,
+  copyEphemeralPlan,
   modifyOptimization,
   loadFilters,
   setActiveFilters,
