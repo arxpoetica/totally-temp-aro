@@ -154,6 +154,9 @@ function subscribeToSocket() {
 
       const unsubscriber = SocketManager.subscribe('SUBNET_DATA', rawData => {
         const data = JSON.parse(utf8decoder.decode(rawData.content))
+        let message
+        const { userId, updateSession, planTransactionId, rootSubnetId } = data
+
         // asynchronous set up of skeleton from socket data
         switch (data.subnetNodeUpdateType) {
           case DRAFT_STATES.START_INITIALIZATION: break // no op
@@ -201,8 +204,17 @@ function subscribeToSocket() {
             break
           case DRAFT_STATES.END_SUBNET_TREE: break // no op
           case DRAFT_STATES.END_INITIALIZATION: break // no op
+          case DRAFT_STATES.ERROR_SUBNET_TREE:
+            message = `Type ${data.subnetNodeUpdateType} for SUBNET_DATA socket channel with `
+            message += `user id ${userId}, transaction id ${planTransactionId}, `
+            message += `session id ${updateSession}, and root subnet id ${rootSubnetId}.`
+            handleError(new Error(message))
+            break
           default:
-            throw new Error(`Not handling SUBNET_DATA socket type: ${data.subnetNodeUpdateType}`)
+            message = `Unhandled type ${data.subnetNodeUpdateType} for SUBNET_DATA socket channel with `
+            message += `user id ${userId}, transaction id ${planTransactionId}, `
+            message += `session id ${updateSession}, and root subnet id ${rootSubnetId}.`
+            handleError(new Error(message))
         }
 
         if (DRAFT_STATES[data.subnetNodeUpdateType]) {
