@@ -470,6 +470,10 @@ function deleteBoundaryVertices (mapObject, vertices, callBack) {
 function showContextMenuForList (features, coords) {
   return (dispatch) => {
     let menuItemFeatures = []
+    // TODO: group by dataType
+    // TODO: order by hierarchy
+    // TODO: for location connectors and terminals 
+    //  if there are more than one add a menu item "merge"
     features.forEach(feature => {
       var menuActions = []
       if (feature.dataType === "edge_construction_area") {

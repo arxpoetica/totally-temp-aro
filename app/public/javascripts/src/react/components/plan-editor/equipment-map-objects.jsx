@@ -57,19 +57,29 @@ export class EquipmentMapObjects extends Component {
     // NOTE: this is a workaround to make sure we're selecting
     // equipment that might be piled on top of one another
     const selectionCircle = new google.maps.Circle({
+      strokeColor: "#228be6",
+      strokeOpacity: 1.0,
+      strokeWeight: 1,
+      fillColor: "#228be6",
+      fillOpacity: 0.5,
+      zIndex: constants.Z_INDEX_PIN,
+
       map: googleMaps,
       center: latLng,
       // FIXME: this radius is only useful at certain zoom levels.
       // How can we set this correctly based on zoom?
-      visible: false,
+      //visible: false,
       radius: metersPerPixel * 15,
     })
+    
 
     const objectsUnderPoint = Object.values(this.mapObjects)
       .filter(object => selectionCircle.getBounds().contains(object.getPosition()))
       .map(filteredMapObjects => { return { objectId: filteredMapObjects.objectId, dataType: filteredMapObjects.dataType }})
 
-    selectionCircle.setMap(null)
+    setTimeout(() => {
+      selectionCircle.setMap(null)
+    }, 600)
     return objectsUnderPoint
   }
 
