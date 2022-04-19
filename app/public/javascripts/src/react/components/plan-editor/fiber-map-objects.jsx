@@ -31,21 +31,24 @@ export const FiberMapObjects = (props) => {
     
     if (selectedSubnetId) {
       let subnetId = selectedSubnetId
-      if (subnetFeatures[selectedSubnetId].feature.dataType === "edge_construction_area") {
-        const rootList = Object.values(rootDrafts)
-        if (rootList.length) { // we have at least 1 root
-          if (rootList.length === 1) { // we have ONLY 1 root
-            subnetId = rootList[0].subnetId
-          } else { // we ahve more than 1 root
-            // get the subnet by lat long
+      const feature = subnetFeatures[selectedSubnetId]
+      if (feature) {
+        if (feature.dataType === 'edge_construction_area') {
+          const rootList = Object.values(rootDrafts)
+          if (rootList.length) { // we have at least 1 root
+            if (rootList.length === 1) { // we have ONLY 1 root
+              subnetId = rootList[0].subnetId
+            } else { // we ahve more than 1 root
+              // get the subnet by lat long
+            }
           }
+        } 
+        // in case of terminal or other feature that isn't a subnet itself
+        if (!subnets[subnetId]) subnetId = feature.subnetId
+        if (subnets[subnetId].fiber) { 
+          subnetLinks = subnets[subnetId].fiber.subnetLinks
+          fiberType = subnets[subnetId].fiber.fiberType
         }
-      } 
-      // in case of terminal or other feature that isn't a subnet itself
-      if (!subnets[subnetId]) subnetId = subnetFeatures[selectedSubnetId].subnetId
-      if (subnets[subnetId].fiber) { 
-        subnetLinks = subnets[subnetId].fiber.subnetLinks
-        fiberType = subnets[subnetId].fiber.fiberType
       }
     }
     

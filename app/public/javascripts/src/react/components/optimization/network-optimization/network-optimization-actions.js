@@ -168,7 +168,7 @@ function modifyOptimization(plan)  {
   return async(dispatch) => {
     try {
       await AroHttp.delete(`/service/v1/plan/${plan.id}/optimization-state`)
-      const result = AroHttp.get(`/service/v1/plan/${plan.id}/optimization-state`)
+      const result = await AroHttp.get(`/service/v1/plan/${plan.id}/optimization-state`)
       dispatch(PlanActions.setActivePlanState(result.data))
     } catch (error) {
       handleError(error)
