@@ -467,25 +467,25 @@ function deleteBoundaryVertices (mapObject, vertices, callBack) {
   }
 }
 
-function showContextMenuForEquipment (featureId, x, y) {
+function showContextMenuForList (features, coords) {
   return (dispatch) => {
-    var menuActions = []
-    menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteFeature', featureId))
-    const menuItemFeature = new MenuItemFeature('EQUIPMENT', 'Equipment', menuActions)
-    // Show context menu
-    dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
-    dispatch(ContextMenuActions.showContextMenu(x, y))
-  }
-}
-
-function showContextMenuForConstructionAreas (featureId, x, y) {
-  return (dispatch) => {
-    var menuActions = []
-    menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteConstructionArea', featureId))
-    const menuItemFeature = new MenuItemFeature('CONSTRUCTION_AREA', 'Construction Area', menuActions)
-    // Show context menu
-    dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
-    dispatch(ContextMenuActions.showContextMenu(x, y))
+    let menuItemFeatures = []
+    features.forEach(feature => {
+      var menuActions = []
+      if (feature.dataType === "edge_construction_area") {
+        menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteConstructionArea', feature.objectId))
+        menuItemFeatures.push(new MenuItemFeature('CONSTRUCTION_AREA', 'Construction Area', menuActions))
+      } else {
+        let label = 'Equipment'
+        if (feature.dataType) label = feature.dataType.toLowerCase().replace('_', ' ').replace(/(^\w{1})|(\s{1}\w{1})/g, match => match.toUpperCase())
+        menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteFeature', feature.objectId))
+        menuItemFeatures.push(new MenuItemFeature('EQUIPMENT', label, menuActions))
+      }
+    })
+    if (menuItemFeatures.length) {
+      dispatch(ContextMenuActions.setContextMenuItems(menuItemFeatures))
+      dispatch(ContextMenuActions.showContextMenu(coords.x, coords.y))
+    }
   }
 }
 
@@ -1717,17 +1717,15 @@ export default {
   discardTransaction,
   resumeOrCreateTransaction,
   createFeature,
-  //modifyFeature,
   updateFeatureProperties,
   moveFeature,
   deleteFeature,
-  //deleteTransactionFeature,
   createConstructionArea,
   moveConstructionArea,
   deleteBoundaryVertex,
   deleteBoundaryVertices,
   addTransactionFeatures,
-  showContextMenuForEquipment,
+  showContextMenuForList,
   showContextMenuForLocations,
   unassignLocation,
   assignLocation,
@@ -1762,7 +1760,6 @@ export default {
   setFiberAnnotations,
   getFiberAnnotations,
   leftClickTile,
-  showContextMenuForConstructionAreas,
   deleteConstructionArea,
   subscribeToSocket,
   unsubscribeFromSocket,

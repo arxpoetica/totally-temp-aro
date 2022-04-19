@@ -130,7 +130,7 @@ export class ContextMenu extends Component {
         cssClass: 'fas fa-trash-alt pl-2 pr-2'
       },
     }
-    return <ul className='dropdown-menu sub-menu' style={{ top: (menuItemIndex * 38 + (numberOfMenuItems > this.MAX_MENU_ITEMS ? 20 : 0)) + 'px', padding: '0px' }}>
+    return <ul className='dropdown-menu sub-menu' >
       {
         menuItemActions.map((menuItemAction, actionIndex) => {
           return <li

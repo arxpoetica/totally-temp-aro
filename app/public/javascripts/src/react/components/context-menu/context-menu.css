@@ -53,6 +53,7 @@
   color: black;
   padding: 8px;
   cursor: pointer;
+  position: relative;
 }
 
 .badge-boundary {
