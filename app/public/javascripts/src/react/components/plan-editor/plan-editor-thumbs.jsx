@@ -32,6 +32,9 @@ const PlanEditorHeader = props => {
             ? constants.BLOCKER.KEY
             : constants.INCLUSION.KEY
             if (dropdownValue !== planThumbInformation[feature.objectId]) {
+              // This was updating infinitely due to the useEffect check on features
+              // Even if the costMultiplier didn't change on the route adjuster the
+              // date modified did. Resulting in infinite loop of death.
               updatePlanThumbInformation({
                 key: feature.objectId,
                 planThumbInformation: dropdownValue
