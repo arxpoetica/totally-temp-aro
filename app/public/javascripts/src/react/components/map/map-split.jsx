@@ -30,7 +30,9 @@ import FrontierFooter from '../footer/frontier-footer.jsx'
 import MapSelectorExportLocations from '../map/map-selector-export-locations.jsx'
 import MapSelectorPlanTarget from '../map/map-selector-plan-target.jsx'
 import ErrorBoundary from '../common/ErrorBoundary.jsx'
+import { OptimizationModal } from '../common/optimization-modal.jsx'
 import { NotificationsProvider } from '@mantine/notifications'
+import { ModalsProvider } from '@mantine/modals';
 
 const transitionTimeMsec = 100
 // This must be the same for the map and sidebar, otherwise animations don't work correctly.
@@ -115,6 +117,8 @@ const MapSplit = (props) => {
 
   return (
     <NotificationsProvider position="top-center">
+    {/* NOTE TO FUTURE ENGINEER: please avoid top-level modals as much as possible */}
+    <ModalsProvider modals={{ OptimizationModal }}>
       {/* First define the container for both the map and the sidebar. */}
       <div className={`app_wrapper_container ${ARO_CLIENT === 'frontier' ? 'footer' : ''}`}>
 
@@ -248,6 +252,14 @@ const MapSplit = (props) => {
           <MapViewToggle />
         </div>
       }
+
+      <style jsx>{`
+        :global(.mantine-Modal-title) {
+          font-size: 18px;
+          font-weight: bold;
+        }
+      `}</style>
+    </ModalsProvider>
     </NotificationsProvider>
   )
 }

@@ -104,7 +104,7 @@ export default class ProgressButton extends Component {
               <i className="far fa-save"/> Save plan as...
             </button>
           : <button className={'btn btn-block modify-coverage-button'} style={{ marginBottom: '10px' }}
-              onClick={() => this.onModify()}>
+              onClick={() => this.onModify()} disabled={this.props.isCommittingTransaction}>
               <i className="fa fa-edit"/> Modify
             </button>
         }

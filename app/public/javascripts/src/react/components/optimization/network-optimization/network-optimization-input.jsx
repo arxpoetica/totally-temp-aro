@@ -10,46 +10,17 @@ import PlanTargetListComponent from '../../selection/plan-target-list.jsx'
 import NetworkOptimizationInputForm from './network-optimization-input-form.jsx'
 import NetworkOptimizationButton from './network-optimization-button.jsx'
 import NetworkOptimizationSelectors from './network-optimization-selectors'
+import { handleError } from '../../../common/notifications'
 import Constants from '../../../common/constants'
 import DropdownList from 'react-widgets/lib/DropdownList'
+import { useModals } from '@mantine/modals'
 
-export class NetworkOptimizationInput extends Component {
-  render () {
-    return (
-      <div style={{ paddingRight: '10px', paddingTop: '8px', paddingLeft: '10px' }}>
-        <NetworkOptimizationButton
-          onRun={() => this.requestRunOptimization()}
-          onModify={() => this.onModifyOptimization()}
-          onCancel={() => this.onCancelOptimization()}
-          isCanceling={this.props.isCanceling}
-        />
-        <NetworkOptimizationInputForm
-          handleChange={(newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
-          initialValues={this.props.optimizationInputs}
-          networkAnalysisTypeId={this.props.networkAnalysisTypeId}
-          displayOnly={!this.areControlsEnabled()} enableReinitialize />
+export function NetworkOptimizationInput(props) {
 
-        <EditorInterface title="Routing Selection">
-          <EditorInterfaceItem subtitle="Selection Type">
-            <DropdownList
-              data={this.props.allSelectionModes}
-              valueField='id'
-              textField='description'
-              value={this.props.activeSelectionModeId}
-              readOnly={!this.areControlsEnabled()}
-              onChange={(val, event) => this.onSelectionModeChange(val, event)} />
-          </EditorInterfaceItem>
-          <EditorInterfaceItem>
-            <PlanTargetListComponent displayOnly={!this.areControlsEnabled()} />
-          </EditorInterfaceItem>
-        </EditorInterface>
+  const modals = useModals()
 
-      </div>
-    )
-  }
-
-  requestRunOptimization () {
-    if (this.props.transaction) {
+  const requestRunOptimization = () => {
+    if (props.transactionId) {
       // open a swal
       swal({
         title: 'Unsaved Changes',
@@ -59,54 +30,85 @@ export class NetworkOptimizationInput extends Component {
         confirmButtonText: 'Save and Run', // 'Yes',
         showCancelButton: true,
         cancelButtonText: 'Back', // 'No',
-        closeOnConfirm: true
-      }, (result) => {
+        closeOnConfirm: true,
+      }, result => {
         if (result) {
           // save transaction
-          this.props.commitTransaction(this.props.transaction.id)
-            .then(() => {
-              this.onRunOptimization()
-            })
-            .catch(err => {
-              console.error(err)
-            })
+          props.commitTransaction(props.transactionId)
+            .then(() => onRunOptimization())
+            .catch(error => handleError(error))
         }
       })
     } else {
-      this.onRunOptimization()
+      onRunOptimization()
     }
   }
 
-  onRunOptimization () {
+  function onRunOptimization() {
     // load settings from otehr spots in the UI
-    var inputs = this.props.additionalOptimizationInputs
+    var inputs = props.additionalOptimizationInputs
 
     //sets active filters to validated ones
-    this.props.setActiveFilters(this.props.validatedFilters)
-    this.props.runOptimization(inputs, this.props.userId)
+    props.setActiveFilters(props.validatedFilters)
+    props.runOptimization(inputs, props.userId)
   }
 
-  onCancelOptimization () {
-    this.props.cancelOptimization(this.props.planId, this.props.optimizationId)
+  function onCancelOptimization() {
+    props.cancelOptimization(props.planId, props.optimizationId)
   }
 
-  handleChange (newVal, prevVal, propChain) {
-    // console.log('--- from parent ---')
-    // console.log([newVal, prevVal, propChain])
+  function onSelectionModeChange(val, event) {
+    props.setSelectionTypeById(val.id)
   }
 
-  onSelectionModeChange (val, event) {
-    this.props.setSelectionTypeById(val.id)
+  // TODO: this is also in analysis-mode.js
+  function areControlsEnabled() {
+    return props.planState === Constants.PLAN_STATE.START_STATE
+      || props.planState === Constants.PLAN_STATE.INITIALIZED
   }
 
-  // ToDo: this is also in analysis-mode.js
-  areControlsEnabled () {
-    return (this.props.planState === Constants.PLAN_STATE.START_STATE) || (this.props.planState === Constants.PLAN_STATE.INITIALIZED)
+  function onModifyOptimization() {
+    modals.openContextModal('OptimizationModal', {
+      title: props.transactionId
+        ? 'This plan has uncommitted changes.'
+        : 'Overwrite the existing plan.',
+      size: 'lg',
+    })
   }
 
-  onModifyOptimization () {
-    this.props.modifyOptimization(this.props.activePlan)
-  }
+  return (
+    <div style={{ paddingRight: '10px', paddingTop: '8px', paddingLeft: '10px' }}>
+      <NetworkOptimizationButton
+        onRun={() => requestRunOptimization()}
+        onCancel={() => onCancelOptimization()}
+        onModify={() => onModifyOptimization()}
+        isCanceling={props.isCanceling}
+        isCommittingTransaction={props.isCommittingTransaction}
+      />
+      <NetworkOptimizationInputForm
+        handleChange={() => {}}
+        initialValues={props.optimizationInputs}
+        networkAnalysisTypeId={props.networkAnalysisTypeId}
+        displayOnly={!areControlsEnabled()} enableReinitialize />
+
+      <EditorInterface title="Routing Selection">
+        <EditorInterfaceItem subtitle="Selection Type">
+          <DropdownList
+            data={props.allSelectionModes}
+            valueField='id'
+            textField='description'
+            value={props.activeSelectionModeId}
+            readOnly={!areControlsEnabled()}
+            onChange={(val, event) => onSelectionModeChange(val, event)} />
+        </EditorInterfaceItem>
+        <EditorInterfaceItem>
+          <PlanTargetListComponent displayOnly={!areControlsEnabled()} />
+        </EditorInterfaceItem>
+      </EditorInterface>
+
+    </div>
+  )
+
 }
 
 const mapStateToProps = (state) => ({
@@ -119,13 +121,14 @@ const mapStateToProps = (state) => ({
   optimizationInputs: state.optimization.networkOptimization.optimizationInputs,
   allSelectionModes: NetworkOptimizationSelectors.getAllSelectionModes(state),
   activeSelectionModeId: state.selection.activeSelectionMode.id,
-  transaction: state.planEditor.transaction,
+  transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
   activePlan: state.plan.activePlan,
   networkAnalysisType: state.optimization.networkOptimization.optimizationInputs.analysis_type,
   activeFilters: state.optimization.networkOptimization.activeFilters,
   clientName: state.configuration.system.ARO_CLIENT,
   validatedFilters: NetworkOptimizationSelectors.getValidatedFilters(state),
-  additionalOptimizationInputs: NetworkOptimizationSelectors.getAdditionalOptimizationInputs(state)
+  additionalOptimizationInputs: NetworkOptimizationSelectors.getAdditionalOptimizationInputs(state),
+  isCommittingTransaction: state.planEditor.isCommittingTransaction
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -133,7 +136,6 @@ const mapDispatchToProps = dispatch => ({
   runOptimization: (inputs, userId) => dispatch(NetworkOptimizationActions.runOptimization(inputs, userId)),
   cancelOptimization: (planId, optimizationId) => dispatch(NetworkOptimizationActions.cancelOptimization(planId, optimizationId)),
   setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
-  modifyOptimization: (activePlan) => dispatch(NetworkOptimizationActions.modifyOptimization(activePlan)),
   setActiveFilters: (filters) => dispatch(NetworkOptimizationActions.setActiveFilters(filters)),
 })
 
