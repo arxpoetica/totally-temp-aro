@@ -31,15 +31,16 @@ const PlanEditorHeader = props => {
           const dropdownValue = isBlocker
             ? constants.BLOCKER.KEY
             : constants.INCLUSION.KEY
-  
-            updatePlanThumbInformation({
-              key: feature.objectId,
-              planThumbInformation: dropdownValue
-            })
+            if (dropdownValue !== planThumbInformation[feature.objectId]) {
+              updatePlanThumbInformation({
+                key: feature.objectId,
+                planThumbInformation: dropdownValue
+              })
+            }
         }
       })
     }
-  }, [selectedEditFeatureIds, features])
+  }, [selectedEditFeatureIds, JSON.stringify(features)])
 
   function onClick(event, objectId) {
     event.stopPropagation()
