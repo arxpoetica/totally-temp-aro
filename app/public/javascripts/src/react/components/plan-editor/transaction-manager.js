@@ -1,5 +1,6 @@
 /* globals swal */
 import AroHttp from '../../common/aro-http'
+import { handleError } from '../../common/notifications'
 
 export default class TransactionManager {
   // Workflow:
@@ -38,8 +39,8 @@ export default class TransactionManager {
       }
 
     } catch (error) {
-        // For transaction resume errors, log it and rethrow the exception
-        console.error(error)
+        // For transaction resume errors, handle it and rethrow the exception
+        handleError(error)
         return error
     }
   }
@@ -68,8 +69,12 @@ export default class TransactionManager {
           Promise.all(deletePromises)
             .then(res => AroHttp.post(`/service/plan-transactions?session_id=${sessionId}`, { planId: currentPlanId }))
             .then(res => resolve(res))
-            .catch(err => reject(err))
+            .catch(error => {
+              handleError(error)
+              reject(error)
+            })
         } else {
+          handleError(error)
           reject(new Error('Unable to delete older transactions. Please try again later.'))
         }
       })
@@ -107,28 +112,28 @@ export default class TransactionManager {
       })
   }
 
-  static discardTransaction (transactionId) {
+  static discardTransaction(transactionId) {
     return new Promise((resolve, reject) => {
       swal({
         title: 'Discard transaction?',
-        text: `Are you sure you want to discard transaction with ID ${transactionId}`,
+        text: `Are you sure you want to discard and exit transaction with ID ${transactionId}`,
         type: 'warning',
         confirmButtonColor: '#DD6B55',
         confirmButtonText: 'Yes, discard',
         cancelButtonText: 'No',
         showCancelButton: true,
-        closeOnConfirm: true
-      }, (deleteTransaction) => {
+        closeOnConfirm: true,
+      }, deleteTransaction => {
         if (deleteTransaction) {
           // The user has confirmed that the transaction should be deleted
           AroHttp.delete(`/service/plan-transactions/transaction/${transactionId}`)
-            .then(() => resolve())
-            .catch(err => {
-              console.error(err)
-              reject(err)
+            .then(() => resolve(true))
+            .catch(error => {
+              handleError(error)
+              reject(error)
             })
         } else {
-          reject(new Error(`The user does not want to discard the transaction`))
+          resolve(false)
         }
       })
     })

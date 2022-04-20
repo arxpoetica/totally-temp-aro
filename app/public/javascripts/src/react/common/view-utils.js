@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react'
 import Constants from './constants.js'
+import moment from 'moment'
 
 // ========================= >>>>> style utils
 
@@ -51,40 +52,6 @@ export const selectStyles = {
   }),
 }
 
-export const selectStylesBlue = {
-  control: provided => ({
-    ...provided,
-    backgroundColor: '#4d99e5',
-    borderWidth: '0px',
-  }),
-  placeholder: provided => ({
-    ...provided,
-    color: '#ffffff',
-    pointerEvents: 'none',
-    userSelect: 'none',
-  }),
-  singleValue: provided => ({
-    ...provided,
-    color: '#ffffff !important',
-    pointerEvents: 'none',
-    userSelect: 'none',
-  }),
-  input: provided => ({
-    ...provided,
-    flex: '1 1 auto',
-    '> div': { width: '100%' },
-    input: {
-      width: '100% !important',
-      color: '#ffffff !important',
-      textAlign: 'left',
-    },
-  }),
-  dropdownIndicator: provided => ({
-    ...provided,
-    color: '#ffffff !important',
-  }),
-}
-
 // ========================= >>>>> misc utils
 
 // logout function
@@ -109,6 +76,10 @@ export const toUTCDate = date => new Date(Date.UTC(
   date.getUTCMonth(),
   date.getUTCDate(),
 ))
+
+// utilize moment for time handling
+export const momentStartDate = startDate => moment(`${startDate}T00:00:00.000`)
+export const momentEndDate = endDate => moment(`${endDate}T23:59:59.000`)
 
 // These two are for formatting for datetime-local and date input elements
 export const getDateString = (date) => date.toISOString().substring(0, 10)

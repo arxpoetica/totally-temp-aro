@@ -12,7 +12,9 @@ import { batch } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import PlanEditorSelectors from './plan-editor-selectors'
 import { constants } from './shared'
+import { displayModes } from '../sidebar/constants'
 const { DRAFT_STATES, BLOCKER, INCLUSION } = constants
+import { handleError } from '../../common/notifications'
 
 let validSubnetTypes = [
   'central_office',
@@ -59,7 +61,7 @@ function resumeOrCreateTransaction() {
         })
       })
     } catch (error) {
-      console.error(error)
+      handleError(error)
       dispatch({
         type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
         payload: false,
@@ -90,8 +92,7 @@ function clearTransaction (doOpenView = true) {
       if (doOpenView) {
         dispatch({
           type: Actions.TOOL_BAR_SET_SELECTED_DISPLAY_MODE,
-          // TODO: globalize the constants in tool-bar including displayModes
-          payload: 'VIEW',
+          payload: displayModes.ANALYSIS,
         })
       }
     })
@@ -100,37 +101,47 @@ function clearTransaction (doOpenView = true) {
 
 // ToDo: there's only one transaction don't require the ID
 function commitTransaction (transactionId) {
-  return (dispatch, getState) => {
-    const state = getState()
-    if (state.isCommittingTransaction 
-      || state.isEnteringTransaction
-      || state.isCalculatingSubnets
-    ) {
-      return Promise.reject()
-    }
-    return dispatch(recalculateSubnets(transactionId))
-      .then(() => {
-        dispatch(setIsCommittingTransaction(true))
-        return AroHttp.put(`/service/plan-transactions/${transactionId}`)
-          .then(() => dispatch(clearTransaction()))
-          .catch(err => {
-            console.error(err)
-            dispatch(clearTransaction())
-          })
+  return async(dispatch, getState) => {
+    try {
+      const { isCommittingTransaction, isEnteringTransaction, isCalculatingSubnets, plan } = getState()
+      if (isCommittingTransaction || isEnteringTransaction || isCalculatingSubnets) {
+        return Promise.reject()
+      }
+
+      await dispatch(recalculateSubnets(transactionId))
+      dispatch(setIsCommittingTransaction(true))
+      dispatch({
+        type: Actions.TOOL_BAR_SET_SELECTED_DISPLAY_MODE,
+        payload: displayModes.ANALYSIS,
       })
+      await AroHttp.put(`/service/plan-transactions/${transactionId}`)
+      dispatch(clearTransaction())
+
+      const { data } = await AroHttp.get(`/service/v1/plan/${plan.activePlan.id}`)
+      dispatch({ type: Actions.PLAN_SET_ACTIVE_PLAN, payload: { plan: data } })
+
+    } catch (error) {
+      handleError(error)
+      dispatch(clearTransaction())
+    }
   }
 }
 
 // ToDo: there's only one transaction don't require the ID
 function discardTransaction (transactionId) {
-  return dispatch => {
-    dispatch(setIsCommittingTransaction(true))
-    TransactionManager.discardTransaction(transactionId)
-      .then(() => dispatch(clearTransaction()))
-      .catch(err => {
-        console.error(err)
+  return async(dispatch) => {
+    try {
+      dispatch(setIsCommittingTransaction(true))
+      const shouldDiscard = await TransactionManager.discardTransaction(transactionId)
+      if (shouldDiscard) {
         dispatch(clearTransaction())
-      })
+      } else {
+        dispatch(setIsCommittingTransaction(false))
+      }
+    } catch (error) {
+      handleError(error)
+      dispatch(clearTransaction())
+    }
   }
 }
 
@@ -144,6 +155,8 @@ function subscribeToSocket() {
       const unsubscriber = SocketManager.subscribe('SUBNET_DATA', rawData => {
         const data = JSON.parse(utf8decoder.decode(rawData.content))
         // console.log({ name: data.subnetNodeUpdateType, SUBNET_DATA: data, properties: rawData.properties })
+        let message
+        const { userId, updateSession, planTransactionId, rootSubnetId } = data
 
         // asynchronous set up of skeleton from socket data
         switch (data.subnetNodeUpdateType) {
@@ -192,8 +205,17 @@ function subscribeToSocket() {
             break
           case DRAFT_STATES.END_SUBNET_TREE: break // no op
           case DRAFT_STATES.END_INITIALIZATION: break // no op
+          case DRAFT_STATES.ERROR_SUBNET_TREE:
+            message = `Type ${data.subnetNodeUpdateType} for SUBNET_DATA socket channel with `
+            message += `user id ${userId}, transaction id ${planTransactionId}, `
+            message += `session id ${updateSession}, and root subnet id ${rootSubnetId}.`
+            handleError(new Error(message))
+            break
           default:
-            throw new Error(`Not handling SUBNET_DATA socket type: ${data.subnetNodeUpdateType}`)
+            message = `Unhandled type ${data.subnetNodeUpdateType} for SUBNET_DATA socket channel with `
+            message += `user id ${userId}, transaction id ${planTransactionId}, `
+            message += `session id ${updateSession}, and root subnet id ${rootSubnetId}.`
+            handleError(new Error(message))
         }
 
         if (DRAFT_STATES[data.subnetNodeUpdateType]) {
@@ -210,7 +232,7 @@ function subscribeToSocket() {
       })
       // console.log('...subscribed to subnet socket channel...')
     } catch (error) {
-      console.error(error)
+      handleError(error)
     }
   }
 }
@@ -222,7 +244,7 @@ function unsubscribeFromSocket() {
       unsubscriber()
       // console.log('...unsubscribed from subnet socket channel...')
     } catch (error) {
-      console.error(error)
+      handleError(error)
     }
     dispatch({ type: Actions.PLAN_EDITOR_CLEAR_SOCKET_UNSUBSCRIBER })
   }
@@ -232,14 +254,13 @@ function createFeature(feature) {
   return async(dispatch, getState) => {
 
     try {
-
       const state = getState()
       const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
 
       // creating a feature on a blank plan
       const rootSubnet = PlanEditorSelectors.getRootSubnet(state)
       if (!rootSubnet) {
-        const coordinatesResponse = await dispatch(addSubnets({ coordinates: feature.point.coordinates }))
+        await dispatch(addSubnets({ coordinates: feature.point.coordinates }))
       }
 
       const url = `/service/plan-transaction/${transactionId}/subnet_cmd/update-children`
@@ -249,14 +270,12 @@ function createFeature(feature) {
       if (state.plan.activePlan.planType === "RING" && rootSubnet) {
         commandsBody.subnetId = rootSubnet.subnetNode;
       }
-      const featureResults = await AroHttp.post(url, {
-        commands: [commandsBody]
-      })
-      const { subnetUpdates, equipmentUpdates } = featureResults.data
+      const updateResponse = await AroHttp.post(url, { commands: [commandsBody] })
+      const { subnetUpdates, equipmentUpdates } = updateResponse.data
 
       // 1. dispatch addSubnets w/ everything that came back...
       const updatedSubnetIds = subnetUpdates.map((subnet) => subnet.subnet.id)
-      const subnetIdsResponse = await dispatch(addSubnets({ subnetIds: updatedSubnetIds }))
+      await dispatch(addSubnets({ subnetIds: updatedSubnetIds }))
 
       // 2. wait for return, and run rest after
       let subnetsCopy = JSON.parse(JSON.stringify(getState().planEditor.subnets))
@@ -289,20 +308,44 @@ function createFeature(feature) {
         }
       })
 
-      batch(() => {
-        dispatch({
-          type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
-          payload: newFeatures,
-        })
-        dispatch({
-          type: Actions.PLAN_EDITOR_ADD_SUBNETS,
-          payload: subnetsCopy,
-        })
+      // if we create a new hub, need to add the subnet to the draft
+      const createdHubSubnet = subnetUpdates.find(({ subnet, type }) => {
+        return subnet.networkNodeType === 'fiber_distribution_hub' && type === 'created'
       })
-      } catch (error) {
-        console.error(error)
+      let newDraft, newEquipment
+      if (createdHubSubnet) {
+        const { subnet, subnetBoundary } = createdHubSubnet
+
+        // unfortunately have to make the extra call to get the fault tree
+        const query = 'selectionTypes=FAULT_TREE'
+        const url = `/service/plan-transaction/${transactionId}/subnet/${subnet.id}?${query}`
+        const { data } = await AroHttp.get(url)
+
+        newDraft = {
+          subnetId: subnet.id,
+          nodeType: subnet.networkNodeType,
+          parentSubnetId: data.parentSubnetId,
+          nodeSynced: true,
+          subnetBoundary,
+          equipment: [],
+          faultTreeSummary: data.faultTree.faultTreeSummary,
+        }
+        newEquipment = subnet
       }
 
+      batch(() => {
+        dispatch({ type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES, payload: newFeatures })
+        dispatch({ type: Actions.PLAN_EDITOR_ADD_SUBNETS, payload: subnetsCopy })
+        if (newDraft && newEquipment) {
+          dispatch({ type: Actions.PLAN_EDITOR_ADD_DRAFT, payload: newDraft })
+          const draftClone = klona(state.planEditor.drafts[newDraft.parentSubnetId])
+          draftClone.equipment.push(newEquipment)
+          dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT, payload: draftClone })
+        }
+      })
+    } catch (error) {
+      handleError(error)
+    }
 
   }
 }
@@ -332,7 +375,7 @@ function updateFeatureProperties({ feature, rootSubnetId }) {
       })
       return Promise.resolve()
     } catch (error) {
-      console.error(err)
+      handleError(error)
     }
   }
 }
@@ -382,8 +425,8 @@ function createConstructionArea(constructionArea) {
           payload: subnetsCopy,
         })
       })
-    } catch (e) {
-      console.warn(e);
+    } catch (error) {
+      handleError(error)
     }
   }
 }
@@ -517,7 +560,7 @@ function _updateSubnetFeatures (subnetFeatures) {
         dispatch(recalculateSubnets(transactionId, subnetIds))
         
       })
-      .catch(err => console.error(err))
+      .catch(error => handleError(error))
   }
 }
 
@@ -632,19 +675,24 @@ function stopDrawingBoundary () {
   }
 }
 
-// does this need to be it's own function? it's only used in the recalc subnets function
-function setIsCalculatingSubnets (isCalculatingSubnets) {
+function setIsRecalculating(isRecalculating) {
   return {
-    type: Actions.PLAN_EDITOR_SET_IS_CALCULATING_SUBNETS,
-    payload: isCalculatingSubnets
+    type: Actions.PLAN_EDITOR_SET_IS_RECALCULATING,
+    payload: isRecalculating,
   }
 }
 
-// does this need to be it's own function? it's only used in the recalc boundary function
+function setIsCalculatingSubnets (isCalculatingSubnets) {
+  return {
+    type: Actions.PLAN_EDITOR_SET_IS_CALCULATING_SUBNETS,
+    payload: isCalculatingSubnets,
+  }
+}
+
 function setIsCalculatingBoundary (isCalculatingBoundary) {
   return {
     type: Actions.PLAN_EDITOR_SET_IS_CALCULATING_BOUNDARY,
-    payload: isCalculatingBoundary
+    payload: isCalculatingBoundary,
   }
 }
 
@@ -715,9 +763,7 @@ function updatePlanThumbInformation (payload) {
           })
         })
       })
-      .catch(err => {
-        console.error(err)
-      })
+      .catch(error => handleError(error))
   }
 }
 
@@ -772,7 +818,7 @@ function moveFeature (featureId, coordinates) {
           dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT, payload: draftClone })
         }
       })
-      .catch(err => console.error(err))
+      .catch(error => handleError(error))
   }
 }
 
@@ -863,7 +909,7 @@ function deleteFeature (featureId) {
         dispatch(recalculateSubnets(transactionId))
       })
     } catch (error) {
-      console.error(error)
+      handleError(error)
     }
   }
 }
@@ -931,7 +977,7 @@ function readFeatures (featureIds) {
               })
             }
           })
-          .catch(err => console.error(err))
+          .catch(error => handleError(error))
       )
     })
     return Promise.all(promises)
@@ -1101,6 +1147,7 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
           fiberApiPromises.push(
             AroHttp.get(`/service/plan-transaction/${transaction.id}/subnetfeature/${subnetId}`)
               .then(fiberResult => subnet.fiber = fiberResult.data)
+              .catch(error => handleError(error))
           )
         })
 
@@ -1112,13 +1159,14 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
               resolve(subnetIds)
             })
           })
-          .catch(err => {
-            console.error(err)
+          .catch(error => {
+            handleError(error)
             dispatch(setIsCalculatingSubnets(false))
             return Promise.reject()
           })
-      }).catch(err => {
-        console.error(err)
+      })
+      .catch(error => {
+        handleError(error)
         dispatch(setIsCalculatingSubnets(false))
         return Promise.reject()
       })
@@ -1163,7 +1211,7 @@ function addSubnetTreeByLatLng([lng, lat]) {
         return Promise.resolve([])
       }
     } catch (error) {
-      console.error(err)
+      handleError(error)
       dispatch(setIsCalculatingSubnets(false))
       return Promise.reject()
     }
@@ -1191,8 +1239,8 @@ function setSelectedSubnetId (selectedSubnetId) {
               type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
               payload: selectedSubnetId,
             })
-          }).catch(err => {
-            console.error(err)
+          }).catch(error => {
+            handleError(error)
             dispatch({
               type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
               payload: null,
@@ -1219,7 +1267,7 @@ function onMapClick(featureIds, latLng) {
         dispatch(selectEditFeaturesById(featureIds))
       }
     } catch (error) {
-      console.log(error)
+      handleError(error)
     }
   }
 }
@@ -1275,8 +1323,8 @@ function recalculateBoundary (subnetId) {
           await dispatch(addSubnets({ subnetIds: updatedSubnetIds }))
         }
       })
-      .catch(err => {
-        console.error(err)
+      .catch(error => {
+        handleError(error)
         dispatch(setIsCalculatingBoundary(false))
       })
   }
@@ -1315,38 +1363,46 @@ function boundaryChange (subnetId, geometry) {
     batch(() => {
       dispatch({ type: Actions.PLAN_EDITOR_SET_BOUNDARY_DEBOUNCE, payload: {subnetId, timeoutId} })
       dispatch({ type: Actions.PLAN_EDITOR_UPDATE_SUBNET_BOUNDARY, payload: {subnetId, geometry} })
-      const draftClone = klona(state.planEditor.drafts[subnetId])
-      draftClone.subnetBoundary.polygon = geometry
-      dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT, payload: draftClone })
+      if (state.planEditor.drafts[subnetId]) {
+        // Handle case where the boundary's subnet is not in the drafts (Route Adjusters)
+        const draftClone = klona(state.planEditor.drafts[subnetId])
+        draftClone.subnetBoundary.polygon = geometry
+        dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT, payload: draftClone })
+      }
     })
   }
 }
 
-function recalculateSubnets (transactionId, subnetIds = []) {
-  return (dispatch, getState) => {
-    const state = getState()
-    if (state.isCalculatingSubnets) return Promise.reject()
-    let activeSubnets = []
-    dispatch(setIsCalculatingSubnets(true))
-    const recalcBody = { subnetIds: activeSubnets }
+function recalculateSubnets(transactionId, subnetIds = []) {
+  return async(dispatch, getState) => {
+    try {
+      const state = getState()
+      if (state.isCalculatingSubnets) return Promise.reject()
+      let activeSubnets = []
+      dispatch(setIsRecalculating(true))
+      dispatch(setIsCalculatingSubnets(true))
+      const recalcBody = { subnetIds: activeSubnets }
 
-    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet-cmd/recalc`, recalcBody)
-      .then(res => {
-        dispatch(setIsCalculatingSubnets(false))
-        batch(() => {
-          // remove annotations from recalculated subnets
-          res.data.subnets.forEach(subnet => {
-            let subnetId = subnet.feature.objectId
-            dispatch(setFiberAnnotations({[subnetId]: []}, subnetId))
-          })
-          // parse changes
-          dispatch(parseRecalcEvents(res.data))
+      const url = `/service/plan-transaction/${transactionId}/subnet-cmd/recalc`
+      const res = await AroHttp.post(url, recalcBody)
+
+      dispatch(setIsCalculatingSubnets(false))
+      dispatch(setIsRecalculating(false))
+      batch(() => {
+        // remove annotations from recalculated subnets
+        res.data.subnets.forEach(subnet => {
+          let subnetId = subnet.feature.objectId
+          dispatch(setFiberAnnotations({[subnetId]: []}, subnetId))
         })
+        // parse changes
+        dispatch(parseRecalcEvents(res.data))
       })
-      .catch(err => {
-        console.error(err)
-        dispatch(setIsCalculatingSubnets(false))
-      })
+
+    } catch (error) {
+      handleError(error)
+      dispatch(setIsCalculatingSubnets(false))
+      dispatch(setIsRecalculating(false))
+    }
   }
 }
 
@@ -1394,9 +1450,7 @@ function getFiberAnnotations (subnetId) {
             payload: { [subnetId]: res.data }
           })
         })
-        .catch((error) => {
-          console.error(error)
-        })
+        .catch((error) => handleError(error))
     }
   }
 }
@@ -1415,9 +1469,7 @@ function setFiberAnnotations (fiberAnnotations, subnetId) {
             payload: fiberAnnotations,
           })
         })
-        .catch((error) => {
-          console.error(error)
-        })
+        .catch((error) => handleError(error))
     }
   }
 }

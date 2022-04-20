@@ -1,6 +1,7 @@
 import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
-import { toUTCDate, toIsoStartDate, toIsoEndDate } from '../../common/view-utils.js'
+import { momentStartDate, momentEndDate } from '../../common/view-utils.js'
+import moment from 'moment'
 
 function broadcastMessage (message) {
   return (dispatch, getState) => {
@@ -16,11 +17,10 @@ function validateBroadcast (broadcast) {
   return dispatch => {
     const { startDate, endDate } = broadcast
     if ((startDate !== undefined && endDate !== undefined)) {
-      const now = new Date()
-      const nowTime = toUTCDate(now).getTime()
-      const compareStart = toIsoStartDate(startDate)
-      const compareEnd = toIsoEndDate(endDate)
-      const isValidDate = nowTime >= compareStart.getTime() && nowTime <= compareEnd.getTime()
+      const nowTimeUTC = moment.utc();
+      const compareStart = momentStartDate(startDate)
+      const compareEnd = momentEndDate(endDate)
+      const isValidDate = nowTimeUTC >= moment.utc(compareStart) && nowTimeUTC <= moment.utc(compareEnd)
       if (isValidDate) {
         dispatch(broadcastMessage(broadcast))
       } else {

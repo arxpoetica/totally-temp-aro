@@ -1,3 +1,10 @@
+/**
+ * BIG FAT TODO: some of the functionality in this file belongs in an `App.jsx`
+ * top-level component. As a last part of the React migration, we should create
+ * that top level component and let it handle global stuff like providers and
+ * what-not (like any Mantine providers).
+ */
+
 import React, { useState, useEffect, useRef } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
@@ -13,7 +20,7 @@ import ViewMode from '../sidebar/view/view-mode.jsx'
 import { displayModes, targetSelectionModes } from '../sidebar/constants'
 import AnalysisMode from '../sidebar/analysis/analysis-mode.jsx'
 import RingEditor from '../sidebar/ring-editor.jsx'
-import PlanEditorContainer from '../plan-editor/plan-editor-container.jsx'
+import PlanEditor from '../plan-editor/plan-editor.jsx'
 import AroDebug from '../sidebar/debug/aro-debug.jsx'
 import PlanSettings from '../plan/plan-settings.jsx'
 import UINotifications from '../notification/ui-notifications.jsx'
@@ -23,6 +30,9 @@ import FrontierFooter from '../footer/frontier-footer.jsx'
 import MapSelectorExportLocations from '../map/map-selector-export-locations.jsx'
 import MapSelectorPlanTarget from '../map/map-selector-plan-target.jsx'
 import ErrorBoundary from '../common/ErrorBoundary.jsx'
+import { OptimizationModal } from '../common/optimization-modal.jsx'
+import { NotificationsProvider } from '@mantine/notifications'
+import { ModalsProvider } from '@mantine/modals';
 
 const transitionTimeMsec = 100
 // This must be the same for the map and sidebar, otherwise animations don't work correctly.
@@ -106,7 +116,9 @@ const MapSplit = (props) => {
   }
 
   return (
-    <>
+    <NotificationsProvider position="top-center">
+    {/* NOTE TO FUTURE ENGINEER: please avoid top-level modals as much as possible */}
+    <ModalsProvider modals={{ OptimizationModal }}>
       {/* First define the container for both the map and the sidebar. */}
       <div className={`app_wrapper_container ${ARO_CLIENT === 'frontier' ? 'footer' : ''}`}>
 
@@ -187,12 +199,12 @@ const MapSplit = (props) => {
             {/* Add a wrapping div because the expander changes the layout even though it is outside the panel */}
             {!isCollapsed &&
               <>
-                <NetworkPlan />
                 <div className="display-mode-container">
                   <div className="display-mode-buttons">
                     {/* this is necessary to make the display-mode-buttons flow correctly */}
                     <DisplayModeButtons />
                   </div>
+                  <NetworkPlan />
                   <div className="display-modes">
                     {/* Error boundaries are React components that catch JavaScript errors anywhere in their child component tree, 
                       log those errors, and display a fallback UI instead of the component tree that crashed.
@@ -208,7 +220,7 @@ const MapSplit = (props) => {
                       {checkSelectedDisplayMode(displayModes.EDIT_RINGS) && <RingEditor /> }
                     </ErrorBoundary>
                     <ErrorBoundary>
-                      {checkSelectedDisplayMode(displayModes.EDIT_PLAN) && <PlanEditorContainer /> }
+                      {checkSelectedDisplayMode(displayModes.EDIT_PLAN) && <PlanEditor /> }
                     </ErrorBoundary>
                     <ErrorBoundary>
                       {checkSelectedDisplayMode(displayModes.DEBUG) && <AroDebug /> }
@@ -240,7 +252,15 @@ const MapSplit = (props) => {
           <MapViewToggle />
         </div>
       }
-    </>
+
+      <style jsx>{`
+        :global(.mantine-Modal-title) {
+          font-size: 18px;
+          font-weight: bold;
+        }
+      `}</style>
+    </ModalsProvider>
+    </NotificationsProvider>
   )
 }
 
