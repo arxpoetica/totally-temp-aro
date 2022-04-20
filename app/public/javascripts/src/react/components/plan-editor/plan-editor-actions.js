@@ -467,21 +467,70 @@ function deleteBoundaryVertices (mapObject, vertices, callBack) {
   }
 }
 
+// helper, should probably be in a utils file
+function toLabel (name) {
+ return name.toLowerCase().replaceAll('_', ' ').replaceAll(/(^\w{1})|(\s{1}\w{1})/g, match => match.toUpperCase())
+}
+
 function showContextMenuForList (features, coords) {
   return (dispatch) => {
     let menuItemFeatures = []
-    // TODO: group by dataType
-    // TODO: order by hierarchy
-    // TODO: for location connectors and terminals 
+    // group by dataType
+    // order by hierarchy
+    // for location connectors and terminals 
     //  if there are more than one add a menu item "merge"
+    console.log(features)
+    let featuresByType = {}
     features.forEach(feature => {
+      let dataType = 'undefined_type'
+      if (feature.dataType) dataType = feature.dataType
+      if (!(dataType in featuresByType)) featuresByType[dataType] = []
+      featuresByType[dataType].push(feature)
+    })
+    // for each ['location_connector', 'fiber_distribution_terminal']
+    if ('location_connector' in featuresByType && featuresByType['location_connector'].length > 1) {
+      let label = `${featuresByType['location_connector'].length} ${toLabel('location_connector')}s`
+      let menuAction = new MenuItemAction('MERGE', 'Merge All', 'PlanEditorActions', 'mergeLocationConnectors', featuresByType['location_connector'])
+      let menuItemFeature = new MenuItemFeature(null, label, [menuAction])
+      featuresByType['location_connector'].unshift(
+        {
+          dataType: 'GROUP_HEADER',
+          menuItemFeature,
+        }
+      )
+    }
+
+    // in leu of proper ordering mechanism
+    let topList = []
+    let orderedFeatureList = []
+    let endList = []
+    for (const [dataType, featureList] of Object.entries(featuresByType)) {
+      if (dataType === 'central_office'
+        || dataType === 'subnet_node'
+      ) {
+        topList = topList.concat(featureList)
+      } else if (dataType === 'fiber_distribution_terminal'
+        || dataType === 'location_connector'
+      ) {
+        endList = endList.concat(featureList)
+      } else {
+        orderedFeatureList = orderedFeatureList.concat(featureList)
+      }
+    }
+    orderedFeatureList = topList.concat(orderedFeatureList).concat(endList)
+    
+    console.log(orderedFeatureList)
+
+    orderedFeatureList.forEach(feature => {
       var menuActions = []
-      if (feature.dataType === "edge_construction_area") {
+      if (feature.dataType === 'GROUP_HEADER') { // this is a little hacky, we'll clean it up later ... probably
+        menuItemFeatures.push(feature.menuItemFeature)
+      } else if (feature.dataType === "edge_construction_area") {
         menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteConstructionArea', feature.objectId))
         menuItemFeatures.push(new MenuItemFeature('CONSTRUCTION_AREA', 'Construction Area', menuActions))
       } else {
         let label = 'Equipment'
-        if (feature.dataType) label = feature.dataType.toLowerCase().replace('_', ' ').replace(/(^\w{1})|(\s{1}\w{1})/g, match => match.toUpperCase())
+        if (feature.dataType) label = toLabel(feature.dataType)
         menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteFeature', feature.objectId))
         menuItemFeatures.push(new MenuItemFeature('EQUIPMENT', label, menuActions))
       }
@@ -493,8 +542,14 @@ function showContextMenuForList (features, coords) {
   }
 }
 
+function mergeLocationConnectors (locationConnectors) {
+  console.log(locationConnectors)
+  return Promise.resolve()
+}
+
 function showContextMenuForLocations (featureIds, event) {
   return (dispatch, getState) => {
+    // TODO: if there are more than one add a menu item remove all, add all
     const state = getState()
     const selectedSubnetId = state.planEditor.selectedSubnetId
     if (featureIds.length > 0
@@ -1730,6 +1785,7 @@ export default {
   deleteBoundaryVertices,
   addTransactionFeatures,
   showContextMenuForList,
+  mergeLocationConnectors,
   showContextMenuForLocations,
   unassignLocation,
   assignLocation,
