@@ -81,9 +81,12 @@ export class ContextMenu extends Component {
     }
     return <div className='dropdown-item aro-dropdown-item' href='#' key={menuItemIndex}>
       {/* Render the label based on the equipment type */}
-      <div className={`${featureTypeToLabel[menuItem.type].cssClass} mr-2`}>
-        {featureTypeToLabel[menuItem.type].text}
-      </div>
+      {menuItem.type in featureTypeToLabel
+        ?  <div className={`${featureTypeToLabel[menuItem.type].cssClass} mr-2`}>
+            {featureTypeToLabel[menuItem.type].text}
+          </div>
+        : null
+      }
       {menuItem.label}
       <i className='fa-caret-right fas ml-2' />
       {/* Render actions */}
@@ -96,7 +99,7 @@ export class ContextMenu extends Component {
     // height of the scroll button (if it exists). Would be better if these constants can be removed
     const actionTypeToLabel = {
       ADD_BOUNDARY: {
-        text: 'Add boundary',
+        text: 'Add Boundary',
         cssClass: 'fas fa-plus pl-2 pr-2'
       },
       SELECT: {
@@ -129,6 +132,11 @@ export class ContextMenu extends Component {
         //cssClass: 'fas fa-circle-minus pl-2 pr-2'
         cssClass: 'fas fa-trash-alt pl-2 pr-2'
       },
+      MERGE: {
+        text: 'Merge',
+        //cssClass: 'fas fa-circle-minus pl-2 pr-2'
+        cssClass: 'fas fa-object-group pl-2 pr-2'
+      },
     }
     return <ul className='dropdown-menu sub-menu' >
       {
@@ -142,7 +150,7 @@ export class ContextMenu extends Component {
             <a href='#' className='dropdown-item aro-dropdown-item' style={{ padding: 0 }}>
               <div>
                 <i className={actionTypeToLabel[menuItemAction.type].cssClass} />
-                {actionTypeToLabel[menuItemAction.type].text}
+                {menuItemAction.label || actionTypeToLabel[menuItemAction.type].text}
               </div>
             </a>
           </li>
