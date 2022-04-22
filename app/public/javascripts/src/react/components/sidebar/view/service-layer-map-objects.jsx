@@ -297,6 +297,7 @@ export const ServiceLayerMapObjects = (props) => {
         if ((code === 8 || code === 46) && multiSelectVertices.mapObjectOverlay.length > 0) {
           // Sort is necessary to ensure that indexes will not be reassigned while deleting more than one vertex.
           const mapObjectOverlayClone = [...multiSelectVertices.mapObjectOverlay]
+          multiSelectVertices.clearMapObjectOverlay()
           // Using mapObject as the argument being passed instead of the one in the parent function is the only way this consistently works.
           mapObjectOverlayClone.sort((a, b) => {
             return Number(b.title) - Number(a.title)
@@ -306,7 +307,6 @@ export const ServiceLayerMapObjects = (props) => {
               mapObject.getPath().removeAt(Number(marker.title))
             }
           })
-          multiSelectVertices.clearMapObjectOverlay()
         }
       })
 
