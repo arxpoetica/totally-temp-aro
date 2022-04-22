@@ -30,6 +30,10 @@ DeleteMenu.prototype.onAdd = function() {
     if (event.target != deleteMenu.div_) {
       event.stopPropagation()
       deleteMenu.close()
+      let callBack = this.get('callBack')
+      if (callBack) {
+        callBack()
+      }
     }
   }, true);
 
@@ -42,11 +46,10 @@ DeleteMenu.prototype.onRemove = function() {
   google.maps.event.removeListener(this.clickListener_);
   google.maps.event.removeListener(this.dragListener_);
   this.div_.parentNode.removeChild(this.div_);
-
   // clean up
   this.set('position');
   this.set('path');
-  this.set('vertex');
+  this.set('vertexPayload');
 };
 
 DeleteMenu.prototype.close = function() {
@@ -69,11 +72,17 @@ DeleteMenu.prototype.draw = function() {
 /**
  * Opens the menu at a vertex of a given path.
  */
-DeleteMenu.prototype.open = function(map, path, vertex) {
+DeleteMenu.prototype.open = function(map, path, position, vertexPayload, callBack) {
   this.close()
-  this.set('position', path.getAt(vertex));
+  this.set('position', position);
   this.set('path', path);
-  this.set('vertex', vertex);
+  this.set('vertexPayload', vertexPayload);
+  this.set('callBack', callBack);
+  if (vertexPayload.length) {
+    this.div_.innerHTML = "Delete All"
+  } else {
+    "Delete"
+  }
   this.setMap(map);
   this.draw();
 };
@@ -83,14 +92,26 @@ DeleteMenu.prototype.open = function(map, path, vertex) {
  */
 DeleteMenu.prototype.removeVertex = function() {
   var path = this.get('path');
-  var vertex = this.get('vertex');
+  var vertexPayload = this.get('vertexPayload');
+  let callBack = this.get('callBack')
 
-  if (!path || vertex == undefined) {
+  if (!path || (vertexPayload == undefined || vertexPayload.length === 0)) {
     this.close();
     return;
   }
 
-  path.removeAt(vertex);
+  if (vertexPayload.length) {
+    vertexPayload.sort((a, b) => {
+      return Number(b.title) - Number(a.title)
+    })
+    vertexPayload.forEach(marker => path.removeAt(Number(marker.title)))
+    if (callBack) {
+      callBack()
+    }
+  } else {
+    path.removeAt(vertexPayload);
+  }
+
   this.close();
 };
 

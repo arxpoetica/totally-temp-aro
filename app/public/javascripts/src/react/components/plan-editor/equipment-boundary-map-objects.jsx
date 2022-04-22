@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import PlanEditorActions from './plan-editor-actions'
 import SelectionActions from '../selection/selection-actions'
 import WktUtils from '../../../shared-utils/wkt-utils'
-
+import { MultiSelectVertices } from '../common/maps/multiselect-vertices'
 export class EquipmentBoundaryMapObjects extends Component {
   constructor (props) {
     super(props)
@@ -12,8 +12,9 @@ export class EquipmentBoundaryMapObjects extends Component {
     this.clickOutListener = undefined
     this.deleteKeyListener = undefined
     this.mapObjectOverlay = []
-    this.clearMapObjectOverlay = this.clearMapObjectOverlay.bind(this)
+    this.multiSelectVertices = undefined
     this.contextMenuClick = this.contextMenuClick.bind(this)
+    this.clearMapObjectOverlay = null
   }
 
   // no ui for this component. it deals with map objects only.
@@ -99,6 +100,13 @@ export class EquipmentBoundaryMapObjects extends Component {
       fillOpacity: 0.05,
     })
     this.setupListenersForMapObject(this.mapObject)
+    this.multiSelectVertices = new MultiSelectVertices(
+      this.mapObject,
+      this.props.googleMaps,
+      google,
+      this.contextMenuClick
+    )
+    this.clearMapObjectOverlay = this.multiSelectVertices.clearMapObjectOverlay.bind(this.multiSelectVertices)
   }
 
   deleteMapObject () {
@@ -151,15 +159,7 @@ export class EquipmentBoundaryMapObjects extends Component {
       if (event.vertex) {
         event.domEvent.stopPropagation()
         if (event.domEvent.shiftKey) {
-          const indexOfMarker = this.mapObjectOverlay.findIndex((marker) => {
-            return marker.title === `${event.vertex}`
-          })
-          if (indexOfMarker > -1) {
-            // If you select a vertex that is already selected, it will remove it.
-            this.removeMarker(indexOfMarker)
-          } else {
-            this.addMarkerOverlay(event)
-          }
+          this.multiSelectVertices.addOrRemoveMarker(event)
         }
       }
     })
@@ -177,9 +177,9 @@ export class EquipmentBoundaryMapObjects extends Component {
       // 8 = Backspace
       // 46 = Delete
       // Supporting both of these because not all keyboards have a 'delete' key
-      if ((code === 8 || code === 46) && this.mapObjectOverlay.length > 0) {
+      if ((code === 8 || code === 46) && this.multiSelectVertices.mapObjectOverlay.length > 0) {
         // Sort is necessary to ensure that indexes will not be reassigned while deleting more than one vertex.
-        const mapObjectOverlayClone = [...this.mapObjectOverlay]
+        const mapObjectOverlayClone = [...this.multiSelectVertices.mapObjectOverlay]
         // Using this.mapObject as the argument being passed instead of the one in the parent function is the only way this consistently works.
         this.props.deleteBoundaryVertices(this.mapObject, mapObjectOverlayClone, this.clearMapObjectOverlay)
       }
@@ -188,87 +188,38 @@ export class EquipmentBoundaryMapObjects extends Component {
   
   clearAll () {
     // Clear all markers from map when clearing poly
-    this.clearMapObjectOverlay()
+    if (this.multiSelectVertices) {
+      this.clearMapObjectOverlay()
+    }
     this.deleteMapObject()
     // Remove global listeners on tear down
     google.maps.event.removeListener(this.clickOutListener)
     google.maps.event.removeListener(this.deleteKeyListener)
   }
 
-  addMarkerOverlay(event) {
-    const vertex = this.mapObject.getPath().getAt(event.vertex)
-    // Position of the marker is oriented on the vertex rather than the event.latLng to ensure
-    // the coords are normalized
-    const position = new google.maps.LatLng(vertex.lat(), vertex.lng())
-    const newMarker = new google.maps.Marker({
-      position,
-      map: this.props.googleMaps,
-      title: `${event.vertex}`,
-      icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        fillOpacity: 1,
-        fillColor: 'white',
-        strokeColor: '#FF69B4',
-        strokeOpacity: 1,
-        strokeWeight: 3,
-        scale: 6,
-        // This was added to ensure that the svg was centered on the verte
-        // The vertex coords seem to be .1,.1 off center of the vertex icon itself.
-        anchor: new google.maps.Point(.1, .1)
-      },
-      optimized: !ARO_GLOBALS.MABL_TESTING,
-    })
-
-    newMarker.addListener('click', () => {
-      // Added this because once the marker is added sometimes you click the marker and sometimes the vertex
-      // So this is a fail safe.
-      if (event.domEvent.shiftKey) {
-        const indexOfMarker = this.mapObjectOverlay.findIndex((marker) => {
-          return marker.title === marker.title
-        })
-        this.removeMarker(indexOfMarker)
-      }
-    })
-
-    newMarker.addListener('contextmenu', event => {
-      this.contextMenuClick(event)
-    })
-
-    this.mapObjectOverlay = this.mapObjectOverlay.concat(newMarker)
-  }
-
-  removeMarker(indexOfMarker) {
-      const mapObjectOverlayClone = [...this.mapObjectOverlay]
-      const [removedMarker] = mapObjectOverlayClone.splice(indexOfMarker, 1)
-      this.mapObjectOverlay = mapObjectOverlayClone
-      removedMarker.setMap(null)
-  }
-
   contextMenuClick(event) {
     let vertexPayload
-    if(this.mapObjectOverlay.length > 0) {
-      const indexOfMarker = this.mapObjectOverlay.findIndex((marker) => {
-        return marker.title === `${event.vertex}`
-      })
+    const overlay = this.multiSelectVertices.mapObjectOverlay
+    if(overlay.length > 0) {
+      const indexOfMarker = this.multiSelectVertices.markerIndex(event.vertex)
       
       if (event.vertex && indexOfMarker === -1) {
         // Add vertex to array if it doesn't already exist there.
-        this.addMarkerOverlay(event)
+        this.multiSelectVertices.addMarker(event)
       }
-      vertexPayload = this.mapObjectOverlay
+      vertexPayload = overlay
     } else {
       vertexPayload = event.vertex
     }
+
     const eventXY = WktUtils.getXYFromEvent(event)
-    this.props.showContextMenuForBoundary(this.mapObject, eventXY.x, eventXY.y, vertexPayload, this.clearMapObjectOverlay)
-  }
-
-  clearMapObjectOverlay() {
-    for (const marker of this.mapObjectOverlay) {
-      marker.setMap(null)
-    }
-
-    this.mapObjectOverlay = []
+    this.props.showContextMenuForBoundary(
+      this.mapObject,
+      eventXY.x,
+      eventXY.y,
+      vertexPayload,
+      this.clearMapObjectOverlay
+    )
   }
 
   componentWillUnmount () {
