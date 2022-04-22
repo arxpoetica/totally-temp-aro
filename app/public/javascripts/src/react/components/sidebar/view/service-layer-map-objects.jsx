@@ -301,7 +301,11 @@ export const ServiceLayerMapObjects = (props) => {
           mapObjectOverlayClone.sort((a, b) => {
             return Number(b.title) - Number(a.title)
           })
-          mapObjectOverlayClone.forEach(marker => mapObject.getPath().removeAt(Number(marker.title)))
+          mapObjectOverlayClone.forEach(marker => {
+            if (marker && marker.title && mapObject.getPath().getLength() > 3) {
+              mapObject.getPath().removeAt(Number(marker.title))
+            }
+          })
           multiSelectVertices.clearMapObjectOverlay()
         }
       })

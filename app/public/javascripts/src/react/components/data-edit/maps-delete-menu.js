@@ -104,12 +104,16 @@ DeleteMenu.prototype.removeVertex = function() {
     vertexPayload.sort((a, b) => {
       return Number(b.title) - Number(a.title)
     })
-    vertexPayload.forEach(marker => path.removeAt(Number(marker.title)))
+    vertexPayload.forEach(marker => {
+      if (marker && marker.title && path.getLength() > 3) {
+        path.removeAt(Number(marker.title))
+      }
+    })
     if (callBack) {
       callBack()
     }
   } else {
-    path.removeAt(vertexPayload);
+    if (marker && marker.title && path.getLength() > 3) path.removeAt(vertexPayload);
   }
 
   this.close();
