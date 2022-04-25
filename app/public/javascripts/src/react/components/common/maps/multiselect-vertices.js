@@ -47,17 +47,17 @@ export class MultiSelectVertices {
             optimized: !ARO_GLOBALS.MABL_TESTING,
         })
     
-        newMarker.addListener('click', () => {
+        newMarker.addListener('click', (subEvent) => {
           // Added this because once the marker is added sometimes you click the marker and sometimes the vertex
           // So this is a fail safe.
-            if (event.domEvent.shiftKey) {
+            if (subEvent.domEvent.shiftKey) {
                 const indexOfMarker = this.markerIndex(event.vertex)
                 this.removeMarker(indexOfMarker)
             }
         })
     
-        newMarker.addListener('contextmenu', event => {
-            this.contextMenuClick(event, this.mapObject)
+        newMarker.addListener('contextmenu', subEvent => {
+            this.contextMenuClick(subEvent, this.mapObject)
         })
     
         this.mapObjectOverlay = this.mapObjectOverlay.concat(newMarker)
