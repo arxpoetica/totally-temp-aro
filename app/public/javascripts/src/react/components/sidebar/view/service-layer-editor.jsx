@@ -68,7 +68,10 @@ export const ServiceLayerEditor = (props) => {
           })
         }
       })
-      .then((result) => { setCurrentTransaction(result.data) })
+      .then((result) => {
+        setRemoveMapObjects(false)
+        setCurrentTransaction(result.data)
+      })
       .catch((err) => {
         selectedDisplayMode(displayModes.VIEW)
         console.warn(err)

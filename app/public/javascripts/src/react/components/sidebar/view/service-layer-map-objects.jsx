@@ -310,11 +310,15 @@ export const ServiceLayerMapObjects = (props) => {
         }
       })
 
+      // Debounce the update to the backend to prevent race conditions on geom for multi select delete
+      const debouncedModifyObject = _.debounce(
+        modifyObject,
+        500
+      )
       mapObject.getPaths().forEach(function (path, index) {
         const isClosed = isClosedPath(path)
-
-        google.maps.event.addListener(path, 'insert_at', function () { modifyObject(mapObject) })
-        google.maps.event.addListener(path, 'remove_at', function () { modifyObject(mapObject) })
+        google.maps.event.addListener(path, 'insert_at', function () { debouncedModifyObject(mapObject); })
+        google.maps.event.addListener(path, 'remove_at', function () { debouncedModifyObject(mapObject); })
         google.maps.event.addListener(path, 'set_at', function () {
           if (isClosed) {
             // IMPORTANT to check if it is already a closed path,
@@ -326,10 +330,10 @@ export const ServiceLayerMapObjects = (props) => {
             } else if (index === path.length - 1) {
               // The last point has been moved, move the first point of the polygon (to keep it a valid, closed polygon)
               path.setAt(path.length - 1, path.getAt(0))
-              modifyObject(mapObject)
+              debouncedModifyObject(mapObject);
             }
           } else {
-            modifyObject(mapObject)
+            debouncedModifyObject(mapObject);
           }
         })
       })
