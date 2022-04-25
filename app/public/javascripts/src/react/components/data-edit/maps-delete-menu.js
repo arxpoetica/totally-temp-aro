@@ -113,7 +113,7 @@ DeleteMenu.prototype.removeVertex = function() {
       callBack()
     }
   } else {
-    if (marker && marker.title && path.getLength() > 3) path.removeAt(vertexPayload);
+    if (path.getLength() > 3) path.removeAt(vertexPayload);
   }
 
   this.close();
