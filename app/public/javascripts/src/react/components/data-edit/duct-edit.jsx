@@ -173,7 +173,12 @@ export class DuctEdit extends Component {
               if (event.vertex === undefined) {
                 return
               }
-              this.deleteMenu.open(this.props.map.googleMaps, ductLinePath, event.vertex)
+              this.deleteMenu.open(
+                this.props.map.googleMaps,
+                ductLinePath,
+                ductLinePath.getAt(event.vertex),
+                event.vertex
+              )
             })
           )
           // ---

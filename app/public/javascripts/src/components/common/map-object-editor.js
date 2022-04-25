@@ -877,12 +877,17 @@ class MapObjectEditorController {
         })
       })
 
-      var mapObjectPaths = mapObject.getPaths()
+      var mapObjectPaths = mapObject.getPath()
       google.maps.event.addListener(mapObject, 'rightclick', event => {
         if (event.vertex === undefined) {
           return
         }
-        this.deleteMenu.open(this.mapRef, mapObjectPaths.getAt(event.path), event.vertex)
+        this.deleteMenu.open(
+          this.mapRef,
+          mapObjectPaths,
+          mapObjectPaths.getAt(event.vertex),
+          event.vertex
+        )
       })
     } else {
       throw `createMapObject() not supported for geometry type ${feature.geometry.type}`
