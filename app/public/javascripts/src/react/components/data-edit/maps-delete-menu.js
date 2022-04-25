@@ -78,7 +78,7 @@ DeleteMenu.prototype.open = function(map, path, position, vertexPayload, callBac
   this.set('path', path);
   this.set('vertexPayload', vertexPayload);
   this.set('callBack', callBack);
-  if (vertexPayload.length) {
+  if (Array.isArray(vertexPayload.length)) {
     this.div_.innerHTML = "Delete All"
   } else {
     "Delete"
