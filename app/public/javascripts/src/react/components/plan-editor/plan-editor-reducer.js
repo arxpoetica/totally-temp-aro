@@ -271,6 +271,14 @@ function clearBoundaryDebounce (state, subnetId) {
   }
 }
 
+function removeFromDraft (state, payload) {
+  if (!state.drafts[payload]) return state
+  const updatedDrafts = { ...state.drafts }
+  delete updatedDrafts[payload]
+  return { ...state, drafts: updatedDrafts }
+}
+
+// --- //
 function planEditorReducer (state = defaultState, { type, payload }) {
   switch (type) {
     case Actions.PLAN_EDITOR_CLEAR_TRANSACTION:
@@ -357,10 +365,7 @@ function planEditorReducer (state = defaultState, { type, payload }) {
     }
 
     case Actions.PLAN_EDITOR_REMOVE_DRAFT: {
-      if (!state.drafts[payload]) return state
-      const updatedDrafts = { ...state.drafts }
-      delete updatedDrafts[payload]
-      return { ...state, drafts: updatedDrafts }
+      return removeFromDraft (state, payload)
     }
 
     case Actions.PLAN_EDITOR_MERGE_DRAFT_PROPS: {

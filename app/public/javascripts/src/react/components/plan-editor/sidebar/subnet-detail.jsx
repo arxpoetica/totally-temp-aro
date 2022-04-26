@@ -10,7 +10,7 @@ import WktUtils from '../../../../shared-utils/wkt-utils.js'
 const SubnetDetail = props => {
   const [hoverPosition, setHoverPosition] = useState(null)
 
-  function onNodeClick(featuredId) {
+  function onNodeClick(featureId) {
     props.map.setCenter(getHoverPosition(featureId))
     // Allow the user to see the nav marker after setCenter then clear
     setTimeout(() => {
