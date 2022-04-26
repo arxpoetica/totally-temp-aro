@@ -692,9 +692,9 @@ function assignLocation (locationId, terminalId) {
   }
 }
 
+// TODO: this function is VERY not DRY (sopping wet!) it points to the need for a restructure of the subnet actions
 function mergeTerminals (terminals) {
   return (dispatch, getState) => {
-    console.log(klona(terminals))
     const state = getState()
     let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
     if (!transactionId) return Promise.resolve()
@@ -702,33 +702,14 @@ function mergeTerminals (terminals) {
     let toFeature = klona(state.planEditor.subnetFeatures[terminals[0].objectId]) // we're merging all terminals into the first one in the list
     let toTerminal = toFeature.feature
     terminals.shift() // remove element 0
-    // let featureIds = []
-    // let features = []
-    // terminals.forEach(terminal => {
-    //   featureIds.push(terminal.objectId)
-    //   let terminalData = klona(state.planEditor.subnetFeatures[terminal.objectId])
-    //   //let fromTerminal = terminalData.feature
-    //   //let subnetId = terminalData.subnetId
-    //   toTerminal.dropLinks = toTerminal.dropLinks.concat(terminalData.feature.dropLinks)
-    //   //terminalData.feature.dropLinks = []
-    //   //features.push(terminalData)
-    // })
-    // features.push(toFeature)
-    // // delete all in terminals array using deleteFeatures
-    
-    // dispatch(_updateSubnetFeatures(features))
-    // dispatch(deleteFeatures(featureIds))
-    // // TODO: I think both of these call for a recalc so we need to break those up a bit
-    // // send new toTerminal to service
-    // // batch
-    // //  return dispatch(_updateSubnetFeatures([toFeature]))
-    
+    let deleteList = []
     let commands = []
     terminals.forEach(terminal => {
       let terminalData = klona(state.planEditor.subnetFeatures[terminal.objectId])
       let fromTerminal = terminalData.feature
       let subnetId = terminalData.subnetId
       toTerminal.dropLinks = toTerminal.dropLinks.concat(fromTerminal.dropLinks)
+      deleteList.push(terminal.objectId)
       commands.push({
         childId: unparseSubnetFeature(fromTerminal),
         subnetId,
@@ -741,6 +722,8 @@ function mergeTerminals (terminals) {
       subnetId: toFeature.subnetId,
       type: 'update',
     })
+    let updateList = {}
+    updateList[toTerminal.objectId] = toFeature
     
     // TODO: break this out
     if (commands.length <= 0) return Promise.resolve()
@@ -748,14 +731,15 @@ function mergeTerminals (terminals) {
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
       .then(result => {
         // we do NOT get the child feature back in the result
-        // dispatch({
-        //   type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
-        //   payload: subnetFeaturesById,
-        // })
+        dispatch({
+          type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+          payload: updateList,
+        })
+        dispatch({ 
+          type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURES,
+          payload: deleteList,
+        })
         dispatch(recalculateSubnets(transactionId))
-        // TODO: basic function is working just need UI refresh (subnet state etc)
-        //  AND need to reorganize these actions 
-        
       })
       .catch(error => handleError(error))
   }
@@ -1353,7 +1337,7 @@ function addSubnetTreeByLatLng([lng, lat]) {
           '%cCannot load subnet until drafts are not fully initialized',
           'background-color:red;color:white;padding:8px;',
         )
-        return
+        return Promise.reject()
       }
 
       const transactionId = transaction && transaction.id
