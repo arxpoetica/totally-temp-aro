@@ -467,30 +467,80 @@ function deleteBoundaryVertices (mapObject, vertices, callBack) {
   }
 }
 
-function showContextMenuForEquipment (featureId, x, y) {
-  return (dispatch) => {
-    var menuActions = []
-    menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteFeature', featureId))
-    const menuItemFeature = new MenuItemFeature('EQUIPMENT', 'Equipment', menuActions)
-    // Show context menu
-    dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
-    dispatch(ContextMenuActions.showContextMenu(x, y))
-  }
+// helper, should probably be in a utils file
+function toLabel (name) {
+ return name.toLowerCase().replaceAll('_', ' ').replaceAll(/(^\w{1})|(\s{1}\w{1})/g, match => match.toUpperCase())
 }
 
-function showContextMenuForConstructionAreas (featureId, x, y) {
+function showContextMenuForList (features, coords) {
   return (dispatch) => {
-    var menuActions = []
-    menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteConstructionArea', featureId))
-    const menuItemFeature = new MenuItemFeature('CONSTRUCTION_AREA', 'Construction Area', menuActions)
-    // Show context menu
-    dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
-    dispatch(ContextMenuActions.showContextMenu(x, y))
+    let menuItemFeatures = []
+    // group by dataType
+    let featuresByType = {}
+    features.forEach(feature => {
+      let dataType = 'undefined_type'
+      if (feature.dataType) dataType = feature.dataType
+      if (!(dataType in featuresByType)) featuresByType[dataType] = []
+      featuresByType[dataType].push(feature)
+    })
+    // for location connectors and terminals 
+    //  if there are more than one add a menu item "merge"
+    // for each ['location_connector', 'fiber_distribution_terminal']
+    if ('location_connector' in featuresByType && featuresByType['location_connector'].length > 1) {
+      let label = `${featuresByType['location_connector'].length} ${toLabel('location_connector')}s`
+      let menuAction = new MenuItemAction('MERGE', 'Merge All', 'PlanEditorActions', 'mergeTerminals', klona(featuresByType['location_connector']))
+      let menuItemFeature = new MenuItemFeature(null, label, [menuAction])
+      featuresByType['location_connector'].unshift(
+        {
+          dataType: 'GROUP_HEADER',
+          menuItemFeature,
+        }
+      )
+    }
+    // order by hierarchy
+    // in leu of proper ordering mechanism
+    let topList = []
+    let orderedFeatureList = []
+    let endList = []
+    for (const [dataType, featureList] of Object.entries(featuresByType)) {
+      if (dataType === 'central_office'
+        || dataType === 'subnet_node'
+      ) {
+        topList = topList.concat(featureList)
+      } else if (dataType === 'fiber_distribution_terminal'
+        || dataType === 'location_connector'
+      ) {
+        endList = endList.concat(featureList)
+      } else {
+        orderedFeatureList = orderedFeatureList.concat(featureList)
+      }
+    }
+    orderedFeatureList = topList.concat(orderedFeatureList).concat(endList)
+    
+    orderedFeatureList.forEach(feature => {
+      var menuActions = []
+      if (feature.dataType === 'GROUP_HEADER') { // this is a little hacky, we'll clean it up later ... probably
+        menuItemFeatures.push(feature.menuItemFeature)
+      } else if (feature.dataType === "edge_construction_area") {
+        menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteConstructionArea', feature.objectId))
+        menuItemFeatures.push(new MenuItemFeature('CONSTRUCTION_AREA', 'Construction Area', menuActions))
+      } else {
+        let label = 'Equipment'
+        if (feature.dataType) label = toLabel(feature.dataType)
+        menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteFeature', feature.objectId))
+        menuItemFeatures.push(new MenuItemFeature('EQUIPMENT', label, menuActions))
+      }
+    })
+    if (menuItemFeatures.length) {
+      dispatch(ContextMenuActions.setContextMenuItems(menuItemFeatures))
+      dispatch(ContextMenuActions.showContextMenu(coords.x, coords.y))
+    }
   }
 }
 
 function showContextMenuForLocations (featureIds, event) {
   return (dispatch, getState) => {
+    // TODO: if there are more than one add a menu item remove all, add all
     const state = getState()
     const selectedSubnetId = state.planEditor.selectedSubnetId
     if (featureIds.length > 0
@@ -536,12 +586,13 @@ function showContextMenuForLocations (featureIds, event) {
 
 // helper
 function _updateSubnetFeatures (subnetFeatures) {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     const state = getState()
     let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
     let commands = []
     let subnetFeaturesById = {}
     let subnetIds = []
+    console.log(subnetFeatures)
     subnetFeatures.forEach(subnetFeature => {
       subnetFeaturesById[subnetFeature.feature.objectId] = subnetFeature
       let subnetId = subnetFeature.subnetId
@@ -556,7 +607,7 @@ function _updateSubnetFeatures (subnetFeatures) {
     })
     
     if (!transactionId || commands.length <= 0) return Promise.resolve()
-
+    // TODO: break this out
     const body = {commands}
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
       .then(result => {
@@ -638,6 +689,59 @@ function assignLocation (locationId, terminalId) {
     features.push(toFeature)
 
     return dispatch(_updateSubnetFeatures(features))
+  }
+}
+
+// TODO: this function is VERY not DRY (sopping wet!) it points to the need for a restructure of the subnet actions
+function mergeTerminals (terminals) {
+  return (dispatch, getState) => {
+    const state = getState()
+    let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+    if (!transactionId) return Promise.resolve()
+
+    let toFeature = klona(state.planEditor.subnetFeatures[terminals[0].objectId]) // we're merging all terminals into the first one in the list
+    let toTerminal = toFeature.feature
+    terminals.shift() // remove element 0
+    let deleteList = []
+    let commands = []
+    terminals.forEach(terminal => {
+      let terminalData = klona(state.planEditor.subnetFeatures[terminal.objectId])
+      let fromTerminal = terminalData.feature
+      let subnetId = terminalData.subnetId
+      toTerminal.dropLinks = toTerminal.dropLinks.concat(fromTerminal.dropLinks)
+      deleteList.push(terminal.objectId)
+      commands.push({
+        childId: unparseSubnetFeature(fromTerminal),
+        subnetId,
+        type: 'delete',
+      })
+    })
+
+    commands.push({
+      childId: unparseSubnetFeature(toTerminal),
+      subnetId: toFeature.subnetId,
+      type: 'update',
+    })
+    let updateList = {}
+    updateList[toTerminal.objectId] = toFeature
+    
+    // TODO: break this out
+    if (commands.length <= 0) return Promise.resolve()
+    const body = {commands}
+    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
+      .then(result => {
+        // we do NOT get the child feature back in the result
+        dispatch({
+          type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+          payload: updateList,
+        })
+        dispatch({ 
+          type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURES,
+          payload: deleteList,
+        })
+        dispatch(recalculateSubnets(transactionId))
+      })
+      .catch(error => handleError(error))
   }
 }
 
@@ -881,30 +985,61 @@ function moveConstructionArea (objectId, newCoordinates) {
   }
 }
 
+// TODO: accept list
+// accept ConstructionArea then pass to deleteConstructionArea
 function deleteFeature (featureId) {
+  return deleteFeatures([featureId])
+}
+function deleteFeatures (featureIds) {
   return async(dispatch, getState) => {
     try {
-      const { planEditor } = getState()
+      const state = getState()
+      const planEditor = state.planEditor
       const { selectedSubnetId, transaction, drafts } = planEditor
       const transactionId = transaction && transaction.id
-      const { subnetId, feature } = klona(planEditor.subnetFeatures[featureId])
-
       const url = `/service/plan-transaction/${transactionId}/subnet_cmd/update-children`
-      await AroHttp.post(url, {
-        commands: [{
+      let nextSelectedSubnetId = selectedSubnetId
+      let commands = []
+      console.log("delete")
+      console.log(featureIds)
+      // TODO: check for construction_area and run deleteConstructionArea
+      featureIds.forEach(featureId => {
+        const { subnetId, feature } = klona(planEditor.subnetFeatures[featureId])
+        commands.push({
           childId: unparseSubnetFeature(feature),
           subnetId,
           type: 'delete',
-        }]
-      })
-
-      batch(() => {
-        dispatch({ type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE, payload: featureId })
-        dispatch({ type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE, payload: featureId })
+        })
         // if deleted equipment is currently selected, move selection to parent
-        if (featureId === selectedSubnetId) dispatch(setSelectedSubnetId(subnetId))
-
-        dispatch({ type: Actions.PLAN_EDITOR_REMOVE_DRAFT, payload: featureId })
+        if (featureId === selectedSubnetId) nextSelectedSubnetId = subnetId
+      })
+      await AroHttp.post(url, {commands})
+      
+      let rootDrafts = klona(PlanEditorSelectors.getRootDrafts(state))
+      // TODO: removing an equipment from a root draft is not an OK process at the moment
+      //  this is pretty inefficient, we should use a dictionary instead of array
+      //  and this process should be in the same place as PLAN_EDITOR_REMOVE_DRAFT
+      Object.values(rootDrafts).forEach(rootDraft => {
+        featureIds.forEach(featureId => {
+          const equipmentIndex = rootDraft.equipment.findIndex(({ id }) => id === featureId)
+          if (equipmentIndex >= 0) {
+            rootDraft.equipment.splice(equipmentIndex, 1)
+          }
+        })
+      })
+      
+      batch(() => {
+        // TODO: make these plural
+        featureIds.forEach(featureId => {
+          dispatch({ type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE, payload: featureId })
+          dispatch({ type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE, payload: featureId })
+          // TODO: break out a draft change function PLAN_EDITOR_REMOVE_DRAFT and PLAN_EDITOR_UPDATE_DRAFT
+          dispatch({ type: Actions.PLAN_EDITOR_REMOVE_DRAFT, payload: featureId })
+        })
+        
+        // if deleted equipment is currently selected, move selection to parent
+        if (nextSelectedSubnetId !== selectedSubnetId) dispatch(setSelectedSubnetId(nextSelectedSubnetId))
+        /*
         // if equipment exists on draft (only on CO), delete it too
         const rootDraft = Object.values(drafts).find(draft => draft.equipment.length)
         const equipmentIndex = rootDraft.equipment.findIndex(({ id }) => id === featureId)
@@ -913,6 +1048,10 @@ function deleteFeature (featureId) {
           draftClone.equipment.splice(equipmentIndex, 1)
           dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT, payload: draftClone })
         }
+        */
+        Object.values(rootDrafts).forEach(rootDraft => {
+          dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT, payload: rootDraft })
+        })
 
         dispatch(recalculateSubnets(transactionId))
       })
@@ -922,13 +1061,14 @@ function deleteFeature (featureId) {
   }
 }
 
+// TODO: accept list
 function deleteConstructionArea (featureId) {
   return async (dispatch, getState) => {
     const state = getState()
     let subnetFeature = state.planEditor.subnetFeatures[featureId]
     let subnet = state.planEditor.subnets[featureId]
     subnetFeature = klona(subnetFeature)
-    subnet = klona(subnet)
+    subnet = klona(subnet) // TODO: no longer contains construction areas? 
     let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
 
     await AroHttp.delete(`/service/plan-transaction/${transactionId}/edge-construction-area/${featureId}`)
@@ -1197,7 +1337,7 @@ function addSubnetTreeByLatLng([lng, lat]) {
           '%cCannot load subnet until drafts are not fully initialized',
           'background-color:red;color:white;padding:8px;',
         )
-        return
+        return Promise.reject()
       }
 
       const transactionId = transaction && transaction.id
@@ -1717,17 +1857,16 @@ export default {
   discardTransaction,
   resumeOrCreateTransaction,
   createFeature,
-  //modifyFeature,
   updateFeatureProperties,
   moveFeature,
   deleteFeature,
-  //deleteTransactionFeature,
   createConstructionArea,
   moveConstructionArea,
   deleteBoundaryVertex,
   deleteBoundaryVertices,
   addTransactionFeatures,
-  showContextMenuForEquipment,
+  showContextMenuForList,
+  mergeTerminals,
   showContextMenuForLocations,
   unassignLocation,
   assignLocation,
@@ -1762,7 +1901,6 @@ export default {
   setFiberAnnotations,
   getFiberAnnotations,
   leftClickTile,
-  showContextMenuForConstructionAreas,
   deleteConstructionArea,
   subscribeToSocket,
   unsubscribeFromSocket,

@@ -206,32 +206,34 @@ function setSubnetFeatures (state, subnetFeatures) {
   return { ...state, subnetFeatures: subnetFeatures || {} }
 }
 
-function removeSubnetFeature (state, featureId) {
+function removeSubnetFeatures (state, featureIds) {
 
-  const subnetId = state.subnetFeatures[featureId].subnetId
   let updatedSubnets = klona(state.subnets)
-  const updatedSubnetFeatures = { ...state.subnetFeatures }
- 
-  // this checks if the ID is a subnet, not sure if this should happen here or in actions
-  // TODO: I feel like there is a better way to check this
-  if (
-    state.subnetFeatures[featureId].feature.networkNodeType === 'central_office'
-    || state.subnetFeatures[featureId].feature.networkNodeType === 'fiber_distribution_hub'
-  ) {
-    // removes each of the children from subnet features
-    updatedSubnets[featureId].children.forEach(child => {
-      delete updatedSubnetFeatures[child]
-    })
-    // removes from subnets and subnet features
-    delete updatedSubnets[featureId]
-    delete updatedSubnetFeatures[featureId]
-  } else {
-    // if it is not a parent itself then it just removes from subFeatures and from its parent in subnets
-    delete updatedSubnetFeatures[featureId]
-    if (subnetId) {
-      updatedSubnets[subnetId].children = updatedSubnets[subnetId].children.filter(childId => childId !== featureId)
+  const updatedSubnetFeatures = klona(state.subnetFeatures)
+
+  featureIds.forEach(featureId => {
+    // this checks if the ID is a subnet, not sure if this should happen here or in actions
+    // TODO: I feel like there is a better way to check this
+    if (
+      state.subnetFeatures[featureId].feature.networkNodeType === 'central_office'
+      || state.subnetFeatures[featureId].feature.networkNodeType === 'fiber_distribution_hub'
+    ) {
+      // removes each of the children from subnet features
+      updatedSubnets[featureId].children.forEach(child => {
+        delete updatedSubnetFeatures[child]
+      })
+      // removes from subnets and subnet features
+      delete updatedSubnets[featureId]
+      delete updatedSubnetFeatures[featureId]
+    } else {
+      // if it is not a parent itself then it just removes from subFeatures and from its parent in subnets
+      const subnetId = updatedSubnetFeatures[featureId].subnetId
+      delete updatedSubnetFeatures[featureId]
+      if (subnetId) {
+        updatedSubnets[subnetId].children = updatedSubnets[subnetId].children.filter(childId => childId !== featureId)
+      }
     }
-  }
+  })
   return { ...state, subnetFeatures: updatedSubnetFeatures, subnets: updatedSubnets }
 }
 
@@ -271,6 +273,14 @@ function clearBoundaryDebounce (state, subnetId) {
   }
 }
 
+function removeFromDraft (state, payload) {
+  if (!state.drafts[payload]) return state
+  const updatedDrafts = { ...state.drafts }
+  delete updatedDrafts[payload]
+  return { ...state, drafts: updatedDrafts }
+}
+
+// --- //
 function planEditorReducer (state = defaultState, { type, payload }) {
   switch (type) {
     case Actions.PLAN_EDITOR_CLEAR_TRANSACTION:
@@ -357,10 +367,7 @@ function planEditorReducer (state = defaultState, { type, payload }) {
     }
 
     case Actions.PLAN_EDITOR_REMOVE_DRAFT: {
-      if (!state.drafts[payload]) return state
-      const updatedDrafts = { ...state.drafts }
-      delete updatedDrafts[payload]
-      return { ...state, drafts: updatedDrafts }
+      return removeFromDraft (state, payload)
     }
 
     case Actions.PLAN_EDITOR_MERGE_DRAFT_PROPS: {
@@ -385,8 +392,11 @@ function planEditorReducer (state = defaultState, { type, payload }) {
     case Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES:
       return { ...state, subnetFeatures: { ...state.subnetFeatures, ...payload } }
 
+    case Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURES:
+      return removeSubnetFeatures(state, payload)
+
     case Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE:
-      return removeSubnetFeature(state, payload)
+      return removeSubnetFeatures(state, [payload])
 
     case Actions.PLAN_EDITOR_REMOVE_SUBNETS:
       return removeSubnets(state, payload)
