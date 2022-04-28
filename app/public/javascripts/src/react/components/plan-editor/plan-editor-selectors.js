@@ -25,13 +25,6 @@ const getRootDrafts = createSelector([getDrafts], (drafts) => {
   }
   return rootDrafts
 })
-// this tells us whether anything besides drafts are loaded
-const getIsDraftsOnlyState = createSelector(
-  [getSubnets, getSubnetFeatures],
-  (subnets, subnetFeatures) => {
-    return !Object.keys(subnets).length && !Object.keys(subnetFeatures).length
-  }
-)
 
 const getSelectedPlanThumbInformation = createSelector(
   [getSelectedSubnet, getPlanThumbInformation],
@@ -391,7 +384,6 @@ const PlanEditorSelectors = Object.freeze({
   getAlertsForSubnetTree,
   locationWarnImgByType,
   getRootDrafts,
-  getIsDraftsOnlyState,
   getSelectedSubnetLocations,
   getCursorLocations,
   getLocationCounts,
