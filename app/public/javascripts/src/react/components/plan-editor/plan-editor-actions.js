@@ -473,6 +473,7 @@ function toLabel (name) {
 }
 
 function showContextMenuForList (features, coords) {
+  // TODO: include locations on right click
   return (dispatch) => {
     let menuItemFeatures = []
     // group by dataType
@@ -490,7 +491,6 @@ function showContextMenuForList (features, coords) {
       'bulk_distribution_terminal',
       //'fiber_distribution_terminal',
     ]
-    // for each ['location_connector', 'fiber_distribution_terminal', 'bulk_distribution_terminal']
     mergableTypes.forEach(mergableType => {
       if (mergableType in featuresByType && featuresByType[mergableType].length > 1) {
         let label = `${featuresByType[mergableType].length} ${toLabel(mergableType)}s`
