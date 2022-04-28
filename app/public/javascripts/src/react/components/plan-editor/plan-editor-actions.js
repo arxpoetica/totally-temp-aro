@@ -251,19 +251,21 @@ function unsubscribeFromSocket() {
 
 function createFeature(feature) {
   return async(dispatch, getState) => {
-    
     try {
 
       let state = getState()
       const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
       // find containing subnet
-      //  if no subnet: ? is there not one or is it not loaded? should we be able to add features before a subnet is selected? 
+      // if no subnet: ? is there not one or is it not loaded?
+      // should we be able to add features before a subnet is selected? 
+
       // creating a feature on a blank plan
       let selectedSubnetId = state.planEditor.selectedSubnetId
-      if (selectedSubnetId && state.planEditor.subnetFeatures[selectedSubnetId].subnetId) selectedSubnetId = planEditor.subnetFeatures[selectedSubnetId].subnetId
       if (!selectedSubnetId) {
         await dispatch(addSubnets({ coordinates: feature.point.coordinates }))
         // set selectedSubnetId to return?
+      } else if (state.planEditor.subnetFeatures[selectedSubnetId].subnetId) {
+        selectedSubnetId = planEditor.subnetFeatures[selectedSubnetId].subnetId
       }
 
       const url = `/service/plan-transaction/${transactionId}/subnet_cmd/update-children`
@@ -276,9 +278,12 @@ function createFeature(feature) {
       const updateResponse = await AroHttp.post(url, { commands: [commandsBody] })
       const { subnetUpdates, equipmentUpdates } = updateResponse.data
 
-      // 1. dispatch addSubnets w/ everything that came back...
-      const updatedSubnetIds = subnetUpdates.map((subnet) => subnet.subnet.id)
-      await dispatch(addSubnets({ subnetIds: updatedSubnetIds }))
+      const isDraftsOnlyState = PlanEditorSelectors.getIsDraftsOnlyState(state)
+      if (!isDraftsOnlyState) {
+        // 1. dispatch addSubnets w/ everything that came back...
+        const updatedSubnetIds = subnetUpdates.map((subnet) => subnet.subnet.id)
+        await dispatch(addSubnets({ subnetIds: updatedSubnetIds }))
+      }
 
       // 2. wait for return, and run rest after
       state = getState() // refresh state
@@ -288,17 +293,22 @@ function createFeature(feature) {
       // For now I am assuming the relevent subnet is the one with type 'modified'
       // TODO: handle there being multiple updated subnets
 
-      // For a standard plan there should always be motified subnets
+      // For a standard plan there should always be modified subnets
       // however that is not the case for ring plans as the rootSubnet
       // is not a real and is used to work in the single parent hirearchy so we can just grab that.
-      
-      const modifiedSubnet = state.plan.activePlan.planType === "RING" && selectedSubnetId
-        ? subnetsCopy[selectedSubnetId]
-        : subnetUpdates.find(subnet => subnet.type === 'modified');
-      
-      const subnetId = modifiedSubnet.subnet
-        ? modifiedSubnet.subnet.id
-        : modifiedSubnet.subnetNode
+      let subnetId
+      if (state.plan.activePlan.planType === 'RING' && selectedSubnetId) {
+        const subnet = subnetsCopy[selectedSubnetId]
+        subnetId = subnet.subnet ? subnet.subnet.id : subnet.subnetNode
+      } else {
+        const modified = subnetUpdates.find(subnet => subnet.type === 'modified')
+        if (modified) {
+          subnetId = modified.subnet.id
+        } else {
+          const created = subnetUpdates.find(subnet => subnet.type === 'created')
+          subnetId = created.subnet.id
+        }
+      }
 
       equipmentUpdates.forEach(equipment => {
         // fix difference between id names
@@ -313,13 +323,17 @@ function createFeature(feature) {
         }
       })
 
-      // if we create a new hub, need to add the subnet to the draft
-      const createdHubSubnet = subnetUpdates.find(({ subnet, type }) => {
-        return subnet.networkNodeType === 'fiber_distribution_hub' && type === 'created'
+      // if we create a new subnet, need to add it to the draft
+      const createdSubnet = subnetUpdates.find(({ subnet, type }) => {
+        const { networkNodeType } = subnet
+        return type === 'created' && (
+          networkNodeType === 'central_office'
+          || networkNodeType === 'fiber_distribution_hub'
+        )
       })
       let newDraft, newEquipment
-      if (createdHubSubnet) {
-        const { subnet, subnetBoundary } = createdHubSubnet
+      if (createdSubnet) {
+        const { subnet, subnetBoundary } = createdSubnet
 
         // unfortunately have to make the extra call to get the fault tree
         const query = 'selectionTypes=FAULT_TREE'
@@ -339,19 +353,27 @@ function createFeature(feature) {
       }
 
       batch(() => {
-        dispatch({ type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES, payload: newFeatures })
-        dispatch({ type: Actions.PLAN_EDITOR_ADD_SUBNETS, payload: subnetsCopy })
+        if (!isDraftsOnlyState) {
+          dispatch({ type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES, payload: newFeatures })
+          dispatch({ type: Actions.PLAN_EDITOR_ADD_SUBNETS, payload: subnetsCopy })
+        }
         if (newDraft && newEquipment) {
-          dispatch({ type: Actions.PLAN_EDITOR_ADD_DRAFT, payload: newDraft })
-          const draftClone = klona(state.planEditor.drafts[newDraft.parentSubnetId])
-          draftClone.equipment.push(newEquipment)
-          dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT, payload: draftClone })
+          if (newDraft.parentSubnetId) {
+            dispatch({ type: Actions.PLAN_EDITOR_ADD_DRAFT, payload: newDraft })
+            const rootDraftClone = klona(state.planEditor.drafts[newDraft.parentSubnetId])
+            rootDraftClone.equipment.push(newEquipment)
+            dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT, payload: rootDraftClone })
+          } else {
+            // is root subnet, 
+            // for ease, throwing CO on itself for display
+            newDraft.equipment.push(newEquipment)
+            dispatch({ type: Actions.PLAN_EDITOR_ADD_DRAFT, payload: newDraft })
+          }
         }
       })
     } catch (error) {
       handleError(error)
     }
-
   }
 }
 
