@@ -145,12 +145,26 @@ function setSelectedEditFeatureIds (state, selectedEditFeatureIds) {
     selectedEditFeatureIds: selectedEditFeatureIds
   }
 }
-
+/*
 function deselectFeature (state, objectId) {
   let newSelectedFeatureIds = [...state.selectedEditFeatureIds]
   let i = newSelectedFeatureIds.indexOf(objectId)
   if (i < 0) return state
   newSelectedFeatureIds.splice(i, 1)
+  return { ...state,
+    selectedEditFeatureIds: newSelectedFeatureIds
+  }
+}
+*/
+function deselectFeature (state, objectId) {
+  return deselectFeatures(state, [objectId])
+}
+
+function deselectFeatures (state, objectIds) {
+  // could be optomised by iterating through objectIds instead of selectedEditFeatureIds
+  let newSelectedFeatureIds = state.selectedEditFeatureIds.filter(seletedId => {
+    return !objectIds.includes(seletedId)
+  })
   return { ...state,
     selectedEditFeatureIds: newSelectedFeatureIds
   }
@@ -342,6 +356,9 @@ function planEditorReducer (state = defaultState, { type, payload }) {
 
     case Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE:
       return deselectFeature(state, payload)
+
+    case Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURES:
+      return deselectFeatures(state, payload)
 
     case Actions.PLAN_EDITOR_SET_DRAFTS_STATE:
       return { ...state, draftsState: payload }

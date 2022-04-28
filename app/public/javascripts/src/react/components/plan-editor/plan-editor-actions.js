@@ -495,6 +495,7 @@ function toLabel (name) {
 }
 
 function showContextMenuForList (features, coords) {
+  // TODO: include locations on right click
   return (dispatch) => {
     let menuItemFeatures = []
     // group by dataType
@@ -507,18 +508,24 @@ function showContextMenuForList (features, coords) {
     })
     // for location connectors and terminals 
     //  if there are more than one add a menu item "merge"
-    // for each ['location_connector', 'fiber_distribution_terminal']
-    if ('location_connector' in featuresByType && featuresByType['location_connector'].length > 1) {
-      let label = `${featuresByType['location_connector'].length} ${toLabel('location_connector')}s`
-      let menuAction = new MenuItemAction('MERGE', 'Merge All', 'PlanEditorActions', 'mergeTerminals', klona(featuresByType['location_connector']))
-      let menuItemFeature = new MenuItemFeature(null, label, [menuAction])
-      featuresByType['location_connector'].unshift(
-        {
-          dataType: 'GROUP_HEADER',
-          menuItemFeature,
-        }
-      )
-    }
+    let mergableTypes = [
+      'location_connector',
+      'bulk_distribution_terminal',
+      //'fiber_distribution_terminal',
+    ]
+    mergableTypes.forEach(mergableType => {
+      if (mergableType in featuresByType && featuresByType[mergableType].length > 1) {
+        let label = `${featuresByType[mergableType].length} ${toLabel(mergableType)}s`
+        let menuAction = new MenuItemAction('MERGE', 'Merge All', 'PlanEditorActions', 'mergeTerminals', klona(featuresByType[mergableType]))
+        let menuItemFeature = new MenuItemFeature(null, label, [menuAction])
+        featuresByType[mergableType].unshift(
+          {
+            dataType: 'GROUP_HEADER',
+            menuItemFeature,
+          }
+        )
+      }
+    })
     // order by hierarchy
     // in leu of proper ordering mechanism
     let topList = []
@@ -529,9 +536,7 @@ function showContextMenuForList (features, coords) {
         || dataType === 'subnet_node'
       ) {
         topList = topList.concat(featureList)
-      } else if (dataType === 'fiber_distribution_terminal'
-        || dataType === 'location_connector'
-      ) {
+      } else if (mergableTypes.includes(dataType)) {
         endList = endList.concat(featureList)
       } else {
         orderedFeatureList = orderedFeatureList.concat(featureList)
@@ -753,6 +758,7 @@ function mergeTerminals (terminals) {
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
       .then(result => {
         // we do NOT get the child feature back in the result
+
         dispatch({
           type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
           payload: updateList,
@@ -761,6 +767,11 @@ function mergeTerminals (terminals) {
           type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURES,
           payload: deleteList,
         })
+        dispatch({ // deselect anything that was deleted
+          type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURES, 
+          payload: deleteList,
+        })
+
         dispatch(recalculateSubnets(transactionId))
       })
       .catch(error => handleError(error))
