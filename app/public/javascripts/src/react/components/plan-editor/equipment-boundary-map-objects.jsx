@@ -2,7 +2,6 @@
 import { Component } from 'react'
 import { connect } from 'react-redux'
 import PlanEditorActions from './plan-editor-actions'
-import SelectionActions from '../selection/selection-actions'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import { MultiSelectVertices } from '../common/maps/multiselect-vertices'
 export class EquipmentBoundaryMapObjects extends Component {
@@ -13,8 +12,8 @@ export class EquipmentBoundaryMapObjects extends Component {
     this.deleteKeyListener = undefined
     this.mapObjectOverlay = []
     this.multiSelectVertices = undefined
-    this.contextMenuClick = this.contextMenuClick.bind(this)
     this.clearMapObjectOverlay = null
+    this.contextMenuClick = this.contextMenuClick.bind(this)
   }
 
   // no ui for this component. it deals with map objects only.
@@ -122,11 +121,9 @@ export class EquipmentBoundaryMapObjects extends Component {
   }
 
   setupListenersForMapObject (mapObject) {
-    // TODO: check to make sure all boundaries are legit and concave/non-crossing
     mapObject.getPaths().forEach((path, index) => {
       google.maps.event.addListener(path, 'insert_at', () => this.modifyBoundaryShape(mapObject))
       google.maps.event.addListener(path, 'remove_at', () => this.modifyBoundaryShape(mapObject))
-      // FIXME: make deleting vertices work
       // TODO: avoid redundant first = last polygons
       //  clear these when parsing from service 
       //  and if needed, replace them when unparsing to send back to service
