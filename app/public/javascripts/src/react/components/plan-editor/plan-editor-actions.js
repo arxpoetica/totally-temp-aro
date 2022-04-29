@@ -253,122 +253,117 @@ function createFeature(feature) {
   return async(dispatch, getState) => {
     try {
 
-      let state = getState()
-      const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-      // find containing subnet
-      // if no subnet: ? is there not one or is it not loaded?
-      // should we be able to add features before a subnet is selected? 
+      const { planEditor, plan } = getState()
+      const transactionId = planEditor.transaction && planEditor.transaction.id
+      const isRingPlan = plan.activePlan.planType === 'RING'
 
-      // creating a feature on a blank plan
-      let selectedSubnetId = state.planEditor.selectedSubnetId
-      if (!selectedSubnetId) {
-        await dispatch(addSubnets({ coordinates: feature.point.coordinates }))
-        // set selectedSubnetId to return?
-      } else if (state.planEditor.subnetFeatures[selectedSubnetId].subnetId) {
-        selectedSubnetId = planEditor.subnetFeatures[selectedSubnetId].subnetId
-      }
 
       const url = `/service/plan-transaction/${transactionId}/subnet_cmd/update-children`
-      const commandsBody = { childId: feature, type: 'add' };
-      // If it is a ring plan we need to pass in the parentID of the dumby subnet
-      // inorder to find the correct ring plan in service
-      if (state.plan.activePlan.planType === "RING" && selectedSubnetId) {
+      const commandsBody = { childId: feature, type: 'add' }
+      // we're relying on `selectedSubnetId` to find the selected subnet for context
+      let { selectedSubnetId } = planEditor
+      if (!selectedSubnetId) {
+        // this call just ensures we have the central office
+        // since we don't know the context since no subnet is selected
+        await dispatch(addSubnets({ coordinates: feature.point.coordinates }))
+      } else if (planEditor.subnetFeatures[selectedSubnetId].subnetId) {
+        // otherwise get the correct `selectedSubnetId` since it exists
+        selectedSubnetId = planEditor.subnetFeatures[selectedSubnetId].subnetId
+      }
+      // If it is a ring plan we need to pass in the parentID of the
+      // dummy subnet in order to find the correct ring plan in service
+      if (isRingPlan && selectedSubnetId) {
         commandsBody.subnetId = selectedSubnetId
       }
       const updateResponse = await AroHttp.post(url, { commands: [commandsBody] })
       const { subnetUpdates, equipmentUpdates } = updateResponse.data
 
-      const isDraftsOnlyState = PlanEditorSelectors.getIsDraftsOnlyState(state)
-      if (!isDraftsOnlyState) {
-        // 1. dispatch addSubnets w/ everything that came back...
-        const updatedSubnetIds = subnetUpdates.map((subnet) => subnet.subnet.id)
-        await dispatch(addSubnets({ subnetIds: updatedSubnetIds }))
-      }
-
-      // 2. wait for return, and run rest after
-      state = getState() // refresh state
-      let subnetsCopy = klona(state.planEditor.subnets)
-      const newFeatures = {}
-      // the subnet and equipment updates are not connected, right now we get back two arrays
-      // For now I am assuming the relevent subnet is the one with type 'modified'
-      // TODO: handle there being multiple updated subnets
-
-      // For a standard plan there should always be modified subnets
-      // however that is not the case for ring plans as the rootSubnet
-      // is not a real and is used to work in the single parent hirearchy so we can just grab that.
       let subnetId
-      if (state.plan.activePlan.planType === 'RING' && selectedSubnetId) {
-        const subnet = subnetsCopy[selectedSubnetId]
-        subnetId = subnet.subnet ? subnet.subnet.id : subnet.subnetNode
+      if (isRingPlan && selectedSubnetId) {
+        // For a standard plan there should always be modified subnets however
+        // that is not the case for ring plans as the rootSubnet is not real and
+        // is used to work in the single parent hirearchy so we can just grab that
+        subnetId = selectedSubnetId
       } else {
+        // looking to modified first could actually be problematic...
+        // FIXME: how do we know which is the correct subnet to be attaching stuff to?
         const modified = subnetUpdates.find(subnet => subnet.type === 'modified')
         if (modified) {
           subnetId = modified.subnet.id
         } else {
+          // otherwise, it has to be a new one...
           const created = subnetUpdates.find(subnet => subnet.type === 'created')
           subnetId = created.subnet.id
         }
       }
 
-      equipmentUpdates.forEach(equipment => {
+      // 2. wait for return, and run rest after
+      const draftsClone = klona(getState().planEditor.drafts)
+
+      // new draft equipment (just subnets are added as equipment)
+      let newDraftEquipment = subnetUpdates.map(update => update.subnet)
+      // new drafts
+      const newDraftProps = {}
+      for (const update of subnetUpdates) {
+        const { subnet, subnetBoundary } = update
+        const type = subnet.networkNodeType
+        const isRoot = type !== 'fiber_distribution_hub'
+
+        // unfortunately have to make the extra call to get the fault tree
+        // also, sometimes subnetBoundary is `null` so need to perchance call that
+        const query = `${subnetBoundary ? '' : 'selectionTypes=BOUNDARIES&'}selectionTypes=FAULT_TREE`
+        const url = `/service/plan-transaction/${transactionId}/subnet/${subnet.id}?${query}`
+        const { data } = await AroHttp.get(url)
+
+        if (isRoot) {
+          // get original root/co draft subnet
+          const rootDraftClone = draftsClone[subnet.id]
+          if (rootDraftClone) {
+            newDraftEquipment = [...rootDraftClone.equipment, ...newDraftEquipment]
+              // make sure there are no duplicates
+              .filter((equip, index, self) => {
+                const foundIndex = self.findIndex(compare => compare.id === equip.id)
+                return index === foundIndex
+              })
+          }
+        }
+        newDraftProps[subnet.id] = {
+          subnetId: subnet.id,
+          nodeType: subnet.networkNodeType,
+          parentSubnetId: isRoot ? null : data.parentSubnetId,
+          nodeSynced: true,
+          equipment: isRoot ? newDraftEquipment : [],
+          subnetBoundary: subnetBoundary || data.subnetBoundary,
+          faultTreeSummary: data.faultTree.faultTreeSummary,
+        }
+      }
+
+      // make sure equipment creations/modifications land
+      const subnetCopy = klona(getState().planEditor.subnets[subnetId])
+      const newFeatures = {}
+
+      for (const equipment of equipmentUpdates) {
         // fix difference between id names
         const parsedFeature = parseSubnetFeature(equipment.subnetNode)
-
         newFeatures[parsedFeature.objectId] = {
           feature: parsedFeature,
           subnetId: subnetId,
         }
-        if (subnetsCopy[subnetId]) {
-          subnetsCopy[subnetId].children.push(parsedFeature.objectId)
+        if (subnetCopy) {
+          const uniqueChildren = new Set([...subnetCopy.children, parsedFeature.objectId])
+          subnetCopy.children = [...uniqueChildren]
         }
-      })
-
-      // if we create a new subnet, need to add it to the draft
-      const createdSubnet = subnetUpdates.find(({ subnet, type }) => {
-        const { networkNodeType } = subnet
-        return type === 'created' && (
-          networkNodeType === 'central_office'
-          || networkNodeType === 'fiber_distribution_hub'
-        )
-      })
-      let newDraft, newEquipment
-      if (createdSubnet) {
-        const { subnet, subnetBoundary } = createdSubnet
-
-        // unfortunately have to make the extra call to get the fault tree
-        const query = 'selectionTypes=FAULT_TREE'
-        const url = `/service/plan-transaction/${transactionId}/subnet/${subnet.id}?${query}`
-        const { data } = await AroHttp.get(url)
-
-        newDraft = {
-          subnetId: subnet.id,
-          nodeType: subnet.networkNodeType,
-          parentSubnetId: data.parentSubnetId,
-          nodeSynced: true,
-          subnetBoundary,
-          equipment: [],
-          faultTreeSummary: data.faultTree.faultTreeSummary,
-        }
-        newEquipment = subnet
       }
 
-      batch(() => {
-        if (!isDraftsOnlyState) {
-          dispatch({ type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES, payload: newFeatures })
-          dispatch({ type: Actions.PLAN_EDITOR_ADD_SUBNETS, payload: subnetsCopy })
+      batch(async() => {
+        if (Object.keys(newDraftProps).length && newDraftEquipment.length) {
+          await dispatch({ type: Actions.PLAN_EDITOR_MERGE_DRAFT_PROPS, payload: newDraftProps })
         }
-        if (newDraft && newEquipment) {
-          if (newDraft.parentSubnetId) {
-            dispatch({ type: Actions.PLAN_EDITOR_ADD_DRAFT, payload: newDraft })
-            const rootDraftClone = klona(state.planEditor.drafts[newDraft.parentSubnetId])
-            rootDraftClone.equipment.push(newEquipment)
-            dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT, payload: rootDraftClone })
-          } else {
-            // is root subnet, 
-            // for ease, throwing CO on itself for display
-            newDraft.equipment.push(newEquipment)
-            dispatch({ type: Actions.PLAN_EDITOR_ADD_DRAFT, payload: newDraft })
-          }
+        if (Object.keys(newFeatures).length) {
+          dispatch({ type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES, payload: newFeatures })
+        }
+        if (subnetCopy) {
+          dispatch({ type: Actions.PLAN_EDITOR_ADD_SUBNETS, payload: [subnetCopy] })
         }
       })
     } catch (error) {
