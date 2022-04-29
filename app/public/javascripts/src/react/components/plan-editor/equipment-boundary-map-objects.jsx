@@ -4,6 +4,7 @@ import { connect } from 'react-redux'
 import PlanEditorActions from './plan-editor-actions'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import { MultiSelectVertices } from '../common/maps/multiselect-vertices'
+import { InvalidBoundaryHandling } from '../common/maps/invalid-boundary-handling'
 export class EquipmentBoundaryMapObjects extends Component {
   constructor (props) {
     super(props)
@@ -13,6 +14,7 @@ export class EquipmentBoundaryMapObjects extends Component {
     this.mapObjectOverlay = []
     this.multiSelectVertices = undefined
     this.clearMapObjectOverlay = null
+    this.invalidBoundaryHandling = new InvalidBoundaryHandling()
     this.contextMenuClick = this.contextMenuClick.bind(this)
   }
 
@@ -105,6 +107,7 @@ export class EquipmentBoundaryMapObjects extends Component {
       google,
       this.contextMenuClick
     )
+    this.invalidBoundaryHandling.stashMapObject(this.mapObject.subnetId, this.mapObject)
     this.clearMapObjectOverlay = this.multiSelectVertices.clearMapObjectOverlay.bind(this.multiSelectVertices)
   }
 
@@ -116,8 +119,21 @@ export class EquipmentBoundaryMapObjects extends Component {
   }
 
   modifyBoundaryShape (mapObject) {
-    const geometry = WktUtils.getWKTMultiPolygonFromGoogleMapPaths(mapObject.getPaths())
-    this.props.boundaryChange(mapObject.subnetId, geometry)
+    const [isValidPolygon, validMapObject] = this.invalidBoundaryHandling.isValidPolygon(
+      mapObject.objectId,
+      mapObject
+    )
+      
+    if (isValidPolygon) {
+      this.invalidBoundaryHandling.stashMapObject(
+        validMapObject.objectId,
+        validMapObject
+      )
+      const geometry = WktUtils.getWKTMultiPolygonFromGoogleMapPaths(validMapObject.getPaths())
+      this.props.boundaryChange(validMapObject.subnetId, geometry)
+    } else {
+      this.createMapObject(validMapObject.subnetId)
+    }
   }
 
   setupListenersForMapObject (mapObject) {
@@ -168,7 +184,7 @@ export class EquipmentBoundaryMapObjects extends Component {
       // Any click that is outside of the polygon will deselect all vertices
       if (this.mapObjectOverlay.length > 0) this.clearMapObjectOverlay()
     })
-    
+    if (this.deleteKeyListener) google.maps.event.removeListener(this.deleteKeyListener)
     this.deleteKeyListener = google.maps.event.addDomListener(document, 'keydown', (e) => {
       const code = (e.keyCode ? e.keyCode : e.which)
       // 8 = Backspace
@@ -191,7 +207,9 @@ export class EquipmentBoundaryMapObjects extends Component {
     this.deleteMapObject()
     // Remove global listeners on tear down
     google.maps.event.removeListener(this.clickOutListener)
+    this.clickOutListener = null
     google.maps.event.removeListener(this.deleteKeyListener)
+    this.deleteKeyListener = null
   }
 
   contextMenuClick(event) {

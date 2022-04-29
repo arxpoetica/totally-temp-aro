@@ -14,9 +14,11 @@ export class InvalidBoundaryHandling {
   }
 
   isValidPolygon (id, newMapObject) {
-    const paths = WktUtils.getWKTPolygonFromGoogleMapPath(
-      newMapObject.getPath()
-    )
+    const paths = newMapObject.getPath 
+      ? WktUtils.getWKTPolygonFromGoogleMapPath(
+        newMapObject.getPath()
+      )
+      : { type: 'Polygon', coordinates: newMapObject.geometry.coordinates[0] }
 
     const selfIntersectingPoints = gpsi(
       { type: 'Feature', geometry: paths },
@@ -24,16 +26,15 @@ export class InvalidBoundaryHandling {
       { useSpatialIndex: false }
     )
     
-    if (selfIntersectingPoints.length) {
-      console.log("INVALID BOUNDARY")
+    if (selfIntersectingPoints.length && newMapObject.getPath) {
       newMapObject.setMap(null)
-      newMapObject.feature.geometry =  this.stashedMapObjects[id]
+      if (newMapObject.feature) {
+        newMapObject.feature.geometry =  this.stashedMapObjects[id]
+      }
       Utilities.displayErrorMessage({
         title: 'Invalid Polygon',
         text: 'Polygon shape is invalid, please try again. Ensure that the polygon is not self-intersecting.'
       })
-    } else {
-      console.log("VALID BOUNDARY")
     }
 
     return [selfIntersectingPoints.length === 0, newMapObject]

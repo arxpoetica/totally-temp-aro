@@ -509,7 +509,6 @@ export const ServiceLayerMapObjects = (props) => {
     )
 
     if (isValidPolygon) {
-      console.log("IN MODIFY OBJECT")
       invalidBoundaryHandling.stashMapObject(
         validMapObject.objectId,
         validMapObject
@@ -690,8 +689,12 @@ export const ServiceLayerMapObjects = (props) => {
       })
 
       // Check if polygon is valid, if valid create a map object
-      const isValidPolygon = MapUtilities.isPolygonValid({ type: 'Feature', geometry: { type: 'Polygon', coordinates: feature.geometry.coordinates[0] } })
-      isValidPolygon ? createMapObject(feature, null, true) : Utilities.displayErrorMessage(polygonInvalidMsg)
+      const [isValidPolygon, _validMapObject] = invalidBoundaryHandling.isValidPolygon(
+        feature.objectId,
+        feature
+      )
+
+      if(isValidPolygon) createMapObject(feature, null, true)
 
       // Remove the overlay. It will be replaced with the created map object
       event.overlay.setMap(null)
