@@ -13,6 +13,7 @@ import MenuItemAction from '../../context-menu/menu-item-action'
 import FeatureSelector from '../../../../components/tiles/feature-selector'
 import DeleteMenu from '../../data-edit/maps-delete-menu.js'
 import { MultiSelectVertices } from '../../common/maps/multiselect-vertices.js'
+import { InvalidBoundaryHandling } from '../../common/maps/invalid-boundary-handling.js'
 import ContextMenuActions from '../../context-menu/actions'
 import uuidStore from '../../../../shared-utils/uuid-store'
 
@@ -45,12 +46,12 @@ export const ServiceLayerMapObjects = (props) => {
   const utils = new Utilities()
   const deleteMenu = new DeleteMenu()
   const [createdMapObjects, setCreatedMapObjects] = useState({})
-  const [selectedMapObjectPreviousShape, setSelectedMapObjectPreviousShape] = useState({})
   let multiSelectVertices = null
+  let invalidBoundaryHandling = new InvalidBoundaryHandling();
   let overlayRightClickListener = null
   let overlayContextMenuListener = null
   let clickOutListener = null
-
+  let backspaceListener = null
   const {
     mapRef,
     mapFeatures,
@@ -148,9 +149,9 @@ export const ServiceLayerMapObjects = (props) => {
         google.maps.event.removeListener(overlayContextMenuListener)
         overlayContextMenuListener = null
       }
-      if (overlayContextMenuListener) {
-        google.maps.event.removeListener(overlayContextMenuListener)
-        overlayContextMenuListener = null
+      if (backspaceListener) {
+        google.maps.event.removeListener(backspaceListener)
+        backspaceListener = null
       }
       removeCreatedMapObjects(objectIdToMapObject)
       if(multiSelectVertices) multiSelectVertices.clearMapObjectOverlay()
@@ -278,6 +279,14 @@ export const ServiceLayerMapObjects = (props) => {
         mapObject = createMultiPolygonMapObject(feature)
       }
 
+      multiSelectVertices = new MultiSelectVertices(
+        mapObject,
+        mapRef,
+        google,
+        openDeleteMenu
+      )
+      invalidBoundaryHandling.stashMapObject(mapObject.objectId, mapObject)
+
       // Set up listeners on the map object
       mapObject.addListener('click', (event) => {
         // Select this map object
@@ -288,8 +297,8 @@ export const ServiceLayerMapObjects = (props) => {
           selectMapObject(mapObject)
         }
       })
-
-      google.maps.event.addDomListener(document, 'keydown', (e) => {
+      if (backspaceListener) google.maps.event.removeListener(backspaceListener)
+      backspaceListener = google.maps.event.addDomListener(document, 'keydown', (e) => {
         const code = (e.keyCode ? e.keyCode : e.which)
         // 8 = Backspace
         // 46 = Delete
@@ -298,7 +307,6 @@ export const ServiceLayerMapObjects = (props) => {
           // Sort is necessary to ensure that indexes will not be reassigned while deleting more than one vertex.
           const mapObjectOverlayClone = [...multiSelectVertices.mapObjectOverlay]
           multiSelectVertices.clearMapObjectOverlay()
-          // Using mapObject as the argument being passed instead of the one in the parent function is the only way this consistently works.
           mapObjectOverlayClone.sort((a, b) => {
             return Number(b.title) - Number(a.title)
           })
@@ -326,7 +334,7 @@ export const ServiceLayerMapObjects = (props) => {
             if (index === 0) {
               // The first point has been moved, move the last point of the polygon (to keep it a valid, closed polygon)
               path.setAt(0, path.getAt(path.length - 1))
-              modifyObject(mapObject)
+              debouncedModifyObject(mapObject)
             } else if (index === path.length - 1) {
               // The last point has been moved, move the first point of the polygon (to keep it a valid, closed polygon)
               path.setAt(path.length - 1, path.getAt(0))
@@ -338,13 +346,6 @@ export const ServiceLayerMapObjects = (props) => {
         })
       })
       
-      multiSelectVertices = new MultiSelectVertices(
-        mapObject,
-        mapRef,
-        google,
-        openDeleteMenu
-      )
-
       google.maps.event.addListener(mapObject, 'rightclick', event => {
         openDeleteMenu(event, mapObject)
       })
@@ -352,7 +353,7 @@ export const ServiceLayerMapObjects = (props) => {
         openDeleteMenu(event, mapObject)
       })
 
-      clickOutListener = mapRef.addListener('click', event => {
+      clickOutListener = mapRef.addListener('click', () => {
         // Any click that is outside of the polygon will deselect all vertices
         if(multiSelectVertices) multiSelectVertices.clearMapObjectOverlay()
       })
@@ -488,10 +489,6 @@ export const ServiceLayerMapObjects = (props) => {
     }
 
     if (!isMult) { setSelectedMapObject(mapObject) }
-    if (mapObject && !isMarker(mapObject)) { // If selected mapobject is boundary store the geom
-      selectedMapObjectPreviousShape[mapObject.objectId] = mapObject.feature.geometry
-      setSelectedMapObjectPreviousShape(selectedMapObjectPreviousShape)
-    }
     onSelectObject(mapObject, isMult)
   }
 
@@ -506,19 +503,19 @@ export const ServiceLayerMapObjects = (props) => {
   }
 
   const modifyObject = (mapObject) => {
-    // Check if polygon is valid, if valid modify a map object
-    const polygonGeoJsonPath = MapUtilities.polygonPathsToWKT(mapObject.getPaths())
-    const isValidPolygon = MapUtilities.isPolygonValid({ type: 'Feature', geometry: polygonGeoJsonPath })
+    const [isValidPolygon, validMapObject] = invalidBoundaryHandling.isValidPolygon(
+      mapObject.objectId,
+      mapObject
+    )
 
     if (isValidPolygon) {
-      selectedMapObjectPreviousShape[mapObject.objectId] = polygonGeoJsonPath
-      onModifyObject(mapObject)
+      invalidBoundaryHandling.stashMapObject(
+        validMapObject.objectId,
+        validMapObject
+      )
+      onModifyObject(validMapObject)
     } else {
-      // display error message & undo last invalid change
-      Utilities.displayErrorMessage(polygonInvalidMsg)
-      mapObject.setMap(null)
-      mapObject.feature.geometry = selectedMapObjectPreviousShape[mapObject.objectId]
-      createMapObject(mapObject.feature, null, true, null, true)
+      createMapObject(validMapObject.feature, null, true, null, true)
     }
   }
 
@@ -692,8 +689,12 @@ export const ServiceLayerMapObjects = (props) => {
       })
 
       // Check if polygon is valid, if valid create a map object
-      const isValidPolygon = MapUtilities.isPolygonValid({ type: 'Feature', geometry: { type: 'Polygon', coordinates: feature.geometry.coordinates[0] } })
-      isValidPolygon ? createMapObject(feature, null, true) : Utilities.displayErrorMessage(polygonInvalidMsg)
+      const [isValidPolygon, _validMapObject] = invalidBoundaryHandling.isValidPolygon(
+        feature.objectId,
+        feature
+      )
+
+      if(isValidPolygon) createMapObject(feature, null, true)
 
       // Remove the overlay. It will be replaced with the created map object
       event.overlay.setMap(null)
