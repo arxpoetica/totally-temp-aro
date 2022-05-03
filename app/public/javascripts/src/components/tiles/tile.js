@@ -56,98 +56,9 @@ class TileComponentController {
     this.utils = Utils
     this.rxState = rxState
 
-    // Subscribe to changes in the mapLayers subject
-    state.mapLayers
-      .debounceTime(100)
-      .pairwise() // This will give us the previous value in addition to the current value
-      .subscribe((pairs) => this.handleMapEvents(pairs[0], pairs[1], null))
-
-    // Subscribe to changes in the plan (for setting center and zoom)
-    state.planChanged.subscribe(() => {
-      // Set default coordinates in case we dont have a valid plan
-      var coordinates = state.defaultPlanCoordinates
-      if (state.plan) {
-        coordinates = {
-          zoom: state.plan.zoomIndex,
-          latitude: state.plan.latitude,
-          longitude: state.plan.longitude
-        }
-      }
-    })
-
     // Subscribe to events for creating and destroying the map overlay layer
     this.createMapOverlaySubscription = state.requestCreateMapOverlay.skip(1).subscribe(() => this.createMapOverlay())
     this.destroyMapOverlaySubscription = state.requestDestroyMapOverlay.skip(1).subscribe(() => this.destroyMapOverlay())
-
-    // Subscribe to changes in the map tile options
-    rxState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
-      this.mapTileOptions = JSON.parse(JSON.stringify(mapTileOptions))
-      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapTileOptions(mapTileOptions)
-      }
-    }) 
-
-    // Redraw map tiles when requestd
-    state.requestMapLayerRefresh.subscribe((tilesToRefresh) => {
-      this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
-      this.refreshMapTiles(tilesToRefresh)
-    })
-
-    rxState.requestMapLayerRefresh.getMessage().subscribe((tilesToRefresh) => {
-      this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
-      this.refreshMapTiles(tilesToRefresh)
-    });
-
-    // If selected layer category map changes or gets loaded, set that in the tile data road
-    state.layerCategories.subscribe((layerCategories) => {
-      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setLayerCategories(layerCategories)
-      }
-    })
-
-    // If Display Mode change, set that in the tile data
-    state.selectedDisplayMode.subscribe((selectedDisplayMode) => {
-      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedDisplayMode(selectedDisplayMode)
-      }
-    })
-
-    // Set the map zoom level
-    state.requestSetMapZoom.subscribe((zoom) => {
-      if (this.mapRef) {
-        this.mapRef.setZoom(zoom)
-      }
-    })
-
-    // Set the map zoom level
-    rxState.requestSetMapZoom.getMessage().subscribe((zoom) => {
-      if (this.mapRef) {
-        this.mapRef.setZoom(zoom)
-      }
-    })
-
-    // To change the center of the map to given LatLng
-    state.requestSetMapCenter.subscribe((mapCenter) => {
-      if (this.mapRef) {
-        this.mapRef.panTo({ lat: mapCenter.latitude, lng: mapCenter.longitude })
-      }
-    })
-
-    // To change the center of the map to given LatLng
-    rxState.requestSetMapCenter.getMessage().subscribe((mapCenter) => {
-      if (this.mapRef) {
-        this.mapRef.panTo({ lat: mapCenter.latitude, lng: mapCenter.longitude })
-      }
-    })
-    
-    //Due to unable to subscribe requestSetMapCenter as of now used Custom Event Listener
-    // https://www.sitepoint.com/javascript-custom-events/
-    window.addEventListener('mapChanged', (mapCenter) => { 
-      if (this.mapRef) {
-        this.mapRef.panTo({ lat: mapCenter.detail.latitude, lng: mapCenter.detail.longitude })
-        this.mapRef.setZoom(mapCenter.detail.zoom)
-      }
-    });
 
     tileDataService.addEntityImageForLayer('SELECTED_LOCATION', state.selectedLocationIcon)
 
@@ -157,125 +68,243 @@ class TileComponentController {
       UPDATE: 2
     })
 
-    this.state.requestPolygonSelect.subscribe((args) => {
-      if (!this.mapRef || !args.coords) {
-        return
-      }
-
-      var mapBounds = this.mapRef.getBounds()
-      var neCorner = mapBounds.getNorthEast()
-      var swCorner = mapBounds.getSouthWest()
-      var zoom = this.mapRef.getZoom()
-      // Note the swap from NE/SW to NW/SE when finding tile coordinates
-      var tileCoordsNW = MapUtilities.getTileCoordinates(zoom, neCorner.lat(), swCorner.lng())
-      var tileCoordsSE = MapUtilities.getTileCoordinates(zoom, swCorner.lat(), neCorner.lng())
-
-      // Loop through all visible tiles
-      var pointInPolyPromises = []
-      for (var xTile = tileCoordsNW.x; xTile <= tileCoordsSE.x; ++xTile) {
-        for (var yTile = tileCoordsNW.y; yTile <= tileCoordsSE.y; ++yTile) {
-          // Convert lat lng coordinates into pixel coordinates relative to this tile
-          var tileCoords = { x: xTile, y: yTile }
-          var convertedPixelCoords = []
-          args.coords.forEach((latLng) => {
-            var lat, lng
-
-            if (latLng.hasOwnProperty('lat')) {
-              lat = latLng.lat()
-              lng = latLng.lng()
-            } else {
-              lat = latLng[1]
-              lng = latLng[0]
-            }
-            var pixelCoords = MapUtilities.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
-            convertedPixelCoords.push([pixelCoords.x, pixelCoords.y])
-          })
-
-          // Get the locations from this tile that are in the polygon
-          pointInPolyPromises.push(FeatureSelector.getPointsInPolygon(tileDataService, { width: Constants.TILE_SIZE, height: Constants.TILE_SIZE },
-            this.state.mapLayers.getValue(),
-            zoom, tileCoords.x, tileCoords.y, convertedPixelCoords,
-            this.state.selectedBoundaryType.id))
-        }
-      }
-      Promise.all(pointInPolyPromises)
-        .then((results) => {
-          var selectedLocations = new Set()
-          var selectedServiceAreas = new Set()
-          var selectedRoadSegments = new Set()
-          results.forEach((result) => {
-            result.forEach((selectedObj) => {
-              if (selectedObj.location_id) {
-                selectedLocations.add(selectedObj.location_id)
-              } else if (selectedObj._data_type == 'service_layer' && selectedObj.id) {
-                selectedServiceAreas.add(selectedObj.id)
-              } else if (selectedObj.gid) {
-                selectedRoadSegments.add(selectedObj)
-              }
-            })
-          })
-
-          var selectedLocationsIds = []
-          var selectedServiceAreaIds = []
-
-          // ToDo: need to combine this with the overlayClickListener below
-          var canSelectLoc = true
-          var canSelectSA = true
-          if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS || this.rSelectedDisplayMode === this.state.displayModes.ANALYSIS) {
-            if (this.activeSelectionModeId != SelectionModes.SELECTED_LOCATIONS) {
-              canSelectLoc = false
-            }
-            if (this.activeSelectionModeId != SelectionModes.SELECTED_AREAS) {
-              canSelectSA = false
-            }
-            if (this.networkAnalysisType === 'RFP') {
-              canSelectLoc = canSelectSA = false // Do not allow any selection for RFP mode
-            }
-          }
-
-          if (canSelectLoc) {
-            selectedLocations.forEach((id) => selectedLocationsIds.push({ location_id: id }))
-          }
-
-          if (canSelectSA) {
-            selectedServiceAreas.forEach((id) => selectedServiceAreaIds.push({ id: id }))
-          }
-
-          state.hackRaiseEvent(selectedLocationsIds)
-
-          // Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
-          state.mapFeaturesSelectedEvent.next({
-            locations: selectedLocationsIds,
-            serviceAreas: selectedServiceAreaIds,
-            roadSegments: selectedRoadSegments,
-            area: processArea()
-          })
-
-          function processArea () {
-            return google.maps.geometry.spherical.computeArea(new google.maps.Polygon({ paths: args.coords.map((a) => {
-              if (a.hasOwnProperty('lat')) {
-                return { lat: a.lat(), lng: a.lng() }
-              } else {
-                return { lat: a[1], lng: a[0] }
-              }
-            }) }).getPath())
-          }
-        })
-        .catch((err) => console.error(err))
-    })
-
     $document.ready(() => {
+      console.log('doc ready')
       // We should have a map variable at this point
       this.mapRef = window[this.mapGlobalObjectName]
-      this.createMapOverlay()
       this.unsubscribeRedux = this.$ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
-      
+      this.createMapOverlay()
     })
+
+
+
+
+    this.rootSubscribeAll = () => {
+      let state = this.state
+      // Subscribe to changes in the mapLayers subject
+      this.unsubMapLayers = state.mapLayers
+        .debounceTime(100)
+        .pairwise() // This will give us the previous value in addition to the current value
+        .subscribe((pairs) => this.handleMapEvents(pairs[0], pairs[1], null))
+
+      // Subscribe to changes in the plan (for setting center and zoom)
+      this.unsubPlanChanged = state.planChanged.subscribe(() => {
+        // Set default coordinates in case we dont have a valid plan
+        var coordinates = state.defaultPlanCoordinates
+        if (state.plan) {
+          coordinates = {
+            zoom: state.plan.zoomIndex,
+            latitude: state.plan.latitude,
+            longitude: state.plan.longitude
+          }
+        }
+      })
+
+      // Subscribe to changes in the map tile options
+      this.unsubMapTileOptions = rxState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
+        this.mapTileOptions = JSON.parse(JSON.stringify(mapTileOptions))
+        if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+          this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapTileOptions(mapTileOptions)
+        }
+      }) 
+
+      // Redraw map tiles when requestd
+      this.unsubMapLayerRefresh = state.requestMapLayerRefresh.subscribe((tilesToRefresh) => {
+        this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
+        this.refreshMapTiles(tilesToRefresh)
+      })
+
+      this.unsubRXMapLayerRefresh = rxState.requestMapLayerRefresh.getMessage().subscribe((tilesToRefresh) => {
+        this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
+        this.refreshMapTiles(tilesToRefresh)
+      });
+
+      // If selected layer category map changes or gets loaded, set that in the tile data road
+      this.unsubCategories = state.layerCategories.subscribe((layerCategories) => {
+        if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+          this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setLayerCategories(layerCategories)
+        }
+      })
+
+      // If Display Mode change, set that in the tile data
+      this.unsubDisplayMode = state.selectedDisplayMode.subscribe((selectedDisplayMode) => {
+        if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+          this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedDisplayMode(selectedDisplayMode)
+        }
+      })
+
+      // Set the map zoom level
+      this.unsubSetMapZoom = state.requestSetMapZoom.subscribe((zoom) => {
+        if (this.mapRef) {
+          this.mapRef.setZoom(zoom)
+        }
+      })
+
+      // Set the map zoom level
+      this.unsubRXSetMapZoom = rxState.requestSetMapZoom.getMessage().subscribe((zoom) => {
+        if (this.mapRef) {
+          this.mapRef.setZoom(zoom)
+        }
+      })
+
+      // To change the center of the map to given LatLng
+      this.unsubSetMapCenter = state.requestSetMapCenter.subscribe((mapCenter) => {
+        if (this.mapRef) {
+          this.mapRef.panTo({ lat: mapCenter.latitude, lng: mapCenter.longitude })
+        }
+      })
+
+      // To change the center of the map to given LatLng
+      this.unsubRXSetMapCenter = rxState.requestSetMapCenter.getMessage().subscribe((mapCenter) => {
+        if (this.mapRef) {
+          this.mapRef.panTo({ lat: mapCenter.latitude, lng: mapCenter.longitude })
+        }
+      })
+      
+      //Due to unable to subscribe requestSetMapCenter as of now used Custom Event Listener
+      // https://www.sitepoint.com/javascript-custom-events/
+      
+      this.onMapChanged = (mapCenter) => { 
+        if (this.mapRef) {
+          this.mapRef.panTo({ lat: mapCenter.detail.latitude, lng: mapCenter.detail.longitude })
+          this.mapRef.setZoom(mapCenter.detail.zoom)
+        }
+      }
+      window.addEventListener('mapChanged', this.onMapChanged)
+
+      this.unsubPolygonSelect = this.state.requestPolygonSelect.subscribe((args) => {
+        if (!this.mapRef || !args.coords) {
+          return
+        }
+
+        var mapBounds = this.mapRef.getBounds()
+        var neCorner = mapBounds.getNorthEast()
+        var swCorner = mapBounds.getSouthWest()
+        var zoom = this.mapRef.getZoom()
+        // Note the swap from NE/SW to NW/SE when finding tile coordinates
+        var tileCoordsNW = MapUtilities.getTileCoordinates(zoom, neCorner.lat(), swCorner.lng())
+        var tileCoordsSE = MapUtilities.getTileCoordinates(zoom, swCorner.lat(), neCorner.lng())
+
+        // Loop through all visible tiles
+        var pointInPolyPromises = []
+        for (var xTile = tileCoordsNW.x; xTile <= tileCoordsSE.x; ++xTile) {
+          for (var yTile = tileCoordsNW.y; yTile <= tileCoordsSE.y; ++yTile) {
+            // Convert lat lng coordinates into pixel coordinates relative to this tile
+            var tileCoords = { x: xTile, y: yTile }
+            var convertedPixelCoords = []
+            args.coords.forEach((latLng) => {
+              var lat, lng
+
+              if (latLng.hasOwnProperty('lat')) {
+                lat = latLng.lat()
+                lng = latLng.lng()
+              } else {
+                lat = latLng[1]
+                lng = latLng[0]
+              }
+              var pixelCoords = MapUtilities.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
+              convertedPixelCoords.push([pixelCoords.x, pixelCoords.y])
+            })
+
+            // Get the locations from this tile that are in the polygon
+            pointInPolyPromises.push(FeatureSelector.getPointsInPolygon(tileDataService, { width: Constants.TILE_SIZE, height: Constants.TILE_SIZE },
+              this.state.mapLayers.getValue(),
+              zoom, tileCoords.x, tileCoords.y, convertedPixelCoords,
+              this.state.selectedBoundaryType.id))
+          }
+        }
+        Promise.all(pointInPolyPromises)
+          .then((results) => {
+            var selectedLocations = new Set()
+            var selectedServiceAreas = new Set()
+            var selectedRoadSegments = new Set()
+            results.forEach((result) => {
+              result.forEach((selectedObj) => {
+                if (selectedObj.location_id) {
+                  selectedLocations.add(selectedObj.location_id)
+                } else if (selectedObj._data_type == 'service_layer' && selectedObj.id) {
+                  selectedServiceAreas.add(selectedObj.id)
+                } else if (selectedObj.gid) {
+                  selectedRoadSegments.add(selectedObj)
+                }
+              })
+            })
+
+            var selectedLocationsIds = []
+            var selectedServiceAreaIds = []
+
+            // ToDo: need to combine this with the overlayClickListener below
+            var canSelectLoc = true
+            var canSelectSA = true
+            if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS || this.rSelectedDisplayMode === this.state.displayModes.ANALYSIS) {
+              if (this.activeSelectionModeId != SelectionModes.SELECTED_LOCATIONS) {
+                canSelectLoc = false
+              }
+              if (this.activeSelectionModeId != SelectionModes.SELECTED_AREAS) {
+                canSelectSA = false
+              }
+              if (this.networkAnalysisType === 'RFP') {
+                canSelectLoc = canSelectSA = false // Do not allow any selection for RFP mode
+              }
+            }
+
+            if (canSelectLoc) {
+              selectedLocations.forEach((id) => selectedLocationsIds.push({ location_id: id }))
+            }
+
+            if (canSelectSA) {
+              selectedServiceAreas.forEach((id) => selectedServiceAreaIds.push({ id: id }))
+            }
+
+            state.hackRaiseEvent(selectedLocationsIds)
+
+            // Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
+            state.mapFeaturesSelectedEvent.next({
+              locations: selectedLocationsIds,
+              serviceAreas: selectedServiceAreaIds,
+              roadSegments: selectedRoadSegments,
+              area: processArea()
+            })
+
+            function processArea () {
+              return google.maps.geometry.spherical.computeArea(new google.maps.Polygon({ paths: args.coords.map((a) => {
+                if (a.hasOwnProperty('lat')) {
+                  return { lat: a.lat(), lng: a.lng() }
+                } else {
+                  return { lat: a[1], lng: a[0] }
+                }
+              }) }).getPath())
+            }
+          })
+          .catch((err) => console.error(err))
+      })
+      console.log('sub all')
+      //this.unsubscribeRedux = this.$ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
+    }
+
+    this.rootUnsubscribeAll = () => {
+      //this.unsubscribeRedux()
+      this.unsubPolygonSelect.unsubscribe()
+      window.removeEventListener('mapChanged', this.onMapChanged)
+      this.unsubRXSetMapCenter.unsubscribe()
+      this.unsubSetMapCenter.unsubscribe()
+      this.unsubRXSetMapZoom.unsubscribe()
+      this.unsubSetMapZoom.unsubscribe()
+      this.unsubDisplayMode.unsubscribe()
+      this.unsubCategories.unsubscribe()
+      this.unsubRXMapLayerRefresh.unsubscribe()
+      this.unsubMapLayerRefresh.unsubscribe()
+      this.unsubMapTileOptions.unsubscribe()
+      this.unsubPlanChanged.unsubscribe()
+      this.unsubMapLayers.unsubscribe()
+    }
   }
 
   // Creates the map overlay that will be used to display vector tile information
   // ToDo: stateMapLayers doesn't seem to get updated in MapTileRenderer when it changes in Redux
   createMapOverlay () {
+    this.rootSubscribeAll()
+
     if (this.mapRef.overlayMapTypes.length > 0) {
       console.error('ERROR: Creating a map overlay, but we already have overlays defined')
       console.error(this.mapRef.overlayMapTypes)
@@ -672,6 +701,9 @@ class TileComponentController {
     }
     
     this.mapRef.overlayMapTypes.clear()
+    this.OVERLAY_MAP_INDEX = null
+
+    this.rootUnsubscribeAll()
   }
 
   // Refresh map tiles
@@ -729,7 +761,7 @@ class TileComponentController {
 
   // Handles map layer events
   handleMapEvents (oldMapLayers, newMapLayers, mapLayerActions) {
-    if (!this.mapRef || this.mapRef.overlayMapTypes.getLength() <= this.OVERLAY_MAP_INDEX) {
+    if (!this.mapRef || !this.OVERLAY_MAP_INDEX || this.mapRef.overlayMapTypes.getLength() <= this.OVERLAY_MAP_INDEX) {
       // Map not initialized yet
       return
     }
@@ -788,6 +820,7 @@ class TileComponentController {
   $onDestroy () {
     this.createMapOverlaySubscription()
     this.destroyMapOverlaySubscription()
+    this.destroyMapOverlay()
     this.unsubscribeRedux()
   }
 
@@ -826,6 +859,7 @@ class TileComponentController {
   }
 
   mergeToTarget (nextState, actions) {
+    if (!this.OVERLAY_MAP_INDEX) return
     // store the previous values before Object.assign
     const currentSelectionModeId = this.activeSelectionModeId
     const oldPlanTargets = this.selection && this.selection.planTargets

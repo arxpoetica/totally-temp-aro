@@ -22,7 +22,7 @@ const _SubnetTileOverlay = props => {
     div.style.fontSize = "10";
     div.style.borderStyle = "solid";
     div.style.borderWidth = "1px";
-    div.style.borderColor = "#AAAAAA";
+    div.style.color = div.style.borderColor = "#AAAAAA";
     return div;
   }
   overlayLayer.releaseTile = (tile) => {

@@ -934,6 +934,12 @@ class State {
         .catch((err) => console.error(err))
     }
 
+    service.disconnectVectorTileClassic = () => {
+      tileDataService.clearDataCache()
+      tileDataService.clearHtmlCache()
+      service.requestDestroyMapOverlay.next(null)
+    }
+
     service.onActivePlanChanged = () => {
       service.planChanged.next(null)
       service.currentPlanTags = service.listOfTags.filter(tag => _.contains(service.plan.tagMapping.global, tag.id))
@@ -1694,7 +1700,17 @@ class State {
       if (nextReduxState.rSelectedDisplayMode &&
           service.rSelectedDisplayMode !== service.selectedDisplayMode.getValue()) 
       {
-        // console.log(service.rSelectedDisplayMode)
+        // NOTE: this should technically be in a listener for service.selectedDisplayMode
+        //  but I'm looking to compleetely replace Vector Tile in the very near future - so hopefully you never see this comment ... erm ...
+        if (service.displayModes.EDIT_PLAN === service.rSelectedDisplayMode) {
+          // If entering Edit Mode turn VT off
+          service.disconnectVectorTileClassic()
+        } else if (service.displayModes.EDIT_PLAN === service.selectedDisplayMode.getValue()) {
+          // If exiting Edit Mode turn VT back on
+          service.recreateTilesAndCache()
+        }
+        
+        // update rSelectedDisplayMode
         service.selectedDisplayMode.next(service.rSelectedDisplayMode)
       }
       // if (nextReduxState.rActiveViewModePanel && 
