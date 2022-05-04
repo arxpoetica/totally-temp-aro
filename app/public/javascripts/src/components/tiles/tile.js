@@ -69,7 +69,6 @@ class TileComponentController {
     })
 
     $document.ready(() => {
-      console.log('doc ready')
       // We should have a map variable at this point
       this.mapRef = window[this.mapGlobalObjectName]
       this.createMapOverlay()
@@ -110,14 +109,12 @@ class TileComponentController {
     }) 
 
     this.unsubRXMapLayerRefresh = rxState.requestMapLayerRefresh.getMessage().subscribe((tilesToRefresh) => {
-      console.log('--- RX refresh')
       this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
       this.refreshMapTiles(tilesToRefresh)
     });
 
     // Redraw map tiles when requestd
     this.unsubMapLayerRefresh = state.requestMapLayerRefresh.subscribe((tilesToRefresh) => {
-      console.log('--- refresh')
       this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
       this.refreshMapTiles(tilesToRefresh)
     })
@@ -137,18 +134,7 @@ class TileComponentController {
     })
 
     // To change the center of the map to given LatLng
-    // this.unsubRXSetMapCenter = rxState.requestSetMapCenter.getMessage().subscribe((mapCenter) => {
-    //   console.log(' --------------------------------- RX map center')
-    //   console.log(mapCenter)
-    //   if (this.mapRef) {
-    //     this.mapRef.panTo({ lat: mapCenter.latitude, lng: mapCenter.longitude })
-    //   }
-    // })
-
-    // To change the center of the map to given LatLng
     this.unsubSetMapCenter = state.requestSetMapCenter.subscribe((mapCenter) => {
-      console.log(' --------------------------------- map center')
-      console.log(mapCenter)
       if (this.mapRef) {
         this.mapRef.panTo({ lat: mapCenter.latitude, lng: mapCenter.longitude })
       }
@@ -156,8 +142,6 @@ class TileComponentController {
     
     // Set the map zoom level
     this.unsubRXSetMapZoom = rxState.requestSetMapZoom.getMessage().subscribe((zoom) => {
-      console.log('RX zoom')
-      console.log(zoom)
       if (this.mapRef) {
         this.mapRef.setZoom(zoom)
       }
@@ -165,8 +149,6 @@ class TileComponentController {
 
     // Set the map zoom level
     this.unsubSetMapZoom = state.requestSetMapZoom.subscribe((zoom) => {
-      console.log('zoom')
-      console.log(zoom)
       if (this.mapRef) {
         this.mapRef.setZoom(zoom)
       }
@@ -289,8 +271,6 @@ class TileComponentController {
         })
         .catch((err) => console.error(err))
     })
-    console.log('sub all')
-    //this.unsubscribeRedux = this.$ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
   }
 
   rootUnsubscribeAll () {
@@ -671,6 +651,11 @@ class TileComponentController {
           console.error(err)
         })
     }
+    // init render tiles
+    let mapLayers = this.state.mapLayers.getValue()
+    if (Object.keys(mapLayers).length) {
+      this.handleMapEvents(null, this.state.mapLayers.getValue(), null)
+    }
   }
 
   // Removes the existing map overlay
@@ -734,7 +719,6 @@ class TileComponentController {
       })
       return
     }
-
     // // First get a list of tiles that are visible on the screen.
     var visibleTiles = []
     var zoom = this.mapRef.getZoom()
