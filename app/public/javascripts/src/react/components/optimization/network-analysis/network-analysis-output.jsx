@@ -54,11 +54,6 @@ export class NetworkAnalysisOutput extends Component {
       <div className='alert alert-warning mt-3' style={{ display: hasChartData ? 'none' : 'block' }}>
         Network analysis data not available. Run a new network analysis to see results.
       </div>
-      {/* Render the current chart definition (i.e. the object that we use when creating a new chart) as a hidden <pre> tag.
-          This is so that we include the chart definition in unit tests. */}
-      <pre style={{ display: 'none' }}>
-        {JSON.stringify(this.chartDefinitionForTesting, null, 2)}
-      </pre>
       <button className='btn btn-primary pull-left' onClick={() => this.props.showOrHideReportModal(true)}>Reports</button>
       <ReportsDownloadModal reportTypes={['NETWORK_ANALYSIS']} />
     </div>
@@ -88,7 +83,6 @@ export class NetworkAnalysisOutput extends Component {
     }
     const { chartDefinition, dataModifiers } = JSON.parse(JSON.stringify(selectedUiDefinition))
     this.chartDefinition = this.buildChartDefinition(chartDefinition, dataModifiers, this.props.chartReport)
-    this.chartDefinitionForTesting = JSON.parse(JSON.stringify(this.chartDefinition))
   }
 
   updateChart () {
@@ -96,12 +90,8 @@ export class NetworkAnalysisOutput extends Component {
       this.chart.destroy()
       this.chart = null
     }
-    if (this.props.isTesting) {
-      console.log('*** network-analysis-output: We are running in test mode. The actual chart will not be created')
-    } else {
-      var ctx = this.chartRef.current.getContext('2d')
-      this.chart = new Chart(ctx, this.chartDefinition)
-    }
+    var ctx = this.chartRef.current.getContext('2d')
+    this.chart = new Chart(ctx, this.chartDefinition)
   }
 
   buildChartDefinition (rawChartDefinition, dataModifiers, chartData) {

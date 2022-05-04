@@ -14,7 +14,7 @@ import PlanNavigation from './sidebar/plan-navigation.jsx'
 import AlertsTooltip from './alerts-tooltip.jsx'
 import BoundaryDrawCreator from './boundary-draw-creator.jsx'
 import AroFeatureEditor from '../common/editor-interface/aro-feature-editor.jsx'
-import { constants, isDraftLoadingOrLoaded } from './shared'
+import { isDraftLoadingOrLoaded } from './shared'
 import { Overlay } from '@mantine/core'
 import './plan-editor.css'
 
@@ -28,13 +28,9 @@ export const PlanEditor = props => {
     features,
     selectedEditFeatureIds,
     equipments,
-    rootSubnet,
     updateFeatureProperties,
     noMetaConstructionAreas,
     noMetaEquipmentTypes,
-    transactionId,
-    rootDraft,
-    getFiberAnnotations,
     isChangesSaved,
     isRecalculating,
     isCommittingTransaction,
@@ -46,18 +42,9 @@ export const PlanEditor = props => {
     return () => unsubscribeFromSocket()
   }, [])
 
-  useEffect(() => {
-    if (transactionId && rootDraft && draftsState === constants.DRAFT_STATES.END_INITIALIZATION) {
-      getFiberAnnotations(rootDraft.subnetId)
-    }
-  }, [transactionId, !!rootDraft, draftsState])
-
   function onFeatureFormSave(newValObj, objectId) {
     const { feature } = features[objectId]
-    updateFeatureProperties({
-      feature: { ...feature, networkNodeEquipment: newValObj },
-      rootSubnetId: rootSubnet.subnetNode,
-    })
+    updateFeatureProperties({ ...feature, networkNodeEquipment: newValObj })
   }
 
   return (
@@ -132,11 +119,8 @@ const mapStateToProps = (state) => {
     selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
     equipments: state.mapLayers.networkEquipment.equipments,
     constructionAreas: state.mapLayers.constructionAreas.construction_areas,
-    rootSubnet: PlanEditorSelectors.getRootSubnet(state),
     noMetaEquipmentTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.networkEquipment.planEdit[planType].noMetaData) || [],
     noMetaConstructionAreas: (state.configuration.ui.perspective && state.configuration.ui.perspective.constructionAreas.planEdit[constructionPlanType].noMetaData) || [],
-    transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
-    rootDraft: PlanEditorSelectors.getRootDraft(state),
     isChangesSaved: PlanEditorSelectors.getIsChangesSaved(state),
     isRecalculating: state.planEditor.isRecalculating,
     isCommittingTransaction: state.planEditor.isCommittingTransaction,
@@ -147,8 +131,7 @@ const mapDispatchToProps = dispatch => ({
   unsubscribeFromSocket: () => dispatch(PlanEditorActions.unsubscribeFromSocket()),
   subscribeToSocket: () => dispatch(PlanEditorActions.subscribeToSocket()),
   resumeOrCreateTransaction: () => dispatch(PlanEditorActions.resumeOrCreateTransaction()),
-  updateFeatureProperties: obj => dispatch(PlanEditorActions.updateFeatureProperties(obj)),
-  getFiberAnnotations: subnetId => dispatch(PlanEditorActions.getFiberAnnotations(subnetId)),
+  updateFeatureProperties: feature => dispatch(PlanEditorActions.updateFeatureProperties(feature)),
 })
 
 const PlanEditorComponent = wrapComponentWithProvider(reduxStore, PlanEditor, mapStateToProps, mapDispatchToProps)

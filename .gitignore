@@ -31,14 +31,12 @@ ops-legacy/
 **/node_modules 
 app/coverage
 app/npm-debug*.*
-app/models/test_permission.js
 app/public/javascripts/src/service-typegen/dist
 app/public/javascripts/lib/
 app/public/javascripts/bundle*
 # Vendor bundle. Specifically exclude this, it is built as part of the npm script "build-vendor-bundle"
 app/public/javascripts/vendors/vendor-bundle.min.js
 conf/config_app.json
-app/jest_*/**
 app/v8-compile-cache*/**
 reportsrv/node_modules
 

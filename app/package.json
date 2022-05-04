@@ -11,8 +11,6 @@
     "npm": "6.14.10"
   },
   "scripts": {
-    "test": "NODE_ENV=test mocha test/models/*.js test/helpers/*.js --timeout 50000 --delay",
-    "test-unit-watch": "sleep 20 && ./node_modules/.bin/jest --watch",
     "build-service-types": "cd ./public/javascripts/src/service-typegen/src && node class-generator.js",
     "build-vendor-bundle": "chmod +x ./node_modules/uglify-js/bin/* && ./node_modules/browserify/bin/cmd.js -r rxjs -r ng-redux -p licensify | ./node_modules/uglify-js/bin/uglifyjs --comments > ./public/javascripts/vendors/vendor-bundle.min.js",
     "build-angularjs": "./node_modules/.bin/babel public/javascripts/src -d public/javascripts/lib --presets=@babel/preset-env --ignore public/javascripts/src/service-typegen/,public/javascripts/src/react/ && cd ./public/javascripts/src/components && find . -name \\*.html -exec cp --parents {} ../../lib/components/ \\;",
@@ -22,7 +20,7 @@
     "watch-client": "babel public/javascripts/src -d public/javascripts/lib --ignore public/javascripts/src/service-typegen/,public/javascripts/src/react/ --watch --copy-files --source-maps",
     "watch-webpack": "NODE_ENV=development webpack --watch",
     "watch-esbuild": "esbuild public/javascripts/src/components/index.js --outfile=public/javascripts/lib/aro-bundle.js --bundle --define:process.env.NODE_ENV=\\\"development\\\" --external:/svg/* --watch --sourcemap=external",
-    "dev": "npm run build-vendor-bundle && npm run build-service-types && concurrently \"npm run watch-client\" \"npm run watch-server\" \"npm run watch-webpack\" \"npm run test-unit-watch\"",
+    "dev": "npm run build-vendor-bundle && npm run build-service-types && concurrently \"npm run watch-client\" \"npm run watch-server\" \"npm run watch-webpack\"",
     "local": "concurrently \"npm run watch-client\" \"npm run watch-server\" \"npm run watch-webpack\"",
     "upgrade-check": "npx npm-check -u"
   },
@@ -46,8 +44,6 @@
     "body-parser": "^1.13.2",
     "browserify": "^14.4.0",
     "busboy": "^0.2.13",
-    "chai": "~3.0.0",
-    "chai-string": "^1.1.6",
     "chart.js": "^2.9.4",
     "clsx": "^1.1.1",
     "compression": "^1.7.4",
@@ -61,7 +57,6 @@
     "deepmerge": "^3.2.0",
     "dequal": "^2.0.2",
     "ejs": "^2.3.3",
-    "enzyme-to-json": "^3.3.5",
     "express": "^4.13.1",
     "express-flash": "0.0.2",
     "express-http-proxy": "^1.5.1",
@@ -124,7 +119,6 @@
     "stream-transform": "^0.1.1",
     "style-loader": "^0.23.1",
     "styled-jsx": "5.0.2",
-    "supertest": "^1.1.0",
     "temp": "^0.8.3",
     "typy": "^3.0.1",
     "uglify-js": "^3.0.24",
@@ -137,19 +131,11 @@
   },
   "devDependencies": {
     "angular": "^1.4.3",
-    "angular-mocks": "^1.4.3",
     "ansi-colors": "^4.1.1",
-    "babel-jest": "^24.1.0",
     "concurrently": "^3.5.1",
     "dotenv-cli": "4.1.0",
-    "enzyme": "^3.8.0",
-    "enzyme-adapter-react-16": "^1.9.1",
     "esbuild": "0.9.0",
-    "jest": "^24.1.0",
-    "mocha": "^2.2.5",
     "nodemon": "^2.0.7",
-    "react-redux": "^7.2.0",
-    "react-test-renderer": "^16.7.0",
-    "xml2js": "^0.4.10"
+    "react-redux": "^7.2.0"
   }
 }
