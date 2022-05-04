@@ -11,69 +11,47 @@ import Utilities from '../../../../components/common/utilities'
 import MenuItemFeature from '../../context-menu/menu-item-feature'
 import MenuItemAction from '../../context-menu/menu-item-action'
 import FeatureSelector from '../../../../components/tiles/feature-selector'
+import DeleteMenu from '../../data-edit/maps-delete-menu.js'
+import { MultiSelectVertices } from '../../common/maps/multiselect-vertices.js'
+import { InvalidBoundaryHandling } from '../../common/maps/invalid-boundary-handling.js'
 import ContextMenuActions from '../../context-menu/actions'
 import uuidStore from '../../../../shared-utils/uuid-store'
 
-const tileDataService = new TileDataService()
-const utils = new Utilities()
-
-const polygonOptions = {
+const polygonOptions = Object.freeze({
   strokeColor: '#FF1493',
   strokeOpacity: 0.8,
   strokeWeight: 2,
   fillColor: '#FF1493',
   fillOpacity: 0.4,
-}
+})
 
-const selectedPolygonOptions = {
+const selectedPolygonOptions = Object.freeze({
   strokeColor: '#000000',
   strokeOpacity: 0.8,
   strokeWeight: 3,
   fillColor: '#FF1493',
   fillOpacity: 0.4,
-}
-
-const isMarker = (mapObject) => mapObject && mapObject.icon
-
-const polygonInvalidMsg = {
-  title: 'Invalid Polygon',
-  text: 'Polygon shape is invalid, please try again. Ensure that the polygon is not self-intersecting.',
-}
-
-// ----- rightclick menu ----- //
-const getXYFromEvent = (event) => {
-  let mouseEvent = null
-  Object.keys(event).forEach((eventKey) => {
-    if (event.hasOwnProperty(eventKey) && (event[eventKey] instanceof MouseEvent)) { mouseEvent = event[eventKey] }
-  })
-  if (!mouseEvent) { return }
-  const x = mouseEvent.clientX
-  const y = mouseEvent.clientY
-  return { x, y }
-}
-
-// Return true if the given path is a closed path
-const isClosedPath = (path) => {
-  const firstPoint = path.getAt(0)
-  const lastPoint = path.getAt(path.length - 1)
-  const deltaLat = Math.abs(firstPoint.lat() - lastPoint.lat())
-  const deltaLng = Math.abs(firstPoint.lng() - lastPoint.lng())
-  const TOLERANCE = 0.0001
-  return (deltaLat < TOLERANCE) && (deltaLng < TOLERANCE)
-}
-
-const drawing = {
-  drawingManager: null,
-  markerIdForBoundary: null // The objectId of the marker for which we are drawing the boundary
-}
-
-let overlayRightClickListener = null
+})
 
 export const ServiceLayerMapObjects = (props) => {
-
+  const polygonInvalidMsg = {
+    title: 'Invalid Polygon',
+    text: 'Polygon shape is invalid, please try again. Ensure that the polygon is not self-intersecting.',
+  }
+  const drawing = {
+    drawingManager: null,
+    markerIdForBoundary: null // The objectId of the marker for which we are drawing the boundary
+  }
+  const tileDataService = new TileDataService()
+  const utils = new Utilities()
+  const deleteMenu = new DeleteMenu()
   const [createdMapObjects, setCreatedMapObjects] = useState({})
-  const [selectedMapObjectPreviousShape, setSelectedMapObjectPreviousShape] = useState({})
-
+  let multiSelectVertices = null
+  let invalidBoundaryHandling = new InvalidBoundaryHandling();
+  let overlayRightClickListener = null
+  let overlayContextMenuListener = null
+  let clickOutListener = null
+  let backspaceListener = null
   const {
     mapRef,
     mapFeatures,
@@ -105,46 +83,61 @@ export const ServiceLayerMapObjects = (props) => {
     createObjectOnClick,
   } = props
 
-  // Use the cross hair cursor while this control is initialized
-  useEffect(() => mapRef.setOptions({ draggableCursor: 'crosshair' }), [])
-
   const prevMapFeatures = usePrevious(mapFeatures)
+  const prevServiceAreaBoundaryDetails = usePrevious(serviceAreaBoundaryDetails)
+  const prevSelectedMapObject = usePrevious(selectMapObject)
+  const prevSelectServiceAreaWithId = usePrevious(selectServiceAreaWithId)
+  const prevEditServiceAreaWithId = usePrevious(editServiceAreaWithId)
+  const prevDeleteServiceAreaWithId = usePrevious(deleteServiceAreaWithId)
+  const prevMultiPolygonFeature = usePrevious(multiPolygonFeature)
   useEffect(() => {
+    if(multiSelectVertices) multiSelectVertices.clearMapObjectOverlay()
     if (isRulerEnabled) { return } // disable any click action when ruler is enabled
     if (prevMapFeatures && !dequal(prevMapFeatures, mapFeatures)) { handleMapEntitySelected(mapFeatures) }
-  }, [mapFeatures])
-
-  useEffect(() => { updateSelectedMapObject(selectedMapObject) }, [selectedMapObject])
-
-  // Select Service Area
-  const prevSelectServiceAreaWithId = usePrevious(selectServiceAreaWithId)
-  useEffect(() => {
-    if (!dequal(prevSelectServiceAreaWithId, selectServiceAreaWithId)) { selectProposedFeature(selectServiceAreaWithId) }
-  }, [selectServiceAreaWithId])
-
-  // Edit Service Area
-  const prevEditServiceAreaWithId = usePrevious(editServiceAreaWithId)
-  useEffect(() => {
-    if (editServiceAreaWithId && !dequal(prevEditServiceAreaWithId, editServiceAreaWithId)) {
-      viewExistingFeature(editServiceAreaWithId.result, editServiceAreaWithId.latLng)
-    }
-  }, [editServiceAreaWithId])
-
-  // Add Service Area
-  const prevServiceAreaBoundaryDetails = usePrevious(serviceAreaBoundaryDetails)
-  useEffect(() => {
     if (prevServiceAreaBoundaryDetails && !dequal(prevServiceAreaBoundaryDetails, serviceAreaBoundaryDetails)) {
       startDrawingBoundaryForServiceArea(serviceAreaBoundaryDetails)
     }
-  }, [serviceAreaBoundaryDetails])
+    
+    if (prevSelectedMapObject && !dequal(prevSelectedMapObject, selectedMapObject)) {
+      updateSelectedMapObject(selectedMapObject)
+    }
+
+    if (!dequal(prevSelectServiceAreaWithId, selectServiceAreaWithId)) {
+      selectProposedFeature(selectServiceAreaWithId)
+    }
+
+    if (editServiceAreaWithId && !dequal(prevEditServiceAreaWithId, editServiceAreaWithId)) {
+      viewExistingFeature(editServiceAreaWithId.result, editServiceAreaWithId.latLng)
+    }
+
+    if (!dequal(prevDeleteServiceAreaWithId, deleteServiceAreaWithId)) {
+      deleteObjectWithId(deleteServiceAreaWithId)
+      deleteCreatedMapObject(deleteServiceAreaWithId)
+    }
+
+    if (prevMultiPolygonFeature && !dequal(prevMultiPolygonFeature, multiPolygonFeature)) {
+      createMapObject(multiPolygonFeature, null, true)
+    }
+
+    if(removeMapObjects)removeCreatedMapObjects(objectIdToMapObject)
+  }, [
+    mapFeatures,
+    selectedMapObject,
+    selectServiceAreaWithId,
+    editServiceAreaWithId,
+    serviceAreaBoundaryDetails,
+    deleteServiceAreaWithId,
+    multiPolygonFeature,
+    removeMapObjects
+  ])
 
   useEffect(() => {
+    mapRef.setOptions({ draggableCursor: 'crosshair' })
     overlayRightClickListener = mapRef.addListener('rightclick', (event) => {
-      if (featureType === 'serviceArea') {
-        const eventXY = getXYFromEvent(event)
-        if (!eventXY) { return }
-        updateContextMenu(event.latLng, eventXY.x, eventXY.y, null)
-      }
+      rightClickServicArea(event)
+    })
+    overlayContextMenuListener = mapRef.addListener('contextmenu', (event) => {
+      rightClickServicArea(event)
     })
 
     return () => {
@@ -152,33 +145,61 @@ export const ServiceLayerMapObjects = (props) => {
         google.maps.event.removeListener(overlayRightClickListener)
         overlayRightClickListener = null
       }
+      if (overlayContextMenuListener) {
+        google.maps.event.removeListener(overlayContextMenuListener)
+        overlayContextMenuListener = null
+      }
+      if (backspaceListener) {
+        google.maps.event.removeListener(backspaceListener)
+        backspaceListener = null
+      }
       removeCreatedMapObjects(objectIdToMapObject)
+      if(multiSelectVertices) multiSelectVertices.clearMapObjectOverlay()
       // Go back to the default map cursor
       mapRef.setOptions({ draggableCursor: null })
     }
   }, [])
 
-  // Delete Service Area
-  const prevDeleteServiceAreaWithId = usePrevious(deleteServiceAreaWithId)
-  useEffect(() => {
-    if (!dequal(prevDeleteServiceAreaWithId, deleteServiceAreaWithId)) {
-      deleteObjectWithId(deleteServiceAreaWithId)
-      deleteCreatedMapObject(deleteServiceAreaWithId)
-    }
-  }, [deleteServiceAreaWithId])
+  const isMarker = (mapObject) => mapObject && mapObject.icon
 
-  // To draw Multi Polygon Feature
-  const prevMultiPolygonFeature = usePrevious(multiPolygonFeature)
-  useEffect(() => {
-    if (prevMultiPolygonFeature && !dequal(prevMultiPolygonFeature, multiPolygonFeature)) {
-      createMapObject(multiPolygonFeature, null, true)
-    }
-  }, [multiPolygonFeature])
+  // ----- rightclick menu ----- //
+  const getXYFromEvent = (event) => {
+    let mouseEvent = null
+    Object.keys(event).forEach((eventKey) => {
+      if (
+        event.hasOwnProperty(eventKey) && (event[eventKey] instanceof MouseEvent)
+      ) {
+        mouseEvent = event[eventKey]
+      }
+    })
 
-  // To Remove Map Objects
-  useEffect(() => { removeMapObjects && removeCreatedMapObjects(objectIdToMapObject) }, [removeMapObjects])
+    if (!mouseEvent) return
+
+    const x = mouseEvent.clientX
+    const y = mouseEvent.clientY
+    return { x, y }
+  }
+
+  // Return true if the given path is a closed path
+  const isClosedPath = (path) => {
+    const firstPoint = path.getAt(0)
+    const lastPoint = path.getAt(path.length - 1)
+    const deltaLat = Math.abs(firstPoint.lat() - lastPoint.lat())
+    const deltaLng = Math.abs(firstPoint.lng() - lastPoint.lng())
+    const TOLERANCE = 0.0001
+    return (deltaLat < TOLERANCE) && (deltaLng < TOLERANCE)
+  }
+
+  const rightClickServicArea = (event) => {
+    if (featureType === 'serviceArea') {
+      const eventXY = getXYFromEvent(event)
+      if (!eventXY) { return }
+      updateContextMenu(event.latLng, eventXY.x, eventXY.y, null)
+    }
+  }
 
   const handleMapEntitySelected = (event) => {
+    if(multiSelectVertices) multiSelectVertices.clearMapObjectOverlay()
     if (!event || !event.latLng) { return }
 
     const feature = {
@@ -244,8 +265,8 @@ export const ServiceLayerMapObjects = (props) => {
   }
 
   const createMapObject = (feature, iconUrl, usingMapClick, existingObjectOverride, deleteExistingBoundary, isMult) => {
+    if(multiSelectVertices) multiSelectVertices.clearMapObjectOverlay()
     if (typeof existingObjectOverride === undefined) { existingObjectOverride = false }
-
     let mapObject = null
     if (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon') {
       // if closed path, prune
@@ -258,16 +279,54 @@ export const ServiceLayerMapObjects = (props) => {
         mapObject = createMultiPolygonMapObject(feature)
       }
 
+      multiSelectVertices = new MultiSelectVertices(
+        mapObject,
+        mapRef,
+        google,
+        openDeleteMenu
+      )
+      invalidBoundaryHandling.stashMapObject(mapObject.objectId, mapObject)
+
       // Set up listeners on the map object
-      mapObject.addListener('click', () => {
+      mapObject.addListener('click', (event) => {
         // Select this map object
-        selectMapObject(mapObject)
+        if (event.vertex && event.domEvent.shiftKey) {
+          event.domEvent.stopPropagation()
+          multiSelectVertices.addOrRemoveMarker(event)
+        } else {
+          selectMapObject(mapObject)
+        }
       })
+      if (backspaceListener) google.maps.event.removeListener(backspaceListener)
+      backspaceListener = google.maps.event.addDomListener(document, 'keydown', (e) => {
+        const code = (e.keyCode ? e.keyCode : e.which)
+        // 8 = Backspace
+        // 46 = Delete
+        // Supporting both of these because not all keyboards have a 'delete' key
+        if ((code === 8 || code === 46) && multiSelectVertices.mapObjectOverlay.length > 0) {
+          // Sort is necessary to ensure that indexes will not be reassigned while deleting more than one vertex.
+          const mapObjectOverlayClone = [...multiSelectVertices.mapObjectOverlay]
+          multiSelectVertices.clearMapObjectOverlay()
+          mapObjectOverlayClone.sort((a, b) => {
+            return Number(b.title) - Number(a.title)
+          })
+          mapObjectOverlayClone.forEach(marker => {
+            if (marker && marker.title && mapObject.getPath().getLength() > 3) {
+              mapObject.getPath().removeAt(Number(marker.title))
+            }
+          })
+        }
+      })
+
+      // Debounce the update to the backend to prevent race conditions on geom for multi select delete
+      const debouncedModifyObject = _.debounce(
+        modifyObject,
+        500
+      )
       mapObject.getPaths().forEach(function (path, index) {
         const isClosed = isClosedPath(path)
-
-        google.maps.event.addListener(path, 'insert_at', function () { modifyObject(mapObject) })
-        google.maps.event.addListener(path, 'remove_at', function () { modifyObject(mapObject) })
+        google.maps.event.addListener(path, 'insert_at', function () { debouncedModifyObject(mapObject); })
+        google.maps.event.addListener(path, 'remove_at', function () { debouncedModifyObject(mapObject); })
         google.maps.event.addListener(path, 'set_at', function () {
           if (isClosed) {
             // IMPORTANT to check if it is already a closed path,
@@ -275,20 +334,28 @@ export const ServiceLayerMapObjects = (props) => {
             if (index === 0) {
               // The first point has been moved, move the last point of the polygon (to keep it a valid, closed polygon)
               path.setAt(0, path.getAt(path.length - 1))
-              modifyObject(mapObject)
+              debouncedModifyObject(mapObject)
             } else if (index === path.length - 1) {
               // The last point has been moved, move the first point of the polygon (to keep it a valid, closed polygon)
               path.setAt(path.length - 1, path.getAt(0))
-              modifyObject(mapObject)
+              debouncedModifyObject(mapObject);
             }
           } else {
-            modifyObject(mapObject)
+            debouncedModifyObject(mapObject);
           }
         })
       })
-
+      
       google.maps.event.addListener(mapObject, 'rightclick', event => {
-        if (event.vertex === undefined) { return }
+        openDeleteMenu(event, mapObject)
+      })
+      google.maps.event.addListener(mapObject, 'contextmenu', event => {
+        openDeleteMenu(event, mapObject)
+      })
+
+      clickOutListener = mapRef.addListener('click', () => {
+        // Any click that is outside of the polygon will deselect all vertices
+        if(multiSelectVertices) multiSelectVertices.clearMapObjectOverlay()
       })
     } else {
       throw `createMapObject() not supported for geometry type ${feature.geometry.type}`
@@ -308,6 +375,27 @@ export const ServiceLayerMapObjects = (props) => {
     setObjectIdToMapObject(createdMapObjects)
     if (usingMapClick) { selectMapObject(mapObject, isMult) }
     return onCreateObject(mapObject, usingMapClick, feature, !deleteExistingBoundary)
+  }
+
+  const openDeleteMenu = (event, mapObject) => {
+    if (event.vertex === undefined) {
+      return
+    }
+    let vertexPayload = event.vertex;
+    if (multiSelectVertices.mapObjectOverlay.length > 0) {
+      if(multiSelectVertices.markerIndex(event.vertex) < 0) {
+        multiSelectVertices.addMarker(event)
+      }
+      vertexPayload = [...multiSelectVertices.mapObjectOverlay]
+    }
+    const clearMapObjectOverlay = multiSelectVertices.clearMapObjectOverlay.bind(multiSelectVertices)
+    deleteMenu.open(
+      mapRef, 
+      mapObject.getPath(),
+      mapObject.getPath().getAt(event.vertex),
+      vertexPayload,
+      clearMapObjectOverlay
+    )
   }
 
   // ToDo: I think we should treat all polygons as multiPolygons
@@ -379,9 +467,13 @@ export const ServiceLayerMapObjects = (props) => {
   }
 
   const selectedMapObjectRef = React.useRef(selectedMapObject)
-  const updateSelectedMapObject = (selectedMapObject) => { selectedMapObjectRef.current = selectedMapObject }
+  const updateSelectedMapObject = (selectedMapObject) => {
+    if(multiSelectVertices) multiSelectVertices.clearMapObjectOverlay()
+    selectedMapObjectRef.current = selectedMapObject
+  }
 
   const selectMapObject = (mapObject, isMult) => {
+    if(multiSelectVertices) multiSelectVertices.clearMapObjectOverlay()
     if (typeof isMult === undefined) { isMult = false }
     const selectedMapObjectCurr = selectedMapObjectRef.current
     // --- clear mult select?
@@ -397,10 +489,6 @@ export const ServiceLayerMapObjects = (props) => {
     }
 
     if (!isMult) { setSelectedMapObject(mapObject) }
-    if (mapObject && !isMarker(mapObject)) { // If selected mapobject is boundary store the geom
-      selectedMapObjectPreviousShape[mapObject.objectId] = mapObject.feature.geometry
-      setSelectedMapObjectPreviousShape(selectedMapObjectPreviousShape)
-    }
     onSelectObject(mapObject, isMult)
   }
 
@@ -415,19 +503,19 @@ export const ServiceLayerMapObjects = (props) => {
   }
 
   const modifyObject = (mapObject) => {
-    // Check if polygon is valid, if valid modify a map object
-    const polygonGeoJsonPath = MapUtilities.polygonPathsToWKT(mapObject.getPaths())
-    const isValidPolygon = MapUtilities.isPolygonValid({ type: 'Feature', geometry: polygonGeoJsonPath })
+    const [isValidPolygon, validMapObject] = invalidBoundaryHandling.isValidPolygon(
+      mapObject.objectId,
+      mapObject
+    )
 
     if (isValidPolygon) {
-      selectedMapObjectPreviousShape[mapObject.objectId] = polygonGeoJsonPath
-      onModifyObject(mapObject)
+      invalidBoundaryHandling.stashMapObject(
+        validMapObject.objectId,
+        validMapObject
+      )
+      onModifyObject(validMapObject)
     } else {
-      // display error message & undo last invalid change
-      Utilities.displayErrorMessage(polygonInvalidMsg)
-      mapObject.setMap(null)
-      mapObject.feature.geometry = selectedMapObjectPreviousShape[mapObject.objectId]
-      createMapObject(mapObject.feature, null, true, null, true)
+      createMapObject(validMapObject.feature, null, true, null, true)
     }
   }
 
@@ -522,12 +610,14 @@ export const ServiceLayerMapObjects = (props) => {
   }
 
   const selectProposedFeature = (objectId) => {
+    if(multiSelectVertices) multiSelectVertices.clearMapObjectOverlay()
     if (!createdMapObjects.hasOwnProperty(objectId)) { return false }
     selectMapObject(createdMapObjects[objectId])
     return true
   }
 
   const deleteObjectWithId = (objectId) => {
+    if(multiSelectVertices) multiSelectVertices.clearMapObjectOverlay()
     if (selectedMapObject && (selectedMapObject.objectId === objectId)) {
       // Deselect the currently selected object, as it is about to be deleted.
       selectMapObject(null)
@@ -537,6 +627,7 @@ export const ServiceLayerMapObjects = (props) => {
   }
 
   const deleteCreatedMapObject = (objectId) => {
+    if(multiSelectVertices) multiSelectVertices.clearMapObjectOverlay()
     const mapObjectToDelete = createdMapObjects[objectId]
     if (mapObjectToDelete) {
       mapObjectToDelete.setMap(null)
@@ -546,6 +637,7 @@ export const ServiceLayerMapObjects = (props) => {
   }
 
   const viewExistingFeature = (feature, latLng) => {
+    if(multiSelectVertices) multiSelectVertices.clearMapObjectOverlay()
     const hitFeatures = {}
     hitFeatures.latLng = latLng
     if (featureType === 'serviceArea') { hitFeatures.serviceAreas = [feature] }
@@ -553,6 +645,7 @@ export const ServiceLayerMapObjects = (props) => {
   }
 
   const removeCreatedMapObjects = (createdMapObjectsObj) => {
+    if(multiSelectVertices) multiSelectVertices.clearMapObjectOverlay()
     // Remove created objects from map
     selectMapObject(null)
     Object.keys(createdMapObjectsObj).forEach((objectId) => {
@@ -562,6 +655,7 @@ export const ServiceLayerMapObjects = (props) => {
   }
 
   const startDrawingBoundaryForServiceArea = (latLng) => {
+    if(multiSelectVertices) multiSelectVertices.clearMapObjectOverlay()
     if (drawing.drawingManager) {
       // If we already have a drawing manager, discard it.
       console.warn('We already have a drawing manager active')
@@ -595,8 +689,12 @@ export const ServiceLayerMapObjects = (props) => {
       })
 
       // Check if polygon is valid, if valid create a map object
-      const isValidPolygon = MapUtilities.isPolygonValid({ type: 'Feature', geometry: { type: 'Polygon', coordinates: feature.geometry.coordinates[0] } })
-      isValidPolygon ? createMapObject(feature, null, true) : Utilities.displayErrorMessage(polygonInvalidMsg)
+      const [isValidPolygon, _validMapObject] = invalidBoundaryHandling.isValidPolygon(
+        feature.objectId,
+        feature
+      )
+
+      if(isValidPolygon) createMapObject(feature, null, true)
 
       // Remove the overlay. It will be replaced with the created map object
       event.overlay.setMap(null)

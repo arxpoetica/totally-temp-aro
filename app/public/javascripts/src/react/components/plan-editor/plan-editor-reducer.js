@@ -25,7 +25,6 @@ const defaultState = {
   subnetFeatures: {},
   selectedSubnetId: null, // need to rename this now that a terminal can be selected, lets do "activeFeature" // unselected this should be null not ''
   boundaryDebounceBySubnetId: {},
-  fiberRenderRequired: true,
   cursorLocationIds: [],
   cursorEquipmentIds: [],
   selectedFiber: [],
@@ -146,7 +145,7 @@ function setSelectedEditFeatureIds (state, selectedEditFeatureIds) {
     selectedEditFeatureIds: selectedEditFeatureIds
   }
 }
-
+/*
 function deselectFeature (state, objectId) {
   let newSelectedFeatureIds = [...state.selectedEditFeatureIds]
   let i = newSelectedFeatureIds.indexOf(objectId)
@@ -156,19 +155,28 @@ function deselectFeature (state, objectId) {
     selectedEditFeatureIds: newSelectedFeatureIds
   }
 }
+*/
+function deselectFeature (state, objectId) {
+  return deselectFeatures(state, [objectId])
+}
+
+function deselectFeatures (state, objectIds) {
+  // could be optomised by iterating through objectIds instead of selectedEditFeatureIds
+  let newSelectedFeatureIds = state.selectedEditFeatureIds.filter(seletedId => {
+    return !objectIds.includes(seletedId)
+  })
+  return { ...state,
+    selectedEditFeatureIds: newSelectedFeatureIds
+  }
+}
 
 // will merge props into draft entries
-function mergeDraftProps (state, drafts) {
-  let mergedDrafts = {}
-  Object.keys(drafts).forEach(id => {
-    if (!mergedDrafts[id]) mergedDrafts[id] = {}
-    let stateDraft = state.drafts[id] || {}
-    mergedDrafts[id] = { ...stateDraft, ...mergedDrafts[id], ...drafts[id]}
+function mergeDraftProps(state, draftProps) {
+  const mergedDrafts = {}
+  Object.keys(draftProps).forEach(id => {
+    mergedDrafts[id] = { ...(state.drafts[id] || {}), ...draftProps[id] }
   })
-
-  return { ...state, 
-    drafts: { ...state.drafts, ...mergedDrafts }
-  }
+  return { ...state, drafts: { ...state.drafts, ...mergedDrafts } }
 }
 
 function addRequestedSubnetIds (state, subnetIds) {
@@ -207,32 +215,34 @@ function setSubnetFeatures (state, subnetFeatures) {
   return { ...state, subnetFeatures: subnetFeatures || {} }
 }
 
-function removeSubnetFeature (state, featureId) {
+function removeSubnetFeatures (state, featureIds) {
 
-  const subnetId = state.subnetFeatures[featureId].subnetId
   let updatedSubnets = klona(state.subnets)
-  const updatedSubnetFeatures = { ...state.subnetFeatures }
- 
-  // this checks if the ID is a subnet, not sure if this should happen here or in actions
-  // TODO: I feel like there is a better way to check this
-  if (
-    state.subnetFeatures[featureId].feature.networkNodeType === 'central_office'
-    || state.subnetFeatures[featureId].feature.networkNodeType === 'fiber_distribution_hub'
-  ) {
-    // removes each of the children from subnet features
-    updatedSubnets[featureId].children.forEach(child => {
-      delete updatedSubnetFeatures[child]
-    })
-    // removes from subnets and subnet features
-    delete updatedSubnets[featureId]
-    delete updatedSubnetFeatures[featureId]
-  } else {
-    // if it is not a parent itself then it just removes from subFeatures and from its parent in subnets
-    delete updatedSubnetFeatures[featureId]
-    if (subnetId) {
-      updatedSubnets[subnetId].children = updatedSubnets[subnetId].children.filter(childId => childId !== featureId)
+  const updatedSubnetFeatures = klona(state.subnetFeatures)
+
+  featureIds.forEach(featureId => {
+    // this checks if the ID is a subnet, not sure if this should happen here or in actions
+    // TODO: I feel like there is a better way to check this
+    if (
+      state.subnetFeatures[featureId].feature.networkNodeType === 'central_office'
+      || state.subnetFeatures[featureId].feature.networkNodeType === 'fiber_distribution_hub'
+    ) {
+      // removes each of the children from subnet features
+      updatedSubnets[featureId].children.forEach(child => {
+        delete updatedSubnetFeatures[child]
+      })
+      // removes from subnets and subnet features
+      delete updatedSubnets[featureId]
+      delete updatedSubnetFeatures[featureId]
+    } else {
+      // if it is not a parent itself then it just removes from subFeatures and from its parent in subnets
+      const subnetId = updatedSubnetFeatures[featureId].subnetId
+      delete updatedSubnetFeatures[featureId]
+      if (subnetId) {
+        updatedSubnets[subnetId].children = updatedSubnets[subnetId].children.filter(childId => childId !== featureId)
+      }
     }
-  }
+  })
   return { ...state, subnetFeatures: updatedSubnetFeatures, subnets: updatedSubnets }
 }
 
@@ -272,6 +282,14 @@ function clearBoundaryDebounce (state, subnetId) {
   }
 }
 
+function removeFromDraft (state, payload) {
+  if (!state.drafts[payload]) return state
+  const updatedDrafts = { ...state.drafts }
+  delete updatedDrafts[payload]
+  return { ...state, drafts: updatedDrafts }
+}
+
+// --- //
 function planEditorReducer (state = defaultState, { type, payload }) {
   switch (type) {
     case Actions.PLAN_EDITOR_CLEAR_TRANSACTION:
@@ -334,6 +352,9 @@ function planEditorReducer (state = defaultState, { type, payload }) {
     case Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE:
       return deselectFeature(state, payload)
 
+    case Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURES:
+      return deselectFeatures(state, payload)
+
     case Actions.PLAN_EDITOR_SET_DRAFTS_STATE:
       return { ...state, draftsState: payload }
 
@@ -344,13 +365,6 @@ function planEditorReducer (state = defaultState, { type, payload }) {
     case Actions.PLAN_EDITOR_CLEAR_DRAFTS:
       return { ...state, drafts: {} }
 
-    case Actions.PLAN_EDITOR_ADD_DRAFT: {
-      return {
-        ...state,
-        drafts: { ...state.drafts, [payload.subnetId]: payload },
-      }
-    }
-
     case Actions.PLAN_EDITOR_UPDATE_DRAFT: {
       const updatedDrafts = { ...state.drafts }
       updatedDrafts[payload.subnetId] = payload
@@ -358,10 +372,7 @@ function planEditorReducer (state = defaultState, { type, payload }) {
     }
 
     case Actions.PLAN_EDITOR_REMOVE_DRAFT: {
-      if (!state.drafts[payload]) return state
-      const updatedDrafts = { ...state.drafts }
-      delete updatedDrafts[payload]
-      return { ...state, drafts: updatedDrafts }
+      return removeFromDraft (state, payload)
     }
 
     case Actions.PLAN_EDITOR_MERGE_DRAFT_PROPS: {
@@ -386,8 +397,11 @@ function planEditorReducer (state = defaultState, { type, payload }) {
     case Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES:
       return { ...state, subnetFeatures: { ...state.subnetFeatures, ...payload } }
 
+    case Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURES:
+      return removeSubnetFeatures(state, payload)
+
     case Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE:
-      return removeSubnetFeature(state, payload)
+      return removeSubnetFeatures(state, [payload])
 
     case Actions.PLAN_EDITOR_REMOVE_SUBNETS:
       return removeSubnets(state, payload)
@@ -409,9 +423,6 @@ function planEditorReducer (state = defaultState, { type, payload }) {
     
     case Actions.PLAN_EDITOR_UPDATE_PLAN_THUMB_INFORMATION:
       return updatePlanThumbInformation(state, payload)
-    
-    case Actions.PLAN_EDITOR_SET_FIBER_RENDER_REQUIRED:
-      return { ...state, fiberRenderRequired: payload }
       
     case Actions.PLAN_EDITOR_SET_CURSOR_LOCATION_IDS:
       return { ...state, cursorLocationIds: payload}
