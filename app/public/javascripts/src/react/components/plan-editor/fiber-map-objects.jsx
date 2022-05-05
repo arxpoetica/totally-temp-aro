@@ -32,7 +32,6 @@ export const FiberMapObjects = (props) => {
     if (selectedSubnetId) {
       let subnetId = selectedSubnetId
       const feature = subnetFeatures[selectedSubnetId]
-      console.log(feature)
       if (feature) {
         if (feature.feature.dataType === 'edge_construction_area') {
           const rootList = Object.values(rootDrafts)
