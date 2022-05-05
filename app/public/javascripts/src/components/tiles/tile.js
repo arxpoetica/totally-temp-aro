@@ -854,7 +854,7 @@ class TileComponentController {
   }
 
   mergeToTarget (nextState, actions) {
-    //if (null this.OVERLAY_MAP_INDEX) return
+    if (null === this.OVERLAY_MAP_INDEX) return
     // store the previous values before Object.assign
     const currentSelectionModeId = this.activeSelectionModeId
     const oldPlanTargets = this.selection && this.selection.planTargets
