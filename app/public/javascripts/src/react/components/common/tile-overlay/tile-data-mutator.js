@@ -88,7 +88,7 @@ TileDataMutator.getPointsUnderClick = (tileData, latLng, zoom, size=null) => {
   if (null === size) size = 8
   size = Math.ceil(size * 0.5)
   let points = {}
-  let worldCoord = TileUtils.latLngToWorldCoord(worldCoord)
+  let worldCoord = TileUtils.latLngToWorldCoord(latLng)
   let nwCoords = {}
   let seCoords = {}
   // scale size by zoom level
