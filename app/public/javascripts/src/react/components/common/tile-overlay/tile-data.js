@@ -7,12 +7,12 @@
 
 import TileUtils from "../common/tile-overlay/tile-overlay-utils"
 
-let TileData = {}
+let TileDataMutator = {}
 
 
-TileData.getNewTileData = () => {return {}} // just here for expansibility
+TileDataMutator.getNewTileData = () => {return {}} // just here for expansibility
 
-TileData.addPoint = (tileData, tileCache, pointId, worldCoord) => {
+TileDataMutator.addPoint = (tileData, tileCache, pointId, worldCoord) => {
   //get tile id from worldCoord
   let allTileIds = TileUtils.getAllTileIdsForWorldCoord(worldCoord)
   let tileId = allTileIds[0]
@@ -25,7 +25,7 @@ TileData.addPoint = (tileData, tileCache, pointId, worldCoord) => {
   return tileData
 }
 
-TileData.deletePoint = (tileData, tileCache, pointId, worldCoord) => {
+TileDataMutator.deletePoint = (tileData, tileCache, pointId, worldCoord) => {
   //get tile id from worldCoord
   let allTileIds = TileUtils.getAllTileIdsForWorldCoord(worldCoord)
   let tileId = allTileIds[0]
@@ -48,27 +48,27 @@ TileData.deletePoint = (tileData, tileCache, pointId, worldCoord) => {
   return tileData
 }
 
-TileData.movePoint = (tileData, tileCache, pointId, fromWorldCoord, toWorldCoord) => {
-  tileData = TileData.deletePoint(tileData, tileCache, pointId, fromWorldCoord)
-  tileData = TileData.addPoint(tileData, tileCache, pointId, toWorldCoord)
+TileDataMutator.movePoint = (tileData, tileCache, pointId, fromWorldCoord, toWorldCoord) => {
+  tileData = TileDataMutator.deletePoint(tileData, tileCache, pointId, fromWorldCoord)
+  tileData = TileDataMutator.addPoint(tileData, tileCache, pointId, toWorldCoord)
   return tileData
 }
 
-TileData.addPoints = (tileData, tileCache, points) => {
+TileDataMutator.addPoints = (tileData, tileCache, points) => {
   for (const [pointId, worldCoord] of Object.entries(points)) {
-    tileData = TileData.addPoint(tileData, tileCache, pointId, worldCoord)
+    tileData = TileDataMutator.addPoint(tileData, tileCache, pointId, worldCoord)
   }
   return tileData
 }
 
-TileData.deletePoints = (tileData, tileCache, points) => {
+TileDataMutator.deletePoints = (tileData, tileCache, points) => {
   for (const [pointId, worldCoord] of Object.entries(points)) {
-    tileData = TileData.deletePoint(tileData, tileCache, pointId, worldCoord)
+    tileData = TileDataMutator.deletePoint(tileData, tileCache, pointId, worldCoord)
   }
   return tileData
 }
 
-TileData.getPointsForLeafTileRect = (tileData, nwTileId, seTileId) => {
+TileDataMutator.getPointsForLeafTileRect = (tileData, nwTileId, seTileId) => {
   let points = {}
   for (let x=nwTileId.x; x<seTileId.x; x++) {
     for (let y=nwTileId.y; x<seTileId.y; y++) {
@@ -78,12 +78,12 @@ TileData.getPointsForLeafTileRect = (tileData, nwTileId, seTileId) => {
   return points
 }
 
-TileData.getPointsForTile = (tileData, tileId) => {
+TileDataMutator.getPointsForTile = (tileData, tileId) => {
   let leafTileRect = TileUtils.getLeafTileRectForTile(tileId)
-  return TileData.getPointsForLeafTileRect(tileData, leafTileRect.nwTileId, leafTileRect.seTileId)
+  return TileDataMutator.getPointsForLeafTileRect(tileData, leafTileRect.nwTileId, leafTileRect.seTileId)
 }
 
-TileData.getPointsUnderClick = (tileData, latLng, zoom, size=null) => {
+TileDataMutator.getPointsUnderClick = (tileData, latLng, zoom, size=null) => {
   // size is number of pixels at current zoom level
   if (null === size) size = 8
   size = Math.ceil(size * 0.5)
@@ -99,7 +99,7 @@ TileData.getPointsUnderClick = (tileData, latLng, zoom, size=null) => {
   })
   let nwTileId = TileUtils.worldCoordToLeafTileId(nwCoords)
   let seTileId = TileUtils.worldCoordToLeafTileId(seCoords)
-  let allPoints = TileData.getPointsForLeafTileRect(tileData, nwTileId, seTileId)
+  let allPoints = TileDataMutator.getPointsForLeafTileRect(tileData, nwTileId, seTileId)
   for (const [pointId, worldCoord] of Object.entries(allPoints)) {
     if ( nwCoords.x <= worldCoord.x
       && worldCoord.x < seCoords.x
@@ -112,5 +112,5 @@ TileData.getPointsUnderClick = (tileData, latLng, zoom, size=null) => {
   return points
 }
 
-Object.freeze(TileData)
-export default TileData
+Object.freeze(TileDataMutator)
+export default TileDataMutator
