@@ -45,6 +45,8 @@ const _SubnetTileOverlay = props => {
 const mapStateToProps = (state) => {
   return {
     mapRef: state.map.googleMaps,
+    // tile data, useEffect: on change tell overlayLayer to run getTile on all visible tiles using clearTileCache
+    // tileOverlay.clearTileCache();
   }
 }
 
