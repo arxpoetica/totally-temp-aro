@@ -159,7 +159,27 @@ LinkedListMutator.shiftToTail = (linkedList, id) => {
   return LinkedListMutator.shiftTo(linkedList, null, id)
 }
 
-// should we do getters and iterators? 
+LinkedListMutator.getAt = (linkedList, id) => {
+  let data = null
+  if (linkedList[id]) data = linkedList[id].data
+  return {key: id, value: data}
+}
+
+LinkedListMutator.getHead = (linkedList) => {
+  return LinkedListMutator.getAt(linkedList, linkedList._head)
+}
+
+LinkedListMutator.getTail = (linkedList) => {
+  return LinkedListMutator.getAt(linkedList, linkedList._tail)
+}
+
+LinkedListMutator.getPrevOf = (linkedList, id) => {
+  return LinkedListMutator.getAt(linkedList, linkedList[id].prev)
+}
+
+LinkedListMutator.getNextOf = (linkedList, id) => {
+  return LinkedListMutator.getAt(linkedList, linkedList[id].next)
+}
 
 Object.freeze(LinkedListMutator)
 export default LinkedListMutator
