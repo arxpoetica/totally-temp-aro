@@ -21,7 +21,7 @@ TileDataMutator.addPoint = (tileData, tileCache, pointId, worldCoord) => {
   if (!tileData[tileId.x][tileId.y]) tileData[tileId.x][tileId.y] = {}
   tileData[tileId.x][tileId.y][pointId] = worldCoord
   //delete cached imageS
-  tileCache.deleteCachedImages(allTileIds)
+  tileCache.deleteTiles(allTileIds)
   return tileData
 }
 
@@ -43,7 +43,7 @@ TileDataMutator.deletePoint = (tileData, tileCache, pointId, worldCoord) => {
       }
     }
     //delete cached imageS
-    tileCache.deleteCachedImages(allTileIds)
+    tileCache.deleteTiles(allTileIds)
   }
   return tileData
 }
