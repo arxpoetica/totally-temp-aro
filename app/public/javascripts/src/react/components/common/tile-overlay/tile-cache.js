@@ -24,18 +24,10 @@ For the moment culling is handled here locally with TileCache itself manipulatin
 export class TileCache {
   constructor (itemLimit) {
     this.itemLimit = itemLimit
-    this.#reset()
+    this.clear()
   }
 
-// --- private --- //
-
-  #reset () {
-    this.#tileCache = {} // [z][x][y]
-    // ToDo: in the future, the culling mechanism should be a seperate class 
-    //  that encompasses multiple caches. 
-    //  Such that adding a tile to one cache can cause a cull on a different, older cache  
-    this.#cullItems = LLM.getNewLinkedList() // head is new, tail is old
-  }
+  // --- private --- //
 
   #tileIdToCacheId (tileId) {
     return `${tileId.z}_${tileId.x}_${tileId.y}`
@@ -65,7 +57,15 @@ export class TileCache {
     }
   }
 
-// --- public --- //
+  // --- public --- //
+
+  clear () {
+    this.#tileCache = {} // [z][x][y]
+    // ToDo: in the future, the culling mechanism should be a seperate class 
+    //  that encompasses multiple caches. 
+    //  Such that adding a tile to one cache can cause a cull on a different, older cache  
+    this.#cullItems = LLM.getNewLinkedList() // head is new, tail is old
+  }
 
   doesExist (tileId) {
     if (
