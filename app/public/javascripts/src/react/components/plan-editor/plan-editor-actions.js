@@ -1242,14 +1242,8 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
 
 
 
-      const {
-        draftsState,
-        transaction,
-        subnets: cachedSubnets,
-        requestedSubnetIds,
-        features,
-        subnetFeatures,
-      } = getState().planEditor
+      const { planEditor } = getState()
+      const { draftsState, transaction, subnets: cachedSubnets } = planEditor
 
       // NOTE: this is a temporary guard against loading subnets
       // until we fix this up w/ further tuning
@@ -1267,7 +1261,7 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
       } else {
 
         // this little dance only fetches uncached (or forced to reload) subnets
-        const cachedSubnetIds = [...Object.keys(cachedSubnets), ...requestedSubnetIds]
+        const cachedSubnetIds = Object.keys(cachedSubnets)
         let uncachedSubnetIds = subnetIds.filter(id => {
           let isNotCached = !cachedSubnetIds.includes(id)
           return forceReload || isNotCached // gotta love that double negative...
