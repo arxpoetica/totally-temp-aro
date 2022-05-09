@@ -1236,118 +1236,82 @@ function deselectEditFeatureById (objectId) {
 }
 
 function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
-  // FIXME: I (BRIAN) needs to refactor this, it works for the moment but does a lot of extranious things
-  //  ALSO there is a "bug" where if we select an FDT before selecting the CO or one of the hubs, we get no info
-  //  to fix this we need to find out what subnet the FDT is a part of and run that through here
   return async (dispatch, getState) => {
 
-    const {
-      draftsState,
-      transaction,
-      subnets: cachedSubnets,
-      requestedSubnetIds,
-      features,
-      subnetFeatures,
-    } = getState().planEditor
+    try {
 
-    // NOTE: this is a temporary guard against loading subnets
-    // until we fix this up w/ further tuning
-    if (draftsState !== DRAFT_STATES.END_INITIALIZATION) {
-      // semi-silently fail
-      console.log(
-        '%cCannot load subnet until drafts are fully initialized',
-        'background-color:red;color:white;padding:8px;',
-      )
-      return
-    }
 
-    let command = {}
-    if (coordinates) {
-      command.cmdType = 'QUERY_CO_SUBNET'
-      command.point = { type: 'Point', coordinates }
-    } else {
-      // this little dance only fetches uncached (or forced to reload) subnets
-      const cachedSubnetIds = [...Object.keys(cachedSubnets), ...requestedSubnetIds]
-      let uncachedSubnetIds = subnetIds.filter(id => {
-        let isNotCached = !cachedSubnetIds.includes(id)
-        return forceReload || isNotCached // gotta love that double negative...
-      })
 
-      // we have everything, no need to query service
-      if (uncachedSubnetIds.length <= 0) {
-        dispatch(setIsCalculatingSubnets(false))
-        return Promise.resolve(subnetIds)
-      }
-      // pull out any ids that are not subnets
-      let validPseudoSubnets = []
-      uncachedSubnetIds = uncachedSubnetIds.filter(id => {
-        if (!features[id]) return true // unknown so we'll try it
-        let networkNodeType = features[id].feature.networkNodeType
-        // TODO: do other networkNodeTypes have subnets?
-        //  how would we know? solve that
-        if (validSubnetTypes.includes(networkNodeType)) {
-          return true
-        }
-        if (subnetFeatures[id]) validPseudoSubnets.push(id)
-        return false
-      })
+      const {
+        draftsState,
+        transaction,
+        subnets: cachedSubnets,
+        requestedSubnetIds,
+        features,
+        subnetFeatures,
+      } = getState().planEditor
 
-      // the selected ID isn't a subnet persay so don't query for it
-      // TODO: we need to fix this selection discrepancy
-      if (uncachedSubnetIds.length <= 0) {
-        // is the FDT in state? If so we can select it
-        if (validPseudoSubnets.length > 0) {
-          return Promise.resolve(validPseudoSubnets)
-        }
-        // if not we can't
-        return Promise.resolve()
+      // NOTE: this is a temporary guard against loading subnets
+      // until we fix this up w/ further tuning
+      if (draftsState !== DRAFT_STATES.END_INITIALIZATION) {
+        // semi-silently fail
+        const style = 'background-color:red;color:white;padding:8px;'
+        console.log('%cCannot load subnet until drafts are fully initialized', style)
+        return
       }
 
-      command.cmdType = 'QUERY_SUBNET_TREE'
-      command.subnetIds = uncachedSubnetIds
-    }
+      let command = {}
+      if (coordinates) {
+        command.cmdType = 'QUERY_CO_SUBNET'
+        command.point = { type: 'Point', coordinates }
+      } else {
 
-    // should we rename that now that we are using it for retreiving subnets as well?
-    dispatch(setIsCalculatingSubnets(true))
-    return AroHttp.post(`/service/plan-transaction/${transaction.id}/subnet_cmd/query-subnets`, command)
-      .then(({ data }) => {
-        let apiSubnets = data.filter(Boolean)
-        let fiberApiPromises = []
-        // TODO: break this out into fiber actions
-        apiSubnets.forEach(subnet => {
-          // subnet could be null (don't ask me)
-          const subnetId = subnet.subnetId.id
-          if (!subnet.parentSubnetId) {
-            dispatch(getConsructionAreaByRoot(subnet))
-            // TODO: get fiber annotations here
-            dispatch(getFiberAnnotations(subnetId))
-          }
-          fiberApiPromises.push(
-            AroHttp.get(`/service/plan-transaction/${transaction.id}/subnetfeature/${subnetId}`)
-              .then(fiberResult => subnet.fiber = fiberResult.data)
-              .catch(error => handleError(error))
-          )
+        // this little dance only fetches uncached (or forced to reload) subnets
+        const cachedSubnetIds = [...Object.keys(cachedSubnets), ...requestedSubnetIds]
+        let uncachedSubnetIds = subnetIds.filter(id => {
+          let isNotCached = !cachedSubnetIds.includes(id)
+          return forceReload || isNotCached // gotta love that double negative...
         })
 
-        return Promise.all(fiberApiPromises)
-          .then(() => {
-            dispatch(setIsCalculatingSubnets(false))
-            return new Promise((resolve, reject) => {
-              dispatch(parseAddApiSubnets(apiSubnets))
-              resolve(subnetIds)
-            })
-          })
-          .catch(error => {
-            handleError(error)
-            dispatch(setIsCalculatingSubnets(false))
-            return Promise.reject()
-          })
-      })
-      .catch(error => {
-        handleError(error)
-        dispatch(setIsCalculatingSubnets(false))
-        return Promise.reject()
-      })
+        // we have everything, no need to query service
+        if (uncachedSubnetIds.length <= 0) {
+          dispatch(setIsCalculatingSubnets(false))
+          return Promise.resolve(subnetIds)
+        }
+
+        command.cmdType = 'QUERY_SUBNET_TREE'
+        command.subnetIds = uncachedSubnetIds
+      }
+
+      // should we rename that now that we are using it for retreiving subnets as well?
+      dispatch(setIsCalculatingSubnets(true))
+      const subnetUrl = `/service/plan-transaction/${transaction.id}/subnet_cmd/query-subnets`
+      const { data } = await AroHttp.post(subnetUrl, command)
+
+      let apiSubnets = data.filter(Boolean)
+
+      // TODO: break this out into fiber actions
+      for (const subnet of apiSubnets) {
+        const subnetId = subnet.subnetId.id
+        if (!subnet.parentSubnetId) {
+          dispatch(getConsructionAreaByRoot(subnet))
+          // TODO: get fiber annotations here
+          dispatch(getFiberAnnotations(subnetId))
+        }
+        const fiberUrl = `/service/plan-transaction/${transaction.id}/subnetfeature/${subnetId}`
+        const fiberResult = await AroHttp.get(fiberUrl)
+        subnet.fiber = fiberResult.data
+      }
+
+      dispatch(setIsCalculatingSubnets(false))
+      dispatch(parseAddApiSubnets(apiSubnets))
+      return subnetIds
+
+    } catch (error) {
+      handleError(error)
+      dispatch(setIsCalculatingSubnets(false))
+      return Promise.reject()
+    }
   }
 }
 
@@ -1399,30 +1363,33 @@ function addSubnetTreeByLatLng([lng, lat]) {
 
 function setSelectedSubnetId (selectedSubnetId) {
   return (dispatch) => {
+
     if (!selectedSubnetId) {
       dispatch({
         type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
         payload: null,
       })
     } else {
-      batch(() => {
-        dispatch(addSubnets({ subnetIds: [selectedSubnetId] }))
-          .then( (result) => {
-            // TODO: we need to figure out the proper subnet select workflow
-            // FDTs aren't subnets but can be selcted as such
-            // that is where the following discrepancy comes from 
-            if (!result) selectedSubnetId = null
-            dispatch({
-              type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
-              payload: selectedSubnetId,
-            })
-          }).catch(error => {
-            handleError(error)
-            dispatch({
-              type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
-              payload: null,
-            })
+      batch(async() => {
+        try {
+          const result = await dispatch(addSubnets({ subnetIds: [selectedSubnetId] }))
+
+          // TODO: we need to figure out the proper subnet select workflow
+          // FDTs aren't subnets but can be selcted as such
+          // that is where the following discrepancy comes from 
+          if (!result) selectedSubnetId = null
+          dispatch({
+            type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
+            payload: selectedSubnetId,
           })
+      
+        } catch (error) {
+          handleError(error)
+          dispatch({
+            type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
+            payload: null,
+          })
+        }
 
       })
     }
