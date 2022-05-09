@@ -1240,10 +1240,8 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
 
     try {
 
-
-
       const { planEditor } = getState()
-      const { draftsState, transaction, subnets: cachedSubnets } = planEditor
+      const { draftsState, transaction, subnets } = planEditor
 
       // NOTE: this is a temporary guard against loading subnets
       // until we fix this up w/ further tuning
@@ -1261,16 +1259,12 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
       } else {
 
         // this little dance only fetches uncached (or forced to reload) subnets
-        const cachedSubnetIds = Object.keys(cachedSubnets)
-        let uncachedSubnetIds = subnetIds.filter(id => {
-          let isNotCached = !cachedSubnetIds.includes(id)
-          return forceReload || isNotCached // gotta love that double negative...
-        })
-
+        const cachedSubnetIds = Object.keys(subnets)
+        let uncachedSubnetIds = subnetIds.filter(id => forceReload || !cachedSubnetIds.includes(id))
         // we have everything, no need to query service
         if (uncachedSubnetIds.length <= 0) {
           dispatch(setIsCalculatingSubnets(false))
-          return Promise.resolve(subnetIds)
+          return subnetIds
         }
 
         command.cmdType = 'QUERY_SUBNET_TREE'
@@ -1289,7 +1283,6 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
         const subnetId = subnet.subnetId.id
         if (!subnet.parentSubnetId) {
           dispatch(getConsructionAreaByRoot(subnet))
-          // TODO: get fiber annotations here
           dispatch(getFiberAnnotations(subnetId))
         }
         const fiberUrl = `/service/plan-transaction/${transaction.id}/subnetfeature/${subnetId}`
