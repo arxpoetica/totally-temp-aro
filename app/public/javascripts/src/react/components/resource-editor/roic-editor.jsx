@@ -11,8 +11,23 @@ const tabs = [
     label: 'Configuration',
     key: 'roicSettingsConfiguration',
   },
+  {
+    label: 'Subsidy',
+    key: 'subsidyConfiguration',
+  },
 ]
 
+const defaultSubsidy = {
+  "subsidyConfiguration": {
+    "pruningCoverageTypes": [
+      "ELIGIBLE"
+    ],
+    "calcType": "IRR",
+    "value": 0.2,
+    "minValue": 0,
+    "maxValue": 500000000
+  }
+}
 export class RoicEditor extends Component {
   constructor(props) {
     super(props)
@@ -77,6 +92,12 @@ export class RoicEditor extends Component {
       { id: 'NEW_CONNECTION', label: 'New Connection' },
       { id: 'REUSE_CONNECTION', label: 'Reuse Connection' },
     ]
+
+    this.calculationTypes = [
+      { id: 'IRR', label: 'IRR' },
+      { id: 'FIXED', label: 'Fixed' },
+      { id: 'PERCENTAGE', label: 'Percentage' }
+    ]
   }
 
   componentDidMount() {
@@ -88,6 +109,15 @@ export class RoicEditor extends Component {
     return nextProps.roicManagerConfiguration !== undefined
       ? { roicManagerConfiguration: nextProps.roicManagerConfiguration }
       : null
+  }
+
+  isCalculationSetting(coverageType) {
+    const coverageTypes = this.state.roicManagerConfiguration.roicSettingsConfiguration.subsidyConfiguration.pruningCoverageTypes
+    return (
+      coverageType === "BOTH" && coverageTypes.length === 2
+    ) || (
+      coverageTypes.length === 1 && coverageTypes[0] === coverageType
+    );
   }
 
   render() {
@@ -358,6 +388,110 @@ export class RoicEditor extends Component {
             </div>
           }
 
+          {activeTab === 'subsidyConfiguration' &&
+            <div className="row">
+              <div className="ei-items-contain">
+                <div className="ei-foldout">
+                  <div className="ei-header" style={{ cursor: 'unset' }}>
+                    Subsidy Configuration
+                  </div>
+                  <div className="ei-gen-level" style={{ paddingLeft: '21px', paddingRight: '10px' }}>
+                    <div className="ei-items-contain">
+                      <div className="ei-property-item">
+                        <div className="ei-property-label">
+                          Calculation Setting
+                        </div>
+                        <form>
+                          Use Location Layer
+                          <input
+                            type="radio"
+                            name="pruningCoverageTypes"
+                            value="SUBSIDIZED"
+                            checked={this.isCalculationSetting("SUBSIDIZED")}
+                            onChange={(event) => this.handleSubsidyChange(event)}
+                          /><br />
+                          Use Dynamic Calculation
+                          <input
+                            type="radio"
+                            name="pruningCoverageTypes"
+                            value="ELIGIBLE"
+                            checked={this.isCalculationSetting("ELIGIBLE")}
+                            onChange={(event) => this.handleSubsidyChange(event)}
+                          /><br />
+                          Use Both
+                          <input
+                            type="radio"
+                            name="pruningCoverageTypes"
+                            value="BOTH"
+                            checked={this.isCalculationSetting("BOTH")}
+                            onChange={(event) => this.handleSubsidyChange(event)}
+                          />
+                        </form>
+                      </div>
+
+                      <div className="ei-property-item">
+                        <div className="ei-property-label">
+                          Calculation Type
+                        </div>
+                        <div>
+                        <select
+                            name="calcType"
+                            className="form-control"
+                            onChange={(event) => {this.handleSubsidyChange(event)}}
+                            value={
+                              roicManagerConfiguration.roicSettingsConfiguration.subsidyConfiguration
+                                .calcType
+                            }
+                          >
+                            {this.calculationTypes.map((item) => (
+                              <option key={item.id} value={item.id}>{item.label}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="ei-property-item">
+                        <div className="ei-property-label">
+                          Value (IRR and Percent in decimal | Fixed in Int)
+                        </div>
+                        <div>
+                          <input
+                            name="value"
+                            value={roicManagerConfiguration.roicSettingsConfiguration.subsidyConfiguration.value}
+                            onChange={(event) => {this.handleSubsidyChange(event)}}
+                            className="form-control input-sm"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="ei-property-item">
+                        <div className="ei-property-label">
+                          Subsidy Range
+                        </div>
+                        <div>
+                          Min
+                          <input
+                            name="minValue"
+                            value={roicManagerConfiguration.roicSettingsConfiguration.subsidyConfiguration.minValue}
+                            onChange={(event) => {this.handleSubsidyChange(event)}}
+                            className="form-control input-sm"
+                          />
+                          Max
+                          <input
+                            name="maxValue"
+                            value={roicManagerConfiguration.roicSettingsConfiguration.subsidyConfiguration.maxValue}
+                            onChange={(event) => {this.handleSubsidyChange(event)}}
+                            className="form-control input-sm"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+
           {activeTab === 'inputs' &&
             <div className="row">
               {/* On the left, show a list of ROIC models that the user can edit */}
@@ -485,6 +619,24 @@ export class RoicEditor extends Component {
         return { ...pristineRoicModel[selectedRoicModelIndex], newRoicModel }
       }
     })
+
+    this.setState({ roicManagerConfiguration: pristineRoicModel })
+  }
+
+  handleSubsidyChange(event) {
+    const name = event.target.name
+    const value = event.target.value
+    const pristineRoicModel = this.state.roicManagerConfiguration
+
+    if (name === 'pruningCoverageTypes') {
+      if (value === "BOTH") {
+        pristineRoicModel.roicSettingsConfiguration.subsidyConfiguration.pruningCoverageTypes = ["ELIGIBLE" , "SUBSIDIZED"]
+      } else {
+        pristineRoicModel.roicSettingsConfiguration.subsidyConfiguration.pruningCoverageTypes = [value]
+      }
+    } else {
+      pristineRoicModel.roicSettingsConfiguration.subsidyConfiguration[name] = value
+    }
 
     this.setState({ roicManagerConfiguration: pristineRoicModel })
   }
