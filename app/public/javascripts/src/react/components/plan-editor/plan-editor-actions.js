@@ -1232,7 +1232,6 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
   return async (dispatch, getState) => {
 
     try {
-
       const { planEditor } = getState()
       const { draftsState, transaction, subnets } = planEditor
 
@@ -1245,35 +1244,51 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
         return
       }
 
-      let command = {}
       if (coordinates) {
-        command.cmdType = 'QUERY_CO_SUBNET'
-        command.point = { type: 'Point', coordinates }
-      } else {
-
-        // this little dance only fetches uncached (or forced to reload) subnets
-        const cachedSubnetIds = Object.keys(subnets)
-        let uncachedSubnetIds = subnetIds.filter(id => forceReload || !cachedSubnetIds.includes(id))
-        // we have everything, no need to query service
-        if (uncachedSubnetIds.length <= 0) {
-          dispatch(setIsCalculatingSubnets(false))
-          return subnetIds
+        // FIXME: break this out into it's own call!!!!!!!
+        // FIXME: break this out into it's own call!!!!!!!
+        // FIXME: break this out into it's own call!!!!!!!
+        // FIXME: break this out into it's own call!!!!!!!
+        // FIXME: break this out into it's own call!!!!!!!
+        dispatch(setIsCalculatingSubnets(true))
+        const subnetUrl = `/service/plan-transaction/${transaction.id}/subnet_cmd/query-subnets`
+        const { data } = await AroHttp.post(subnetUrl, {
+          cmdType: 'QUERY_CO_SUBNET',
+          point: { type: 'Point', coordinates },
+        })
+        let apiSubnets = data.filter(Boolean)
+        // TODO: break this out into fiber actions
+        for (const subnet of apiSubnets) {
+          const subnetId = subnet.subnetId.id
+          if (!subnet.parentSubnetId) {
+            dispatch(getConsructionAreaByRoot(subnet))
+            dispatch(getFiberAnnotations(subnetId))
+          }
+          const fiberUrl = `/service/plan-transaction/${transaction.id}/subnetfeature/${subnetId}`
+          const fiberResult = await AroHttp.get(fiberUrl)
+          subnet.fiber = fiberResult.data
         }
-
-        command.cmdType = 'QUERY_SUBNET_TREE'
-        command.subnetIds = uncachedSubnetIds
+        dispatch(setIsCalculatingSubnets(false))
+        dispatch(parseAddApiSubnets(apiSubnets))
+        return subnetIds
       }
 
-      // should we rename that now that we are using it for retreiving subnets as well?
+      // this little dance only fetches uncached (or forced to reload) subnets
+      const cachedSubnetIds = Object.keys(subnets)
+      let uncachedSubnetIds = subnetIds.filter(id => forceReload || !cachedSubnetIds.includes(id))
+      // we have everything, no need to query service
+      if (uncachedSubnetIds.length <= 0) {
+        // dispatch(setIsCalculatingSubnets(false))
+        return subnetIds
+      }
+
       dispatch(setIsCalculatingSubnets(true))
-      const subnetUrl = `/service/plan-transaction/${transaction.id}/subnet_cmd/query-subnets`
-      const { data } = await AroHttp.post(subnetUrl, command)
 
-      let apiSubnets = data.filter(Boolean)
-
+      const apiSubnets = []
       // TODO: break this out into fiber actions
-      for (const subnet of apiSubnets) {
-        const subnetId = subnet.subnetId.id
+      for (const subnetId of uncachedSubnetIds) {
+        const subnetUrl = `/service/plan-transaction/${transaction.id}/subnet/${subnetId}`
+        const { data: subnet } = await AroHttp.get(subnetUrl)
         if (!subnet.parentSubnetId) {
           dispatch(getConsructionAreaByRoot(subnet))
           dispatch(getFiberAnnotations(subnetId))
@@ -1281,10 +1296,11 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
         const fiberUrl = `/service/plan-transaction/${transaction.id}/subnetfeature/${subnetId}`
         const fiberResult = await AroHttp.get(fiberUrl)
         subnet.fiber = fiberResult.data
+        apiSubnets.push(subnet)
       }
 
-      dispatch(setIsCalculatingSubnets(false))
       dispatch(parseAddApiSubnets(apiSubnets))
+      dispatch(setIsCalculatingSubnets(false))
       return subnetIds
 
     } catch (error) {
@@ -1297,7 +1313,6 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
 
 function addSubnetTreeByLatLng([lng, lat]) {
   return async(dispatch, getState) => {
-
     try {
       const { draftsState, transaction } = getState().planEditor
 
