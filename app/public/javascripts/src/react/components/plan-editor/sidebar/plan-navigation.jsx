@@ -51,7 +51,7 @@ const PlanNavigation = props => {
 
   function onNodeClick (event, featureId) {
     event.stopPropagation()
-    props.appendEditFeaturesById([featureId])
+    props.selectEditFeaturesById([featureId])
     props.map.setCenter(getHoverPosition(featureId))
     // Allow the user to see the nav marker after setCenter then clear
     setTimeout(() => {
@@ -279,7 +279,7 @@ const mapStateToProps = state => {
 }
 
 const mapDispatchToProps = dispatch => ({
-  appendEditFeaturesById: ids => dispatch(PlanEditorActions.appendEditFeaturesById(ids)),
+  selectEditFeaturesById: ids => dispatch(PlanEditorActions.selectEditFeaturesById(ids)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlanNavigation)
