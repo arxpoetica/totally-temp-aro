@@ -342,7 +342,7 @@ module.exports = class User {
             firstName: user.firstName,
             lastName: user.lastName,
             fullName: `${user.firstName} ${user.lastName}`,
-            groupIds: []
+            groupIds: user.groupIds || []
           },
           json: true
         }
@@ -365,12 +365,6 @@ module.exports = class User {
           .catch((err) => console.error(err))
       }
       return database.query(`UPDATE auth.users SET ${setString} WHERE id=${createdUserId};`)
-    })
-    .then(() => {
-      // Set the group membership for the user
-      var groupPromises = []
-      user.groupIds.forEach((groupId) => groupPromises.push(this.addUserToGroup(user.email, groupId)))
-      return Promise.all(groupPromises)
     })
     .then(() => {
       // If the "global super user" flag is set, then change that setting. Again, can't use service as this may be called from ETL.

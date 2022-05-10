@@ -48,14 +48,48 @@ export class EquipmentMapObjects extends Component {
     this.highlightSelectedMarkers()
   }
 
+  getObjectsUnderPoint (latLng) {
+    const {
+      googleMaps,
+    } = this.props
+
+    const metersPerPixel = getMetersPerPixel(latLng.lat(), googleMaps.getZoom())
+    // NOTE: this is a workaround to make sure we're selecting
+    // equipment that might be piled on top of one another
+    const selectionCircle = new google.maps.Circle({
+      strokeColor: "#228be6",
+      strokeOpacity: 1.0,
+      strokeWeight: 1,
+      fillColor: "#228be6",
+      fillOpacity: 0.5,
+      zIndex: constants.Z_INDEX_PIN,
+
+      map: googleMaps,
+      center: latLng,
+      // FIXME: this radius is only useful at certain zoom levels.
+      // How can we set this correctly based on zoom?
+      //visible: false,
+      radius: metersPerPixel * 15,
+    })
+    
+
+    const objectsUnderPoint = Object.values(this.mapObjects)
+      .filter(object => selectionCircle.getBounds().contains(object.getPosition()))
+      .map(filteredMapObjects => { return { objectId: filteredMapObjects.objectId, dataType: filteredMapObjects.dataType }})
+
+    setTimeout(() => {
+      selectionCircle.setMap(null)
+    }, 600)
+    return objectsUnderPoint
+  }
+
   createMapObject(feature) {
 
     const {
       googleMaps,
       moveFeature,
       moveConstructionArea,
-      showContextMenuForEquipment,
-      showContextMenuForConstructionAreas,
+      showContextMenuForList,
       selectEditFeaturesById,
       addCursorEquipmentIds,
       clearCursorEquipmentIds,
@@ -64,7 +98,7 @@ export class EquipmentMapObjects extends Component {
     const { objectId } = feature
     const mapObject = new google.maps.Marker({
       objectId: objectId, // Not used by Google Maps
-      dataType: feature.dataType, // Not used by Google Maps
+      dataType: feature.dataType || feature.networkNodeType, // Not used by Google Maps
       mouseoverTimer: null,
       position: WktUtils.getGoogleMapLatLngFromWKTPoint(feature.geometry), 
       icon: { url: getIconUrl(feature, this.props) },
@@ -84,33 +118,13 @@ export class EquipmentMapObjects extends Component {
       }
     })
     mapObject.addListener('contextmenu', event => {
+      let clickedObjects = this.getObjectsUnderPoint(event.latLng)
       const eventXY = WktUtils.getXYFromEvent(event)
-      if (mapObject.dataType === "edge_construction_area") {
-        showContextMenuForConstructionAreas(mapObject.objectId, eventXY.x, eventXY.y)
-      } else {
-        showContextMenuForEquipment(mapObject.objectId, eventXY.x, eventXY.y)
-      }
+      showContextMenuForList(clickedObjects, eventXY)
     })
     mapObject.addListener('click', event => {
-
-      const metersPerPixel = getMetersPerPixel(event.latLng.lat(), googleMaps.getZoom())
-      // NOTE: this is a workaround to make sure we're selecting
-      // equipment that might be piled on top of one another
-      const selectionCircle = new google.maps.Circle({
-        map: googleMaps,
-        center: event.latLng,
-        // FIXME: this radius is only useful at certain zoom levels.
-        // How can we set this correctly based on zoom?
-        visible: false,
-        radius: metersPerPixel * 15,
-      })
-
-      const selectedEquipmentIds = Object.values(this.mapObjects)
-        .filter(object => selectionCircle.getBounds().contains(object.getPosition()))
-        .map(filteredMapObjects => { return { objectId: filteredMapObjects.objectId, dataType: filteredMapObjects.dataType }})
-
-      selectionCircle.setMap(null)
-      selectEditFeaturesById(selectedEquipmentIds)
+      let clickedObjects = this.getObjectsUnderPoint(event.latLng)
+      selectEditFeaturesById(clickedObjects)
     })
 
     mapObject.addListener('mouseover', () => {
@@ -254,12 +268,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   moveFeature: (id, coordinates) => dispatch(PlanEditorActions.moveFeature(id, coordinates)),
   moveConstructionArea: (id, coordinates) => dispatch(PlanEditorActions.moveConstructionArea(id, coordinates)),
-  showContextMenuForEquipment: (equipmentObjectId, x, y) => {
-    dispatch(PlanEditorActions.showContextMenuForEquipment(equipmentObjectId, x, y))
-  },
-  showContextMenuForConstructionAreas: (equipmentObjectId, x, y) => {
-    dispatch(PlanEditorActions.showContextMenuForConstructionAreas(equipmentObjectId, x, y))
-  },
+  showContextMenuForList: (features, coords) => dispatch(PlanEditorActions.showContextMenuForList(features, coords)),
   setSelectedSubnetId: id => dispatch(PlanEditorActions.setSelectedSubnetId(id)),
   selectEditFeaturesById: featureIds => dispatch(PlanEditorActions.selectEditFeaturesById(featureIds)),
   addCursorEquipmentIds: ids => dispatch(PlanEditorActions.addCursorEquipmentIds(ids)),

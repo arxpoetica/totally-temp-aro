@@ -1,6 +1,6 @@
 import Actions from '../../common/actions'
 
-function showContextMenu (x, y) {
+function showContextMenu (x, y) { // I think this should be coords: {x, y} not two seperate values
   return {
     type: Actions.CONTEXT_MENU_SHOW,
     payload: {

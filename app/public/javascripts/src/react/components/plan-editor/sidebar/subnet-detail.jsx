@@ -10,7 +10,7 @@ import WktUtils from '../../../../shared-utils/wkt-utils.js'
 const SubnetDetail = props => {
   const [hoverPosition, setHoverPosition] = useState(null)
 
-  function onNodeClick(featuredId) {
+  function onNodeClick(featureId) {
     props.map.setCenter(getHoverPosition(featureId))
     // Allow the user to see the nav marker after setCenter then clear
     setTimeout(() => {
@@ -20,7 +20,11 @@ const SubnetDetail = props => {
   function getHoverPosition(featureId) {
     let locationAlert = props.locationAlerts[featureId]
     if (!locationAlert) {
-      const node = props.rootDraft.equipment.find(node => node.id === featureId)
+      let allEquipment = [] // should probably put into selector
+      Object.values(props.rootDrafts).forEach(draft => {
+        allEquipment = allEquipment.concat(draft.equipment)
+      })
+      const node = allEquipment.find(node => node.id === featureId)
       return WktUtils.getGoogleMapLatLngFromWKTPoint(node.point)
     }
     const { point } = locationAlert
@@ -152,7 +156,7 @@ const mapStateToProps = state => {
     selectedSubnetId: state.planEditor.selectedSubnetId,
     subnets: state.planEditor.subnets, 
     subnetFeatures: state.planEditor.subnetFeatures,
-    rootDraft: PlanEditorSelectors.getRootDraft(state),
+    rootDrafts: PlanEditorSelectors.getRootDrafts(state),
     locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
     iconsByType: MapLayerSelectors.getIconsByType(state),
     map: state.map.googleMaps,
