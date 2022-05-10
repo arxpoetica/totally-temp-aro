@@ -224,6 +224,11 @@
       var globalServiceLayers = <%- JSON.stringify(serviceLayers) %>;
       var globalAnalysisLayers = <%- JSON.stringify(analysisLayers) %>;
       var mapTypeId = <%- JSON.stringify(mapType) %>;
+      // this should maybe be a singleson to be imported
+      var tileCaches = {
+        subnets: {},
+        unbounded: {},
+      }
 
       $(document).ready(initialize);
     </script>
