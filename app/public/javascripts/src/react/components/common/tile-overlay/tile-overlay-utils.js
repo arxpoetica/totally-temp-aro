@@ -71,7 +71,8 @@ TileUtils.getAllTileIdsForLeafTileId = (leafTileId) => {
   for (let scaleLevel = TileUtils.MAX_ZOOM+1; scaleLevel >= TileUtils.MIN_ZOOM; scaleLevel--){
     let scaleDif = TileUtils.MAX_ZOOM - scaleLevel
     let tileId = {'z': scaleLevel}
-    ['x', 'y'].forEach(dimention => {
+    let dimentions = ['x', 'y']
+    dimentions.forEach(dimention => {
       tileId[dimention] = leafTileId[dimention] >> scaleDif // bit shift back up the chain
     })
     tileIds.push(tileId)
@@ -89,7 +90,8 @@ TileUtils.getLeafTileRectForTile = (tileId) => {
   let nwTileId = {'z': TileUtils.MAX_ZOOM}
   let seTileId = {'z': TileUtils.MAX_ZOOM}
   let scale = 1 << (TileUtils.MAX_ZOOM - tileId.z)
-  ['x', 'y'].forEach(dimention => {
+  let dimentions = ['x', 'y']
+  dimentions.forEach(dimention => {
     nwTileId[dimention] = scale * tileId[dimention]
     // nw corner of next large tile to the se, 
     //  get the leaf id of that corner 

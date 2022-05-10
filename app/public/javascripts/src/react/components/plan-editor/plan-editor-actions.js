@@ -7,6 +7,7 @@ import MenuItemFeature from '../context-menu/menu-item-feature'
 import MenuItemAction from '../context-menu/menu-item-action'
 import ContextMenuActions from '../context-menu/actions'
 import ResourceActions from '../resource-editor/resource-actions'
+import SubnetTileActions from './subnet-tile-actions'
 import SocketManager from '../../common/socket-manager'
 import { batch } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
@@ -1733,15 +1734,19 @@ function parseAddApiSubnets (apiSubnets) {
     if (apiSubnets.length) {
       let subnets = {}
       let allFeatures = {}
+      let tileDataBySubnet = {}
       // parse
       apiSubnets.forEach(apiSubnet => {
         let { subnet, subnetFeatures } = parseSubnet(apiSubnet)
         const subnetId = subnet.subnetNode
         subnets[subnetId] = subnet
         allFeatures = { ...allFeatures, ...subnetFeatures }
+        tileDataBySubnet[subnetId] = subnet.subnetLocationsById
       })
       // dispatch add subnets and add subnetFeatures
       return batch(() => {
+        // tile data
+        dispatch(SubnetTileActions.setSubnetsData(tileDataBySubnet))
         dispatch({
           type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
           payload: allFeatures,

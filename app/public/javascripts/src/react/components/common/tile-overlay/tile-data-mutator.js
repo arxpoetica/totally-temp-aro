@@ -5,7 +5,7 @@
 // tileData[x][y][pointId] : worldCoord
 // the TileData object should not be directly augmented, use these functions:
 
-import TileUtils from "../common/tile-overlay/tile-overlay-utils"
+import TileUtils from "./tile-overlay-utils.js"
 
 let TileDataMutator = {}
 

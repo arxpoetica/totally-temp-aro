@@ -25,7 +25,7 @@ LinkedListMutator.getNewLinkedList = () => {
 // ------- //
 
 // private function
-getNewLink = (prev = null, next = null, data = null) => {
+let getNewLink = (prev = null, next = null, data = null) => {
   return {
     prev,
     next,
@@ -37,7 +37,7 @@ getNewLink = (prev = null, next = null, data = null) => {
 
 // private function, depends on remove, insert, shift to handle values and count
 // id MUST already be added to linkedList
-removeLinkage = (linkedList, id) => {
+let removeLinkage = (linkedList, id) => {
   // do NOT check if linkedList[id] exists! 
   //  other functions change count and depend on linkedList[id] existing
   //  so if it doesn't we want errors in the console
@@ -59,7 +59,7 @@ removeLinkage = (linkedList, id) => {
 
 // private function, depends on remove, insert, shift to handle values and count
 // id MUST already be added to linkedList
-insertLinkage = (linkedList, atId, id) => {
+let insertLinkage = (linkedList, atId, id) => {
   // do NOT check if linkedList[id] exists! 
   //  other functions change count and depend on linkedList[id] existing
   //  so if it doesn't we want errors in the console
@@ -182,4 +182,4 @@ LinkedListMutator.getNextOf = (linkedList, id) => {
 }
 
 Object.freeze(LinkedListMutator)
-export default LinkedListMutator
+export {LinkedListMutator}

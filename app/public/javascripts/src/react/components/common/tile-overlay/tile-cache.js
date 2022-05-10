@@ -22,37 +22,37 @@ For the moment culling is handled here locally with TileCache itself manipulatin
 */
 
 export class TileCache {
-  constructor (itemLimit) {
+  constructor (itemLimit = 1024) {
     this.itemLimit = itemLimit
     this.clear()
   }
 
   // --- private --- //
 
-  #tileIdToCacheId (tileId) {
+  _tileIdToCacheId (tileId) {
     return `${tileId.z}_${tileId.x}_${tileId.y}`
   }
 
-  #checkCull () {
-    let cullCount = LLM.getCount(this.#cullItems)
+  _checkCull () {
+    let cullCount = LLM.getCount(this._cullItems)
     cullCount -= this.itemLimit
     if (0 < cullCount) {
       for (let i=0; i<cullCount; i++) {
-        let tailTileId = LLM.getTail(this.#cullItems).value
-        this.#deleteTile(tailTileId)
-        this.#cullItems = LLM.removeTail(this.#cullItems)
+        let tailTileId = LLM.getTail(this._cullItems).value
+        this._deleteTile(tailTileId)
+        this._cullItems = LLM.removeTail(this._cullItems)
       }
     }
   }
 
   // private, removes tile element ONLY
   //  the caller should also call tileCull.removeElement UNLESS the caller is tileCull 
-  #deleteTile (tileId) {
-    delete this.#tileCache[tileId.z][tileId.x][tileId.y]
-    if (!Object.keys(this.#tileCache[tileId.z][tileId.x]).length) {
-      delete this.#tileCache[tileId.z][tileId.x]
-      if (!Object.keys(this.#tileCache[tileId.z]).length) {
-        delete this.#tileCache[tileId.z]
+  _deleteTile (tileId) {
+    delete this._tileCache[tileId.z][tileId.x][tileId.y]
+    if (!Object.keys(this._tileCache[tileId.z][tileId.x]).length) {
+      delete this._tileCache[tileId.z][tileId.x]
+      if (!Object.keys(this._tileCache[tileId.z]).length) {
+        delete this._tileCache[tileId.z]
       }
     }
   }
@@ -60,18 +60,18 @@ export class TileCache {
   // --- public --- //
 
   clear () {
-    this.#tileCache = {} // [z][x][y]
+    this._tileCache = {} // [z][x][y]
     // ToDo: in the future, the culling mechanism should be a seperate class 
     //  that encompasses multiple caches. 
     //  Such that adding a tile to one cache can cause a cull on a different, older cache  
-    this.#cullItems = LLM.getNewLinkedList() // head is new, tail is old
+    this._cullItems = LLM.getNewLinkedList() // head is new, tail is old
   }
 
   doesExist (tileId) {
     if (
-      this.#tileCache[tileId.z]
-      && this.#tileCache[tileId.z][tileId.x]
-      && this.#tileCache[tileId.z][tileId.x][tileId.y]
+      this._tileCache[tileId.z]
+      && this._tileCache[tileId.z][tileId.x]
+      && this._tileCache[tileId.z][tileId.x][tileId.y]
     ) {
       return true
     }
@@ -82,24 +82,24 @@ export class TileCache {
   deleteTiles (tileIds) {
     tileIds.forEach(tileId => {
       if (this.doesExist(tileId)) {
-        this.#deleteTile(tileId)
+        this._deleteTile(tileId)
       }
-      this.#cullItems = LLM.remove(this.#cullItems, this.#tileIdToCacheId(tileId))
+      this._cullItems = LLM.remove(this._cullItems, this._tileIdToCacheId(tileId))
     })
   }
 
   addTile (tile, tileId) {
-    this.#tileCache[tileId.z][tileId.x][tileId.y] = tile
+    this._tileCache[tileId.z][tileId.x][tileId.y] = tile
     // if already exists, will just be shifted to head
-    this.#cullItems = LLM.insertAtHead(this.#cullItems, this.#tileIdToCacheId(tileId), tileId)
-    this.#checkCull()
+    this._cullItems = LLM.insertAtHead(this._cullItems, this._tileIdToCacheId(tileId), tileId)
+    this._checkCull()
   }
 
   getTile (tileId) {
     if (this.doesExist(tileId)) {
       // move tile to back of cull line
-      this.#cullItems = LLM.shiftToHead(this.#cullItems, this.#tileIdToCacheId(tileId))
-      return this.#tileCache[tileId.z][tileId.x][tileId.y]
+      this._cullItems = LLM.shiftToHead(this._cullItems, this._tileIdToCacheId(tileId))
+      return this._tileCache[tileId.z][tileId.x][tileId.y]
     }
     return null
   }
