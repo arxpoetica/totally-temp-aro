@@ -69,12 +69,21 @@ TileDataMutator.deletePoints = (tileData, tileCache, points) => {
 }
 
 TileDataMutator.getPointsForLeafTileRect = (tileData, nwTileId, seTileId) => {
+  let minX = Math.min(nwTileId.x, seTileId.x)
+  let maxX = Math.max(nwTileId.x, seTileId.x)
+  let minY = Math.min(nwTileId.y, seTileId.y)
+  let maxY = Math.max(nwTileId.y, seTileId.y)
   let points = {}
-  for (let x=nwTileId.x; x<seTileId.x; x++) {
-    for (let y=nwTileId.y; x<seTileId.y; y++) {
-      points = { ...points, ...tileData[x][y] }
+  
+  for (let x=minX; x<maxX; x++) {
+    for (let y=minY; y<maxY; y++) {
+      if (tileData[x] && tileData[x][y]) points = { ...points, ...tileData[x][y] }
+      // if (tileData[x] && tileData[x][y]) {
+      //   points.push(tileData[x][y])
+      // }
     }
   }
+  
   return points
 }
 

@@ -20,6 +20,10 @@ TileUtils.Point = (x=null, y=null, z=null) => {
   return {x,y,z}
 }
 
+TileUtils.coordToTileId = (coord, zoom) => {
+  return TileUtils.Point(coord.x, coord.y, zoom)
+}
+
 // below is my optimization of the function found at 
 //  https://developers.google.com/maps/documentation/javascript/examples/map-coordinates
 // The mapping between latitude, longitude and pixels is defined by the web
@@ -57,6 +61,17 @@ TileUtils.worldCoordToLeafTileId = (worldCoord) => {
     Math.floor(worldCoord.y * TileUtils.LEAF_SCALE_DELTA),
     TileUtils.MAX_ZOOM,
   )
+}
+
+TileUtils.worldCoordToTilePixel = (worldCoord, tileId) => {
+  const scale = 1 << tileId.z
+
+  let px = {
+    x: Math.floor(worldCoord.x * scale) - (tileId.x * TileUtils.TILE_SIZE),
+    y: Math.floor(worldCoord.y * scale) - (tileId.y * TileUtils.TILE_SIZE),
+  }
+  console.log({worldCoord, px})
+  return px
 }
 
 TileUtils.latLngToLeafTileId = (latLng) => {

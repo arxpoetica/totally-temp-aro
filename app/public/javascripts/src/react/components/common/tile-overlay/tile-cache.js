@@ -89,6 +89,8 @@ export class TileCache {
   }
 
   addTile (tile, tileId) {
+    if (!this._tileCache[tileId.z]) this._tileCache[tileId.z] = {}
+    if (!this._tileCache[tileId.z][tileId.x]) this._tileCache[tileId.z][tileId.x] = {}
     this._tileCache[tileId.z][tileId.x][tileId.y] = tile
     // if already exists, will just be shifted to head
     this._cullItems = LLM.insertAtHead(this._cullItems, this._tileIdToCacheId(tileId), tileId)
