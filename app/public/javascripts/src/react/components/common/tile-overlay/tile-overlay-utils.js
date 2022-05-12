@@ -65,12 +65,10 @@ TileUtils.worldCoordToLeafTileId = (worldCoord) => {
 
 TileUtils.worldCoordToTilePixel = (worldCoord, tileId) => {
   const scale = 1 << tileId.z
-
   let px = {
     x: Math.floor(worldCoord.x * scale) - (tileId.x * TileUtils.TILE_SIZE),
     y: Math.floor(worldCoord.y * scale) - (tileId.y * TileUtils.TILE_SIZE),
   }
-  console.log({worldCoord, px})
   return px
 }
 

@@ -12,6 +12,12 @@ let TileDataMutator = {}
 
 TileDataMutator.getNewTileData = () => {return {}} // just here for expansibility
 
+// TileDataMutator.clear = (tileData, tileCache) => {
+//   tileCache.clear()
+//   tileData = TileDataMutator.getNewTileData()
+//   return tileData
+// }
+
 TileDataMutator.addPoint = (tileData, tileCache, pointId, worldCoord) => {
   //get tile id from worldCoord
   let allTileIds = TileUtils.getAllTileIdsForWorldCoord(worldCoord)

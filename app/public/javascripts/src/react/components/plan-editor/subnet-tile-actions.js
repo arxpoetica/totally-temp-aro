@@ -12,12 +12,9 @@ function setSubnetData (subnetId, locations) { // will make this generic in te f
   if (!tileCache.subnets[subnetId]) {
     tileCache.subnets[subnetId] = new TileCache()
   }
-  return (dispatch, getState) => {
-    //const state = getState()
+  return (dispatch) => {
+    // this function completely clears the current entry for data and cache
     let tileData = TileDataMutator.getNewTileData()
-    // if (state.subnetTileData[subnetId]) {
-    //   tileData = klona(state.subnetTileData[subnetId])
-    // }
     tileCache.subnets[subnetId].clear()
     let points = {}
     for (const [id, location] of Object.entries(locations)) {
@@ -39,6 +36,7 @@ function setSubnetData (subnetId, locations) { // will make this generic in te f
 
 function setSubnetsData (subnetsData) {
   console.log(subnetsData)
+  // gaurd against empty set?
   return (dispatch) => {
     return batch(() => {
       for (const [subnetId, locations] of Object.entries(subnetsData)) {
@@ -48,9 +46,24 @@ function setSubnetsData (subnetsData) {
   }
 }
 
+function clearSubnetDataAndCache () {
+  return (dispatch, getState) => {
+    const subnetTileData = getState().subnetTileData
+    // clear tile cache
+    Object.keys(subnetTileData).forEach(subnetId => {
+      tileCache.subnets[subnetId].clear()
+    })
+    // clear data
+    return dispatch({
+      type: Actions.SUBNET_TILES_CLEAR_DATA
+    })
+  }
+}
+
 // --- //
 
 export default {
   setSubnetData,
   setSubnetsData,
+  clearSubnetDataAndCache,
 }

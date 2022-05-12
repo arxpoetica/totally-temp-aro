@@ -16,6 +16,9 @@ function subnetTileReducer (state = defaultState, {type, payload}) {
     case Actions.SUBNET_TILES_UPDATE_DATA:
       return updateSubnetTileData(state, payload.subnetId, payload.tileData)
 
+    case Actions.SUBNET_TILES_CLEAR_DATA:
+      return defaultState
+
     default:
       return state
   }

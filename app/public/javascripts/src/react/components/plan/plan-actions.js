@@ -12,6 +12,7 @@ import UserActions from '../user/user-actions'
 import ToolBarActions from '../header/tool-bar-actions.js'
 import AroHttp from '../../common/aro-http'
 import { handleError } from '../../common/notifications'
+import subnetTileActions from '../plan-editor/subnet-tile-actions'
 
 function setActivePlanState (planState) {
   return dispatch => {
@@ -161,6 +162,7 @@ function setActivePlan (plan) {
     getState().plan.activePlan && getState().plan.activePlan.id &&
       SocketManager.leaveRoom('plan', getState().plan.activePlan.id) // leave previous plan
     batch(() => {
+      dispatch(subnetTileActions.clearSubnetDataAndCache())
       dispatch({
         type: Actions.PLAN_SET_ACTIVE_PLAN,
         payload: {
