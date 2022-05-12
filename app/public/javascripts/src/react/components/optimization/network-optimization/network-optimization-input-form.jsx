@@ -379,9 +379,9 @@ export class NetworkOptimizationInputFormProto extends Component {
       if (vals.optimization.preIrrThreshold === null && vals.optimization.threshold === null) {
         algorithm = 'BUDGET'
       } else if (vals.optimization.preIrrThreshold === null) {
-        algorithm = 'IRR_THRESH'
-      } else {
         algorithm = 'IRR_TARGET'
+      } else {
+        algorithm = 'IRR_THRESH'
       }
     }
 
