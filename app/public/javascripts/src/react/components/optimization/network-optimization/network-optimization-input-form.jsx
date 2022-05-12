@@ -194,7 +194,7 @@ export class NetworkOptimizationInputFormProto extends Component {
 
   renderOptimizationOptions () {
     // possibly make this its own component
-    return this.props.networkAnalysisTypeId === 'NETWORK_PLAN' ? (
+    return this.props.networkAnalysisTypeId === 'NETWORK_PLAN' && this.state.algorithmComposite ? (
       <>
         <div className='ei-header ei-no-pointer'>Optimization</div>
         <div className='ei-gen-level ei-internal-level' style={{ paddingLeft: '11px' }}>
@@ -213,21 +213,6 @@ export class NetworkOptimizationInputFormProto extends Component {
                 />
               </div>
             </div>
-            {/*
-            <div className='ei-property-item'>
-              <div className='ei-property-label'>Optimization Name</div>
-              <div className='ei-property-value'>
-                <Field
-                  onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
-                  name={'optimization.algorithm'}
-                  component={this.filterComponent(FieldComponents.renderDropdownList)}
-                  valueField='value'
-                  textField='label'
-                  data={this.AlgorithmNames}
-                />
-              </div>
-            </div>
-            */}
             {!this.state.algorithmComposite.excludedFields.includes('optimization.preIrrThreshold') // algorithm === 'IRR' // IRR_THRESH
               ? (
                 <div className='ei-property-item'>
@@ -394,9 +379,9 @@ export class NetworkOptimizationInputFormProto extends Component {
       if (vals.optimization.preIrrThreshold === null && vals.optimization.threshold === null) {
         algorithm = 'BUDGET'
       } else if (vals.optimization.preIrrThreshold === null) {
-        algorithm = 'IRR'
+        algorithm = 'IRR_THRESH'
       } else {
-        algorithm = 'IRR'
+        algorithm = 'IRR_TARGET'
       }
     }
 
