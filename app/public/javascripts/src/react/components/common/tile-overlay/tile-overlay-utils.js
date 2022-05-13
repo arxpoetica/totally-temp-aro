@@ -15,6 +15,7 @@ TileUtils.ONE_OVER_360 = 1 / 360
 TileUtils.ONE_OVER_4_PI = 1 / (4 * Math.PI)
 TileUtils.PI_OVER_180 = Math.PI / 180
 
+TileUtils.TILE_MARGIN = 8 // per side! so canvas H and W will be TILE_SIZE + (2 * TILE_MARGIN)
 
 TileUtils.Point = (x=null, y=null, z=null) => {
   return {x,y,z}
