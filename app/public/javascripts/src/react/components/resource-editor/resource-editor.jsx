@@ -102,7 +102,6 @@ export class ResourceEditor extends Component {
     if (
       !prevProp.isResourceEditor
       && this.props.isResourceEditor
-      && this.props.breadCrumb[this.props.breadCrumb.length - 1] === 'ROIC Settings'
     ) {
       const breadCrumbClone = klona(this.props.breadCrumb)
       breadCrumbClone.pop()
@@ -419,11 +418,9 @@ export class ResourceEditor extends Component {
 		this.props.startEditingResourceManager(selectedManager.id, selectedManager.resourceType,
 			selectedManager.name, 'EDIT_RESOURCE_MANAGER'
 		)
-    if (selectedManager.resourceType === 'roic_manager') {
-      const breadCrumbClone = klona(this.props.breadCrumb)
-      breadCrumbClone.push('ROIC Settings')
-      this.props.setBreadCrumb(breadCrumbClone)
-    }
+    const breadCrumbClone = klona(this.props.breadCrumb)
+    breadCrumbClone.push(selectedManager.name)
+    this.props.setBreadCrumb(breadCrumbClone)
 		this.setState({ clickedResourceForEditAndClone: selectedManager.resourceType, clickedResource: '' })
 	}
 
@@ -469,7 +466,7 @@ export class ResourceEditor extends Component {
           resolve(resourceName)
         } else {
 					reject('Cancelled')
-          if (this.props.breadCrumb[this.props.breadCrumb.length - 1] === 'ROIC Settings') {
+          if (this.state.selectedResourceForClone && this.props.breadCrumb[this.props.breadCrumb.length - 1] === this.state.selectedResourceForClone.name) {
             const breadCrumbClone = klona(this.props.breadCrumb)
             breadCrumbClone.pop()
             this.props.setBreadCrumb(breadCrumbClone)
@@ -488,11 +485,9 @@ export class ResourceEditor extends Component {
 				this.props.newManager(this.state.filterText, resourceName,this.props.loggedInUser,
 					this.state.selectedResourceForClone.id
 				)
-        if (selectedManager.resourceType === 'roic_manager') {
-          const breadCrumbClone = klona(this.props.breadCrumb)
-          breadCrumbClone.push('ROIC Settings')
-          this.props.setBreadCrumb(breadCrumbClone)
-        }
+        const breadCrumbClone = klona(this.props.breadCrumb)
+        breadCrumbClone.push(this.state.selectedResourceForClone.name)
+        this.props.setBreadCrumb(breadCrumbClone)
 				this.setState({ clickedResourceForEditAndClone: this.state.filterText })
 			}
 		})
@@ -506,7 +501,7 @@ export class ResourceEditor extends Component {
 		} else {
 			this.getNewResourceDetailsFromUser()
 		}
-    if (this.props.breadCrumb[this.props.breadCrumb.length - 1] === 'ROIC Settings') {
+    if (this.state.selectedResourceForClone && this.props.breadCrumb[this.props.breadCrumb.length - 1] === this.state.selectedResourceForClone.name) {
       const breadCrumbClone = klona(this.props.breadCrumb)
       breadCrumbClone.pop()
       this.props.setBreadCrumb(breadCrumbClone)
@@ -550,7 +545,7 @@ export class ResourceEditor extends Component {
 		if (clickedResource !== 'Competition System') {
 			this.props.setIsResourceEditor(false)
 		}
-    if (this.props.breadCrumb[this.props.breadCrumb.length - 1] === 'ROIC Settings') {
+    if (this.state.selectedResourceForClone && this.props.breadCrumb[this.props.breadCrumb.length - 1] === this.state.selectedResourceForClone.name) {
       const breadCrumbClone = klona(this.props.breadCrumb)
       breadCrumbClone.pop()
       this.props.setBreadCrumb(breadCrumbClone)
@@ -610,7 +605,8 @@ const mapStateToProps = (state) => ({
 	pageableData: state.resourceEditor.pageableData,
 	isMakeNewFilter: state.resourceEditor.isMakeNewFilter,
 	isResourceEditor: state.resourceEditor.isResourceEditor,
-	loggedInUser: state.user.loggedInUser
+	loggedInUser: state.user.loggedInUser,
+  modalTitle: state.resourceEditor.modalTitle,
 })
 
 const mapDispatchToProps = (dispatch) => ({

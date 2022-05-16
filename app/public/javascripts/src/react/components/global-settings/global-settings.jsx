@@ -127,10 +127,11 @@ export function GlobalSettings(props) {
   const back = () => {
     if(!Object.values(views).includes(currentBreadCrumb())) {
       props.setIsResourceEditor(true)
+    } else {
+      const breadCrumbClone = klona(breadCrumb);
+      breadCrumbClone.pop()
+      setBreadCrumb(breadCrumbClone)
     }
-    const breadCrumbClone = klona(breadCrumb);
-    breadCrumbClone.pop()
-    setBreadCrumb(breadCrumbClone)
   }
 
   const currentBreadCrumb = () => {
@@ -150,7 +151,7 @@ export function GlobalSettings(props) {
       size={
         breadCrumb.length === 1 
           ? '40%' 
-          : currentBreadCrumb() === 'ROIC Settings' 
+          : !Object.values(views).includes(currentBreadCrumb()) 
             ? '60%' 
             :'xl'
       }
