@@ -28,59 +28,17 @@ const EquipmentBoundaryMapObjects = props => {
   } = props
 
   useEffect(() => {
-    let subnetId = selectedSubnetId
-    let activeFeature = subnetFeatures[subnetId]
-
-    if (!activeFeature) {
+    if (!selectedSubnetId) {
       clearAll()
       return
     }
-
-    // step up through the subnets until you get to a subnet with no parent (the CO)
-    let rootSubnetId = subnetId
-    let parentSubnetId = activeFeature.subnetId
-    while (parentSubnetId) {
-      rootSubnetId = parentSubnetId
-      const features = subnetFeatures[rootSubnetId]
-      parentSubnetId = features ? features.subnetId : null
-    }
-
-    let allIds = []
-    // Enable click anywhere subnet for Route Adjusters
-    if (activeFeature.feature.dataType === 'edge_construction_area') {
-      let rootSubnet
-      for (let subnetFeature of Object.values(subnetFeatures)) {
-        if (
-          (subnetFeature.feature.networkNodeType === 'central_office' && planType !== 'RING')
-          || (subnetFeature.feature.networkNodeType === 'subnet_node' && planType === 'RING')
-        ) {
-          rootSubnet = subnetFeature
-          break
-        }
-      }
-      rootSubnetId = rootSubnet.feature.objectId
-      allIds.push(subnetId)
-    }
-
-    const childrenIds = subnets[rootSubnetId] && subnets[rootSubnetId].children || []
-    const coEquipmentIds = subnets[rootSubnetId] && subnets[rootSubnetId].coEquipments || []
-    const inclusiveIds = allIds.concat([...childrenIds, ...coEquipmentIds])
-    // ensure allIds are unique
-    const uniqueAllIds = [...new Set(inclusiveIds.concat([rootSubnetId]))]
-    // selected feature is not a subnet
-    if (!uniqueAllIds.includes(subnetId)) {
-      subnetId = null
-    }
-
     deleteMapObject()
-    createMapObject(subnetId)
-
+    createMapObject(selectedSubnetId)
     return () => clearAll()
   }, [selectedSubnetId])
 
 
   function createMapObject(subnetId) {
-    console.log('createMapObject')
     if (!subnets[subnetId]) return
     const geometry = subnets[subnetId].subnetBoundary.polygon
     let isEditable = !subnets[subnetId].subnetBoundary.locked

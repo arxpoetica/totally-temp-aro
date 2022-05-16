@@ -1357,7 +1357,7 @@ function addSubnetTreeByLatLng([lng, lat]) {
 }
 
 function setSelectedSubnetId (selectedSubnetId) {
-  return (dispatch) => {
+  return (dispatch, getState) => {
 
     if (!selectedSubnetId) {
       dispatch({
@@ -1367,17 +1367,16 @@ function setSelectedSubnetId (selectedSubnetId) {
     } else {
       batch(async() => {
         try {
-          const result = await dispatch(addSubnets({ subnetIds: [selectedSubnetId] }))
-
-          // TODO: we need to figure out the proper subnet select workflow
-          // FDTs aren't subnets but can be selcted as such
-          // that is where the following discrepancy comes from 
-          if (!result) selectedSubnetId = null
+          const { planEditor } = getState()
+          const { drafts } = planEditor
+          // only load a new subnet if you have a subnet selected
+          // otherwise it's just a piece of equipment
+          // so go ahead and pass the `selectedSubnetId` along...
+          if (drafts[selectedSubnetId]) await dispatch(addSubnets({ subnetIds: [selectedSubnetId] }))
           dispatch({
             type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
             payload: selectedSubnetId,
           })
-      
         } catch (error) {
           handleError(error)
           dispatch({
