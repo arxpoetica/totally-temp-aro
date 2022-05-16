@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
+import { Button } from '@mantine/core'
 import ResourceActions from '../resource-actions'
 import ROICSubsidy from './roic-subsidy.jsx'
 import ROICModels from './roic-models.jsx'
@@ -15,7 +16,7 @@ const tabs = [
     key: 'roicSettingsConfiguration',
   },
   {
-    label: 'Subsidy',
+    label: 'Subsidies',
     key: 'subsidyConfiguration',
   },
 ]
@@ -131,32 +132,46 @@ export class RoicEditor extends Component {
     const { roicManagerConfiguration, activeTab, selectedRoicModelIndex, speedCategoryHelp } = this.state
 
     return (
-      <>
-        {/* Create tabs */}
-        <ul className="nav nav-tabs" role="tablist">
+      <div style={{ display: "flex", flexDirection: "row", background: "#F8F9FA" }}>
+        <ul
+          style={{
+            background: "#FFFFFF",
+            display: "flex",
+            flexDirection: "column",
+            flex: "0 0 20%",
+            paddingLeft: 0,
+            margin: 0,
+            borderRadius: "5px"
+          }}
+        >
           {tabs.map((tabValue, tabKey) => {
             return (
               <li
                 key={tabKey}
-                role="presentation"
-                className={`nav-item ${activeTab === tabValue.key ? 'active' : ''}`}
+                style={{
+                  background: tabValue.key === activeTab && "#F8F9FA",
+                  cursor: "pointer",
+                  fontSize: "16px",
+                  borderRadius: "5px",
+                  listStyle: 'none',
+                  margin: "5px 10px",
+                  lineHeight: "42px"
+                }}
+                onClick={() => this.selectTab(tabValue.key)}
               >
                 <a
                   role="tab"
                   data-toggle="tab"
-                  onClick={(event) => this.selectTab(tabValue.key)}
-                  className={`nav-link ${activeTab === tabValue.key ? 'active' : ''}`}
                 >
-                  {tabValue.label}
+                  X {tabValue.label}
                 </a>
               </li>
             )
-          })
-          }
+          })}
         </ul>
 
         <div className="container"
-          style={{ display: 'flex', flexDirection: 'column', height: '100%', marginTop: '10px' }}
+          style={{ background: "#FFFFFF", display: 'flex', flexDirection: 'column', height: '100%', marginTop: '10px', marginLeft: "10px", borderRadius: "5px" }}
         >
           {activeTab === 'roicSettingsConfiguration' &&
             <ROICConfiguration
@@ -191,18 +206,32 @@ export class RoicEditor extends Component {
             />
           }
 
-          <div style={{ flex: '0 0 auto' }}>
-            <div style={{ textAlign: 'right' }}>
-              <button type="button" className="btn btn-light mr-2" onClick={() => this.exitEditingMode()}>
-                <i className="fa fa-undo action-button-icon"></i>Discard changes
-              </button>
-              <button type="button" className="btn btn-primary" onClick={() => this.saveConfigurationToServer()}>
-                <i className="fa fa-save action-button-icon"></i>Save
-              </button>
+          <div 
+            style={{
+              flex: '0 0 auto',
+              display: "flex",
+              flexDirection: "row",
+              position: 'absolute',
+              bottom: '32px',
+              right: '36px',
+              justifyContent: "space-between",
+              width: "73%"
+            }}
+          >
+            <p style={{ color: "#717880", lineHeight: "36px", margin: 0 }} onClick={() => this.exitEditingMode()}>
+              Discard Changes
+            </p>
+            <div style={{ display: 'flex' }}>
+              <p style={{ color: "#717880", lineHeight: "36px", margin: 0, marginRight: "25px" }} onClick={() => this.exitEditingMode()}>
+                Reset Defaults
+              </p>
+              <Button type="button" onClick={() => this.saveConfigurationToServer()}>
+                Save Settings
+              </Button>
             </div>
           </div>
         </div>
-      </>
+      </div>
     )
   }
 

@@ -12,7 +12,7 @@ function ROICModels(props) {
   } = props
 
   return (
-    <div className="row">
+    <div className="row" style={{ marginBottom: "8%"}}>
       {/* On the left, show a list of ROIC models that the user can edit */}
       <div className="col-md-4">
         <ul className="nav nav-pills flex-column" style={{ maxHeight: '380px', overflowY: 'auto' }}>

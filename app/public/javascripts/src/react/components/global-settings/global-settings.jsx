@@ -142,7 +142,7 @@ export function GlobalSettings(props) {
     return <ModalBreadCrumb breadCrumb={breadCrumb} />
   }
 
-  const { loggedInUser, isRrmManager, selectedResourceNameProps } = props
+  const { loggedInUser, selectedResourceNameProps } = props
 
   return(
     <Modal
@@ -157,6 +157,7 @@ export function GlobalSettings(props) {
       }
       title={renderBreadCrumb()}
       overflow="inside"
+      styles={{ modal: { backgroundColor: "#F8F9FA" } }}
     >
       {breadCrumb.length === 1 &&
         <div id="global-settings">
@@ -234,7 +235,17 @@ export function GlobalSettings(props) {
       {
         currentBreadCrumb() === views.GLOBAL_SETTINGS
           ? <Button color="primary" onClick={toggle}>Close</Button>
-          : <Button color="primary" onClick={back}>Back</Button>
+          : <Button
+              color="primary"
+              onClick={back}
+              style={{
+                position: !Object.values(views).includes(props.modalTitle) && 'absolute',
+                bottom: "6%",
+                left: "3%"
+              }}
+            >
+              Back
+            </Button>
       }
     </Modal>
   )

@@ -9,7 +9,7 @@ function ROICSubsidy(props) {
   } = props
 
   return (
-    <div className="row">
+    <div className="row" style={{ marginBottom: "8%"}}>
       <div className="ei-items-contain">
         <div className="ei-foldout">
           <div className="ei-header" style={{ cursor: 'unset' }}>
