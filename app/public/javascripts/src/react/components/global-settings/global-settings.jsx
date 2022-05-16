@@ -2,10 +2,9 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import PlanActions from '../plan/plan-actions'
 import './global-settings.css'
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap'
+import { Modal, Button, Group } from '@mantine/core';
 import GlobalsettingsActions from './globalsettings-action'
 import ResourceActions from '../resource-editor/resource-actions'
-
 import MyAccount from '../user/my-account.jsx'
 import MultiFactor from './multi-factor.jsx'
 import ManageUsers from '../user/manage-users.jsx'
@@ -90,183 +89,172 @@ export class GlobalSettings extends Component {
     const { currentView, userIdForSettingsEdit, modal, dataUploadProps, dataSelectionID,
       resourceEditorProps } = this.state
     return(
-      <>
-        <Modal isOpen={modal} toggle={this.toggle}
-          size={ currentView === this.views.RESOURCE_EDITOR && isRrmManager === true
-            ? 'xl'
-            : currentView === this.views.MANAGE_USERS || currentView === this.views.REPORTS_EDITOR ||
-              currentView === this.views.DATA_UPLOAD || currentView === this.views.RESOURCE_EDITOR
-              ? 'lg'
-              : 'md'
-          }
-        >
-          <ModalHeader toggle={this.toggle}>
-            {currentView === this.views.RESOURCE_EDITOR
-              ? this.props.modalTitle
-              : currentView
-            }
-          </ModalHeader>
-          <ModalBody style={{height: '500px',overflow: 'auto'}}>
+      <Modal
+        opened={modal}
+        onClose={this.toggle}
+        size={currentView === this.views.GLOBAL_SETTINGS ? '40%' : 'xl'}
+        title={
+          currentView === this.views.RESOURCE_EDITOR
+            ? this.props.modalTitle
+            : currentView
+        }
+        overflow="inside"
+      >
+        {currentView === this.views.GLOBAL_SETTINGS &&
+          <div id="global-settings">
+            <button
+              className="btn btn-light settings-btn"
+              onClick={() => this.handleChangeView(this.views.MY_ACCOUNT)}>
+              <i className="fa fa-2x fa-user" />
+              <br/>My Account
+            </button>
 
-            {currentView === this.views.GLOBAL_SETTINGS &&
-              <div id="global-settings">
-                <button
-                  className="btn btn-light settings-btn"
-                  onClick={() => this.handleChangeView(this.views.MY_ACCOUNT)}>
-                  <i className="fa fa-2x fa-user" />
-                  <br/>My Account
-                </button>
+            <button
+              className="btn btn-light settings-btn"
+              onClick={() => this.handleChangeView(this.views.MULTIFACTOR_AUTHENTICATION)}>
+              <i className="fa fa-2x fa-user-shield" />
+              <br/>Multi Factor Authentication
+            </button>
 
-                <button
-                  className="btn btn-light settings-btn"
-                  onClick={() => this.handleChangeView(this.views.MULTIFACTOR_AUTHENTICATION)}>
-                  <i className="fa fa-2x fa-user-shield" />
-                  <br/>Multi Factor Authentication
-                </button>
-
-                {loggedInUser.isAdministrator &&
-                  <button
-                    className="btn btn-light settings-btn"
-                    onClick={() => this.handleChangeView(this.views.MANAGE_USERS)}>
-                    <i className="fa fa-2x fa-users" />
-                    <br/>Manage Users
-                  </button>
-                }
-
-                {loggedInUser.isAdministrator &&
-                  <button
-                    className="btn btn-light settings-btn"
-                    onClick={() => this.handleChangeView(this.views.MANAGE_GROUPS)}>
-                    <i className="fa fa-2x fa-users" />
-                    <br/>Manage Groups
-                  </button>
-                }
-
-                <button
-                  className="btn btn-light settings-btn"
-                  onClick={() => this.openUserSettingsForUserId(loggedInUser.id, this.views.USER_SETTINGS)}>
-                  <i className="fa fa-2x fa-cogs" />
-                  <br/>User Settings
-                </button>
-
-                {loggedInUser.isAdministrator &&
-                  <button
-                    className="btn btn-light settings-btn"
-                    onClick={() => this.handleChangeView(this.views.TAG_MANAGER)}>
-                    <i className="fa fa-2x fa-tags" />
-                    <br/>Tag Manager
-                  </button>
-                }
-
-                <button
-                  className="btn btn-light settings-btn notification"
-                  onClick={() => this.handleChangeView(this.views.RELEASE_NOTES)}>
-                  <i className="fa fa-2x fa-bell" />
-                  <br/>Release Notes
-                </button>
-
-                {loggedInUser.isAdministrator &&
-                  <button
-                    className="btn btn-light settings-btn"
-                    onClick={() => this.handleChangeView(this.views.CONFIGURATION_EDITOR)}>
-                    <i className="fa fa-2x fa-sliders-h" />
-                    <br/>Configuration Editor
-                  </button>
-                }
-
-                {loggedInUser.isAdministrator &&
-                  <button
-                    className="btn btn-light settings-btn"
-                    onClick={() => this.handleChangeView(this.views.REPORTS_EDITOR)}>
-                    <i className="fas fa-2x fa-file-download" />
-                    <br/>Reports Editor
-                  </button>
-                }
-
-                {loggedInUser.isAdministrator &&
-                  <button
-                    className="btn btn-light settings-btn"
-                    onClick={() => this.handleChangeView(this.views.DATA_UPLOAD)}>
-                    <i className="fa fa-2x fa-upload" />
-                    <br/>Data Upload
-                  </button>
-                }
-
-                {loggedInUser.isAdministrator &&
-                  <button
-                    className="btn btn-light settings-btn"
-                    onClick={() => this.handleChangeView(this.views.RESOURCE_EDITOR)}>
-                    <i className="fa fa-2x fa-edit" />
-                    <br/>Resource Editor
-                  </button>
-                }
-
-                {loggedInUser.isAdministrator &&
-                  <button
-                    className="btn btn-light settings-btn"
-                    onClick={() => this.handleChangeView(this.views.BROADCAST)}>
-                    <i className="fa fa-2x fa-bullhorn" />
-                    <br/>BroadCast
-                  </button>
-                }
-              </div>
+            {loggedInUser.isAdministrator &&
+              <button
+                className="btn btn-light settings-btn"
+                onClick={() => this.handleChangeView(this.views.MANAGE_USERS)}>
+                <i className="fa fa-2x fa-users" />
+                <br/>Manage Users
+              </button>
             }
 
-            {/* Other Components */}
-
-            {currentView === this.views.MY_ACCOUNT &&
-              <MyAccount/>
-            }
-            {currentView === this.views.MULTIFACTOR_AUTHENTICATION &&
-              <MultiFactor/>
-            }
-            {currentView === this.views.MANAGE_USERS &&
-              <ManageUsers openUserSettingsForUserId={this.openUserSettingsForUserId}/>
-            }
-            {currentView === this.views.MANAGE_GROUPS &&
-              <ManageGroups/>
-            }
-            {currentView === this.views.USER_SETTINGS &&
-              <UserSettings userIdForSettingsEdit={userIdForSettingsEdit}/>
-            }
-            {currentView === this.views.TAG_MANAGER &&
-              <TagManager/>
-            }
-            {currentView === this.views.RELEASE_NOTES &&
-              <ReleaseNotes/>
-            }
-            {currentView === this.views.CONFIGURATION_EDITOR &&
-              <ConfigurationEditor/>
-            }
-            {currentView === this.views.REPORTS_EDITOR &&
-              <ReportModuleList/>
-            }
-            {currentView === this.views.DATA_UPLOAD &&
-              <DataUpload
-                selectedDataSourceName={dataUploadProps}
-                selectedDataTypeId={dataSelectionID}
-                onSave={() => {this.toggle()}}
-              />
-            }
-            {currentView === this.views.RESOURCE_EDITOR &&
-              <ResourceEditor
-                filterText={resourceEditorProps}
-                selectedResourceName={selectedResourceNameProps}
-              />
-            }
-            {currentView === this.views.BROADCAST &&
-              <Broadcast/>
+            {loggedInUser.isAdministrator &&
+              <button
+                className="btn btn-light settings-btn"
+                onClick={() => this.handleChangeView(this.views.MANAGE_GROUPS)}>
+                <i className="fa fa-2x fa-users" />
+                <br/>Manage Groups
+              </button>
             }
 
-          </ModalBody>
-          <ModalFooter>
-            {currentView === this.views.GLOBAL_SETTINGS
-              ? <Button color="primary" onClick={this.toggle}>Close</Button>
-              : <Button color="primary" onClick={() => this.handleChangeView(this.views.GLOBAL_SETTINGS)}>Back</Button>
+            <button
+              className="btn btn-light settings-btn"
+              onClick={() => this.openUserSettingsForUserId(loggedInUser.id, this.views.USER_SETTINGS)}>
+              <i className="fa fa-2x fa-cogs" />
+              <br/>User Settings
+            </button>
+
+            {loggedInUser.isAdministrator &&
+              <button
+                className="btn btn-light settings-btn"
+                onClick={() => this.handleChangeView(this.views.TAG_MANAGER)}>
+                <i className="fa fa-2x fa-tags" />
+                <br/>Tag Manager
+              </button>
             }
-          </ModalFooter>
-        </Modal>
-      </>
+
+            <button
+              className="btn btn-light settings-btn notification"
+              onClick={() => this.handleChangeView(this.views.RELEASE_NOTES)}>
+              <i className="fa fa-2x fa-bell" />
+              <br/>Release Notes
+            </button>
+
+            {loggedInUser.isAdministrator &&
+              <button
+                className="btn btn-light settings-btn"
+                onClick={() => this.handleChangeView(this.views.CONFIGURATION_EDITOR)}>
+                <i className="fa fa-2x fa-sliders-h" />
+                <br/>Configuration Editor
+              </button>
+            }
+
+            {loggedInUser.isAdministrator &&
+              <button
+                className="btn btn-light settings-btn"
+                onClick={() => this.handleChangeView(this.views.REPORTS_EDITOR)}>
+                <i className="fas fa-2x fa-file-download" />
+                <br/>Reports Editor
+              </button>
+            }
+
+            {loggedInUser.isAdministrator &&
+              <button
+                className="btn btn-light settings-btn"
+                onClick={() => this.handleChangeView(this.views.DATA_UPLOAD)}>
+                <i className="fa fa-2x fa-upload" />
+                <br/>Data Upload
+              </button>
+            }
+
+            {loggedInUser.isAdministrator &&
+              <button
+                className="btn btn-light settings-btn"
+                onClick={() => this.handleChangeView(this.views.RESOURCE_EDITOR)}>
+                <i className="fa fa-2x fa-edit" />
+                <br/>Resource Editor
+              </button>
+            }
+
+            {loggedInUser.isAdministrator &&
+              <button
+                className="btn btn-light settings-btn"
+                onClick={() => this.handleChangeView(this.views.BROADCAST)}>
+                <i className="fa fa-2x fa-bullhorn" />
+                <br/>BroadCast
+              </button>
+            }
+          </div>
+        }
+
+        {/* Other Components */}
+
+        {currentView === this.views.MY_ACCOUNT &&
+          <MyAccount/>
+        }
+        {currentView === this.views.MULTIFACTOR_AUTHENTICATION &&
+          <MultiFactor/>
+        }
+        {currentView === this.views.MANAGE_USERS &&
+          <ManageUsers openUserSettingsForUserId={this.openUserSettingsForUserId}/>
+        }
+        {currentView === this.views.MANAGE_GROUPS &&
+          <ManageGroups/>
+        }
+        {currentView === this.views.USER_SETTINGS &&
+          <UserSettings userIdForSettingsEdit={userIdForSettingsEdit}/>
+        }
+        {currentView === this.views.TAG_MANAGER &&
+          <TagManager/>
+        }
+        {currentView === this.views.RELEASE_NOTES &&
+          <ReleaseNotes/>
+        }
+        {currentView === this.views.CONFIGURATION_EDITOR &&
+          <ConfigurationEditor/>
+        }
+        {currentView === this.views.REPORTS_EDITOR &&
+          <ReportModuleList/>
+        }
+        {currentView === this.views.DATA_UPLOAD &&
+          <DataUpload
+            selectedDataSourceName={dataUploadProps}
+            selectedDataTypeId={dataSelectionID}
+            onSave={() => {this.toggle()}}
+          />
+        }
+        {currentView === this.views.RESOURCE_EDITOR &&
+          <ResourceEditor
+            filterText={resourceEditorProps}
+            selectedResourceName={selectedResourceNameProps}
+          />
+        }
+        {currentView === this.views.BROADCAST &&
+          <Broadcast/>
+        }
+
+        {currentView === this.views.GLOBAL_SETTINGS
+          ? <Button color="primary" onClick={this.toggle}>Close</Button>
+          : <Button color="primary" onClick={() => this.handleChangeView(this.views.GLOBAL_SETTINGS)}>Back</Button>
+        }
+      </Modal>
     )
   }
 
