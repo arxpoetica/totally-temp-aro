@@ -54,6 +54,9 @@ export const LocationEditor = (props) => {
 
   const { createdMapObjects } = state
 
+  let overlayRightClickListener = null
+  let overlayContextMenuListener = null
+
   const {
     mapFeatures,
     modifyingLibraryId,
@@ -84,7 +87,26 @@ export const LocationEditor = (props) => {
     if (prevMapFeatures && !dequal(prevMapFeatures, mapFeatures)) { handleMapEntitySelected(mapFeatures) }
   }, [mapFeatures])
 
-  useEffect(() => { return () => removeCreatedMapObjects() }, [])
+  useEffect(() => {
+    overlayRightClickListener = mapRef.addListener('rightclick', (event) => {
+      rightClickLocation(event)
+    })
+    overlayContextMenuListener = mapRef.addListener('contextmenu', (event) => {
+      rightClickLocation(event)
+    })
+
+    return () => {
+      if (overlayRightClickListener) {
+        google.maps.event.removeListener(overlayRightClickListener)
+        overlayRightClickListener = null
+      }
+      if (overlayContextMenuListener) {
+        google.maps.event.removeListener(overlayContextMenuListener)
+        overlayContextMenuListener = null
+      }
+      removeCreatedMapObjects()
+    }
+  }, [])
 
   useEffect(() => { updateSelectedMapObject(selectedMapObject) }, [selectedMapObject])
 
@@ -107,6 +129,15 @@ export const LocationEditor = (props) => {
 
   useEffect(() => { createMapObjects.length && createMapObjectsFN(createMapObjects) }, [createMapObjects])
 
+  const rightClickLocation = (event) => {
+    event.domEvent.preventDefault()
+    if (featureType === 'location') {
+      const eventXY = getXYFromEvent(event)
+      if (!eventXY) { return }
+      updateContextMenu(event.latLng, eventXY.x, eventXY.y, null)
+    }
+  }
+
   const createMapObject = (feature, iconUrl, usingMapClick, existingObjectOverride, deleteExistingBoundary, isMult) => {
     if (typeof existingObjectOverride === undefined) { existingObjectOverride = false }
 
@@ -127,6 +158,10 @@ export const LocationEditor = (props) => {
     } else {
       throw `createMapObject() not supported for geometry type ${feature.geometry.type}`
     }
+
+    mapObject.addListener('contextmenu', event => {
+      event.domEvent.preventDefault()
+    })
 
     mapObject.addListener('rightclick', event => {
       if (!event || event.vertex) { return }
@@ -149,13 +184,15 @@ export const LocationEditor = (props) => {
   const updateSelectedMapObject = (selectedMapObject) => { selectedMapObjectRef.current = selectedMapObject }
 
   const updateContextMenu = (latLng, x, y, clickedMapObject) => {
-    if (featureType === 'location' && isFeatureEditable(clickedMapObject.feature)) {
-      const menuActions = []
-      const { objectId } = clickedMapObject
-      menuActions.push(
-        new MenuItemAction('DELETE', 'Delete', 'ViewSettingsActions', 'deleteLocationWithId', objectId))
-      const menuItems = new MenuItemFeature('LOCATION', 'Location', menuActions)
-      openContextMenu(x, y, [menuItems])
+    if(clickedMapObject) {
+      if (featureType === 'location' && isFeatureEditable(clickedMapObject.feature)) {
+        const menuActions = []
+        const { objectId } = clickedMapObject
+        menuActions.push(
+          new MenuItemAction('DELETE', 'Delete', 'ViewSettingsActions', 'deleteLocationWithId', objectId))
+        const menuItems = new MenuItemFeature('LOCATION', 'Location', menuActions)
+        openContextMenu(x, y, [menuItems])
+      }
     }
   }
 
