@@ -1370,9 +1370,9 @@ function setSelectedSubnetId (selectedSubnetId) {
           const { planEditor } = getState()
           const { drafts } = planEditor
           // only load a new subnet if you have a subnet selected
+          if (drafts[selectedSubnetId]) await dispatch(addSubnets({ subnetIds: [selectedSubnetId] }))
           // otherwise it's just a piece of equipment
           // so go ahead and pass the `selectedSubnetId` along...
-          if (drafts[selectedSubnetId]) await dispatch(addSubnets({ subnetIds: [selectedSubnetId] }))
           dispatch({
             type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
             payload: selectedSubnetId,
