@@ -124,6 +124,9 @@ export function GlobalSettings(props) {
   }
   
   const back = () => {
+    if(!Object.values(views).includes(currentBreadCrumb())) {
+      props.setIsResourceEditor(true)
+    }
     const breadCrumbClone = klona(breadCrumb);
     breadCrumbClone.pop()
     setBreadCrumb(breadCrumbClone)
@@ -206,6 +209,8 @@ export function GlobalSettings(props) {
       }
       {breadCrumb.includes(views.RESOURCE_EDITOR) &&
         <ResourceEditor
+          breadCrumb={breadCrumb}
+          setBreadCrumb={setBreadCrumb}
           filterText={resourceEditorProps}
           selectedResourceName={selectedResourceNameProps}
         />
@@ -239,6 +244,7 @@ const mapDispatchToProps = (dispatch) => ({
   setIsRrmManager: (status) => dispatch(ResourceActions.setIsRrmManager(status)),
   searchManagers: (searchText) => dispatch(ResourceActions.searchManagers(searchText)),
   setGlobalSettingsView: (status) => dispatch(GlobalsettingsActions.setGlobalSettingsView(status)),
+  setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
 })
 
 const GlobalSettingsComponent = connect(mapStateToProps, mapDispatchToProps)(GlobalSettings)

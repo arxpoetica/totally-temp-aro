@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { klona } from 'klona'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import ResourceActions from './resource-actions'
@@ -96,6 +97,18 @@ export class ResourceEditor extends Component {
 		this.props.canMakeNewFilter(this.state.filterText)
 		this.props.setModalTitle('Resource Managers')
 	}
+
+  componentDidUpdate(prevProp) {
+    if (
+      !prevProp.isResourceEditor
+      && this.props.isResourceEditor
+      && this.props.breadCrumb[this.props.breadCrumb.length - 1] === 'ROIC Settings'
+    ) {
+      const breadCrumbClone = klona(this.props.breadCrumb)
+      breadCrumbClone.pop()
+      this.props.setBreadCrumb(breadCrumbClone)
+    }
+  }
 
   render () {
     return !this.props.resourceTypes
@@ -406,6 +419,11 @@ export class ResourceEditor extends Component {
 		this.props.startEditingResourceManager(selectedManager.id, selectedManager.resourceType,
 			selectedManager.name, 'EDIT_RESOURCE_MANAGER'
 		)
+    if (selectedManager.resourceType === 'roic_manager') {
+      const breadCrumbClone = klona(this.props.breadCrumb)
+      breadCrumbClone.push('ROIC Settings')
+      this.props.setBreadCrumb(breadCrumbClone)
+    }
 		this.setState({ clickedResourceForEditAndClone: selectedManager.resourceType, clickedResource: '' })
 	}
 
@@ -451,6 +469,11 @@ export class ResourceEditor extends Component {
           resolve(resourceName)
         } else {
 					reject('Cancelled')
+          if (this.props.breadCrumb[this.props.breadCrumb.length - 1] === 'ROIC Settings') {
+            const breadCrumbClone = klona(this.props.breadCrumb)
+            breadCrumbClone.pop()
+            this.props.setBreadCrumb(breadCrumbClone)
+          }
 					this.setState({ clickedResource: '', clickedResourceForEditAndClone: '' })
         }
       })
@@ -465,6 +488,11 @@ export class ResourceEditor extends Component {
 				this.props.newManager(this.state.filterText, resourceName,this.props.loggedInUser,
 					this.state.selectedResourceForClone.id
 				)
+        if (selectedManager.resourceType === 'roic_manager') {
+          const breadCrumbClone = klona(this.props.breadCrumb)
+          breadCrumbClone.push('ROIC Settings')
+          this.props.setBreadCrumb(breadCrumbClone)
+        }
 				this.setState({ clickedResourceForEditAndClone: this.state.filterText })
 			}
 		})
@@ -478,6 +506,11 @@ export class ResourceEditor extends Component {
 		} else {
 			this.getNewResourceDetailsFromUser()
 		}
+    if (this.props.breadCrumb[this.props.breadCrumb.length - 1] === 'ROIC Settings') {
+      const breadCrumbClone = klona(this.props.breadCrumb)
+      breadCrumbClone.pop()
+      this.props.setBreadCrumb(breadCrumbClone)
+    }
 		this.setState({ clickedResource: selectedManager.resourceType,
 			clickedResourceForEditAndClone: '', selectedResourceForClone: selectedManager
 		})
@@ -517,6 +550,11 @@ export class ResourceEditor extends Component {
 		if (clickedResource !== 'Competition System') {
 			this.props.setIsResourceEditor(false)
 		}
+    if (this.props.breadCrumb[this.props.breadCrumb.length - 1] === 'ROIC Settings') {
+      const breadCrumbClone = klona(this.props.breadCrumb)
+      breadCrumbClone.pop()
+      this.props.setBreadCrumb(breadCrumbClone)
+    }
 		this.setState({ clickedResource, selectedResourceForClone: '', clickedResourceForEditAndClone: '' })
   }
 
