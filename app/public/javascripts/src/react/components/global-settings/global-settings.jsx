@@ -3,7 +3,8 @@ import { connect } from 'react-redux'
 import { klona } from "klona"
 import PlanActions from '../plan/plan-actions'
 import './global-settings.css'
-import { Modal, Button, Group } from '@mantine/core';
+import { Modal, Button } from '@mantine/core';
+import ModalBreadCrumb from './bread-crumb.jsx'
 import GlobalsettingsActions from './globalsettings-action'
 import ResourceActions from '../resource-editor/resource-actions'
 import MyAccount from '../user/my-account.jsx'
@@ -136,14 +137,24 @@ export function GlobalSettings(props) {
     return breadCrumb[breadCrumb.length - 1]
   }
 
+  const renderBreadCrumb = () => {
+    return <ModalBreadCrumb breadCrumb={breadCrumb} />
+  }
+
   const { loggedInUser, isRrmManager, selectedResourceNameProps } = props
 
   return(
     <Modal
       opened={modal}
       onClose={toggle}
-      size={breadCrumb.length === 1 ? '40%' : 'xl'}
-      title={breadCrumb.join(" > ")}
+      size={
+        breadCrumb.length === 1 
+          ? '40%' 
+          : currentBreadCrumb() === 'ROIC Settings' 
+            ? '60%' 
+            :'xl'
+      }
+      title={renderBreadCrumb()}
       overflow="inside"
     >
       {breadCrumb.length === 1 &&

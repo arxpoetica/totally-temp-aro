@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import ResourceActions from './resource-actions'
+import ResourceActions from '../resource-actions'
 
 const tabs = [
   {
@@ -16,18 +16,6 @@ const tabs = [
     key: 'subsidyConfiguration',
   },
 ]
-
-const defaultSubsidy = {
-  "subsidyConfiguration": {
-    "pruningCoverageTypes": [
-      "ELIGIBLE"
-    ],
-    "calcType": "IRR",
-    "value": 0.2,
-    "minValue": 0,
-    "maxValue": 500000000
-  }
-}
 export class RoicEditor extends Component {
   constructor(props) {
     super(props)
