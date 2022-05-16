@@ -170,8 +170,16 @@ export class RoicEditor extends Component {
           })}
         </ul>
 
-        <div className="container"
-          style={{ background: "#FFFFFF", display: 'flex', flexDirection: 'column', height: '100%', marginTop: '10px', marginLeft: "10px", borderRadius: "5px" }}
+        <div
+          className="container"
+          style={{
+            background: "#FFFFFF",
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+            marginLeft: "10px",
+            borderRadius: "5px",
+          }}
         >
           {activeTab === 'roicSettingsConfiguration' &&
             <ROICConfiguration
