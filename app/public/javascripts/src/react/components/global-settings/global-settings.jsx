@@ -32,7 +32,7 @@ const views = Object.freeze({
   REPORTS_EDITOR: 'Reports Editor',
   DATA_UPLOAD: 'Upload Data Resources',
   RESOURCE_EDITOR: 'Resource Managers',
-  BROADCAST: 'BROADCAST'
+  BROADCAST: 'Broadcast'
 })
 
 export function GlobalSettings(props) {
@@ -42,9 +42,20 @@ export function GlobalSettings(props) {
   const [resourceEditorProps, setResourceEditorProps] = useState('')
   const [dataUploadProps, setDataUploadProps] = useState('')
   const [dataSelectionID, setDataSelectionID] = useState('')
-
-  // toggle = this.toggle.bind(this)
-  // this.openUserSettingsForUserId = this.openUserSettingsForUserId.bind(this)
+  const buttons = [
+    { title: views.MY_ACCOUNT, className: "fa-user", conditional: true },
+    { title: views.MULTIFACTOR_AUTHENTICATION, className: "fa-user-shield", conditional: true },
+    { title: views.MANAGE_USERS, className: "fa-users", conditional: props.loggedInUser.isAdministrator },
+    { title: views.MANAGE_GROUPS, className: "fa-users", conditional: props.loggedInUser.isAdministrator },
+    { title: views.USER_SETTINGS, className: "fa-cogs", conditional: true },
+    { title: views.TAG_MANAGER, className: "fa-tags", conditional: props.loggedInUser.isAdministrator },
+    { title: views.RELEASE_NOTES, className: "fa-bell", conditional: true },
+    { title: views.CONFIGURATION_EDITOR, className: "fa-sliders-h", conditional: props.loggedInUser.isAdministrator },
+    { title: views.REPORTS_EDITOR, className: "fa-file-download", conditional: props.loggedInUser.isAdministrator },
+    { title: views.DATA_UPLOAD, className: "fa-upload", conditional: props.loggedInUser.isAdministrator },
+    { title: views.RESOURCE_EDITOR, className: "fa-edit", conditional: props.loggedInUser.isAdministrator },
+    { title: views.BROADCAST, className: "fa-bullhorn", conditional: props.loggedInUser.isAdministrator },
+  ]
 
   useEffect(() => {
     if (props.isGlobalSettingsView) {
@@ -123,7 +134,6 @@ export function GlobalSettings(props) {
   }
 
   const { loggedInUser, isRrmManager, selectedResourceNameProps } = props
-  // const { currentView, userIdForSettingsEdit, modal, dataUploadProps, dataSelectionID, resourceEditorProps } = this.state
 
   return(
     <Modal
@@ -135,157 +145,79 @@ export function GlobalSettings(props) {
     >
       {breadCrumb.length === 1 &&
         <div id="global-settings">
-          <button
-            className="btn btn-light settings-btn"
-            onClick={() => handleChangeView(views.MY_ACCOUNT)}>
-            <i className="fa fa-2x fa-user" />
-            <br/>My Account
-          </button>
-
-          <button
-            className="btn btn-light settings-btn"
-            onClick={() => handleChangeView(views.MULTIFACTOR_AUTHENTICATION)}>
-            <i className="fa fa-2x fa-user-shield" />
-            <br/>Multi Factor Authentication
-          </button>
-
-          {loggedInUser.isAdministrator &&
-            <button
-              className="btn btn-light settings-btn"
-              onClick={() => handleChangeView(views.MANAGE_USERS)}>
-              <i className="fa fa-2x fa-users" />
-              <br/>Manage Users
-            </button>
-          }
-
-          {loggedInUser.isAdministrator &&
-            <button
-              className="btn btn-light settings-btn"
-              onClick={() => handleChangeView(views.MANAGE_GROUPS)}>
-              <i className="fa fa-2x fa-users" />
-              <br/>Manage Groups
-            </button>
-          }
-
-          <button
-            className="btn btn-light settings-btn"
-            onClick={() => openUserSettingsForUserId(loggedInUser.id, views.USER_SETTINGS)}>
-            <i className="fa fa-2x fa-cogs" />
-            <br/>User Settings
-          </button>
-
-          {loggedInUser.isAdministrator &&
-            <button
-              className="btn btn-light settings-btn"
-              onClick={() => handleChangeView(views.TAG_MANAGER)}>
-              <i className="fa fa-2x fa-tags" />
-              <br/>Tag Manager
-            </button>
-          }
-
-          <button
-            className="btn btn-light settings-btn notification"
-            onClick={() => handleChangeView(views.RELEASE_NOTES)}>
-            <i className="fa fa-2x fa-bell" />
-            <br/>Release Notes
-          </button>
-
-          {loggedInUser.isAdministrator &&
-            <button
-              className="btn btn-light settings-btn"
-              onClick={() => handleChangeView(views.CONFIGURATION_EDITOR)}>
-              <i className="fa fa-2x fa-sliders-h" />
-              <br/>Configuration Editor
-            </button>
-          }
-
-          {loggedInUser.isAdministrator &&
-            <button
-              className="btn btn-light settings-btn"
-              onClick={() => handleChangeView(views.REPORTS_EDITOR)}>
-              <i className="fas fa-2x fa-file-download" />
-              <br/>Reports Editor
-            </button>
-          }
-
-          {loggedInUser.isAdministrator &&
-            <button
-              className="btn btn-light settings-btn"
-              onClick={() => handleChangeView(views.DATA_UPLOAD)}>
-              <i className="fa fa-2x fa-upload" />
-              <br/>Data Upload
-            </button>
-          }
-
-          {loggedInUser.isAdministrator &&
-            <button
-              className="btn btn-light settings-btn"
-              onClick={() => handleChangeView(views.RESOURCE_EDITOR)}>
-              <i className="fa fa-2x fa-edit" />
-              <br/>Resource Editor
-            </button>
-          }
-
-          {loggedInUser.isAdministrator &&
-            <button
-              className="btn btn-light settings-btn"
-              onClick={() => handleChangeView(views.BROADCAST)}>
-              <i className="fa fa-2x fa-bullhorn" />
-              <br/>BroadCast
-            </button>
-          }
+          {buttons.map(buttonInfo => {
+            if (buttonInfo.conditional) {
+              return (
+                <button
+                  key={buttonInfo.title}
+                  className="btn btn-light settings-btn"
+                  onClick={() => 
+                    buttonInfo.title === views.USER_SETTINGS 
+                      ? openUserSettingsForUserId(loggedInUser.id, views.USER_SETTINGS)
+                      : handleChangeView(buttonInfo.title)
+                  }
+                >
+                  <i className={`fa fa-2x ${buttonInfo.className}`} />
+                  <br/>{buttonInfo.title}
+                </button>
+              )
+            } else {
+              return <></>
+            }
+          })}
         </div>
       }
 
       {/* Other Components */}
 
-      {currentBreadCrumb() === views.MY_ACCOUNT &&
+      {breadCrumb.includes(views.MY_ACCOUNT) &&
         <MyAccount/>
       }
-      {currentBreadCrumb() === views.MULTIFACTOR_AUTHENTICATION &&
+      {breadCrumb.includes(views.MULTIFACTOR_AUTHENTICATION) &&
         <MultiFactor/>
       }
-      {currentBreadCrumb() === views.MANAGE_USERS &&
+      {breadCrumb.includes(views.MANAGE_USERS) &&
         <ManageUsers openUserSettingsForUserId={openUserSettingsForUserId}/>
       }
-      {currentBreadCrumb() === views.MANAGE_GROUPS &&
+      {breadCrumb.includes(views.MANAGE_GROUPS) &&
         <ManageGroups/>
       }
-      {currentBreadCrumb() === views.USER_SETTINGS &&
+      {breadCrumb.includes(views.USER_SETTINGS) &&
         <UserSettings userIdForSettingsEdit={userIdForSettingsEdit}/>
       }
-      {currentBreadCrumb() === views.TAG_MANAGER &&
+      {breadCrumb.includes(views.TAG_MANAGER) &&
         <TagManager/>
       }
-      {currentBreadCrumb() === views.RELEASE_NOTES &&
+      {breadCrumb.includes(views.RELEASE_NOTES) &&
         <ReleaseNotes/>
       }
-      {currentBreadCrumb() === views.CONFIGURATION_EDITOR &&
+      {breadCrumb.includes(views.CONFIGURATION_EDITOR) &&
         <ConfigurationEditor/>
       }
-      {currentBreadCrumb() === views.REPORTS_EDITOR &&
+      {breadCrumb.includes(views.REPORTS_EDITOR) &&
         <ReportModuleList/>
       }
-      {currentBreadCrumb() === views.DATA_UPLOAD &&
+      {breadCrumb.includes(views.DATA_UPLOAD) &&
         <DataUpload
           selectedDataSourceName={dataUploadProps}
           selectedDataTypeId={dataSelectionID}
           onSave={() => {toggle()}}
         />
       }
-      {currentBreadCrumb() === views.RESOURCE_EDITOR &&
+      {breadCrumb.includes(views.RESOURCE_EDITOR) &&
         <ResourceEditor
           filterText={resourceEditorProps}
           selectedResourceName={selectedResourceNameProps}
         />
       }
-      {currentBreadCrumb() === views.BROADCAST &&
+      {breadCrumb.includes(views.BROADCAST) &&
         <Broadcast/>
       }
 
-      {currentBreadCrumb() === views.GLOBAL_SETTINGS
-        ? <Button color="primary" onClick={toggle}>Close</Button>
-        : <Button color="primary" onClick={back}>Back</Button>
+      {
+        currentBreadCrumb() === views.GLOBAL_SETTINGS
+          ? <Button color="primary" onClick={toggle}>Close</Button>
+          : <Button color="primary" onClick={back}>Back</Button>
       }
     </Modal>
   )
