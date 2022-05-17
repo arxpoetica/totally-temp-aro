@@ -6,6 +6,32 @@ import TileUtils from '../common/tile-overlay/tile-overlay-utils'
 import { batch } from 'react-redux'
 // global: tileCache.subnets
 
+// For points there should be a data object that controls badges
+// (these badges should be modular and stackable)
+// for example 
+// UUID: {
+//   'TYPE': 'SMALL_BUSINESS',
+//   'ALERT': true,
+//   'COUNT': 3,
+//   'SOMETHING_ELSE': false,
+//   'worldCoord': maybe?
+// }
+
+// TYPE is a special one all others are optional. 
+//  We will have a central register for all of these so that the renderer and tile actions can access them
+//  The action creator / controller will choose which ones are applied to which tile data store. 
+//  The renderer just renders what values are present on the data object
+//  these are part of tile data object so that when a value is changed here; it triggers a rerender just like moving a point
+//  We need a generic update data function that invalidates the appropriate tiles in cache:
+//    So when ALERT on a single location changes 
+//    we get the leaf tile of that ID, 
+//    invalidate all the way up the zoom 
+//    and then the change in the redux object will trigger a tile refresh
+//
+//  BUT most of these are derived data so how do we handle that?!
+
+
+
 function setSubnetData (subnetId, locations) { // will make this generic in te future
   //console.log(global)
   //let tileCache = global.tileCache
