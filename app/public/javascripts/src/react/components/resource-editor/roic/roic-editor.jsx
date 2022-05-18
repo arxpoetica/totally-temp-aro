@@ -92,14 +92,14 @@ export class RoicEditor extends Component {
     ]
 
     this.defaultSubsidy = {
-      "subsidyConfiguration": {
-        "pruningCoverageTypes": [
+      subsidyConfiguration: {
+        pruningCoverageTypes: [
           "ELIGIBLE"
         ],
-        "calcType": "IRR",
-        "value": 0.2,
-        "minValue": 0,
-        "maxValue": 500000000
+        calcType: "IRR",
+        value: 0.2,
+        minValue: 0,
+        maxValue: 500000000
       }
     }
 
@@ -165,7 +165,7 @@ export class RoicEditor extends Component {
     name = event.target ? event.target.name : name
     const value = event.target ? event.target.value : event
     const pristineRoicModel = this.state.roicManagerConfiguration
-    let pruningCoverageTypes;
+    let pruningCoverageTypes = pristineRoicModel.roicSettingsConfiguration.subsidyConfiguration.pruningCoverageTypes;
     if (name === 'pruningCoverageTypes') {
       if (value === "BOTH") {
         pruningCoverageTypes = ["ELIGIBLE" , "SUBSIDIZED"]
@@ -188,7 +188,7 @@ export class RoicEditor extends Component {
 
   setSubsidyDefaults() {
     const pristineRoicModel = this.state.roicManagerConfiguration
-    pristineRoicModel.roicSettingsConfiguration.subsidyConfiguration = this.defaultSubsidy;
+    pristineRoicModel.roicSettingsConfiguration.subsidyConfiguration = this.defaultSubsidy.subsidyConfiguration;
     
     this.setState({ roicManagerConfiguration: pristineRoicModel })
   }
