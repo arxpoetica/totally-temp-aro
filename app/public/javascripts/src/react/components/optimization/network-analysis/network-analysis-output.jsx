@@ -7,23 +7,37 @@ import ReportsDownloadModal from '../reports/reports-download-modal.jsx'
 import NetworkAnalysisActions from './network-analysis-actions'
 import ReportActions from '../reports/reports-actions'
 import PlanStates from '../../plan/plan-states'
+import deepmerge from 'deepmerge'
+
 
 export class NetworkAnalysisOutput extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      selectedUiDefinition: null
+      selectedCapitalType: null,
+      selectedChartType: null
     }
     this.props.loadReport(this.props.planId)
     this.chartRef = React.createRef()
+  }
+
+  componentDidUpdate() {
+    if (this.props.chartReportDefinition && !this.state.selectedChartType && !this.state.selectedCapitalType) {
+      this.setState({
+        selectedChartType: this.props.chartReportDefinition.uiDefinition.chartType[0].chartDefinition.name,
+        selectedCapitalType: this.props.chartReportDefinition.uiDefinition.capitalType[0].dataModifiers.labelProperty
+      })
+    }
   }
 
   render () {
     const hasChartData = Boolean(this.props.chartReportDefinition && this.props.chartReport && this.props.chartReport.length > 0)
     if (hasChartData) {
       // Why setTimeout()? We need the chart to be rendered with the right display style, THEN we create the chart.
-      this.updateChartDefinition()
-      setTimeout(() => this.updateChart(), 0)
+      if (this.state.selectedCapitalType && this.state.selectedChartType) {
+        this.updateChartDefinition()
+        setTimeout(() => this.updateChart(), 0)
+      }
     } else {
       // Someone may have clicked the 'Modify' button to re-run analysis. Clear old chart (if any)
       if (this.chart) {
@@ -40,12 +54,12 @@ export class NetworkAnalysisOutput extends Component {
         <div className="col-md-8">
           <select
             className="form-control"
-            value={this.state.selectedUiDefinition ? this.state.selectedUiDefinition.name : ''}
-            onChange={event => this.setState({ selectedUiDefinition: event.target.value })}
+            value={this.state.selectedCapitalType ? this.state.selectedCapitalType.name : ''}
+            onChange={event => this.setState({ selectedCapitalType: event.target.value })}
           >
             {this.props.chartReportDefinition
-              ? this.props.chartReportDefinition.uiDefinition.map(chart => (
-                <option key={chart.chartDefinition.name} value={chart.chartDefinition.name}>
+              ? this.props.chartReportDefinition.uiDefinition.capitalType.map(chart => (
+                <option key={chart.chartDefinition.displayName} value={chart.dataModifiers.labelProperty}>
                   {chart.chartDefinition.displayName}
                 </option>
               ))
@@ -61,11 +75,11 @@ export class NetworkAnalysisOutput extends Component {
         <div className="col-md-8">
           <select
             className="form-control"
-            value={this.state.selectedUiDefinition ? this.state.selectedUiDefinition.name : ''}
-            onChange={event => this.setState({ selectedUiDefinition: event.target.value })}
+            value={this.state.selectedChartType ? this.state.selectedChartType.name : ''}
+            onChange={event => this.setState({ selectedChartType: event.target.value })}
           >
             {this.props.chartReportDefinition
-              ? this.props.chartReportDefinition.uiDefinition.map(chart => (
+              ? this.props.chartReportDefinition.uiDefinition.chartType.map(chart => (
                 <option key={chart.chartDefinition.name} value={chart.chartDefinition.name}>{chart.chartDefinition.displayName}</option>
               ))
               : null}
@@ -98,12 +112,19 @@ export class NetworkAnalysisOutput extends Component {
       return
     }
     var selectedUiDefinition = null
-    if (!this.state.selectedUiDefinition) {
-      selectedUiDefinition = this.props.chartReportDefinition.uiDefinition[0]
+    if (!this.state.selectedCapitalType || !this.state.selectedChartType) {
+      selectedUiDefinition = deepmerge(
+        this.props.chartReportDefinition.uiDefinition.chartType[0],
+        this.props.chartReportDefinition.uiDefinition.capitalType[0]
+      )
     } else {
-      selectedUiDefinition = this.props.chartReportDefinition.uiDefinition.filter(item => {
-        return item.chartDefinition.name === this.state.selectedUiDefinition
-      })[0]
+      const selectedChartType = this.props.chartReportDefinition.uiDefinition.chartType.find(item => {
+        return item.chartDefinition.name === this.state.selectedChartType
+      })
+      const selectedCapitalType = this.props.chartReportDefinition.uiDefinition.capitalType.find(item => {
+        return item.dataModifiers.labelProperty === this.state.selectedCapitalType
+      })
+      selectedUiDefinition = deepmerge(selectedChartType, selectedCapitalType)
     }
     const { chartDefinition, dataModifiers } = JSON.parse(JSON.stringify(selectedUiDefinition))
     this.chartDefinition = this.buildChartDefinition(chartDefinition, dataModifiers, this.props.chartReport)
@@ -139,7 +160,6 @@ export class NetworkAnalysisOutput extends Component {
       const multiplier = (dataModifiers.sortOrder === 'ascending') ? 1.0 : -1.0
       return (a[dataModifiers.sortBy] - b[dataModifiers.sortBy]) * multiplier
     })
-
     this.populateSeriesValues(sortedData, rawChartDefinition, dataModifiers)
     this.populateAxesOptions(sortedData, rawChartDefinition, dataModifiers)
     this.populateTooltipOptions(rawChartDefinition, dataModifiers)
