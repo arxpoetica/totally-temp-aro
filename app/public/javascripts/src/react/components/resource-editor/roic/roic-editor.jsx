@@ -91,7 +91,18 @@ export class RoicEditor extends Component {
       { id: 'PERCENTAGE', label: 'Percentage' }
     ]
 
-    this.isCalculationSetting = this.isCalculationSetting.bind(this)
+    this.defaultSubsidy = {
+      "subsidyConfiguration": {
+        "pruningCoverageTypes": [
+          "ELIGIBLE"
+        ],
+        "calcType": "IRR",
+        "value": 0.2,
+        "minValue": 0,
+        "maxValue": 500000000
+      }
+    }
+
     this.handleConfigChange = this.handleConfigChange.bind(this)
     this.handleBAUChange = this.handleBAUChange.bind(this)
     this.handleSubsidyChange = this.handleSubsidyChange.bind(this)
@@ -110,137 +121,6 @@ export class RoicEditor extends Component {
     return nextProps.roicManagerConfiguration !== undefined
       ? { roicManagerConfiguration: nextProps.roicManagerConfiguration }
       : null
-  }
-
-  isCalculationSetting(coverageType) {
-    const coverageTypes = this.state.roicManagerConfiguration.roicSettingsConfiguration.subsidyConfiguration.pruningCoverageTypes
-    return (
-      coverageType === "BOTH" && coverageTypes.length === 2
-    ) || (
-      coverageTypes.length === 1 && coverageTypes[0] === coverageType
-    );
-  }
-
-  render() {
-    return this.state.roicManagerConfiguration.inputs === undefined
-      ? null
-      : this.renderRoicEditor()
-  }
-
-  renderRoicEditor() {
-
-    const { roicManagerConfiguration, activeTab, selectedRoicModelIndex, speedCategoryHelp } = this.state
-
-    return (
-      <div style={{ display: "flex", flexDirection: "row", background: "#F8F9FA" }}>
-        <ul
-          style={{
-            background: "#FFFFFF",
-            display: "flex",
-            flexDirection: "column",
-            flex: "0 0 20%",
-            paddingLeft: 0,
-            margin: 0,
-            borderRadius: "5px"
-          }}
-        >
-          {tabs.map((tabValue, tabKey) => {
-            return (
-              <li
-                key={tabKey}
-                style={{
-                  background: tabValue.key === activeTab && "#F8F9FA",
-                  cursor: "pointer",
-                  fontSize: "16px",
-                  borderRadius: "5px",
-                  listStyle: 'none',
-                  margin: "5px 10px",
-                  lineHeight: "42px"
-                }}
-                onClick={() => this.selectTab(tabValue.key)}
-              >
-                <a
-                  role="tab"
-                  data-toggle="tab"
-                >
-                  X {tabValue.label}
-                </a>
-              </li>
-            )
-          })}
-        </ul>
-
-        <div
-          className="container"
-          style={{
-            background: "#FFFFFF",
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100%',
-            marginLeft: "10px",
-            borderRadius: "5px",
-          }}
-        >
-          {activeTab === 'roicSettingsConfiguration' &&
-            <ROICConfiguration
-              handleConfigChange={this.handleConfigChange}
-              handleBAUChange={this.handleBAUChange}
-              roicManagerConfiguration={roicManagerConfiguration}
-              cashFlowStrategyTypes={this.cashFlowStrategyTypes}
-              penetrationAnalysisStrategies={this.penetrationAnalysisStrategies}
-              connectionCostStrategies={this.connectionCostStrategies}
-              terminalValueStrategyTypes={this.terminalValueStrategyTypes}
-            />
-          }
-
-          {activeTab === 'subsidyConfiguration' &&
-            <ROICSubsidy
-              handleSubsidyChange={this.handleSubsidyChange}
-              roicManagerConfiguration={roicManagerConfiguration}
-              isCalculationSetting={this.isCalculationSetting}
-              calculationTypes={this.calculationTypes}
-            />
-          }
-
-          {activeTab === 'inputs' &&
-            <ROICModels
-              selectRoicModel={this.selectRoicModel}
-              showSpeedCategoryHelp={this.showSpeedCategoryHelp}
-              handleModelsChange={this.handleModelsChange}
-              hideSpeedCategoryHelp={this.hideSpeedCategoryHelp}
-              speedCategoryHelp={speedCategoryHelp}
-              roicManagerConfiguration={roicManagerConfiguration}
-              selectedRoicModelIndex={selectedRoicModelIndex}
-            />
-          }
-
-          <div 
-            style={{
-              flex: '0 0 auto',
-              display: "flex",
-              flexDirection: "row",
-              position: 'absolute',
-              bottom: '32px',
-              right: '36px',
-              justifyContent: "space-between",
-              width: "73%"
-            }}
-          >
-            <p style={{ color: "#717880", lineHeight: "36px", margin: 0 }} onClick={() => this.exitEditingMode()}>
-              Discard Changes
-            </p>
-            <div style={{ display: 'flex' }}>
-              <p style={{ color: "#717880", lineHeight: "36px", margin: 0, marginRight: "25px" }} onClick={() => this.exitEditingMode()}>
-                Reset Defaults
-              </p>
-              <Button type="button" onClick={() => this.saveConfigurationToServer()}>
-                Save Settings
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
   }
 
   handleBAUChange(event) {
@@ -281,21 +161,24 @@ export class RoicEditor extends Component {
     this.setState({ roicManagerConfiguration: pristineRoicModel })
   }
 
-  handleSubsidyChange(event) {
-    const name = event.target.name
-    const value = event.target.value
+  handleSubsidyChange(event, name) {
+    name = event.target ? event.target.name : name
+    const value = event.target ? event.target.value : event
     const pristineRoicModel = this.state.roicManagerConfiguration
-
+    let pruningCoverageTypes;
     if (name === 'pruningCoverageTypes') {
       if (value === "BOTH") {
-        pristineRoicModel.roicSettingsConfiguration.subsidyConfiguration.pruningCoverageTypes = ["ELIGIBLE" , "SUBSIDIZED"]
+        pruningCoverageTypes = ["ELIGIBLE" , "SUBSIDIZED"]
       } else {
-        pristineRoicModel.roicSettingsConfiguration.subsidyConfiguration.pruningCoverageTypes = [value]
+        pruningCoverageTypes = [value]
       }
+    } else if (name === 'disableSubsidy') {
+      pruningCoverageTypes = event.target.checked ? ["ELIGIBLE"] : [];
     } else {
       pristineRoicModel.roicSettingsConfiguration.subsidyConfiguration[name] = value
     }
 
+    pristineRoicModel.roicSettingsConfiguration.subsidyConfiguration.pruningCoverageTypes = pruningCoverageTypes;
     this.setState({ roicManagerConfiguration: pristineRoicModel })
   }
 
@@ -303,8 +186,22 @@ export class RoicEditor extends Component {
     this.props.setIsResourceEditor(true)
   }
 
+  setSubsidyDefaults() {
+    const pristineRoicModel = this.state.roicManagerConfiguration
+    pristineRoicModel.roicSettingsConfiguration.subsidyConfiguration = this.defaultSubsidy;
+    
+    this.setState({ roicManagerConfiguration: pristineRoicModel })
+  }
+  
   saveConfigurationToServer() {
-    this.props.saveRoicConfigurationToServer(this.props.roicManager.id, this.state.roicManagerConfiguration)
+    const pristineRoicModel = this.state.roicManagerConfiguration
+    const value = pristineRoicModel.roicSettingsConfiguration.subsidyConfiguration.value
+    const calcType = pristineRoicModel.roicSettingsConfiguration.subsidyConfiguration.calcType
+
+    if (calcType !== 'FIXED') {
+      pristineRoicModel.roicSettingsConfiguration.subsidyConfiguration.value = value / 100
+    }
+    this.props.saveRoicConfigurationToServer(this.props.roicManager.id, pristineRoicModel)
   }
 
   showSpeedCategoryHelp(category) {
@@ -322,6 +219,159 @@ export class RoicEditor extends Component {
 
   selectRoicModel(index) {
     this.setState({ selectedRoicModelIndex: index })
+  }
+
+  render() {
+    return this.state.roicManagerConfiguration.inputs === undefined
+      ? null
+      : this.renderRoicEditor()
+  }
+
+  renderRoicEditor() {
+
+    const { roicManagerConfiguration, activeTab, selectedRoicModelIndex, speedCategoryHelp } = this.state
+
+    return (
+      <div className="roic-modal">
+        <ul className="nav-list">
+          {tabs.map((tabValue, tabKey) => {
+            return (
+              <li
+                key={tabKey}
+                style={{ background: tabValue.key === activeTab && "#F8F9FA" }}
+                className="nav-item-wrapper"
+                onClick={() => this.selectTab(tabValue.key)}
+              >
+                <a
+                  role="tab"
+                  data-toggle="tab"
+                  className="nav-item"
+                >
+                  <div className={"nav-icon " + tabValue.key} /> {tabValue.label}
+                </a>
+              </li>
+            )
+          })}
+        </ul>
+
+        <div className="container roic-contents">
+          {activeTab === 'roicSettingsConfiguration' &&
+            <ROICConfiguration
+              handleConfigChange={this.handleConfigChange}
+              handleBAUChange={this.handleBAUChange}
+              roicManagerConfiguration={roicManagerConfiguration}
+              cashFlowStrategyTypes={this.cashFlowStrategyTypes}
+              penetrationAnalysisStrategies={this.penetrationAnalysisStrategies}
+              connectionCostStrategies={this.connectionCostStrategies}
+              terminalValueStrategyTypes={this.terminalValueStrategyTypes}
+            />
+          }
+
+          {activeTab === 'subsidyConfiguration' &&
+            <ROICSubsidy
+              handleSubsidyChange={this.handleSubsidyChange}
+              roicManagerConfiguration={roicManagerConfiguration}
+              calculationTypes={this.calculationTypes}
+            />
+          }
+
+          {activeTab === 'inputs' &&
+            <ROICModels
+              selectRoicModel={this.selectRoicModel}
+              showSpeedCategoryHelp={this.showSpeedCategoryHelp}
+              handleModelsChange={this.handleModelsChange}
+              hideSpeedCategoryHelp={this.hideSpeedCategoryHelp}
+              speedCategoryHelp={speedCategoryHelp}
+              roicManagerConfiguration={roicManagerConfiguration}
+              selectedRoicModelIndex={selectedRoicModelIndex}
+            />
+          }
+
+          <div className='roic-footer'>
+            <p className="footer-item" style={{ cursor: 'pointer' }} onClick={() => this.exitEditingMode()}>
+              Discard Changes
+            </p>
+            <div style={{ display: 'flex' }}>
+              {activeTab === 'subsidyConfiguration' &&
+                <p className="footer-item" style={{ marginRight: "25px", cursor: 'pointer' }} onClick={() => this.setSubsidyDefaults()}>
+                  Reset Defaults
+                </p>
+              }
+              <Button type="button" onClick={() => this.saveConfigurationToServer()}>
+                Save Settings
+              </Button>
+            </div>
+          </div>
+        </div>
+        <style jsx>{`
+          .roic-modal {
+            display: flex;
+            flex-direction: row;
+            background: #F8F9FA; 
+          }
+          .nav-icon {
+            background: none no-repeat center transparent;
+            width: 18px;
+            height: 18px;
+            margin-right: 6%;
+          }
+          .inputs {
+            background-image: url('/svg/roic-models.svg');
+          }
+          .roicSettingsConfiguration {
+            background-image: url('/svg/roic-configuration.svg');
+          }
+          .subsidyConfiguration {
+            background-image: url('/svg/roic-subsidies.svg');
+          }
+          .nav-item {
+            display: flex;
+            align-items: center;
+          }
+          .nav-item-wrapper {
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            list-style: none;
+            margin: 5px 10px;
+            line-height: 42px;
+          }   
+
+          .nav-list {
+            background: #FFFFFF;
+            display: flex;
+            flex-direction: column;
+            flex: 0 0 20%;
+            padding-left: 0;
+            margin: 0;
+            border-radius: 5px;
+          }
+          .roic-contents {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            margin-left: 10px;
+            border-radius: 5px;
+          }
+          .roic-footer {
+            flex: 0 0 auto;
+            display: flex;
+            flex-direction: row;
+            position: absolute;
+            bottom: 32px;
+            right: 36px;
+            justify-content: space-between;
+            width: 73%;
+          }
+
+          .footer-item {
+            color: #717880;
+            line-height: 36px;
+            margin: 0 ;
+          }
+        `}</style>
+      </div>
+    )
   }
 }
 
