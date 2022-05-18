@@ -48,7 +48,7 @@ const filterFeatureForSelection = (feature) => {
   return true
 }
 
-export const LocationEditor = (props) => {
+const LocationMapObjects = (props) => {
 
   const [state, setState] = useState({ createdMapObjects: {} })
 
@@ -343,4 +343,4 @@ const mapDispatchToProps = (dispatch) => ({
   showContextMenu: (x, y) => dispatch(ContextMenuActions.showContextMenu(x, y)),
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(LocationEditor)
+export default connect(mapStateToProps, mapDispatchToProps)(LocationMapObjects)
