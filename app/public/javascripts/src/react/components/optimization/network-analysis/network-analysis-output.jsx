@@ -32,25 +32,49 @@ export class NetworkAnalysisOutput extends Component {
       }
     }
     return <div>
-      {/* A combobox to select the chart type */}
-      <div className='row p-3' style={{ display: hasChartData ? 'flex' : 'none' }}>
-        <div className='col-md-4'>
-          <label style={{ lineHeight: '36px' }}>Chart type</label>
+
+      <div className="row p-3" style={{ display: hasChartData ? 'flex' : 'none' }}>
+        <div className="col-md-4">
+          <label style={{ lineHeight: '36px' }}>Capital Type</label>
         </div>
-        <div className='col-md-8'>
-          <select className='form-control' value={this.state.selectedUiDefinition ? this.state.selectedUiDefinition.name : ''}
-            onChange={event => this.setState({ selectedUiDefinition: event.target.value })}>
-            { this.props.chartReportDefinition
+        <div className="col-md-8">
+          <select
+            className="form-control"
+            value={this.state.selectedUiDefinition ? this.state.selectedUiDefinition.name : ''}
+            onChange={event => this.setState({ selectedUiDefinition: event.target.value })}
+          >
+            {this.props.chartReportDefinition
               ? this.props.chartReportDefinition.uiDefinition.map(chart => (
-                <option key={chart.chartDefinition.name} value={chart.chartDefinition.name}>{chart.chartDefinition.displayName}</option>
+                <option key={chart.chartDefinition.name} value={chart.chartDefinition.name}>
+                  {chart.chartDefinition.displayName}
+                </option>
               ))
-              : null }
+              : null}
           </select>
         </div>
       </div>
-      {/* The canvas that will hold the actual chart */}
+
+      <div className="row pl-3 pr-3 pb-3" style={{ display: hasChartData ? 'flex' : 'none' }}>
+        <div className="col-md-4">
+          <label style={{ lineHeight: '36px' }}>Chart Type</label>
+        </div>
+        <div className="col-md-8">
+          <select
+            className="form-control"
+            value={this.state.selectedUiDefinition ? this.state.selectedUiDefinition.name : ''}
+            onChange={event => this.setState({ selectedUiDefinition: event.target.value })}
+          >
+            {this.props.chartReportDefinition
+              ? this.props.chartReportDefinition.uiDefinition.map(chart => (
+                <option key={chart.chartDefinition.name} value={chart.chartDefinition.name}>{chart.chartDefinition.displayName}</option>
+              ))
+              : null}
+          </select>
+        </div>
+      </div>
+
       <canvas ref={this.chartRef} style={{ display: hasChartData ? 'block' : 'none' }} />
-      {/* If we don't have a chart to show, display a message */}
+
       <div className='alert alert-warning mt-3' style={{ display: hasChartData ? 'none' : 'block' }}>
         Network analysis data not available. Run a new network analysis to see results.
       </div>
