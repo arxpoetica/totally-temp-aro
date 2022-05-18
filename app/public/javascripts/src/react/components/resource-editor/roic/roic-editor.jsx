@@ -93,9 +93,7 @@ export class RoicEditor extends Component {
 
     this.defaultSubsidy = {
       subsidyConfiguration: {
-        pruningCoverageTypes: [
-          "ELIGIBLE"
-        ],
+        pruningCoverageTypes: [],
         calcType: "IRR",
         value: 20,
         minValue: 0,
