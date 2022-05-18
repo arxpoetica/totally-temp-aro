@@ -33,21 +33,47 @@ function ROICSubsidy(props) {
     )
   }
 
+  const subsidyConfiguration = () => roicManagerConfiguration.roicSettingsConfiguration.subsidyConfiguration
+
   const isCalculationSetting = () => {
-    const coverageTypes = roicManagerConfiguration.roicSettingsConfiguration.subsidyConfiguration.pruningCoverageTypes
+    const coverageTypes = subsidyConfiguration().pruningCoverageTypes
     return coverageTypes.length > 1 ? "BOTH" : coverageTypes[0];
   }
 
   const getSubsidyValue = () => {
-    let value = roicManagerConfiguration.roicSettingsConfiguration.subsidyConfiguration.value
-    if (!!Number(value) && !Number.isInteger(Number(value)) && (value.toString()[0] === '0' || value.toString()[0] === '.')) {
+    let value = subsidyConfiguration().value
+    if (
+      !!Number(value)
+      && !Number.isInteger(Number(value))
+      && (
+        value.toString()[0] === '0'
+        || value.toString()[0] === '.'
+      )
+    ) {
       value = value * 100
     }
     return value
   }
 
   const isSubsidyDisabled = () => {
-    return roicManagerConfiguration.roicSettingsConfiguration.subsidyConfiguration.pruningCoverageTypes.length === 0
+    return !subsidyConfiguration().pruningCoverageTypes.length
+  }
+
+  const isLocationLayerCoverage = () => {
+    const subsidyConfig = subsidyConfiguration()
+    return subsidyConfig.pruningCoverageTypes[0] == "SUBSIDIZED" && subsidyConfig.pruningCoverageTypes.length === 1
+  }
+
+  const isFixedCalcType = () => {
+    return subsidyConfiguration().calcType == "FIXED"
+  }
+
+  const isCalcTypeDisabled = () => {
+    return isLocationLayerCoverage() || isSubsidyDisabled()
+  }
+
+  const isRangeDisabled = () => {
+    return isCalcTypeDisabled() || isFixedCalcType()
   }
   
   return (
@@ -112,10 +138,8 @@ function ROICSubsidy(props) {
               }}
               name="calcType"
               onChange={(event) => handleSubsidyChange(event, 'calcType')}
-              value={
-                roicManagerConfiguration.roicSettingsConfiguration.subsidyConfiguration.calcType
-              }
-              disabled={isSubsidyDisabled()}
+              value={subsidyConfiguration().calcType}
+              disabled={isCalcTypeDisabled()}
             />
             <TextInput
               classNames={{
@@ -125,9 +149,8 @@ function ROICSubsidy(props) {
               }}
               label="Value"
               name="value"
-              rightSection={
-                roicManagerConfiguration.roicSettingsConfiguration.subsidyConfiguration.calcType !== "FIXED" && "%"
-              }
+              icon={isFixedCalcType() && "$"}
+              rightSection={!isFixedCalcType() && "%"}
               value={getSubsidyValue()}
               onChange={(event) => handleSubsidyChange(event)}
               disabled={isSubsidyDisabled()}
@@ -140,18 +163,18 @@ function ROICSubsidy(props) {
                 classNames={{ root: 'text-input-root' }}
                 icon="$"
                 name="minValue"
-                value={roicManagerConfiguration.roicSettingsConfiguration.subsidyConfiguration.minValue}
+                value={subsidyConfiguration().minValue}
                 onChange={(event) => handleSubsidyChange(event)}
-                disabled={isSubsidyDisabled()}
+                disabled={isRangeDisabled()}
               />
               to
               <TextInput
                 classNames={{ root: 'text-input-root' }}
                 icon="$"
                 name="maxValue"
-                value={roicManagerConfiguration.roicSettingsConfiguration.subsidyConfiguration.maxValue}
+                value={subsidyConfiguration().maxValue}
                 onChange={(event) => handleSubsidyChange(event)}
-                disabled={isSubsidyDisabled()}
+                disabled={isRangeDisabled()}
               />
             </div>
           </div>
@@ -280,6 +303,11 @@ function ROICSubsidy(props) {
           flex-direction: column;
           margin-left: 2%;
           margin-bottom: 5%;
+        }
+        @media screen and (max-width: 1500px) {
+          .roic-subsidy-container :global(.value-root) {
+            width: 15%;
+          }
         }
       `}</style>
     </div>
