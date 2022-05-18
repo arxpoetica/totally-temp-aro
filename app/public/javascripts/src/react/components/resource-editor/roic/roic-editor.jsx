@@ -97,7 +97,7 @@ export class RoicEditor extends Component {
           "ELIGIBLE"
         ],
         calcType: "IRR",
-        value: 0.2,
+        value: 20,
         minValue: 0,
         maxValue: 500000000
       }
