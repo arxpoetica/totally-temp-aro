@@ -54,7 +54,7 @@ export class NetworkAnalysisOutput extends Component {
         <div className="col-md-8">
           <select
             className="form-control"
-            value={this.state.selectedCapitalType ? this.state.selectedCapitalType.name : ''}
+            value={this.state.selectedCapitalType ? this.state.selectedCapitalType : ''}
             onChange={event => this.setState({ selectedCapitalType: event.target.value })}
           >
             {this.props.chartReportDefinition
@@ -75,7 +75,7 @@ export class NetworkAnalysisOutput extends Component {
         <div className="col-md-8">
           <select
             className="form-control"
-            value={this.state.selectedChartType ? this.state.selectedChartType.name : ''}
+            value={this.state.selectedChartType ? this.state.selectedChartType : ''}
             onChange={event => this.setState({ selectedChartType: event.target.value })}
           >
             {this.props.chartReportDefinition
@@ -218,8 +218,9 @@ export class NetworkAnalysisOutput extends Component {
       data.datasets.forEach(dataset => { allYValues = allYValues.concat(dataset.data.map(item => item.y || item)) })
       const xTickFormat = dataModifiers[dataModifiers.labelProperty].tickFormat
       const yTickFormat = dataModifiers[rawChartDefinition.name].tickFormat
-      const labelLine1 = `${dataModifiers.labelProperty}: ${this.formatAxisValue(+tooltipItem.label, allXValues, xTickFormat.prefix || '', xTickFormat.suffix || '', xTickFormat.precision || 1)}`
-      const labelLine2 = `${rawChartDefinition.displayName}: ${this.formatAxisValue(+tooltipItem.value, allYValues, yTickFormat.prefix || '', yTickFormat.suffix || '', yTickFormat.precision || 1)}`
+      const dataset = rawChartDefinition.data.datasets.find(dataset => dataset.propertyName === rawChartDefinition.name)
+      const labelLine1 = `${rawChartDefinition.displayName}: ${this.formatAxisValue(+tooltipItem.label, allXValues, xTickFormat.prefix || '', xTickFormat.suffix || '', xTickFormat.precision || 1)}`
+      const labelLine2 = `${dataset && dataset.label}: ${this.formatAxisValue(+tooltipItem.value, allYValues, yTickFormat.prefix || '', yTickFormat.suffix || '', yTickFormat.precision || 1)}`
       return [labelLine1, labelLine2]
     }
   }
