@@ -25,7 +25,7 @@ export class NetworkAnalysisOutput extends Component {
     if (this.props.chartReportDefinition && !this.state.selectedChartType && !this.state.selectedCapitalType) {
       this.setState({
         selectedChartType: this.props.chartReportDefinition.uiDefinition.chartType[0].chartDefinition.name,
-        selectedCapitalType: this.props.chartReportDefinition.uiDefinition.capitalType[0].dataModifiers.labelProperty
+        selectedCapitalType: this.props.chartReportDefinition.uiDefinition.capitalType[1].dataModifiers.labelProperty
       })
     }
   }
