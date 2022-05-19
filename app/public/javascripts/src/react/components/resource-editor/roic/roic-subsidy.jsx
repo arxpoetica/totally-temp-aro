@@ -72,6 +72,10 @@ function ROICSubsidy(props) {
     return isLocationLayerCoverage() || isSubsidyDisabled()
   }
 
+  const isValueDisabled = () => {
+    return isCalcTypeDisabled()
+  }
+
   const isRangeDisabled = () => {
     return isCalcTypeDisabled() || isFixedCalcType()
   }
@@ -153,7 +157,7 @@ function ROICSubsidy(props) {
               rightSection={!isFixedCalcType() && "%"}
               value={getSubsidyValue()}
               onChange={(event) => handleSubsidyChange(event)}
-              disabled={isSubsidyDisabled()}
+              disabled={isValueDisabled()}
             />
           </div>
           <div className="subsidy-range">
