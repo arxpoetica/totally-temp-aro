@@ -42,6 +42,9 @@ function ROICSubsidy(props) {
 
   const getSubsidyValue = () => {
     let value = subsidyConfiguration().value
+    // The intent of this number is to prevent the user from entering decimals and also
+    // Translate values from the db EG:
+    // It comes from the database as a decimal in the form .2 and we need it as 20 for display
     if (
       !!Number(value)
       && !Number.isInteger(Number(value))
