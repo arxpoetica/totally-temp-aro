@@ -117,7 +117,7 @@ const NetworkPlan = (props) => {
           Modified {displayTimestamp(updatedDate)}
         </div>
       }
-      {planInProgress && <TopProgressBar /> }
+      {planInProgress && <TopProgressBar />}
 
       <style jsx>{`
         .network-plan {
