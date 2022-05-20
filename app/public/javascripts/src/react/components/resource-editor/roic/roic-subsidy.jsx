@@ -165,7 +165,7 @@ function ROICSubsidy(props) {
             <span className="range-title"> Subsidy Range </span>
             <div className="range-inputs">
               <NumberInput
-                classNames={{ root: 'number-input-root' }}
+                classNames={{ root: 'number-input-root range-item' }}
                 icon="$"
                 value={subsidyConfiguration().minValue}
                 onChange={(value) => handleSubsidyChange(value, 'minValue')}
@@ -174,9 +174,9 @@ function ROICSubsidy(props) {
                 disabled={isRangeDisabled()}
                 hideControls
                 />
-              to
+              <span className="range-item">to</span>
               <NumberInput
-                classNames={{ root: 'number-input-root' }}
+                classNames={{ root: 'number-input-root range-item' }}
                 icon="$"
                 value={subsidyConfiguration().maxValue}
                 onChange={(value) => handleSubsidyChange(value, 'maxValue')}
@@ -295,9 +295,13 @@ function ROICSubsidy(props) {
         }
         .range-inputs {
           display: flex;
-          width: 55%;
-          justify-content: space-between;
+          width: fit-content;
           align-items: baseline;
+        }
+        .range-item {
+          margin-right: 2%;
+          word-break: normal;
+          margin-left: 2%;
         }
         .range-title {
           font-size: 16px;
@@ -316,11 +320,6 @@ function ROICSubsidy(props) {
         @media screen and (max-width: 1500px) {
           .roic-subsidy-container :global(.value-root) {
             width: 20%;
-          }
-        }
-        @media screen and (max-width: 1820px) {
-          .range-inputs {
-            width: fit-content;
           }
         }
       `}</style>
