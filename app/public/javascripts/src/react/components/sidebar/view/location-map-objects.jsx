@@ -48,7 +48,7 @@ const filterFeatureForSelection = (feature) => {
   return true
 }
 
-export const LocationEditor = (props) => {
+const LocationMapObjects = (props) => {
 
   const [state, setState] = useState({ createdMapObjects: {} })
 
@@ -128,7 +128,7 @@ export const LocationEditor = (props) => {
       throw `createMapObject() not supported for geometry type ${feature.geometry.type}`
     }
 
-    mapObject.addListener('rightclick', event => {
+    mapObject.addListener('contextmenu', event => {
       if (!event || event.vertex) { return }
       // 'event' contains a MouseEvent which we use to get X,Y coordinates. The key of the MouseEvent object
       // changes with google maps implementations. So iterate over the keys to find the right object.
@@ -343,4 +343,4 @@ const mapDispatchToProps = (dispatch) => ({
   showContextMenu: (x, y) => dispatch(ContextMenuActions.showContextMenu(x, y)),
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(LocationEditor)
+export default connect(mapStateToProps, mapDispatchToProps)(LocationMapObjects)
