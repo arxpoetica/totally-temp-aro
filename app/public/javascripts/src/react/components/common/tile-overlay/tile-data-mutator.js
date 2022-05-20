@@ -81,8 +81,8 @@ TileDataMutator.getPointsForLeafTileRect = (tileData, nwTileId, seTileId) => {
   let maxY = Math.max(nwTileId.y, seTileId.y)
   let points = {}
   
-  for (let x=minX; x<maxX; x++) {
-    for (let y=minY; y<maxY; y++) {
+  for (let x=minX; x<=maxX; x++) {
+    for (let y=minY; y<=maxY; y++) {
       if (tileData[x] && tileData[x][y]) points = { ...points, ...tileData[x][y] }
       // if (tileData[x] && tileData[x][y]) {
       //   points.push(tileData[x][y])
