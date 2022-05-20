@@ -160,8 +160,8 @@ export class RoicEditor extends Component {
   }
 
   handleSubsidyChange(event, name) {
-    name = event.target ? event.target.name : name
-    const value = event.target ? event.target.value : event
+    name = event && event.target ? event.target.name : name
+    const value = event && event.target ? event.target.value : event
     const pristineRoicModel = this.state.roicManagerConfiguration
     let pruningCoverageTypes = pristineRoicModel.roicSettingsConfiguration.subsidyConfiguration.pruningCoverageTypes;
     if (name === 'pruningCoverageTypes') {
@@ -196,7 +196,7 @@ export class RoicEditor extends Component {
     const value = pristineRoicModel.roicSettingsConfiguration.subsidyConfiguration.value
     const calcType = pristineRoicModel.roicSettingsConfiguration.subsidyConfiguration.calcType
 
-    if (calcType !== 'FIXED') {
+    if (calcType !== 'FIXED' && value >= 1) {
       pristineRoicModel.roicSettingsConfiguration.subsidyConfiguration.value = value / 100
     }
     this.props.saveRoicConfigurationToServer(this.props.roicManager.id, pristineRoicModel)

@@ -1,5 +1,5 @@
 import React from "react";
-import { Switch, RadioGroup, Radio, Select, TextInput } from "@mantine/core"
+import { Switch, RadioGroup, Radio, Select, NumberInput } from "@mantine/core"
 
 const coverageTypes = Object.freeze({
   SUBSIDIZED: 'Use Location layer',
@@ -18,11 +18,7 @@ function ROICSubsidy(props) {
     const [label, labelDescription] = coverageTypes[calcType].split('|')
 
     return (
-      <span className="radio-label"
-        style={{
-
-        }}
-      >
+      <span className="radio-label">
         { label }
         { labelDescription && (
           <span className="radio-description">
@@ -38,24 +34,6 @@ function ROICSubsidy(props) {
   const isCalculationSetting = () => {
     const coverageTypes = subsidyConfiguration().pruningCoverageTypes
     return coverageTypes.length > 1 ? "BOTH" : coverageTypes[0];
-  }
-
-  const getSubsidyValue = () => {
-    let value = subsidyConfiguration().value
-    // The intent of this number is to prevent the user from entering decimals and also
-    // Translate values from the db EG:
-    // It comes from the database as a decimal in the form .2 and we need it as 20 for display
-    if (
-      !!Number(value)
-      && !Number.isInteger(Number(value))
-      && (
-        value.toString()[0] === '0'
-        || value.toString()[0] === '.'
-      )
-    ) {
-      value = value * 100
-    }
-    return value
   }
 
   const isSubsidyDisabled = () => {
@@ -81,6 +59,24 @@ function ROICSubsidy(props) {
 
   const isRangeDisabled = () => {
     return isCalcTypeDisabled() || isFixedCalcType()
+  }
+
+  const parseNumber = (value) => {
+    return !Number.isNaN(parseFloat(value))
+      ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+      : ''
+  }
+
+  const parseValue = () => {
+    // If number is a decimal display it as a whole number. eg:
+    // database: .2 -> user display: 20%
+    let stringValue = subsidyConfiguration().value
+    const toNumber = Number(stringValue)
+    if(!Number.isInteger(toNumber) && toNumber < 1) {
+      stringValue = stringValue * 100
+    }
+
+    return parseNumber(stringValue)
   }
   
   return (
@@ -148,40 +144,46 @@ function ROICSubsidy(props) {
               value={subsidyConfiguration().calcType}
               disabled={isCalcTypeDisabled()}
             />
-            <TextInput
+            <NumberInput
               classNames={{
                 rightSection: 'value-right-section',
                 root: 'value-root',
                 label: 'value-label'
               }}
               label="Value"
-              name="value"
               icon={isFixedCalcType() && "$"}
               rightSection={!isFixedCalcType() && "%"}
-              value={getSubsidyValue()}
-              onChange={(event) => handleSubsidyChange(event)}
+              value={subsidyConfiguration().value}
+              onChange={(value) => handleSubsidyChange(value, 'value')}
+              parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+              formatter={() => parseValue()}
               disabled={isValueDisabled()}
-            />
+              hideControls
+              />
           </div>
           <div className="subsidy-range">
             <span className="range-title"> Subsidy Range </span>
             <div className="range-inputs">
-              <TextInput
-                classNames={{ root: 'text-input-root' }}
+              <NumberInput
+                classNames={{ root: 'number-input-root' }}
                 icon="$"
-                name="minValue"
                 value={subsidyConfiguration().minValue}
-                onChange={(event) => handleSubsidyChange(event)}
+                onChange={(value) => handleSubsidyChange(value, 'minValue')}
+                parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+                formatter={(value) => parseNumber(value)}
                 disabled={isRangeDisabled()}
-              />
+                hideControls
+                />
               to
-              <TextInput
-                classNames={{ root: 'text-input-root' }}
+              <NumberInput
+                classNames={{ root: 'number-input-root' }}
                 icon="$"
-                name="maxValue"
                 value={subsidyConfiguration().maxValue}
-                onChange={(event) => handleSubsidyChange(event)}
+                onChange={(value) => handleSubsidyChange(value, 'maxValue')}
+                parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+                formatter={(value) => parseNumber(value)}
                 disabled={isRangeDisabled()}
+                hideControls
               />
             </div>
           </div>
@@ -242,7 +244,7 @@ function ROICSubsidy(props) {
           line-height: 25px
         }
         .roic-subsidy-container :global(.value-root) {
-          width: 10%;
+          width: 15%;
         }
         .roic-subsidy-container {
           background: #FFFFFF;
@@ -293,7 +295,7 @@ function ROICSubsidy(props) {
         }
         .range-inputs {
           display: flex;
-          width: 50%;
+          width: 55%;
           justify-content: space-between;
           align-items: baseline;
         }
@@ -313,7 +315,7 @@ function ROICSubsidy(props) {
         }
         @media screen and (max-width: 1500px) {
           .roic-subsidy-container :global(.value-root) {
-            width: 15%;
+            width: 20%;
           }
         }
       `}</style>

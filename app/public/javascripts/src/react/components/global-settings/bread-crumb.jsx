@@ -6,7 +6,7 @@ function ModalBreadCrumb(props) {
   }
 
   return (
-      <div style={{ display: "flex", fontSize: "16px" }}>
+      <div className="crumb-wrapper">
         {props.breadCrumb.map((crumb, i) => {
           return (
             <div
@@ -21,6 +21,12 @@ function ModalBreadCrumb(props) {
             </div>
           )
         })}
+        <style jsx>{`
+          .crumb-wrapper {
+            display: flex;
+            font-size: 16px;
+          }
+        `}</style>
       </div>
   );
 }
