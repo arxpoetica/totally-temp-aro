@@ -318,6 +318,11 @@ function ROICSubsidy(props) {
             width: 20%;
           }
         }
+        @media screen and (max-width: 1820px) {
+          .range-inputs {
+            width: fit-content;
+          }
+        }
       `}</style>
     </div>
   );
