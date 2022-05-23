@@ -19,6 +19,7 @@ const defaultState = {
   isEnteringTransaction: false,
   isCommittingTransaction: false,
   draftsState: null,
+  draftProgressTuple: [0, 0], // -> [total percent to load, incremental percent loaded]
   drafts: {},
   subnets: {},
   subnetFeatures: {},
@@ -342,6 +343,9 @@ function planEditorReducer (state = defaultState, { type, payload }) {
 
     case Actions.PLAN_EDITOR_SET_DRAFTS_STATE:
       return { ...state, draftsState: payload }
+
+    case Actions.PLAN_EDITOR_SET_DRAFTS_PROGRESS_TUPLE:
+      return { ...state, draftProgressTuple: payload }
 
     case Actions.PLAN_EDITOR_SET_DRAFTS: {
       return { ...state, drafts: { ...state.drafts, ...payload } }

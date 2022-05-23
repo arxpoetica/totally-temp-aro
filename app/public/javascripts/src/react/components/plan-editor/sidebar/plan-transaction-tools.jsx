@@ -2,7 +2,10 @@ import React from 'react'
 import { connect } from 'react-redux'
 import PlanEditorActions from '../plan-editor-actions'
 import PlanEditorSelectors from '../plan-editor-selectors'
+import { constants } from '../shared'
+const { DRAFT_STATES } = constants
 import { Button, Menu } from '@mantine/core'
+import { ProgressBar } from '../../common/progress-bar.jsx'
 import { StateIcon } from '../../common/state-icon.jsx'
 
 const DropdownCaret = () => {
@@ -26,6 +29,8 @@ const PlanTransactionTools = props => {
     transactionId,
     discardTransaction,
     fiberAnnotations,
+    draftsState,
+    draftProgressTuple,
     isChangesSaved,
     isRecalculating,
     isCommittingTransaction,
@@ -46,6 +51,13 @@ const PlanTransactionTools = props => {
   return (
 
     <div className="transaction-tools">
+
+      {draftsState !== DRAFT_STATES.END_INITIALIZATION &&
+        <div className="drafts-state">
+          <ProgressBar progress={draftProgressTuple} />
+        </div>
+      }
+
       <div className="state">
         <StateIcon state={isLoading ? 'loading' : 'good'} size="sm"/>
         <div className="text">{stateText}</div>
@@ -133,6 +145,8 @@ const mapStateToProps = state => ({
   transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
   selectedSubnetId: state.planEditor.selectedSubnetId,
   fiberAnnotations: state.planEditor.fiberAnnotations || {},
+  draftsState: state.planEditor.draftsState,
+  draftProgressTuple: state.planEditor.draftProgressTuple,
   isChangesSaved: PlanEditorSelectors.getIsChangesSaved(state),
   isRecalculating: state.planEditor.isRecalculating,
   isCommittingTransaction: state.planEditor.isCommittingTransaction,
