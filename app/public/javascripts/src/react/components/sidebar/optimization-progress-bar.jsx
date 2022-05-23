@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { ProgressBar } from '../common/progress-bar.jsx'
 
-const TopProgressBar = (props) => {
+const OptimizationProgressBar = (props) => {
   let progress = 0
   switch (props.activePlan.planType) {
     case 'UNDEFINED':
@@ -33,4 +33,4 @@ const mapStateToProps = (state) => ({
     analysisType: state.optimization.networkOptimization.optimizationInputs.analysis_type
 })
 
-export default connect(mapStateToProps, null)(TopProgressBar)
+export default connect(mapStateToProps, null)(OptimizationProgressBar)
