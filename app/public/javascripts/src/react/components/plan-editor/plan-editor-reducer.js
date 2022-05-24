@@ -19,7 +19,7 @@ const defaultState = {
   isEnteringTransaction: false,
   isCommittingTransaction: false,
   draftsState: null,
-  draftProgressTuple: [0, 0], // -> [total percent to load, incremental percent loaded]
+  draftProgressTuple: [0, 1], // -> [count loaded, total count to load]
   drafts: {},
   subnets: {},
   subnetFeatures: {},

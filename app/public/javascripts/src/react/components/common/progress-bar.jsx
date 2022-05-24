@@ -10,7 +10,12 @@ export const ProgressBar = ({ progress }) =>
     />
     <div className="label">{`${Math.round(progress)}%`}</div>
     <style jsx>{`
-      .prog-bar { position: relative; }
+      .prog-bar {
+        position: relative;
+      }
+      .prog-bar :global(.mantine-Progress-bar) {
+        opacity: 0.4;
+      }
       .label {
         display: flex;
         justify-content: center;

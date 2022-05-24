@@ -179,6 +179,10 @@ function subscribeToSocket() {
               }
             })
             batch(() => {
+              dispatch({
+                type: Actions.PLAN_EDITOR_SET_DRAFTS_PROGRESS_TUPLE,
+                payload: [0, Object.keys(drafts).length],
+              })
               dispatch({ type: Actions.PLAN_EDITOR_SET_DRAFTS, payload: drafts })
               dispatch({ type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION, payload: false })
             })
@@ -201,6 +205,11 @@ function subscribeToSocket() {
                 payload: draftProps,
               })
             }
+            const { planEditor: { draftProgressTuple } } = getState()
+            dispatch({
+              type: Actions.PLAN_EDITOR_SET_DRAFTS_PROGRESS_TUPLE,
+              payload: [draftProgressTuple[0] + 1, draftProgressTuple[1]],
+            })
             break
           case DRAFT_STATES.END_SUBNET_TREE: break // no op
           case DRAFT_STATES.END_INITIALIZATION: break // no op
