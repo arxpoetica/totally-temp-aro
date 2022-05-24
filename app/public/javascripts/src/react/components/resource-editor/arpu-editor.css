@@ -1,13 +1,3 @@
-.arpu-manager {
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  height: 100%;
-}
-
-/* ----------- */
-
 .arpu-manager .accordion { height: calc(100% - 70px); }
 .arpu-manager .segmentation {
   overflow-x: auto;
