@@ -9,6 +9,66 @@ import TileDataMutator from '../common/tile-overlay/tile-data-mutator'
 // --- helpers --- //
 const TWO_PI = 2 * Math.PI
 
+// this will be it's own importable file
+let mapIcons = {
+  'small_businesses': {
+    image: null,
+    size: {
+      w: 16,
+      h: 16,
+    },
+    // offset: { // if not present will use center
+    //   x: 0,
+    //   y: 0,
+    // },
+  },
+}
+var loadImg_small_businesses = new Image()
+loadImg_small_businesses.addEventListener('load', function() {
+  console.log(`image loaded ${this}`)
+  mapIcons['small_businesses'].image = this
+  mapIcons['small_businesses'].size.w = this.width
+  mapIcons['small_businesses'].size.h = this.height
+  if (!mapIcons['small_businesses'].offset) {
+    mapIcons['small_businesses'].offset = {
+      x: Math.floor(this.width * 0.5),
+      y: Math.floor(this.height * 0.5),
+    }
+  }
+}, false)
+loadImg_small_businesses.src = '/images/map_icons/aro/businesses_small_default.png'
+
+let iconsBadges = {
+  'alert': {
+    image: null,
+    size: {
+      w: 16,
+      h: 16,
+    },
+    offset: { // if not present will use center
+      x: -1,
+      y: 12,
+    },
+  },
+}
+var loadImg_alert = new Image()
+loadImg_alert.addEventListener('load', function() {
+  console.log(`image loaded ${this}`)
+  iconsBadges['alert'].image = this
+  iconsBadges['alert'].size.w = this.width
+  iconsBadges['alert'].size.h = this.height
+  if (!iconsBadges['alert'].offset) {
+    iconsBadges['alert'].offset = {
+      x: Math.floor(this.width * 0.5),
+      y: Math.floor(this.height * 0.5),
+    }
+  }
+}, false)
+loadImg_alert.src = '/images/map_icons/badges/badge_alert.png'
+
+
+
+
 // needs to be a class instance becasue is needs to keep a scope for the getTile callback functions
 class _SubnetTileOverlay extends Component {
   constructor (props) {
@@ -29,10 +89,28 @@ class _SubnetTileOverlay extends Component {
     ctx.fillStyle = '#99FF99'
     Object.values(points).forEach(point => {
       let px = TileUtils.worldCoordToTilePixel(point, tileId)
-      //ctx.arc(x, y, radius, startAngle, endAngle, counterclockwise)
-      ctx.beginPath()
-      ctx.arc(px.x+TileUtils.TILE_MARGIN, px.y+TileUtils.TILE_MARGIN, 5, 0, TWO_PI)
-      ctx.fill()
+      px.x += TileUtils.TILE_MARGIN
+      px.y += TileUtils.TILE_MARGIN
+      // get icon type
+      // //ctx.arc(x, y, radius, startAngle, endAngle, counterclockwise)
+      // ctx.beginPath()
+      // ctx.arc(px.x+TileUtils.TILE_MARGIN, px.y+TileUtils.TILE_MARGIN, 5, 0, TWO_PI)
+      // ctx.fill()
+      ctx.drawImage(
+        mapIcons['small_businesses'].image, 
+        px.x - mapIcons['small_businesses'].offset.x, 
+        px.y - mapIcons['small_businesses'].offset.y
+      )
+      // figure badges
+      // for each badge
+      let hasBadge = false
+      if (hasBadge) {
+        ctx.drawImage(
+          iconsBadges['alert'].image, 
+          px.x - iconsBadges['alert'].offset.x, 
+          px.y - iconsBadges['alert'].offset.y
+        )
+      }
     })
 
     return canvas
