@@ -26,6 +26,19 @@ const getRootDrafts = createSelector([getDrafts], (drafts) => {
   return rootDrafts
 })
 
+// TODO: we need to destinguish between 
+//  selectedSubnetId and selected feature 
+//  currently both are represented by selectedSubnetId
+const getNearestSubnetIdOfSelected = createSelector(
+  [getSelectedSubnetId, getSubnetFeatures, getDrafts],
+  (selectedSubnetId, subnetFeatures, drafts) => {
+    let subnetId = selectedSubnetId
+    if (!drafts[subnetId]) subnetId = subnetFeatures[subnetId] ? subnetFeatures[subnetId].subnetId : null
+    // TODO? if feature is not in a subnet send the root (first root)?
+    return subnetId
+  }
+)
+
 const getSelectedPlanThumbInformation = createSelector(
   [getSelectedSubnet, getPlanThumbInformation],
   (selectedSubnet, planThumbInformation) => {
@@ -390,6 +403,7 @@ const PlanEditorSelectors = Object.freeze({
   getSubnetFeatures,
   getSelectedPlanThumbInformation,
   getRootSubnetIdForSelected,
+  getNearestSubnetIdOfSelected,
 })
 
 export default PlanEditorSelectors

@@ -1734,7 +1734,8 @@ function parseAddApiSubnets (apiSubnets) {
     if (apiSubnets.length) {
       let subnets = {}
       let allFeatures = {}
-      let tileDataByRootSubnet = {}
+      //let tileDataByRootSubnet = {}
+      let tileDataBySubnet = {}
       // parse
       apiSubnets.forEach(apiSubnet => {
         let { subnet, subnetFeatures } = parseSubnet(apiSubnet)
@@ -1742,16 +1743,18 @@ function parseAddApiSubnets (apiSubnets) {
         subnets[subnetId] = subnet
         allFeatures = { ...allFeatures, ...subnetFeatures }
         // if is root subnet
-        if (!subnet.parentSubnetId) {
-          tileDataByRootSubnet[subnetId] = subnet.subnetLocationsById
-        }
+        // if (!subnet.parentSubnetId) {
+        //   tileDataByRootSubnet[subnetId] = subnet.subnetLocationsById
+        // }
+        tileDataBySubnet[subnetId] = subnet.subnetLocationsById
       })
       // dispatch add subnets and add subnetFeatures
       return batch(() => {
         // tile data
-        if (Object.keys(tileDataByRootSubnet).length){
-          dispatch(SubnetTileActions.setSubnetsData(tileDataByRootSubnet))
-        }
+        // if (Object.keys(tileDataByRootSubnet).length){
+        //   dispatch(SubnetTileActions.setSubnetsData(tileDataByRootSubnet))
+        // }
+        dispatch(SubnetTileActions.setSubnetsData(tileDataBySubnet))
         dispatch({
           type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
           payload: allFeatures,

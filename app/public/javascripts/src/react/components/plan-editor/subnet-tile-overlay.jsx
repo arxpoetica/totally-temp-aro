@@ -60,12 +60,12 @@ class _SubnetTileOverlay extends Component {
   //  it gets called everytime a tile initially enters the view.
   //  BUT it needs to be attached to 'this' so that 
   //  when it's called it uses the current (at call time) values of 
-  //  this.props.subnetTileData and this.props.rootSubnetId
+  //  this.props.subnetTileData and this.props.selectedSubnetId
   //  instead of the values at time of function declarition 
   overlayGetTileCallback = (coord, zoom, ownerDocument) => {
     let sCoords = String(coord)
     //console.log(`getTile ${sCoords} ${zoom}`)
-    //console.log(this.props.rootSubnetId)
+    //console.log(this.props.selectedSubnetId)
 
     const div = ownerDocument.createElement("div")
     
@@ -75,13 +75,13 @@ class _SubnetTileOverlay extends Component {
     div.style.overflow = 'visible'
 
     let tile = null
-    if (this.props.subnetTileData[this.props.rootSubnetId] && tileCache.subnets[this.props.rootSubnetId]) {
+    if (this.props.subnetTileData[this.props.selectedSubnetId] && tileCache.subnets[this.props.selectedSubnetId]) {
       let tileId = TileUtils.coordToTileId(coord, zoom)
       //console.log(tileId)
       tile = this.getTileCanvas(
         ownerDocument, 
-        this.props.subnetTileData[this.props.rootSubnetId], 
-        tileCache.subnets[this.props.rootSubnetId], 
+        this.props.subnetTileData[this.props.selectedSubnetId], 
+        tileCache.subnets[this.props.selectedSubnetId], 
         tileId
       )
     }
@@ -130,7 +130,7 @@ class _SubnetTileOverlay extends Component {
   // --- //
 
   initOverlayLayer () {
-    if (this.props.mapRef && this.props.rootSubnetId && !this.overlayLayer) {
+    if (this.props.mapRef && this.props.selectedSubnetId && !this.overlayLayer) {
       this.overlayLayer = this.makeOverlayLayer()
       this.props.mapRef.overlayMapTypes.push(this.overlayLayer) // this will cause a tile refresh
       return true
@@ -173,7 +173,7 @@ class _SubnetTileOverlay extends Component {
   componentDidUpdate(/* prevProps, prevState, snapshot */) {
     //console.log(' --- update --- ') 
     this.refreshTiles() // will init if it can and hasn't yet
-    // we could check to make sure that either rootSubnetId changed 
+    // we could check to make sure that either selectedSubnetId changed 
     //  OR subnetTileData changed on the subnet we are showing
     //  BUT that would probably take longer than simply querying cached tiles 
   }
@@ -191,7 +191,8 @@ const mapStateToProps = (state) => {
     mapRef: state.map.googleMaps,
     subnetTileData: state.subnetTileData, 
     //selectedSubnetId: state.planEditor.selectedSubnetId,
-    rootSubnetId: PlanEditorSelectors.getRootSubnetIdForSelected(state),
+    selectedSubnetId: PlanEditorSelectors.getNearestSubnetIdOfSelected(state)
+    //rootSubnetId: PlanEditorSelectors.getRootSubnetIdForSelected(state),
     // tile data, useEffect: on change tell overlayLayer to run getTile on all visible tiles using clearTileCache
     // tileOverlay.clearTileCache();
   }
