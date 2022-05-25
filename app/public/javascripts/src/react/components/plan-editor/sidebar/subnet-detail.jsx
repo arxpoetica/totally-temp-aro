@@ -158,7 +158,7 @@ const mapStateToProps = state => {
     subnetFeatures: state.planEditor.subnetFeatures,
     rootDrafts: PlanEditorSelectors.getRootDrafts(state),
     locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
-    iconsByType: MapLayerSelectors.getIconsByType(state),
+    iconsByType: MapLayerSelectors.getIconsByType(state), // TODO: use new icon system
     map: state.map.googleMaps,
   }
 }

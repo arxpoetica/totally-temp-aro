@@ -74,20 +74,22 @@ class _SubnetTileOverlay extends Component {
   constructor (props) {
     super(props)
     this.overlayLayer = null
-    //console.log(props)
+    // TODO: we will do two layers
+    //  the bottom one will be all locations at half opacity
   }
 
   // --- renderer --- //
 
   // this may become it's own static class
-  renderTileCanvas (ownerDocument, points, tileId) {
+  renderTileCanvas (ownerDocument, points, tileId, state) {
+    console.log(points)
     var canvas = ownerDocument.createElement('canvas')
     canvas.width = TileUtils.TILE_SIZE + (2 * TileUtils.TILE_MARGIN)
     canvas.height = TileUtils.TILE_SIZE + (2 * TileUtils.TILE_MARGIN)
     var ctx = canvas.getContext('2d')
 
     ctx.fillStyle = '#99FF99'
-    Object.values(points).forEach(point => {
+    for (const [id, point] of Object.entries(points)) {
       let px = TileUtils.worldCoordToTilePixel(point, tileId)
       px.x += TileUtils.TILE_MARGIN
       px.y += TileUtils.TILE_MARGIN
@@ -103,15 +105,14 @@ class _SubnetTileOverlay extends Component {
       )
       // figure badges
       // for each badge
-      let hasBadge = false
-      if (hasBadge) {
+      if (state.alertLocationIds[id]) {
         ctx.drawImage(
           iconsBadges['alert'].image, 
           px.x - iconsBadges['alert'].offset.x, 
           px.y - iconsBadges['alert'].offset.y
         )
       }
-    })
+    }
 
     return canvas
   }
@@ -124,7 +125,7 @@ class _SubnetTileOverlay extends Component {
       //console.log(points)
       if (Object.keys(points).length) {
         // render tile
-        tile = this.renderTileCanvas(ownerDocument, points, tileId)
+        tile = this.renderTileCanvas(ownerDocument, points, tileId, {alertLocationIds: this.props.alertLocationIds})
         tileCache.addTile(tile, tileId)
       }
     }
@@ -265,14 +266,28 @@ class _SubnetTileOverlay extends Component {
 // --- //
 
 const mapStateToProps = (state) => {
+  const selectedSubnetId = PlanEditorSelectors.getNearestSubnetIdOfSelected(state)
+  // TODO: this should probably be a selector 
+  //  OR we make it a dictionary in state
+  let alertLocationIds = {}
+  if (
+    selectedSubnetId
+    && state.planEditor.subnets[selectedSubnetId]
+    && state.planEditor.subnets[selectedSubnetId].faultTree
+  ) {
+    state.planEditor.subnets[selectedSubnetId].faultTree.rootNode.childNodes.forEach(faultNode => {
+      alertLocationIds[faultNode.faultReference.objectId] = faultNode
+    })
+  }
   return {
     mapRef: state.map.googleMaps,
     subnetTileData: state.subnetTileData, 
     //selectedSubnetId: state.planEditor.selectedSubnetId,
-    selectedSubnetId: PlanEditorSelectors.getNearestSubnetIdOfSelected(state)
+    selectedSubnetId,
     //rootSubnetId: PlanEditorSelectors.getRootSubnetIdForSelected(state),
     // tile data, useEffect: on change tell overlayLayer to run getTile on all visible tiles using clearTileCache
     // tileOverlay.clearTileCache();
+    alertLocationIds,
   }
 }
 

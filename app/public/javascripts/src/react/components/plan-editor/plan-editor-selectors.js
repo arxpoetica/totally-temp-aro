@@ -194,6 +194,7 @@ const getCursorLocations = createSelector(
 )
 
 // can have multiple subnets
+// TODO: do we still need this now that we use fault trees?
 const getAlertsForSubnetTree = createSelector(
   [getSubnets, getSubnetFeatures, getNetworkConfig],
   (subnets, subnetFeatures, networkConfig) => {
