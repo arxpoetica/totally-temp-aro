@@ -179,6 +179,10 @@ function subscribeToSocket() {
               }
             })
             batch(() => {
+              dispatch({
+                type: Actions.PLAN_EDITOR_SET_DRAFTS_PROGRESS_TUPLE,
+                payload: [0, Object.keys(drafts).length],
+              })
               dispatch({ type: Actions.PLAN_EDITOR_SET_DRAFTS, payload: drafts })
               dispatch({ type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION, payload: false })
             })
@@ -201,6 +205,11 @@ function subscribeToSocket() {
                 payload: draftProps,
               })
             }
+            const { planEditor: { draftProgressTuple } } = getState()
+            dispatch({
+              type: Actions.PLAN_EDITOR_SET_DRAFTS_PROGRESS_TUPLE,
+              payload: [draftProgressTuple[0] + 1, draftProgressTuple[1]],
+            })
             break
           case DRAFT_STATES.END_SUBNET_TREE: break // no op
           case DRAFT_STATES.END_INITIALIZATION: break // no op
@@ -265,7 +274,11 @@ function createFeature(feature) {
       if (!selectedSubnetId) {
         // this call just ensures we have the central office
         // since we don't know the context since no subnet is selected
-        await dispatch(addSubnets({ coordinates: feature.point.coordinates }))
+        const rootSubnet = Object.values(planEditor.drafts).find(draft => {
+          return draft.nodeType === 'central_office' || draft.nodeType === 'subnet_node'
+        })
+        if (!rootSubnet) throw new Error('No root node found.')
+        await dispatch(addSubnets({ subnetIds: [rootSubnet.subnetId] }))
       } else if (planEditor.subnetFeatures[selectedSubnetId].subnetId) {
         // otherwise get the correct `selectedSubnetId` since it exists
         selectedSubnetId = planEditor.subnetFeatures[selectedSubnetId].subnetId
@@ -1166,10 +1179,7 @@ function readFeatures (featureIds) {
   }
 }
 
-function appendEditFeaturesById (featureIds) {
-  return selectEditFeaturesById (featureIds, true)
-}
-function selectEditFeaturesById (featureIds, append=false) {
+function selectEditFeaturesById (featureIds) {
   return (dispatch, getState) => {
     // NOTE: this seemingly unnecessary call to `readFeatures` puts the features from service in state
     dispatch(readFeatures(featureIds))
@@ -1183,10 +1193,6 @@ function selectEditFeaturesById (featureIds, append=false) {
           }
         })
         let subnetToSelect = validFeatures[0]
-        if (append) {
-          validFeatures = state.planEditor.selectedEditFeatureIds.concat(validFeatures)
-          validFeatures = [...new Set(validFeatures)] // unique features only
-        }
         batch(() => {
           dispatch({
             type: Actions.PLAN_EDITOR_SET_SELECTED_EDIT_FEATURE_IDS, 
@@ -1235,216 +1241,81 @@ function deselectEditFeatureById (objectId) {
   }
 }
 
-function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
-  // FIXME: I (BRIAN) needs to refactor this, it works for the moment but does a lot of extranious things
-  //  ALSO there is a "bug" where if we select an FDT before selecting the CO or one of the hubs, we get no info
-  //  to fix this we need to find out what subnet the FDT is a part of and run that through here
+function addSubnets({ subnetIds = [], forceReload = false }) {
   return async (dispatch, getState) => {
 
-    const {
-      draftsState,
-      transaction,
-      subnets: cachedSubnets,
-      requestedSubnetIds,
-      features,
-      subnetFeatures,
-    } = getState().planEditor
+    try {
+      const { planEditor } = getState()
+      const { transaction, subnets } = planEditor
 
-    // NOTE: this is a temporary guard against loading subnets
-    // until we fix this up w/ further tuning
-    if (draftsState !== DRAFT_STATES.END_INITIALIZATION) {
-      // semi-silently fail
-      console.log(
-        '%cCannot load subnet until drafts are fully initialized',
-        'background-color:red;color:white;padding:8px;',
-      )
-      return
-    }
-
-    let command = {}
-    if (coordinates) {
-      command.cmdType = 'QUERY_CO_SUBNET'
-      command.point = { type: 'Point', coordinates }
-    } else {
       // this little dance only fetches uncached (or forced to reload) subnets
-      const cachedSubnetIds = [...Object.keys(cachedSubnets), ...requestedSubnetIds]
-      let uncachedSubnetIds = subnetIds.filter(id => {
-        let isNotCached = !cachedSubnetIds.includes(id)
-        return forceReload || isNotCached // gotta love that double negative...
-      })
-
+      const cachedSubnetIds = Object.keys(subnets)
+      let uncachedSubnetIds = subnetIds.filter(id => forceReload || !cachedSubnetIds.includes(id))
       // we have everything, no need to query service
       if (uncachedSubnetIds.length <= 0) {
-        dispatch(setIsCalculatingSubnets(false))
-        return Promise.resolve(subnetIds)
-      }
-      // pull out any ids that are not subnets
-      let validPseudoSubnets = []
-      uncachedSubnetIds = uncachedSubnetIds.filter(id => {
-        if (!features[id]) return true // unknown so we'll try it
-        let networkNodeType = features[id].feature.networkNodeType
-        // TODO: do other networkNodeTypes have subnets?
-        //  how would we know? solve that
-        if (validSubnetTypes.includes(networkNodeType)) {
-          return true
-        }
-        if (subnetFeatures[id]) validPseudoSubnets.push(id)
-        return false
-      })
-
-      // the selected ID isn't a subnet persay so don't query for it
-      // TODO: we need to fix this selection discrepancy
-      if (uncachedSubnetIds.length <= 0) {
-        // is the FDT in state? If so we can select it
-        if (validPseudoSubnets.length > 0) {
-          return Promise.resolve(validPseudoSubnets)
-        }
-        // if not we can't
-        return Promise.resolve()
+        // dispatch(setIsCalculatingSubnets(false))
+        return subnetIds
       }
 
-      command.cmdType = 'QUERY_SUBNET_TREE'
-      command.subnetIds = uncachedSubnetIds
-    }
-
-    // should we rename that now that we are using it for retreiving subnets as well?
-    dispatch(setIsCalculatingSubnets(true))
-    return AroHttp.post(`/service/plan-transaction/${transaction.id}/subnet_cmd/query-subnets`, command)
-      .then(({ data }) => {
-        let apiSubnets = data.filter(Boolean)
-        let fiberApiPromises = []
-        // TODO: break this out into fiber actions
-        apiSubnets.forEach(subnet => {
-          // subnet could be null (don't ask me)
-          const subnetId = subnet.subnetId.id
-          if (!subnet.parentSubnetId) {
-            dispatch(getConsructionAreaByRoot(subnet))
-            // TODO: get fiber annotations here
-            dispatch(getFiberAnnotations(subnetId))
-          }
-          fiberApiPromises.push(
-            AroHttp.get(`/service/plan-transaction/${transaction.id}/subnetfeature/${subnetId}`)
-              .then(fiberResult => subnet.fiber = fiberResult.data)
-              .catch(error => handleError(error))
-          )
-        })
-
-        return Promise.all(fiberApiPromises)
-          .then(() => {
-            dispatch(setIsCalculatingSubnets(false))
-            return new Promise((resolve, reject) => {
-              dispatch(parseAddApiSubnets(apiSubnets))
-              resolve(subnetIds)
-            })
-          })
-          .catch(error => {
-            handleError(error)
-            dispatch(setIsCalculatingSubnets(false))
-            return Promise.reject()
-          })
-      })
-      .catch(error => {
-        handleError(error)
-        dispatch(setIsCalculatingSubnets(false))
-        return Promise.reject()
-      })
-  }
-}
-
-function addSubnetTreeByLatLng([lng, lat]) {
-  return async(dispatch, getState) => {
-
-    try {
-      const { draftsState, transaction } = getState().planEditor
-
-      // NOTE: this is a temporary guard against loading subnets
-      // until we fix this up w/ further tuning
-      if (draftsState !== DRAFT_STATES.END_INITIALIZATION) {
-        // semi-silently fail
-        console.log(
-          '%cCannot load subnet until drafts are not fully initialized',
-          'background-color:red;color:white;padding:8px;',
-        )
-        return Promise.reject()
-      }
-
-      const transactionId = transaction && transaction.id
-      const command = {
-        cmdType: 'QUERY_CO_SUBNET',
-        point:{ type: 'Point', coordinates: [lng, lat] },
-      }
       dispatch(setIsCalculatingSubnets(true))
-      const endpoint = `/service/plan-transaction/${transactionId}/subnet_cmd/query-subnets`
-      const { data } = await AroHttp.post(endpoint, command)
 
-      let rootId = null
-      if (data && data[0] && data[0].subnetId && data[0].subnetId.id) {
-        rootId = data[0].subnetId.id
+      const apiSubnets = []
+      // TODO: break this out into fiber actions
+      for (const subnetId of uncachedSubnetIds) {
+        const subnetUrl = `/service/plan-transaction/${transaction.id}/subnet/${subnetId}`
+        const { data: subnet } = await AroHttp.get(subnetUrl)
+        if (!subnet.parentSubnetId) {
+          dispatch(getConsructionAreaByRoot(subnet))
+          dispatch(getFiberAnnotations(subnetId))
+        }
+        const fiberUrl = `/service/plan-transaction/${transaction.id}/subnetfeature/${subnetId}`
+        const fiberResult = await AroHttp.get(fiberUrl)
+        subnet.fiber = fiberResult.data
+        apiSubnets.push(subnet)
       }
 
-      if (rootId) {
-        return dispatch(addSubnets({ subnetIds: [rootId] }))
-      } else {
-        dispatch(setIsCalculatingSubnets(false))
-        return Promise.resolve([])
-      }
+      dispatch(parseAddApiSubnets(apiSubnets))
+      dispatch(setIsCalculatingSubnets(false))
+      return subnetIds
+
     } catch (error) {
       handleError(error)
       dispatch(setIsCalculatingSubnets(false))
       return Promise.reject()
     }
-
   }
 }
 
 function setSelectedSubnetId (selectedSubnetId) {
-  return (dispatch) => {
+  return (dispatch, getState) => {
+
     if (!selectedSubnetId) {
       dispatch({
         type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
         payload: null,
       })
     } else {
-      batch(() => {
-        dispatch(addSubnets({ subnetIds: [selectedSubnetId] }))
-          .then( (result) => {
-            // TODO: we need to figure out the proper subnet select workflow
-            // FDTs aren't subnets but can be selcted as such
-            // that is where the following discrepancy comes from 
-            if (!result) selectedSubnetId = null
-            dispatch({
-              type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
-              payload: selectedSubnetId,
-            })
-          }).catch(error => {
-            handleError(error)
-            dispatch({
-              type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
-              payload: null,
-            })
+      batch(async() => {
+        try {
+          const { planEditor } = getState()
+          const { drafts } = planEditor
+          // only load a new subnet if you have a subnet selected
+          if (drafts[selectedSubnetId]) await dispatch(addSubnets({ subnetIds: [selectedSubnetId] }))
+          // otherwise it's just a piece of equipment
+          // so go ahead and pass the `selectedSubnetId` along...
+          dispatch({
+            type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
+            payload: selectedSubnetId,
           })
+        } catch (error) {
+          handleError(error)
+          dispatch({
+            type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
+            payload: null,
+          })
+        }
 
       })
-    }
-  }
-}
-
-function onMapClick(featureIds, latLng) {
-  // TODO: this is a bit of a shim for the moment to handle selecting a terminal that isn't yet loaded
-  //  next we'll be selecting subnets by bounds using addSubnetTreeByLatLng 
-  // TODO: this file is has become a two course meal of spaghetti and return dispatch soup
-  //  Corr, fix yer mess!
-  return async(dispatch, getState) => {
-    try {
-      const state = getState()
-      if (!featureIds.length || state.planEditor.subnetFeatures[featureIds[0]]) { 
-        dispatch(selectEditFeaturesById(featureIds))
-      } else {
-        await dispatch(addSubnetTreeByLatLng([latLng.lng(), latLng.lat()]))
-        dispatch(selectEditFeaturesById(featureIds))
-      }
-    } catch (error) {
-      handleError(error)
     }
   }
 }
@@ -1913,11 +1784,9 @@ export default {
   setPlanThumbInformation,
   readFeatures,
   selectEditFeaturesById,
-  appendEditFeaturesById,
   deselectEditFeatureById,
   addSubnets,
   setSelectedSubnetId,
-  onMapClick,
   setCursorLocationIds,
   clearCursorLocationIds,
   addCursorEquipmentIds,

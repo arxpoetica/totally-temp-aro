@@ -75,6 +75,7 @@ workflows:
                 - uat
                 - plan-edit-tuning/main
                 - dev_subsidy
+                - fine-tuning/main
       - deploy:
           context: aro_qa_builds
           requires:
