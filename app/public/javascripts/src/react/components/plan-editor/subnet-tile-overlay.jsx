@@ -82,7 +82,6 @@ class _SubnetTileOverlay extends Component {
 
   // this may become it's own static class
   renderTileCanvas (ownerDocument, points, tileId, state) {
-    console.log(points)
     var canvas = ownerDocument.createElement('canvas')
     canvas.width = TileUtils.TILE_SIZE + (2 * TileUtils.TILE_MARGIN)
     canvas.height = TileUtils.TILE_SIZE + (2 * TileUtils.TILE_MARGIN)
@@ -105,7 +104,9 @@ class _SubnetTileOverlay extends Component {
       )
       // figure badges
       // for each badge
-      if (state.alertLocationIds[id]) {
+      // TODO: should be stored in Redux as a dictionary
+      let hasAlertBadge = Object.values(state.alertLocationIds).find(faultNode => faultNode.faultReference.objectId === id)
+      if (hasAlertBadge) {
         ctx.drawImage(
           iconsBadges['alert'].image, 
           px.x - iconsBadges['alert'].offset.x, 
@@ -275,9 +276,10 @@ const mapStateToProps = (state) => {
     && state.planEditor.subnets[selectedSubnetId]
     && state.planEditor.subnets[selectedSubnetId].faultTree
   ) {
-    state.planEditor.subnets[selectedSubnetId].faultTree.rootNode.childNodes.forEach(faultNode => {
-      alertLocationIds[faultNode.faultReference.objectId] = faultNode
-    })
+    // state.planEditor.subnets[selectedSubnetId].faultTree.rootNode.childNodes.forEach(faultNode => {
+    //   alertLocationIds[faultNode.faultReference.objectId] = faultNode
+    // })
+    alertLocationIds = state.planEditor.subnets[selectedSubnetId].faultTree.rootNode.childNodes
   }
   return {
     mapRef: state.map.googleMaps,
@@ -287,7 +289,7 @@ const mapStateToProps = (state) => {
     //rootSubnetId: PlanEditorSelectors.getRootSubnetIdForSelected(state),
     // tile data, useEffect: on change tell overlayLayer to run getTile on all visible tiles using clearTileCache
     // tileOverlay.clearTileCache();
-    alertLocationIds,
+    alertLocationIds, // TODO: when this changes the action creator needs to clear the cache
   }
 }
 
