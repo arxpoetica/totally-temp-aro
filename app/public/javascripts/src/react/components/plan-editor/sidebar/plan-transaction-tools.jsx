@@ -59,9 +59,8 @@ const PlanTransactionTools = props => {
         <div className="drafts-state">
           <ProgressBar progress={draftsLoadedProgress} />
           <Alert title="Initializing" color="yellow">
-            Please wait while the plan initializes content for editing.
-            We're performing several operations behind the scenes
-            which will help future performance and caching.
+            Please wait while the plan is prepared for editing.
+            After your first commit you will be able to edit more quickly.
           </Alert>
         </div>
       }
