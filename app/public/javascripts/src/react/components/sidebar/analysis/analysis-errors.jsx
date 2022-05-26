@@ -26,8 +26,8 @@ const errorHeaders = Object.freeze({
   }
 })
 
-const AnalysisErrors = (props) => {
-  const hasErrors = Object.values(props.planErrors).some(errorCategory => {
+const AnalysisErrors = props => {
+  const hasErrors = Object.values(props.activePlanErrors).some(errorCategory => {
     return Object.values(errorCategory).length > 0;
   })
 
@@ -36,7 +36,7 @@ const AnalysisErrors = (props) => {
     let errorMessage;
 
     errorMessage = baseErrorMessage =
-      props.planErrors[errorCategory][serviceCode].split(
+      props.activePlanErrors[errorCategory][serviceCode].split(
         ":: "
       )[1]
       
@@ -48,7 +48,7 @@ const AnalysisErrors = (props) => {
 
 
       Object.keys(errorHeaders[errorCategory]).forEach(keyword => {
-        if (props.planErrors[errorCategory][serviceCode].includes(keyword)) {
+        if (props.activePlanErrors[errorCategory][serviceCode].includes(keyword)) {
           errorMessage = errorHeaders[errorCategory][keyword];
         }
       })
@@ -82,8 +82,8 @@ const AnalysisErrors = (props) => {
     <div>
       { hasErrors && <h2>Failures</h2> }
       <div style={{ display: "flex", flexWrap: "wrap" }}>
-        {hasErrors && Object.keys(props.planErrors).map((errorCategory) => {
-          return Object.keys(props.planErrors[errorCategory]).map((serviceCode, i) => {
+        {hasErrors && Object.keys(props.activePlanErrors).map((errorCategory) => {
+          return Object.keys(props.activePlanErrors[errorCategory]).map((serviceCode, i) => {
           const errorBody = generateErrorBody(errorCategory, serviceCode)
             return (
               <React.Fragment key={serviceCode}>
@@ -103,7 +103,7 @@ const AnalysisErrors = (props) => {
 }
 
 const mapStateToProps = (state) => ({
-  planErrors: state.plan.activePlan.planErrors
+  activePlanErrors: state.plan.activePlanErrors
 })
 
 export default connect(mapStateToProps, null)(AnalysisErrors)
