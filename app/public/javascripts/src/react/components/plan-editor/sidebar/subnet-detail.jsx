@@ -19,16 +19,24 @@ const SubnetDetail = props => {
   }
   function getHoverPosition(featureId) {
     let locationAlert = props.locationAlerts[featureId]
-    if (!locationAlert) {
-      let allEquipment = [] // should probably put into selector
-      Object.values(props.rootDrafts).forEach(draft => {
-        allEquipment = allEquipment.concat(draft.equipment)
-      })
-      const node = allEquipment.find(node => node.id === featureId)
-      return WktUtils.getGoogleMapLatLngFromWKTPoint(node.point)
+    if (locationAlert) {
+      const { point } = locationAlert
+      return { lat: point.latitude, lng: point.longitude }
     }
-    const { point } = locationAlert
-    return { lat: point.latitude, lng: point.longitude }
+
+    // no location alert found, better search elsewhere
+    let equipment
+
+    // search among draft equipment first
+    let allEquipment = []
+    const drafts = Object.values(props.rootDrafts)
+    drafts.forEach(draft => allEquipment = allEquipment.concat(draft.equipment))
+    equipment = allEquipment.find(equipment => equipment.id === featureId)
+    if (equipment) return WktUtils.getGoogleMapLatLngFromWKTPoint(equipment.point)
+
+    // if no draft equipment found, check subnetFeatures
+    equipment = props.subnetFeatures[featureId]
+    if (equipment) return WktUtils.getGoogleMapLatLngFromWKTPoint(equipment.feature.geometry)
   }
 
   function disableRows() {

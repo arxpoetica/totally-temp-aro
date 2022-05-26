@@ -15,8 +15,9 @@ import SubnetTileOverlay from './subnet-tile-overlay.jsx'
 import AlertsTooltip from './alerts-tooltip.jsx'
 import BoundaryDrawCreator from './boundary-draw-creator.jsx'
 import AroFeatureEditor from '../common/editor-interface/aro-feature-editor.jsx'
-import { isDraftLoadingOrLoaded } from './shared'
 import { Overlay } from '@mantine/core'
+import { constants } from './shared'
+const { DRAFT_STATES } = constants
 import './plan-editor.css'
 
 export const PlanEditor = props => {
@@ -52,10 +53,11 @@ export const PlanEditor = props => {
     <div className="aro-plan-editor">
 
       <PlanTransactionTools />
+      <PlanEditorDrafts />
 
       <div className="body">
         {/* certain things shouldn't be visible until drafts are loaded */}
-        {isDraftLoadingOrLoaded(draftsState) && <>
+        {draftsState === DRAFT_STATES.END_INITIALIZATION && <>
           <EquipmentDragger />
           <EquipmentMapObjects />
           <EquipmentBoundaryMapObjects />
@@ -82,11 +84,9 @@ export const PlanEditor = props => {
             }
             return null
           })}
+          <PlanNavigation />
+          <AlertsTooltip />
         </>}
-
-        <PlanEditorDrafts />
-        <PlanNavigation />
-        <AlertsTooltip />
 
         {(!isChangesSaved || isRecalculating || isCommittingTransaction) &&
           <Overlay opacity={0.75} color="#ffffff" zIndex={5}/>

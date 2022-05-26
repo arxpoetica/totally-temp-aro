@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { klona } from 'klona'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import ResourceActions from './resource-actions'
@@ -13,7 +14,7 @@ import FusionEditor from '../resource-manager/fusion-editor.jsx'
 import NetworkArchitectureEditor from '../resource-manager/network-architecture-editor.jsx'
 import PlanningConstraintsEditor from '../resource-manager/planning-constraints-editor.jsx'
 import ArpuEditor from '../resource-editor/arpu-editor.jsx'
-import RoicEditor from '../resource-editor/roic-editor.jsx'
+import RoicEditor from './roic/roic-editor.jsx'
 import ImpedanceEditor from '../resource-editor/impedance-editor.jsx'
 import TsmEditor from '../resource-editor/tsm-editor.jsx'
 import RateReachEditor from '../resource-editor/rate-reach-editor.jsx'
@@ -96,6 +97,17 @@ export class ResourceEditor extends Component {
 		this.props.canMakeNewFilter(this.state.filterText)
 		this.props.setModalTitle('Resource Managers')
 	}
+
+  componentDidUpdate(prevProp) {
+    if (
+      !prevProp.isResourceEditor
+      && this.props.isResourceEditor
+    ) {
+      const breadCrumbClone = klona(this.props.breadCrumb)
+      breadCrumbClone.pop()
+      this.props.setBreadCrumb(breadCrumbClone)
+    }
+  }
 
   render () {
     return !this.props.resourceTypes
@@ -406,6 +418,9 @@ export class ResourceEditor extends Component {
 		this.props.startEditingResourceManager(selectedManager.id, selectedManager.resourceType,
 			selectedManager.name, 'EDIT_RESOURCE_MANAGER'
 		)
+    const breadCrumbClone = klona(this.props.breadCrumb)
+    breadCrumbClone.push(selectedManager.name)
+    this.props.setBreadCrumb(breadCrumbClone)
 		this.setState({ clickedResourceForEditAndClone: selectedManager.resourceType, clickedResource: '' })
 	}
 
@@ -451,6 +466,11 @@ export class ResourceEditor extends Component {
           resolve(resourceName)
         } else {
 					reject('Cancelled')
+          if (this.state.selectedResourceForClone && this.props.breadCrumb[this.props.breadCrumb.length - 1] === this.state.selectedResourceForClone.name) {
+            const breadCrumbClone = klona(this.props.breadCrumb)
+            breadCrumbClone.pop()
+            this.props.setBreadCrumb(breadCrumbClone)
+          }
 					this.setState({ clickedResource: '', clickedResourceForEditAndClone: '' })
         }
       })
@@ -465,6 +485,9 @@ export class ResourceEditor extends Component {
 				this.props.newManager(this.state.filterText, resourceName,this.props.loggedInUser,
 					this.state.selectedResourceForClone.id
 				)
+        const breadCrumbClone = klona(this.props.breadCrumb)
+        breadCrumbClone.push(this.state.selectedResourceForClone.name)
+        this.props.setBreadCrumb(breadCrumbClone)
 				this.setState({ clickedResourceForEditAndClone: this.state.filterText })
 			}
 		})
@@ -478,6 +501,11 @@ export class ResourceEditor extends Component {
 		} else {
 			this.getNewResourceDetailsFromUser()
 		}
+    if (this.state.selectedResourceForClone && this.props.breadCrumb[this.props.breadCrumb.length - 1] === this.state.selectedResourceForClone.name) {
+      const breadCrumbClone = klona(this.props.breadCrumb)
+      breadCrumbClone.pop()
+      this.props.setBreadCrumb(breadCrumbClone)
+    }
 		this.setState({ clickedResource: selectedManager.resourceType,
 			clickedResourceForEditAndClone: '', selectedResourceForClone: selectedManager
 		})
@@ -517,6 +545,11 @@ export class ResourceEditor extends Component {
 		if (clickedResource !== 'Competition System') {
 			this.props.setIsResourceEditor(false)
 		}
+    if (this.state.selectedResourceForClone && this.props.breadCrumb[this.props.breadCrumb.length - 1] === this.state.selectedResourceForClone.name) {
+      const breadCrumbClone = klona(this.props.breadCrumb)
+      breadCrumbClone.pop()
+      this.props.setBreadCrumb(breadCrumbClone)
+    }
 		this.setState({ clickedResource, selectedResourceForClone: '', clickedResourceForEditAndClone: '' })
   }
 
@@ -572,7 +605,8 @@ const mapStateToProps = (state) => ({
 	pageableData: state.resourceEditor.pageableData,
 	isMakeNewFilter: state.resourceEditor.isMakeNewFilter,
 	isResourceEditor: state.resourceEditor.isResourceEditor,
-	loggedInUser: state.user.loggedInUser
+	loggedInUser: state.user.loggedInUser,
+  modalTitle: state.resourceEditor.modalTitle,
 })
 
 const mapDispatchToProps = (dispatch) => ({

@@ -475,11 +475,6 @@ class State {
         service.setIsMapClicked(true)
       }
 
-      if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_PLAN) {
-        const featureIds = options.equipmentFeatures.map(feature => feature.object_id)
-        service.planEditorOnMapClick(featureIds, options.latLng)
-      }
-
       // ToDo: this check may need to move into REACT
       if (service.rSelectedDisplayMode === service.displayModes.EDIT_RINGS) {
         service.onFeatureSelectedRedux(options)
@@ -1804,7 +1799,6 @@ class State {
       setShowGlobalSettings: () => dispatch(GlobalSettingsActions.setShowGlobalSettings(true)),
       setCurrentViewToReleaseNotes: (viewString) => dispatch(GlobalSettingsActions.setCurrentViewToReleaseNotes(viewString)),
       setIsMapClicked: mapFeatures => dispatch(SelectionActions.setIsMapClicked(mapFeatures)),
-      planEditorOnMapClick: (featureIds, latLng) => dispatch(PlanEditorActions.onMapClick(featureIds, latLng)),
       showContextMenuForLocations: (featureIds, event) => dispatch(PlanEditorActions.showContextMenuForLocations(featureIds, event)),
       setUserGroupsMsg: (userGroupsMsg) => dispatch(GlobalSettingsActions.setUserGroupsMsg(userGroupsMsg)),
       setRecreateTilesAndCache: (mapSelection) => dispatch(ViewSettingsActions.recreateTilesAndCache(mapSelection)),

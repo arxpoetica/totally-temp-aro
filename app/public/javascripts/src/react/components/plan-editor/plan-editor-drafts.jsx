@@ -4,18 +4,22 @@ import Boundary from './map-objects/boundary.jsx'
 import EquipmentNode from './map-objects/equipment-node.jsx'
 import PlanEditorActions from './plan-editor-actions'
 import PlanEditorSelectors from './plan-editor-selectors'
-import { getMetersPerPixel } from './shared'
+import { constants, getMetersPerPixel } from './shared'
+const { DRAFT_STATES } = constants
 
 // TODO: in the future, might have abstract higher order component to wrap state.
 // Basically, the contract is fragile if we want to reuse `Boundary` or
 // `EquipmendNode` elsewhere. For now, just lifting state to this component
 // for those actions.
 
+let draftsStateStatic
+
 const PlanEditorDrafts = props => {
 
   const {
     drafts,
     rootDrafts,
+    draftsState,
     googleMaps,
     selectedSubnetId,
     selectEditFeaturesById,
@@ -24,7 +28,13 @@ const PlanEditorDrafts = props => {
 
   const [objects, setObjects] = useState([])
 
+  // this little dance keeps `draftsStateStatic` up to date
+  // which is necessary for use in `mapClickHandler`
+  useEffect(() => { draftsStateStatic = draftsState }, [draftsState])
+
   const mapClickHandler = event => {
+    if (draftsStateStatic !== DRAFT_STATES.END_INITIALIZATION) return
+
     const metersPerPixel = getMetersPerPixel(event.latLng.lat(), googleMaps.getZoom())
     // NOTE: this is a workaround to make sure we're selecting
     // equipment/boundaries that might be piled on top of one another
@@ -119,6 +129,7 @@ const PlanEditorDrafts = props => {
 const mapStateToProps = state => ({
   drafts: state.planEditor.drafts,
   rootDrafts: PlanEditorSelectors.getRootDrafts(state), 
+  draftsState: state.planEditor.draftsState,
   googleMaps: state.map.googleMaps,
   selectedSubnetId: state.planEditor.selectedSubnetId,
   equipments: state.mapLayers.networkEquipment.equipments,
