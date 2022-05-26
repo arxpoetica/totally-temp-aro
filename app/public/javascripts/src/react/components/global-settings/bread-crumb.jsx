@@ -1,4 +1,5 @@
 import React from "react";
+import { Button } from "@mantine/core"
 
 function ModalBreadCrumb(props) {
   const isLastCrumb = (index) => {
@@ -7,10 +8,15 @@ function ModalBreadCrumb(props) {
 
   return (
       <div className="crumb-wrapper">
+        { props.breadCrumb.length > 1 && 
+          <Button style={{ marginRight: "2%" }} color="primary" onClick={props.back}>
+            Back
+          </Button>
+        }
         {props.breadCrumb.map((crumb, i) => {
           return (
             <div
-              key={crumb}
+              key={crumb + i}
               style={{
                 color: isLastCrumb(i) ? 'black' : 'grey',
                 fontWeight: isLastCrumb(i) ? 'bold' : 'normal',
@@ -25,6 +31,8 @@ function ModalBreadCrumb(props) {
           .crumb-wrapper {
             display: flex;
             font-size: 16px;
+            align-items: baseline;
+            white-space: nowrap;
           }
         `}</style>
       </div>

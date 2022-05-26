@@ -1,4 +1,5 @@
-import React, { Component } from 'react'
+import React, { useEffect, useState } from 'react'
+import { usePrevious } from '../../common/view-utils'
 import { klona } from 'klona'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
@@ -18,121 +19,280 @@ import RoicEditor from './roic/roic-editor.jsx'
 import ImpedanceEditor from '../resource-editor/impedance-editor.jsx'
 import TsmEditor from '../resource-editor/tsm-editor.jsx'
 import RateReachEditor from '../resource-editor/rate-reach-editor.jsx'
+import { Breadcrumbs } from '@mantine/core'
 
-export class ResourceEditor extends Component {
-  constructor (props) {
-		super(props)
+function ResourceEditor(props) {
+  const sortableColumns = { 'NAME': 'name', 'RESOURCE_TYPE': 'resource_type' }
+  const [_ssp, setSelectedPage] = useState(0)
+  const [searchText, setSearchText] = useState('')
+  const [openRowId, setOpenRowId] = useState(null)
+  const [cloneManager, setCloneManager] = useState('')
+  const [cloneManagerType, setCloneManagerType] = useState('')
+  const [openedManager, setOpenedManager] = useState('')
+  const [selectedResourceName, setSelectedResourceName] = useState('')
+  const [filterText, setFilterText] = useState('')
+  const [isOrderDesc, setIsOrderDesc] = useState(false)
+  const [selectedColumn, setSelectedColumn] = useState('')
 
-		this.handleOnDiscard = this.handleOnDiscard.bind(this)
-
-		this.sortableColumns = { 'NAME': 'name', 'RESOURCE_TYPE': 'resource_type' }
-    this.sortedRows = []
-    this.state = {
-			selectedPage: 0,
-			searchText: '',
-			filterText: '',
-			openRowId: null,
-			selectedResourceName: '',
-			selectedResourceForClone: '',
-			clickedResource: '',
-			clickedResourceForEditAndClone: '',
-		}
-
-		this.actionsECD = [
-      {
-        buttonText: 'Edit', // Edit
-        buttonClass: 'btn-light',
-        iconClass: 'fa-edit',
-        toolTip: 'Edit',
-        isEnabled: (row) => {
-          return this.canEdit(row)
-        },
-        callBack: (row) => {
-          this.editSelectedManager(row)
-        }
+  const actionsECD = [
+    {
+      buttonText: 'Edit', // Edit
+      buttonClass: 'btn-light',
+      iconClass: 'fa-edit',
+      toolTip: 'Edit',
+      isEnabled: (row) => {
+        return canEdit(row)
       },
-      {
-        buttonText: 'Clone', // Clone
-        buttonClass: 'btn-light',
-        iconClass: 'fa-copy',
-        toolTip: 'Clone',
-        callBack: (row) => {
-          this.cloneSelectedManagerFromSource(row)
-        }
-      },
-      {
-        buttonText: 'Delete', // Delete
-        buttonClass: 'btn-outline-danger',
-        iconClass: 'fa-trash-alt',
-        toolTip: 'Delete',
-        isEnabled: (row) => {
-          return this.canAdmin(row)
-        },
-        callBack: (row) => {
-          this.deleteSelectedResourceManager(row)
-        }
+      callBack: (row) => {
+        editSelectedManager(row)
       }
-		]
-	}
+    },
+    {
+      buttonText: 'Clone', // Clone
+      buttonClass: 'btn-light',
+      iconClass: 'fa-copy',
+      toolTip: 'Clone',
+      callBack: (row) => {
+        cloneSelectedManagerFromSource(row)
+      }
+    },
+    {
+      buttonText: 'Delete', // Delete
+      buttonClass: 'btn-outline-danger',
+      iconClass: 'fa-trash-alt',
+      toolTip: 'Delete',
+      isEnabled: (row) => {
+        return canAdmin(row)
+      },
+      callBack: (row) => {
+        deleteSelectedResourceManager(row)
+      }
+    }
+  ]
 
-	static getDerivedStateFromProps(nextProps, prevState) {
-		if (prevState.filterText !== undefined && nextProps.filterText !== undefined) {
-			if (prevState.filterText === '') {
-				return {
-					filterText: nextProps.filterText,
-					selectedResourceName: nextProps.selectedResourceName,
-				}
-			} else {
-				return {
-					filterText: prevState.filterText,
-					selectedResourceName: prevState.selectedResourceName,
-				}
-			}
-		}
-  }
+  useEffect(() => {
+    props.getResourceTypes()
+    props.getResourceManagers(filterText)
+		props.canMakeNewFilter(filterText)
+		props.setModalTitle('Resource Managers')
+  }, [])
 
-  componentDidMount () {
-    this.props.getResourceTypes()
-    this.props.getResourceManagers(this.state.filterText)
-		this.props.canMakeNewFilter(this.state.filterText)
-		this.props.setModalTitle('Resource Managers')
-	}
+  useEffect(() => {
+    if (filterText !== undefined && props.filterText !== undefined) {
+      if (filterText === '') {
+        setFilterText(props.filterText)
+        setSelectedResourceName(props.selectedResourceName)
+      }
+    }
+  }, [props.filterText])
 
-  componentDidUpdate(prevProp) {
+  useEffect(() => {
+    const editingManager = props.editingManager
+    let selectedManager = editingManager && props.managers[editingManager.id]
+
     if (
-      !prevProp.isResourceEditor
-      && this.props.isResourceEditor
+      !props.isResourceEditor
+      && selectedManager
+      && props.selectedEditingMode === 'EDIT_RESOURCE_MANAGER'
     ) {
-      const breadCrumbClone = klona(this.props.breadCrumb)
-      breadCrumbClone.pop()
-      this.props.setBreadCrumb(breadCrumbClone)
+      if (!openedManager) {
+        setOpenedManager(selectedManager.definition.managerType)
+      }
+      if (!props.breadCrumb.includes(selectedManager.resourceManagerName)) {
+        addBreadCrumb(selectedManager.resourceManagerName)
+      }
+    } else if (
+      props.isResourceEditor
+      && props.selectedEditingMode === 'LIST_RESOURCE_MANAGERS'
+    ) {
+      if(props.breadCrumb.length >= 3) {
+        removeBreadCrumb()
+      }
+      setOpenedManager('')
+    }
+  }, [props.editingManager, props.selectedEditingMode, props.isResourceEditor])
+
+	const handleOnDiscard = () => {
+		this.props.setIsResourceEditor(true)
+	}
+
+	const onSortClick = (colName) => {
+    if (selectedColumn === colName) {
+      setIsOrderDesc(!isOrderDesc)
+    } else {
+      setSelectedColumn(colName)
     }
   }
 
-  render () {
-    return !this.props.resourceTypes
-    ? null
-    : <>
-				{
-          this.props.isResourceEditor
-          ? this.renderResourceEditorTable()
-          : this.renderResourceManager()
-        }
-      </>
+  const addBreadCrumb = (name) => {
+    const breadCrumbClone = klona(props.breadCrumb)
+    breadCrumbClone.push(name)
+    props.setBreadCrumb(breadCrumbClone)
   }
 
-  renderResourceEditorTable() {
+  const removeBreadCrumb = () => {
+    const breadCrumbClone = klona(props.breadCrumb)
+    breadCrumbClone.pop()
+    props.setBreadCrumb(breadCrumbClone)
+  }
 
+	const editSelectedManager = (selectedManager) => {
+    props.startEditingResourceManager(
+      selectedManager.id,
+      selectedManager.resourceType,
+      selectedManager.name,
+      'EDIT_RESOURCE_MANAGER'
+    )
+    setCloneManager('')
+    setCloneManagerType('')
+	}
+
+  const askNewResourceDetailsFromUser = () => {
+		// Get the name for a new plan from the user
+    return new Promise((resolve, reject) => {
+      const swalOptions = {
+        title: 'Resource name required',
+        text: 'Enter the name of the new resource',
+        type: 'input',
+        showCancelButton: true,
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'OK'
+      }
+      swal(swalOptions, (resourceName) => {
+        if (resourceName) {
+          resolve(resourceName)
+        } else {
+					reject('Cancelled')
+          setCloneManagerType('')
+          setCloneManager('')
+        }
+      })
+    })
+	}
+  
+  const getNewResourceDetailsFromUser = (resourceType, id) => {
+    askNewResourceDetailsFromUser()
+      .then((resourceName) => {
+        if (resourceName) {
+          setCloneManagerType('')
+          props.newManager(
+            resourceType,
+            resourceName,
+            props.loggedInUser,
+            id
+          )
+        }
+      })
+      .catch((err) => console.error(err))
+  }
+    
+  const cloneSelectedManagerFromSource = (selectedManager) => {
+    const { resourceType } = selectedManager
+    if (resourceType === 'price_book' || resourceType === 'rate_reach_manager') {
+      setCloneManagerType(resourceType)
+      setCloneManager(selectedManager)
+      props.setIsResourceEditor(false)
+    } else {
+      getNewResourceDetailsFromUser(resourceType, selectedManager.id)
+    }
+  }
+
+	const askUserToConfirmManagerDelete = (managerName) => {
+    return new Promise((resolve, reject) => {
+      swal({
+        title: 'Delete resource manager?',
+        text: `Are you sure you want to delete "${managerName}"?`,
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No'
+      }, (result) => {
+        if (result) {
+          resolve(true)
+        } else {
+          resolve(false)
+        }
+      })
+    })
+	}
+
+	const deleteSelectedResourceManager = (selectedManager) => {
+		askUserToConfirmManagerDelete(selectedManager.name)
+      .then((okToDelete) => {
+        if (okToDelete) {
+          props.deleteResourceManager(selectedManager, selectedManager.resourceType)
+        }
+      })
+      .catch((err) => console.error(err))
+	}
+
+  const handleCanMakeNewFilter = (cloneManagerType) => {
+    const { setIsResourceEditor } = props;
+		if (cloneManagerType !== 'competition_system') {
+			setIsResourceEditor(false)
+		}
+    setCloneManagerType('')
+    setCloneManagerType('')
+    setOpenedManager('')
+  }
+
+  const toggleRow = (rowId) => {
+		if (openRowId === rowId) {
+			rowId = null
+		}
+    setOpenRowId(rowId)
+  }
+
+	const handlePageClick = (data) => {
+		props.nextOrPrevPageClick(data.selected)
+		setSelectedPage(data.selected)
+	}
+
+	const searchManagers = () => {
+		const searchText = searchText
+		props.searchManagers(searchText)
+		props.getResourceManagers(filterText)
+		setSearchText(searchText)
+	}
+  
+	const handleChange = (event) => {
+    const searchText = event.target.value
+		event.target.name = searchText
+    setSearchText(searchText)
+	}
+
+	const handleEnter = (event) => {
+		if (event.key === 'Enter') {
+			const searchText = searchText
+			props.searchManagers(searchText)
+			props.getResourceManagers(filterText)
+			setSearchText(searchText)
+		}
+	}
+
+	const handlefilterManager = (event) => {
+		const filterText = event.target.value
+		const selectedResourceIndex = event.nativeEvent.target.selectedIndex
+		const selectedResourceName = event.nativeEvent.target[selectedResourceIndex].text
+
+		props.getResourceManagers(filterText)
+		props.canMakeNewFilter(filterText)
+    setFilterText(filterText)
+    setSelectedResourceName(selectedResourceName)
+	}
+
+  const renderResourceEditorTable = () => {
     let paginationElement
-    if (this.props.pageableData.pageCount > 1) {
+    if (props.pageableData.pageCount > 1) {
 			paginationElement = (
 				<ReactPaginate
 					previousLabel={'«'}
 					nextLabel={'»'}
 					breakLabel={<span className="gap">...</span>}
-					pageCount={this.props.pageableData.pageCount}
-					onPageChange={(event) => this.handlePageClick(event)}
-					forcePage={this.props.pageableData.currentPage}
+					pageCount={props.pageableData.pageCount}
+					onPageChange={(event) => handlePageClick(event)}
+					forcePage={props.pageableData.currentPage}
 					activeClassName={"active"}
 					containerClassName={'pagination'}
 					pageClassName={'page-item'}
@@ -143,25 +303,6 @@ export class ResourceEditor extends Component {
 			)
 		}
 
-		this.sortedRows = this.props.pageableData.paginateData.slice(0)
-    this.sortedRows.sort((a, b) => {
-      let aVal = ''
-      let bVal = ''
-      if (this.state.selectedColumn === this.sortableColumns.NAME) {
-        aVal = a['name']
-				bVal = b['name']
-      } else if (this.state.selectedColumn === this.sortableColumns.RESOURCE_TYPE) {
-        aVal = a['resourceType']
-				bVal = b['resourceType']
-      }
-      if (this.state.isOrderDesc) {
-        const holder = aVal
-        aVal = bVal
-        bVal = holder
-      }
-      return aVal.toLowerCase() > bVal.toLowerCase() ? 1 : -1
-    })
-
     return (
 			<div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
 					<div style={{flex: '0 0 auto'}}>
@@ -170,11 +311,11 @@ export class ResourceEditor extends Component {
 								<div className="col-sm-8">
 									<select
 										className="form-control"
-										onChange={(event) => this.handlefilterManager(event)}
-										value={this.state.filterText}
+										onChange={(event) => handlefilterManager(event)}
+										value={filterText}
 									>
 										<option key="all" value="all">all</option>
-										{this.props.resourceTypes.map(item =>
+										{props.resourceTypes.map(item =>
 											<option value={item.name} key={item.name}>{item.description}</option>
 										)}
 									</select>
@@ -183,12 +324,12 @@ export class ResourceEditor extends Component {
 						<div className="form-group row">
 							<label className="col-sm-4 col-form-label">Search Name:</label>
 							<div className="col-sm-8 input-group">
-								<input type="text" className="form-control input-sm" onChange={(event) => this.handleChange(event)}
-									onKeyDown={(event) => this.handleEnter(event)} name="searchText" value={this.state.searchText}/>               
+								<input type="text" className="form-control input-sm" onChange={(event) => handleChange(event)}
+									onKeyDown={(event) => handleEnter(event)} name="searchText" value={searchText}/>               
 								<button
 									className="btn btn-light input-group-append"
 									style={{cursor: 'pointer'}}
-									onClick={(event) => this.searchManagers(event)}
+									onClick={(event) => searchManagers(event)}
 								>
 									<span style={{marginTop: '10px'}} className="fa fa-search"></span>
 								</button>
@@ -202,26 +343,26 @@ export class ResourceEditor extends Component {
 									<th></th>
 									<th
 										className='ei-table-col-head-sortable ng-binding ng-scope'
-										onClick={event => { this.onSortClick(this.sortableColumns.NAME) }}
+										onClick={event => { onSortClick(sortableColumns.NAME) }}
 										style={{'cursor': 'pointer'}}
 									>
 										Name
-										{this.state.selectedColumn === this.sortableColumns.NAME
+										{selectedColumn === sortableColumns.NAME
 											? <div className='ei-table-col-sort-icon ng-scope'>
-													<i className={'fa' + (this.state.isOrderDesc ? ' fa-chevron-up' : ' fa-chevron-down')} aria-hidden='true'> </i>
+													<i className={'fa' + (isOrderDesc ? ' fa-chevron-up' : ' fa-chevron-down')} aria-hidden='true'> </i>
 												</div>
 											: ''
 										}
 									</th>
 									<th
 										className='ei-table-col-head-sortable ng-binding ng-scope'
-										onClick={event => { this.onSortClick(this.sortableColumns.RESOURCE_TYPE) }}
+										onClick={event => { onSortClick(sortableColumns.RESOURCE_TYPE) }}
 										style={{'cursor': 'pointer'}}
 									>
 										Resource Type
-										{this.state.selectedColumn === this.sortableColumns.RESOURCE_TYPE
+										{selectedColumn === sortableColumns.RESOURCE_TYPE
 											? <div className='ei-table-col-sort-icon ng-scope'>
-													<i className={'fa' + (this.state.isOrderDesc ? ' fa-chevron-up' : ' fa-chevron-down')} aria-hidden='true'> </i>
+													<i className={'fa' + (isOrderDesc ? ' fa-chevron-up' : ' fa-chevron-down')} aria-hidden='true'> </i>
 												</div>
 											: ''
 										}
@@ -230,7 +371,7 @@ export class ResourceEditor extends Component {
 								</tr>
 							</thead>
 							<tbody>
-								{this.renderDataRows()}
+								{renderDataRows()}
 							</tbody>
 						</table>
 					</div>
@@ -240,17 +381,17 @@ export class ResourceEditor extends Component {
 						</div>
 					</div>
 					{
-					this.props.isMakeNewFilter &&
+					props.isMakeNewFilter &&
 						<div style={{flex: '0 0 auto'}}>
 							<div className="form-group row justify-content-end">
 								<div className="col-sm-6">
 									<button
-										onClick={() => this.handleCanMakeNewFilter(this.state.selectedResourceName)}
-										value={this.state.selectedResourceName}
+										onClick={() => handleCanMakeNewFilter(selectedResourceName)}
+										value={selectedResourceName}
 										className="btn btn-light btn-block"
 									>
 										<i className="fa fa-file action-button-icon"></i>
-										New {this.state.selectedResourceName}
+										New {selectedResourceName}
 									</button>
 								</div>
 							</div>
@@ -258,30 +399,55 @@ export class ResourceEditor extends Component {
 					}
 					<>
 						{
-							this.state.clickedResource === 'Competition System' &&
-							this.getNewResourceDetailsFromUser()
+							cloneManagerType === 'competition_system'
+                && getNewResourceDetailsFromUser(
+                      cloneManagerType,
+                      cloneManager.i
+                    )
 						}
 					</>
 			</div>
 		)
 	}
 
-	renderDataRows () {
+	const renderDataRows = () => {
     const jsx = []
-    this.sortedRows.forEach((recourceItem, recourceKey) => {
-      jsx.push(this.renderDataRow(recourceItem, recourceKey ))
+    const clonePaginatedData = klona(props.pageableData.paginateData.slice(0))
+    clonePaginatedData.sort((a, b) => {
+      let aVal = ''
+      let bVal = ''
+      if (selectedColumn === sortableColumns.NAME) {
+        aVal = a['name']
+				bVal = b['name']
+      } else if (selectedColumn === sortableColumns.RESOURCE_TYPE) {
+        aVal = a['resourceType']
+				bVal = b['resourceType']
+      }
+      if (isOrderDesc) {
+        const holder = aVal
+        aVal = bVal
+        bVal = holder
+      }
+      return aVal.toLowerCase() > bVal.toLowerCase() ? 1 : -1
+    })
+    clonePaginatedData.forEach((recourceItem, recourceKey) => {
+      jsx.push(renderDataRow(recourceItem, recourceKey))
     })
     return jsx
 	}
 
-	renderDataRow (listValue, rowKey) {
-		const resourceFormattedObject = { identifier: listValue.id, dataType: listValue.resourceType,
-			name: listValue.name, permissions: 63, id: listValue.id
+	const renderDataRow = (listValue, rowKey) => {
+		const resourceFormattedObject = {
+      identifier: listValue.id,
+      dataType: listValue.resourceType,
+			name: listValue.name,
+      permissions: 63,
+      id: listValue.id
 		}
 		return (
 			<React.Fragment key={listValue.id}>
-				<tr className={this.state.openRowId === rowKey ? 'ei-foldout-table-open' : ''} key={listValue.id+'_a'}>
-					<td onClick={event => { this.toggleRow(rowKey) }}>
+				<tr className={openRowId === rowKey ? 'ei-foldout-table-open' : ''} key={listValue.id+'_a'}>
+					<td onClick={event => { toggleRow(rowKey) }}>
 						<i className='far fa-minus-square ei-foldout-icon ei-foldout-icon-table-open' />
 						<i className='far fa-plus-square ei-foldout-icon ei-foldout-icon-table-closed' />
 					</td>
@@ -308,7 +474,7 @@ export class ResourceEditor extends Component {
 							</button>
 							<div className="dropdown-menu dropdown-menu-right">
 								{
-									this.actionsECD.map(( listButton, buttonKey ) => {
+									actionsECD.map(( listButton, buttonKey ) => {
 										return (
 											<React.Fragment key={buttonKey}>
 												<button
@@ -330,7 +496,7 @@ export class ResourceEditor extends Component {
 					<td colSpan='999'>
 						<div style={{ 'padding': '0px 20px 0px 20px' }}>
 							{
-								this.state.openRowId === rowKey
+								openRowId === rowKey
 								? <PermissionsTable resource={resourceFormattedObject} resourceType='RESOURCE_MANAGER' isOwner={true} />
 								: ''
 							}
@@ -341,262 +507,71 @@ export class ResourceEditor extends Component {
 		)
 	}
 
-  renderResourceManager() {
-
-		const clickedResource = this.state.clickedResource
-		const clickedResourceForEditAndClone = this.state.clickedResourceForEditAndClone
-
+  const renderResourceManager = () => {
     return (
 			<>
 				{
-					(clickedResource === 'Price Book' || clickedResource === 'price_book')
-						&& clickedResourceForEditAndClone !== 'price_book' &&
-					<PriceBookCreator selectedResourceForClone={this.state.selectedResourceForClone}/>
+					cloneManagerType === 'price_book' && openedManager !== 'price_book' &&
+					<PriceBookCreator cloneManager={cloneManager}/>
 				}
 				{
-					clickedResourceForEditAndClone === 'price_book' &&
+					openedManager === 'price_book' &&
 					<PriceBookEditor/>
 				}
 				{
-					clickedResourceForEditAndClone === 'tsm_manager' &&
+					openedManager === 'tsm_manager' &&
 					<TsmEditor/>
 				}
 				{
-					clickedResourceForEditAndClone === 'roic_manager' &&
+					openedManager === 'roic_manager' &&
 					<RoicEditor/>
 				}
 				{
-					clickedResourceForEditAndClone === 'arpu_manager' &&
+					openedManager === 'arpu_manager' &&
 					<ArpuEditor/>
 				}
 				{
-					clickedResourceForEditAndClone === 'impedance_mapping_manager' &&
+					openedManager === 'impedance_mapping_manager' &&
 					<ImpedanceEditor/>
 				}
 				{
-					(clickedResource === 'Rate Reach Manager'|| clickedResource === 'rate_reach_manager')
-						&& clickedResourceForEditAndClone !== 'rate_reach_manager' &&
-					<RateReachManager selectedResourceForClone={this.state.selectedResourceForClone}/>
+					cloneManagerType === 'rate_reach_manager' && openedManager !== 'rate_reach_manager' &&
+					<RateReachManager cloneManager={cloneManager}/>
 				}
 				{
-					clickedResourceForEditAndClone === 'rate_reach_manager' &&
+					openedManager === 'rate_reach_manager' &&
 					<RateReachEditor/>
 				}
 				{
-					clickedResourceForEditAndClone === 'competition_manager' &&
+					openedManager === 'competition_manager' &&
 					<CompetitorEditor/>
 				}
 				{
-					clickedResourceForEditAndClone === 'fusion_manager' &&
-					<FusionEditor onDiscard={this.handleOnDiscard}/>
+					openedManager === 'fusion_manager' &&
+					<FusionEditor onDiscard={handleOnDiscard}/>
 				}
 				{
-					clickedResourceForEditAndClone === 'network_architecture_manager' &&
-					<NetworkArchitectureEditor onDiscard={this.handleOnDiscard}/>
+					openedManager === 'network_architecture_manager' &&
+					<NetworkArchitectureEditor onDiscard={handleOnDiscard}/>
 				}
 				{
-					clickedResourceForEditAndClone === 'planning_constraints_manager' &&
-					<PlanningConstraintsEditor onDiscard={this.handleOnDiscard}/>
+					openedManager === 'planning_constraints_manager' &&
+					<PlanningConstraintsEditor onDiscard={handleOnDiscard}/>
 				}
 			</>
     )
 	}
 
-	handleOnDiscard() {
-		this.props.setIsResourceEditor(true)
-	}
-
-	onSortClick (colName) {
-    if (this.state.selectedColumn === colName) {
-      this.setState({ ...this.state, 'isOrderDesc': !this.state.isOrderDesc })
-    } else {
-      this.setState({ ...this.state, 'selectedColumn': colName })
-    }
-  }
-
-	editSelectedManager(selectedManager) {
-		this.props.startEditingResourceManager(selectedManager.id, selectedManager.resourceType,
-			selectedManager.name, 'EDIT_RESOURCE_MANAGER'
-		)
-    const breadCrumbClone = klona(this.props.breadCrumb)
-    breadCrumbClone.push(selectedManager.name)
-    this.props.setBreadCrumb(breadCrumbClone)
-		this.setState({ clickedResourceForEditAndClone: selectedManager.resourceType, clickedResource: '' })
-	}
-
-	// Showing a SweetAlert from within a modal dialog does not work (The input box is not clickable).
-  // Workaround from https://github.com/t4t5/sweetalert/issues/412#issuecomment-234675096
-  // Call this function before showing the SweetAlert
-  fixBootstrapModal () {
-		const modalNodes = document.querySelectorAll('.modal')
-    if (!modalNodes) return
-
-    modalNodes.forEach((modalNode) => {
-      modalNode.removeAttribute('tabindex')
-      modalNode.classList.add('js-swal-fixed')
-    })
-  }
-
-  // Showing a SweetAlert from within a modal dialog does not work (The input box is not clickable).
-  // Workaround from https://github.com/t4t5/sweetalert/issues/412#issuecomment-234675096
-  // Call this function before hiding the SweetAlert
-  restoreBootstrapModal () {
-    const modalNode = document.querySelector('.modal.js-swal-fixed')
-    if (!modalNode) return
-
-    modalNode.setAttribute('tabindex', '-1')
-    modalNode.classList.remove('js-swal-fixed')
-  }
-
-  askNewResourceDetailsFromUser () {
-		// Get the name for a new plan from the user
-    this.fixBootstrapModal() // Workaround to show SweetAlert from within a modal dialog
-    return new Promise((resolve, reject) => {
-      const swalOptions = {
-        title: 'Resource name required',
-        text: 'Enter the name of the new resource',
-        type: 'input',
-        showCancelButton: true,
-        confirmButtonColor: '#DD6B55',
-        confirmButtonText: 'OK'
+  return (
+    <>
+      {
+        props.resourceTypes && 
+          props.isResourceEditor
+            ? renderResourceEditorTable()
+            : renderResourceManager()
       }
-      swal(swalOptions, (resourceName) => {
-        this.restoreBootstrapModal() // Workaround to show SweetAlert from within a modal dialog
-        if (resourceName) {
-          resolve(resourceName)
-        } else {
-					reject('Cancelled')
-          if (this.state.selectedResourceForClone && this.props.breadCrumb[this.props.breadCrumb.length - 1] === this.state.selectedResourceForClone.name) {
-            const breadCrumbClone = klona(this.props.breadCrumb)
-            breadCrumbClone.pop()
-            this.props.setBreadCrumb(breadCrumbClone)
-          }
-					this.setState({ clickedResource: '', clickedResourceForEditAndClone: '' })
-        }
-      })
-    })
-	}
-
-	getNewResourceDetailsFromUser () {
-		this.askNewResourceDetailsFromUser()
-		.then((resourceName) => {
-			if (resourceName) {
-				this.setState({ clickedResource: '' })
-				this.props.newManager(this.state.filterText, resourceName,this.props.loggedInUser,
-					this.state.selectedResourceForClone.id
-				)
-        const breadCrumbClone = klona(this.props.breadCrumb)
-        breadCrumbClone.push(this.state.selectedResourceForClone.name)
-        this.props.setBreadCrumb(breadCrumbClone)
-				this.setState({ clickedResourceForEditAndClone: this.state.filterText })
-			}
-		})
-		.catch((err) => console.error(err))
-	}
-
-	cloneSelectedManagerFromSource (selectedManager) {
-		const resourceType = selectedManager.resourceType
-		if (resourceType === 'price_book' || resourceType === 'rate_reach_manager') {
-			this.props.setIsResourceEditor(false)
-		} else {
-			this.getNewResourceDetailsFromUser()
-		}
-    if (this.state.selectedResourceForClone && this.props.breadCrumb[this.props.breadCrumb.length - 1] === this.state.selectedResourceForClone.name) {
-      const breadCrumbClone = klona(this.props.breadCrumb)
-      breadCrumbClone.pop()
-      this.props.setBreadCrumb(breadCrumbClone)
-    }
-		this.setState({ clickedResource: selectedManager.resourceType,
-			clickedResourceForEditAndClone: '', selectedResourceForClone: selectedManager
-		})
-  }
-
-	askUserToConfirmManagerDelete (managerName) {
-    return new Promise((resolve, reject) => {
-      swal({
-        title: 'Delete resource manager?',
-        text: `Are you sure you want to delete "${managerName}"?`,
-        type: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#DD6B55',
-        confirmButtonText: 'Yes',
-        cancelButtonText: 'No'
-      }, (result) => {
-        if (result) {
-          resolve(true)
-        } else {
-          resolve(false)
-        }
-      })
-    })
-	}
-
-	deleteSelectedResourceManager(selectedManager) {
-		this.askUserToConfirmManagerDelete(selectedManager.name)
-		.then((okToDelete) => {
-			if (okToDelete) {
-				this.props.deleteResourceManager(selectedManager, this.state.filterText)
-			}
-		})
-		.catch((err) => console.error(err))
-	}
-
-  handleCanMakeNewFilter (clickedResource) {
-		if (clickedResource !== 'Competition System') {
-			this.props.setIsResourceEditor(false)
-		}
-    if (this.state.selectedResourceForClone && this.props.breadCrumb[this.props.breadCrumb.length - 1] === this.state.selectedResourceForClone.name) {
-      const breadCrumbClone = klona(this.props.breadCrumb)
-      breadCrumbClone.pop()
-      this.props.setBreadCrumb(breadCrumbClone)
-    }
-		this.setState({ clickedResource, selectedResourceForClone: '', clickedResourceForEditAndClone: '' })
-  }
-
-  toggleRow (rowId) {
-		if (this.state.openRowId === rowId) {
-			rowId = null
-		}
-		this.setState({ ...this.state, 'openRowId': rowId })
-  }
-
-	handlePageClick (data) {
-		this.props.nextOrPrevPageClick(data.selected)
-		this.setState({ selectedPage: data.selected })
-	}
-
-	searchManagers() {
-		const searchText = this.state.searchText
-		this.props.searchManagers(searchText)
-		this.props.getResourceManagers(this.state.filterText)
-		this.setState({ searchText })
-	}
-
-	handleChange (event) {
-		const searchText = event.target.value
-		event.target.name = searchText
-		this.setState({ searchText })
-	}
-
-	handleEnter(event) {
-		if (event.key === 'Enter') {
-			const searchText = this.state.searchText
-			this.props.searchManagers(searchText)
-			this.props.getResourceManagers(this.state.filterText)
-			this.setState({ searchText })
-		}
-	}
-
-	handlefilterManager (event) {
-		const filterText = event.target.value
-		const selectedResourceIndex = event.nativeEvent.target.selectedIndex
-		const selectedResourceName = event.nativeEvent.target[selectedResourceIndex].text
-
-		this.props.getResourceManagers(filterText)
-		this.props.canMakeNewFilter(filterText)
-		this.setState({ filterText })
-		this.setState({ selectedResourceName })
-	}
+    </>  
+  )
 }
 
 const mapStateToProps = (state) => ({
@@ -607,6 +582,9 @@ const mapStateToProps = (state) => ({
 	isResourceEditor: state.resourceEditor.isResourceEditor,
 	loggedInUser: state.user.loggedInUser,
   modalTitle: state.resourceEditor.modalTitle,
+  editingManager: state.resourceManager.editingManager,
+  managers: state.resourceManager.managers,
+  selectedEditingMode: state.resourceManager.selectedEditingMode,
 })
 
 const mapDispatchToProps = (dispatch) => ({
