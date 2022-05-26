@@ -2,6 +2,7 @@ import Actions from '../../common/actions'
 
 const defaultState = {
   activePlan: null,
+  activePlanErrors: {},
   dataItems: {},
   haveDataItemsChanged: false,
   uploadDataSources: [],
@@ -32,12 +33,8 @@ function setActivePlanState (state, planState) {
   }
 }
 
-function setActivePlanErrors(state, planErrors) {
-  return { ...state,
-    activePlan: { ...state.activePlan,
-      planErrors
-    }
-  }
+function setActivePlanErrors(state, activePlanErrors) {
+  return { ...state, activePlanErrors }
 }
 
 function setDataItems (state, dataItems, uploadDataSources) {

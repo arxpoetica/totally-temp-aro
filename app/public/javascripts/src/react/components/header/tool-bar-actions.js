@@ -180,6 +180,8 @@ function loadPlan (planId) {
           // Load selected service areas
           dispatch(SelectionActions.loadPlanTargetSelectionsFromServer(planId))
           dispatch(PlanActions.setActivePlan(plan)) // This will also create overlay, tiles, etc.
+          // FIXME: do we also need to load the plan error info here?
+          // dispatch(PlanActions.setActivePlanErrors({}))
         })
       })
   }
@@ -208,7 +210,6 @@ function makeCurrentPlanNonEphemeral (planName, planType) {
         serviceAreaIds: []
       }
     }
-    delete newPlan.planErrors
 
     newPlan.tagMapping.global = currentPlanTags.map(tag => tag.id)
     newPlan.tagMapping.linkTags.serviceAreaIds = currentPlanServiceAreaTags.map(tag => tag.id)
@@ -222,6 +223,7 @@ function makeCurrentPlanNonEphemeral (planName, planType) {
         if (result.status >= 200 && result.status <= 299) {
           // Plan has been saved in the DB. Reload it
           dispatch(PlanActions.setActivePlan(result.data))
+          dispatch(PlanActions.setActivePlanErrors({}))
         } else {
           console.error('Unable to make plan permanent')
           console.error(result)
