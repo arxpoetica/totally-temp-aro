@@ -44,6 +44,22 @@ export class ManageUsers extends Component {
     this.props.clearUserList()
   }
 
+  componentDidUpdate(_prevProps, prevState) {
+    if (this.state.selectedNav !== prevState.selectedNav) {
+      this.navSelection()
+    }
+
+    if(this.props.goPrevious) {
+      this.setState({
+        selectedPage: 0,
+        searchText: '',
+        selectedNav: '',
+        userIdForSettingsEdit: '',
+      })
+      this.props.setGoPrevious()
+    }
+  }
+
   handlePageClick(data) {
     this.props.handlePageClick(data.selected)
     this.setState({ selectedPage: data.selected })
@@ -59,9 +75,8 @@ export class ManageUsers extends Component {
     if (this.props.clientId.toLowerCase() === 'frontier') {
       this.emailLabel = 'Corp ID'
     }
-    return this.props.userList === null
-      ? null
-      : <>{this.renderUserList()}</>
+
+    return this.props.userList && this.props.userList.length && this.renderUserList()
   }
 
   renderUserList() {
@@ -362,7 +377,6 @@ export class ManageUsers extends Component {
           }
         </>
         }
-        {this.navSelection()}
       </>
     )
   }
@@ -504,8 +518,9 @@ export class ManageUsers extends Component {
     const val = this.state.selectedNav
     const { userIdForSettingsEdit } = this.state
     if (val === 'UserSettings') {
-      return (
-        this.props.openUserSettingsForUserId(userIdForSettingsEdit, 'User Settings')
+      this.props.openUserSettingsForUserId(
+        userIdForSettingsEdit,
+        'User Settings'
       )
     }
   }

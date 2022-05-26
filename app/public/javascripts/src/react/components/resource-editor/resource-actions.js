@@ -80,6 +80,17 @@ function searchManagers (searchText) {
   }
 }
 
+function setEditingMode (editingMode) {
+  return dispatch => {
+    dispatch({
+      type: Actions.RESOURCE_MANAGER_SET_EDITING_MODE,
+      payload: {
+        editingMode
+      }
+    })
+  }
+}
+
 function canMakeNewFilter (filterText) {
   return dispatch => {
     dispatch({
@@ -1043,6 +1054,7 @@ function saveRoicConfigurationToServer (roicManagerId, roicManagerConfiguration)
       batch(() => {
         dispatch(setIsResourceEditor(true))
         dispatch(getResourceManagers(state.resourceEditor.selectedResourceKey))
+        dispatch(setEditingMode('LIST_RESOURCE_MANAGERS'))
       })
     })
     .catch((err) => console.error(err))
@@ -1357,5 +1369,6 @@ export default {
   setModalTitle,
   setIsRrmManager,
   convertMetersToLengthUnits,
-  convertlengthUnitsToMeters
+  convertlengthUnitsToMeters,
+  setEditingMode
 }
