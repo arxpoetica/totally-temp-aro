@@ -3,27 +3,27 @@ import { connect } from 'react-redux'
 import ToolTip from '../../common/tooltip.jsx'
 
 const errorHeaders = Object.freeze({
-    CANCELLED: {
-        header: "Cancelled"
-    },
-    PRE_VALIDATION: {
-        header: "Pre Validation",
-        location: "Max Location Failure",
-        edge: "Max Edge Failure",
-        replacements: [
-            "database "
-        ]
-    },
-    ROOT_OPTIMIZATION_FAILURE: {
-        header: "Optimzation Failure"
-    },
-    RUNTIME_EXCEPTION: {
-        header: "Runtime",
-        UNKNOWN: "Unknown Failure",
-        replacements: [
-            ": null"
-        ]
-    }
+  CANCELLED: {
+    header: "Cancelled"
+  },
+  PRE_VALIDATION: {
+    header: "Pre Validation",
+    location: "Max Location Failure",
+    edge: "Max Edge Failure",
+    replacements: [
+      "database "
+    ]
+  },
+  ROOT_OPTIMIZATION_FAILURE: {
+    header: "Optimzation Failure"
+  },
+  RUNTIME_EXCEPTION: {
+    header: "Runtime",
+    UNKNOWN: "Unknown Failure",
+    replacements: [
+      ": null"
+    ]
+  }
 })
 
 const AnalysisErrors = props => {
@@ -31,9 +31,9 @@ const AnalysisErrors = props => {
     return Object.values(errorCategory).length > 0;
   })
 
-    const generateMessage = (errorCategory, serviceCode) => {
-        let baseErrorMessage;
-        let errorMessage;
+  const generateMessage = (errorCategory, serviceCode) => {
+    let baseErrorMessage;
+    let errorMessage;
 
     errorMessage = baseErrorMessage =
       props.activePlanErrors[errorCategory][serviceCode].split(
@@ -53,30 +53,31 @@ const AnalysisErrors = props => {
         }
       })
 
-        return [errorMessage, baseErrorMessage]
-    }
+    return [errorMessage, baseErrorMessage]
+  }
 
-    const generateErrorBody = (errorCategory, serviceCode) => {
-        let [errorMessage, baseErrorMessage] = generateMessage(errorCategory, serviceCode);
-        return (
-            <div style={{ justifyContent: "space-between", display: "flex", width: "100%" }}>
-                <div style={{ maxWidth: "50%" }}>
-                    <ToolTip
-                        isActive={errorMessage !== baseErrorMessage}
-                        toolTipText={baseErrorMessage}
-                        minWidth="200%"
-                    >
-                        <div style={{ fontStyle: "italic" }}>
-                            {errorMessage}
-                        </div>
-                    </ToolTip>
-                </div>
-                <div>
-                    Service Area: {serviceCode}
-                </div>
+
+  const generateErrorBody = (errorCategory, serviceCode) => {
+    let [errorMessage, baseErrorMessage] = generateMessage(errorCategory, serviceCode);
+    return (
+      <div style={{ justifyContent: "space-between", display: "flex", width: "100%" }}>
+        <div style={{ maxWidth: "50%" }}>
+          <ToolTip
+            isActive={errorMessage !== baseErrorMessage}
+            toolTipText={baseErrorMessage}
+            minWidth="200%"
+          >
+            <div style={{ fontStyle: "italic" }}>
+              {errorMessage}
             </div>
-        )   
-    }
+          </ToolTip>
+        </div>
+        <div>
+          Service Area: {serviceCode}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>
