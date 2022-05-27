@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
+import { dequal } from 'dequal'; 
 import UserActions from './user-actions'
 import Select, { components } from 'react-select'
 import createClass from 'create-react-class'
@@ -45,7 +46,7 @@ export class ManageUsers extends Component {
   }
 
   componentDidUpdate(_prevProps, prevState) {
-    if (this.state.selectedNav !== prevState.selectedNav) {
+    if (!dequal(this.state.selectedNav, prevState.selectedNav)) {
       this.navSelection()
     }
 
