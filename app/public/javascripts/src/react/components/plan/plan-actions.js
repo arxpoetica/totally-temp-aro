@@ -28,26 +28,25 @@ function setActivePlanState (planState) {
 
 function setActivePlanErrors() {
   return (dispatch, getState) => {
-    const state = getState();
+    const state = getState()
     const activePlan = state.plan.activePlan
     AroHttp.get(`/service/v1/plan/${activePlan.id}/errors?user_id=${activePlan.createdBy}`)
-      .then((response) => {
+      .then(({ data }) => {
         const activePlanErrors = {
           PRE_VALIDATION: {},
           NONE: {},
           CANCELLED: {},
           RUNTIME_EXCEPTION: {},
           ROOT_OPTIMIZATION_FAILURE: {}
-        };
+        }
 
-        response.data.forEach((error) => {
-            activePlanErrors[error.errorCategory][error.serviceAreaCode] = 
-              error.errorMessage;
+        data.forEach(error => {
+          activePlanErrors[error.errorCategory][error.serviceAreaCode] = error.errorMessage
         })
 
         dispatch({
           type: Actions.PLAN_SET_ACTIVE_PLAN_ERRORS,
-          payload: activePlanErrors
+          payload: activePlanErrors,
         })
       })
   }
