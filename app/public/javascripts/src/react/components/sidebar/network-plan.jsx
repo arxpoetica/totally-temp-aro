@@ -31,8 +31,8 @@ const NetworkPlan = (props) => {
       createdDate,
       name,
       ephemeral,
-      planErrors
     },
+    activePlanErrors,
     selection,
     setSelectedDisplayMode
   } = props
@@ -53,21 +53,21 @@ const NetworkPlan = (props) => {
 
   const getAlertState = () => {
     let state = ''
-    if (planErrors) {
-      const hasErrors = Object.values(planErrors).some(errorCategory => {
+    if (activePlanErrors) {
+      const hasErrors = Object.values(activePlanErrors).some(errorCategory => {
         return Object.values(errorCategory).length > 0
       })
   
       if (planInProgress) {
         state = 'loading'
       } else if (hasErrors) {
-        if (Object.values(planErrors.PRE_VALIDATION).length > 0) {
+        if (Object.values(activePlanErrors.PRE_VALIDATION).length > 0) {
           state = 'warn'
         }
-        if (Object.values(planErrors.CANCELLED).length > 0) {
+        if (Object.values(activePlanErrors.CANCELLED).length > 0) {
           state = 'warn'
         }
-        if (Object.values(planErrors.RUNTIME_EXCEPTION).length > 0) {
+        if (Object.values(activePlanErrors.RUNTIME_EXCEPTION).length > 0) {
           state = 'error'
         }
       } else if (planState === 'COMPLETED') {
@@ -148,6 +148,7 @@ const NetworkPlan = (props) => {
 
 const mapStateToProps = (state) => ({
   activePlan: state.plan.activePlan || {},
+  activePlanErrors: state.plan.activePlanErrors,
   selection: state.selection
 })
 
