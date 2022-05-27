@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { usePrevious } from '../../common/view-utils'
 import { klona } from 'klona'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
@@ -19,10 +18,9 @@ import RoicEditor from './roic/roic-editor.jsx'
 import ImpedanceEditor from '../resource-editor/impedance-editor.jsx'
 import TsmEditor from '../resource-editor/tsm-editor.jsx'
 import RateReachEditor from '../resource-editor/rate-reach-editor.jsx'
-import { Breadcrumbs } from '@mantine/core'
 
 function ResourceEditor(props) {
-  const sortableColumns = { 'NAME': 'name', 'RESOURCE_TYPE': 'resource_type' }
+  const sortableColumns = { NAME: 'name', 'RESOURCE_TYPE': 'resource_type' }
   const [_ssp, setSelectedPage] = useState(0)
   const [searchText, setSearchText] = useState('')
   const [openRowId, setOpenRowId] = useState(null)
@@ -87,8 +85,8 @@ function ResourceEditor(props) {
   }, [props.filterText])
 
   useEffect(() => {
-    const editingManager = props.editingManager
-    let selectedManager = editingManager && props.managers[editingManager.id]
+    const { editingManager, managers } = props
+    const selectedManager = editingManager && managers[editingManager.id]
 
     if (
       !props.isResourceEditor
@@ -105,7 +103,7 @@ function ResourceEditor(props) {
       props.isResourceEditor
       && props.selectedEditingMode === 'LIST_RESOURCE_MANAGERS'
     ) {
-      if(props.breadCrumb.length >= 3) {
+      if (props.breadCrumb.length >= 3) {
         removeBreadCrumb()
       }
       setOpenedManager('')
@@ -417,11 +415,11 @@ function ResourceEditor(props) {
       let aVal = ''
       let bVal = ''
       if (selectedColumn === sortableColumns.NAME) {
-        aVal = a['name']
-				bVal = b['name']
+        aVal = a.name
+				bVal = b.name
       } else if (selectedColumn === sortableColumns.RESOURCE_TYPE) {
-        aVal = a['resourceType']
-				bVal = b['resourceType']
+        aVal = a.resourceType
+				bVal = b.resourceType
       }
       if (isOrderDesc) {
         const holder = aVal

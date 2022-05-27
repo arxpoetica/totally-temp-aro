@@ -9,7 +9,10 @@ function ModalBreadCrumb(props) {
   return (
       <div className="crumb-wrapper">
         { props.breadCrumb.length > 1 && 
-          <Button style={{ marginRight: "2%" }} color="primary" onClick={props.back}>
+          <Button
+            classNames={{ root: 'back-button' }}
+            color="primary" onClick={props.back}
+          >
             Back
           </Button>
         }
@@ -33,6 +36,9 @@ function ModalBreadCrumb(props) {
             font-size: 16px;
             align-items: baseline;
             white-space: nowrap;
+          }
+          .crumb-wrapper :global(.back-button) {
+            margin-right: 2%;
           }
         `}</style>
       </div>
