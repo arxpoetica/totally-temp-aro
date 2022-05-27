@@ -45,6 +45,7 @@
 
 .comp_edit_tbl_contain{
   max-height: 500px; 
+  min-height: 125px;
   overflow-y: auto;
 }
  

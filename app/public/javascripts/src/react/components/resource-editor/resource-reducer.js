@@ -37,7 +37,6 @@ const defaultState = {
 
 function setResourceTypes (state, resourceTypes) {
   return { ...state,
-    isResourceEditor: true,
     resourceTypes: resourceTypes
   }
 }
