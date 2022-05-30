@@ -14,6 +14,7 @@ import ToolBarActions from '../../header/tool-bar-actions'
 import MapLayerActions from '../../map-layers/map-layer-actions'
 import Permissions from '../../../../shared-utils/permissions'
 import { viewModePanels, displayModes } from '../constants'
+import RxState from '../../../common/rxState'
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllLocationLayers = state => state.mapLayers.location
@@ -75,6 +76,8 @@ const askUserToConfirmBeforeDelete = (key) => {
   })
 }
 
+const rxState = new RxState()
+
 export const LocationEditor = (props) => {
 
   const [state, setState] = useState({
@@ -124,6 +127,7 @@ export const LocationEditor = (props) => {
     setMapSelection,
     setPlanEditorFeatures,
     selectedDisplayMode,
+    setDeletedMapObjects,
   } = props
 
   useEffect(() => {
@@ -209,6 +213,7 @@ export const LocationEditor = (props) => {
       .then((result) => {
         // Transaction has been committed, start a new one
         setState((state) => ({ ...state, isCommiting: false }))
+        setDeletedMapObjects([])
         // Do not recreate tiles and/or data cache. That will be handled by the tile invalidation messages from aro-service
         Object.keys(objectIdToMapObject).forEach(objectId => tileDataService.removeFeatureToExclude(objectId))
         resumeOrCreateTransaction()
@@ -218,6 +223,7 @@ export const LocationEditor = (props) => {
           currentTransaction: null,
           isCommiting: false,
         }))
+        setDeletedMapObjects([])
         activeViewModePanel(viewModePanels.LOCATION_INFO) // Close out this panel
         console.error(err)
       })
@@ -241,11 +247,13 @@ export const LocationEditor = (props) => {
           .then((result) => {
             // Transaction has been discarded, start a new one
             Object.keys(objectIdToMapObject).forEach(objectId => tileDataService.removeFeatureToExclude(objectId))
-            // this.state.recreateTilesAndCache()
+            rxState.requestMapLayerRefresh.sendMessage(null)
+            setDeletedMapObjects([])
             return resumeOrCreateTransaction()
           })
           .catch((err) => {
             setState((state) => ({ ...state, currentTransaction: null }))
+            setDeletedMapObjects([])
             activeViewModePanel('LOCATION_INFO') // Close out this panel
             console.error(err)
           })
@@ -531,6 +539,7 @@ export const LocationEditor = (props) => {
   }
 
   const handleObjectDeleted = (mapObject) => {
+    setDeletedMapObjects(mapObject)
     AroHttp.delete(`/service/library/transaction/${currentTransaction.id}/features/${mapObject.objectId}`)
   }
 
@@ -982,6 +991,7 @@ const mapDispatchToProps = (dispatch) => ({
   setSelectedMapObject: mapObject => dispatch(SelectionActions.setSelectedMapObject(mapObject)),
   deleteLocationWithId: objectId => dispatch(ViewSettingsActions.deleteLocationWithId(objectId)),
   activeViewModePanel: displayPanel => dispatch(ToolBarActions.activeViewModePanel(displayPanel)),
+  setDeletedMapObjects: (mapObject) => dispatch(ToolBarActions.setDeletedMapObjects(mapObject)),
 })
 
 export default wrapComponentWithProvider(reduxStore, LocationEditor, mapStateToProps, mapDispatchToProps)
