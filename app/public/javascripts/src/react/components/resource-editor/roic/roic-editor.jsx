@@ -182,6 +182,7 @@ export class RoicEditor extends Component {
 
   exitEditingMode() {
     this.props.setIsResourceEditor(true)
+    this.props.setEditingMode('LIST_RESOURCE_MANAGERS')
   }
 
   setSubsidyDefaults() {
@@ -392,6 +393,7 @@ const mapDispatchToProps = (dispatch) => ({
   ),
   setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
   setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title)),
+  setEditingMode: (status) => dispatch(ResourceActions.setEditingMode(status)),
 })
 
 const RoicEditorComponent = connect(mapStateToProps, mapDispatchToProps)(RoicEditor)
