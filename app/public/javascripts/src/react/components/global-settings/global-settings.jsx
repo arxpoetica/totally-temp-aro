@@ -39,6 +39,7 @@ const views = Object.freeze({
 export function GlobalSettings(props) {
   const [modal, setModal] = useState(true)
   const [breadCrumb, setBreadCrumb] = useState([])
+  const [goPrevious, setGoPrevious] = useState(false)
   const [userIdForSettingsEdit, setUserIdForSettingsEdit] = useState('')
   const [resourceEditorProps, setResourceEditorProps] = useState('')
   const [dataUploadProps, setDataUploadProps] = useState('')
@@ -102,7 +103,6 @@ export function GlobalSettings(props) {
   }
   
   const handleChangeView = (currentView) => {
-    
     const breadCrumbClone = klona(breadCrumb);
     breadCrumbClone.push(currentView)
     setResourceEditorProps('all')
@@ -125,8 +125,14 @@ export function GlobalSettings(props) {
   }
   
   const back = () => {
-    if(!Object.values(views).includes(currentBreadCrumb())) {
+    setGoPrevious(true)
+    const viewValues = Object.values(views)
+    if(
+      !viewValues.includes(currentBreadCrumb())
+      && breadCrumb.includes("Resource Managers")
+    ) {
       props.setIsResourceEditor(true)
+      props.setEditingMode('LIST_RESOURCE_MANAGERS')
     } else {
       const breadCrumbClone = klona(breadCrumb);
       breadCrumbClone.pop()
@@ -139,13 +145,14 @@ export function GlobalSettings(props) {
   }
 
   const renderBreadCrumb = () => {
-    return <ModalBreadCrumb breadCrumb={breadCrumb} />
+    return <ModalBreadCrumb breadCrumb={breadCrumb} back={back} />
   }
 
   const { loggedInUser, selectedResourceNameProps } = props
 
   return(
     <Modal
+      key={breadCrumb.length}
       opened={modal}
       onClose={toggle}
       size={
@@ -193,7 +200,11 @@ export function GlobalSettings(props) {
         <MultiFactor/>
       }
       {breadCrumb.includes(views.MANAGE_USERS) &&
-        <ManageUsers openUserSettingsForUserId={openUserSettingsForUserId}/>
+        <ManageUsers
+          openUserSettingsForUserId={openUserSettingsForUserId}
+          setGoPrevious={() => setGoPrevious(false)}
+          goPrevious={goPrevious}
+        />
       }
       {breadCrumb.includes(views.MANAGE_GROUPS) &&
         <ManageGroups/>
@@ -234,18 +245,7 @@ export function GlobalSettings(props) {
 
       {
         currentBreadCrumb() === views.GLOBAL_SETTINGS
-          ? <Button color="primary" onClick={toggle}>Close</Button>
-          : <Button
-              color="primary"
-              onClick={back}
-              style={{
-                position: !Object.values(views).includes(props.modalTitle) && 'absolute',
-                bottom: "6%",
-                left: "3%"
-              }}
-            >
-              Back
-            </Button>
+          && <Button color="primary" onClick={toggle}>Close</Button>
       }
     </Modal>
   )
@@ -268,6 +268,7 @@ const mapDispatchToProps = (dispatch) => ({
   searchManagers: (searchText) => dispatch(ResourceActions.searchManagers(searchText)),
   setGlobalSettingsView: (status) => dispatch(GlobalsettingsActions.setGlobalSettingsView(status)),
   setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
+  setEditingMode: (status) => dispatch(ResourceActions.setEditingMode(status)),
 })
 
 const GlobalSettingsComponent = connect(mapStateToProps, mapDispatchToProps)(GlobalSettings)
