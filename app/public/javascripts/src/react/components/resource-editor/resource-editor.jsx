@@ -94,7 +94,10 @@ function ResourceEditor(props) {
       && props.selectedEditingMode === 'EDIT_RESOURCE_MANAGER'
     ) {
       if (!openedManager) {
-        setOpenedManager(selectedManager.definition.managerType)
+        setOpenedManager(
+          selectedManager.definition.managerType
+          || editingManager.type
+        )
       }
       if (!props.breadCrumb.includes(selectedManager.resourceManagerName)) {
         addBreadCrumb(selectedManager.resourceManagerName)
@@ -108,7 +111,7 @@ function ResourceEditor(props) {
       }
       setOpenedManager('')
     }
-  }, [props.editingManager, props.selectedEditingMode, props.isResourceEditor])
+  }, [props.selectedEditingMode, props.isResourceEditor])
 
 	const handleOnDiscard = () => {
 		this.props.setIsResourceEditor(true)
@@ -248,24 +251,20 @@ function ResourceEditor(props) {
 	}
 
 	const searchManagers = () => {
-		const searchText = searchText
 		props.searchManagers(searchText)
 		props.getResourceManagers(filterText)
-		setSearchText(searchText)
 	}
   
 	const handleChange = (event) => {
-    const searchText = event.target.value
-		event.target.name = searchText
-    setSearchText(searchText)
+    const newSearchText = event.target.value
+		event.target.name = newSearchText
+    setSearchText(newSearchText)
 	}
 
 	const handleEnter = (event) => {
 		if (event.key === 'Enter') {
-			const searchText = searchText
 			props.searchManagers(searchText)
 			props.getResourceManagers(filterText)
-			setSearchText(searchText)
 		}
 	}
 
@@ -605,4 +604,4 @@ const mapDispatchToProps = (dispatch) => ({
 })
 
 const ResourceEditorComponent = wrapComponentWithProvider(reduxStore, ResourceEditor, mapStateToProps, mapDispatchToProps)
-export default ResourceEditorComponent
+export default ResourceEditorComponent;
