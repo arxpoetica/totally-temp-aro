@@ -80,9 +80,7 @@ import conduits from './views/conduits'
 import networkPlanModal from './header/network-plan-modal'
 import fullScreenContainer from './full-screen/full-screen-container'
 import aroPanel from './common/aro-panel'
-import mapObjectEditor from './common/map-object-editor'
 import contextMenu from './common/context-menu/context-menu'
-import dropTarget from './common/drop-target'
 import tile from './tiles/tile'
 
 import aroObjectEditor from './common/editor-interfaces/aro-object-editor'
@@ -110,9 +108,7 @@ app.component('boundaries', boundaries)
   // .component('uiNotification', uiNotification)
   .component('fullScreenContainer', fullScreenContainer)
   .component('aroPanel', aroPanel)
-  .component('mapObjectEditor', mapObjectEditor)
   .component('contextMenu', contextMenu)
-  .component('dropTarget', dropTarget)
   .component('tile', tile)
   .component('aroObjectEditor', aroObjectEditor)
   .component('editorInterfaceTree', editorInterfaceTree)
