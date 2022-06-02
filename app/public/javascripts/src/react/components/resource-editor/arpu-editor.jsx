@@ -213,7 +213,7 @@ export class ArpuEditor extends Component {
   }
 
   exitEditingMode() {
-    this.props.setIsResourceEditor(true)
+    this.props.onDiscard()
   }
 
   saveConfigurationToServer() {
