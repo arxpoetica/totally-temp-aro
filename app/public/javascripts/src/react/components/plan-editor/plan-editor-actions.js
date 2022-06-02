@@ -1631,6 +1631,14 @@ function parseSubnet (subnet) {
   // --- fix service typos - eventually this won't be needed --- //
   subnet.subnetNode = parseSubnetFeature(subnet.subnetId)
   delete subnet.subnetId
+
+  // subnet nodes are not draggable 
+  //  not entirely sure if this is where this should go, and I don't like hardcoding 
+  //  theoretically this should be set by service 
+  if (subnet.subnetNode.networkNodeType === 'subnet_node') {
+    subnet.subnetNode.locked = true
+  }
+
   subnet.children = subnet.children.map(feature => parseSubnetFeature(feature))
   subnet.coEquipments = subnet.coEquipments.map(feature => parseSubnetFeature(feature))
   // --- end typo section --- //
