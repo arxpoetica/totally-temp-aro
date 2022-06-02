@@ -310,7 +310,7 @@ function resourceReducer (state = defaultState, action) {
 
     case Actions.RESOURCE_EDITOR_STRENGTH_COLS:
       return setStrengthCols(
-        state, action.payload.pristineStrengthsById, action.payload.strengthsById, action.payload.strengthCol
+        state, action.payload.pristineStrengthsById, action.payload.strengthsById, action.payload.strengthCols
       )
 
     case Actions.RESOURCE_EDITOR_COMP_MAN_META:
