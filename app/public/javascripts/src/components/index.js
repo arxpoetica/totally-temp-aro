@@ -77,7 +77,6 @@ import networkEquipment from './views/network-equipment'
 import copper from './views/copper'
 import cables from './views/cables'
 import conduits from './views/conduits'
-import networkPlanModal from './header/network-plan-modal'
 import fullScreenContainer from './full-screen/full-screen-container'
 import aroPanel from './common/aro-panel'
 import contextMenu from './common/context-menu/context-menu'
@@ -98,7 +97,6 @@ app.component('boundaries', boundaries)
   .component('cables', cables)
   .component('copper', copper)
   .component('conduits', conduits)
-  .component('networkPlanModal', networkPlanModal)
   // .component('uiNotification', uiNotification)
   .component('fullScreenContainer', fullScreenContainer)
   .component('aroPanel', aroPanel)
