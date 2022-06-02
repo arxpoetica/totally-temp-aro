@@ -83,7 +83,6 @@ import aroPanel from './common/aro-panel'
 import mapObjectEditor from './common/map-object-editor'
 import contextMenu from './common/context-menu/context-menu'
 import dropTarget from './common/drop-target'
-import aroDrawingManager from './common/aro-drawing-manager'
 import tile from './tiles/tile'
 
 import aroObjectEditor from './common/editor-interfaces/aro-object-editor'
@@ -114,7 +113,6 @@ app.component('boundaries', boundaries)
   .component('mapObjectEditor', mapObjectEditor)
   .component('contextMenu', contextMenu)
   .component('dropTarget', dropTarget)
-  .component('aroDrawingManager', aroDrawingManager)
   .component('tile', tile)
   .component('aroObjectEditor', aroObjectEditor)
   .component('editorInterfaceTree', editorInterfaceTree)
