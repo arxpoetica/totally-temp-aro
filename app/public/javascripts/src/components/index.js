@@ -83,12 +83,6 @@ import aroPanel from './common/aro-panel'
 import contextMenu from './common/context-menu/context-menu'
 import tile from './tiles/tile'
 
-import aroObjectEditor from './common/editor-interfaces/aro-object-editor'
-import editorInterfaceTree from './common/editor-interfaces/editor-interface-tree'
-import editorInterfaceTable from './common/editor-interfaces/editor-interface-table'
-import editorInterfaceValue from './common/editor-interfaces/editor-interface-value'
-import editorInterfacePrimitive from './common/editor-interfaces/editor-interface-primitive'
-import editorInterfaceNullableNumber from './common/editor-interfaces/editor-interface-nullable-number'
 import utils from './common/utilities'
 
 import state from '../models/state'
@@ -110,12 +104,7 @@ app.component('boundaries', boundaries)
   .component('aroPanel', aroPanel)
   .component('contextMenu', contextMenu)
   .component('tile', tile)
-  .component('aroObjectEditor', aroObjectEditor)
-  .component('editorInterfaceTree', editorInterfaceTree)
-  .component('editorInterfaceTable', editorInterfaceTable)
-  .component('editorInterfaceValue', editorInterfaceValue)
-  .component('editorInterfacePrimitive', editorInterfacePrimitive)
-  .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
+
 // ReactJS components
   .component('rMapSplit', react2angular(MapSplit))
   .component('rViewMode', react2angular(ViewMode))
