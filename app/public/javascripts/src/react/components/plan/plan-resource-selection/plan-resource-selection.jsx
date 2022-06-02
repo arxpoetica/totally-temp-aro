@@ -107,6 +107,7 @@ export class PlanResourceSelection extends Component {
   openResourceSelection(currentEditor, selectedResourceName){
     this.setState({ currentEditor, selectedResourceName })
     this.props.setIsResourceSelection(true)
+    this.props.setIsResourceEditor(true)
     this.props.searchManagers('')
   }
 }
@@ -121,6 +122,7 @@ const mapDispatchToProps = (dispatch) => ({
   loadPlanResourceSelectionFromServer: (plan) => dispatch(PlanActions.loadPlanResourceSelectionFromServer(plan)),
   setIsResourceSelection: (status) => dispatch(PlanActions.setIsResourceSelection(status)),
   searchManagers: (searchText) => dispatch(ResourceActions.searchManagers(searchText)),
+  setIsResourceEditor: (isResourceEditor) => dispatch(ResourceActions.setIsResourceEditor(isResourceEditor)),
 })
 
 const PlanResourceSelectionComponent = connect(mapStateToProps, mapDispatchToProps)(PlanResourceSelection)
