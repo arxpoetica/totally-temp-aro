@@ -69,20 +69,20 @@ function ResourceEditor(props) {
   ]
 
   useEffect(() => {
-    props.getResourceTypes()
-    props.getResourceManagers(filterText)
-		props.canMakeNewFilter(filterText)
-		props.setModalTitle('Resource Managers')
+    props.getResourceTypes(props.filterText)
+    props.getResourceManagers(props.filterText)
+    props.canMakeNewFilter(props.filterText)
+    props.setModalTitle('Resource Managers')
   }, [])
 
   useEffect(() => {
-    if (filterText !== undefined && props.filterText !== undefined) {
-      if (filterText === '') {
-        setFilterText(props.filterText)
-        setSelectedResourceName(props.selectedResourceName)
-      }
+    if (props.selectedResourceName !== selectedResourceName && props.filterText !== filterText) {
+      props.getResourceManagers(props.filterText)
+      props.canMakeNewFilter(props.filterText)
+      setFilterText(props.filterText)
+      setSelectedResourceName(props.selectedResourceName)
     }
-  }, [props.filterText])
+  }, [props.selectedResourceName, props.filtertext])
 
   useEffect(() => {
     const { editingManager, managers } = props
@@ -272,12 +272,12 @@ function ResourceEditor(props) {
 	const handlefilterManager = (event) => {
 		const filterText = event.target.value
 		const selectedResourceIndex = event.nativeEvent.target.selectedIndex
-		const selectedResourceName = event.nativeEvent.target[selectedResourceIndex].text
+		const newSelectedResourceName = event.nativeEvent.target[selectedResourceIndex].text
 
 		props.getResourceManagers(filterText)
 		props.canMakeNewFilter(filterText)
     setFilterText(filterText)
-    setSelectedResourceName(selectedResourceName)
+    setSelectedResourceName(newSelectedResourceName)
 	}
 
   const renderResourceEditorTable = () => {
