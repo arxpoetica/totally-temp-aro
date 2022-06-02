@@ -181,8 +181,7 @@ export class RoicEditor extends Component {
   }
 
   exitEditingMode() {
-    this.props.setIsResourceEditor(true)
-    this.props.setEditingMode('LIST_RESOURCE_MANAGERS')
+    this.props.onDiscard()
   }
 
   setSubsidyDefaults() {

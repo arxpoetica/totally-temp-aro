@@ -269,7 +269,7 @@ export class CompetitorEditor extends Component {
   }
 
   exitEditingMode(){
-    this.props.setIsResourceEditor(true)
+    this.props.onDiscard()
   }
 
   saveConfigurationToServer(){

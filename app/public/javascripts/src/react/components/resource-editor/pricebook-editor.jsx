@@ -203,7 +203,7 @@ export class PriceBookEditor extends Component {
                                             <td style={{width: '100px', borderRight: 'none'}}>
                                               <input type="text" onChange={(e)=>this.handleCostChange(e, definitionKey, definitionItem.id)} value={definitionItem.costAssignment !== undefined ? definitionItem.costAssignment.cost : 0} className="form-control form-control-sm"/>
                                             </td>
-                                            <td style={{verticalAlign: 'middle', borderLeft: 'none', width: '10px'}}>{definitionItem.unitOfMeasure}</td>
+                                            <td style={{ verticalAlign: 'middle', borderLeft: 'none' }}>{definitionItem.unitOfMeasure}</td>
                                           </tr>
                                         </tbody>
                                       </table>
@@ -378,7 +378,7 @@ export class PriceBookEditor extends Component {
   }
 
   exitEditingMode(){
-    this.props.setIsResourceEditor(true);
+    this.props.onDiscard();
   }
 
   saveConfigurationToServer(){
@@ -466,7 +466,6 @@ const mapDispatchToProps = (dispatch) => ({
   getEquipmentTags: () => dispatch(ResourceActions.getEquipmentTags()),
   rebuildPricebookDefinitions: (priceBookId) => dispatch(ResourceActions.rebuildPricebookDefinitions(priceBookId)),
   definePriceBookForSelectedState: (selectedStateForStrategy, priceBookDefinitions, pristineAssignments) => dispatch(ResourceActions.definePriceBookForSelectedState(selectedStateForStrategy, priceBookDefinitions, pristineAssignments)),
-  setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
   saveAssignmentsToServer: (pristineAssignments, structuredPriceBookDefinitions, constructionRatios, priceBookId) => dispatch(ResourceActions.saveAssignmentsToServer(pristineAssignments, structuredPriceBookDefinitions, constructionRatios, priceBookId)),
   setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title)),
 })
