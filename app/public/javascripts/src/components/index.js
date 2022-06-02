@@ -86,9 +86,6 @@ import contextMenu from './common/context-menu/context-menu'
 import dropTarget from './common/drop-target'
 import resourcePermissionsEditor from './common/resource-permissions-editor'
 import aroDrawingManager from './common/aro-drawing-manager'
-import accordion from './accordion/accordion'
-import accordionPanelContents from './accordion/accordion-panel-contents'
-import accordionPanelTitle from './accordion/accordion-panel-title'
 import tile from './tiles/tile'
 
 import aroObjectEditor from './common/editor-interfaces/aro-object-editor'
@@ -122,9 +119,6 @@ app.component('boundaries', boundaries)
   .component('dropTarget', dropTarget)
   .component('resourcePermissionsEditor', resourcePermissionsEditor)
   .component('aroDrawingManager', aroDrawingManager)
-  .component('accordion', accordion)
-  .component('accordionPanelContents', accordionPanelContents)
-  .component('accordionPanelTitle', accordionPanelTitle)
   .component('tile', tile)
   .component('aroObjectEditor', aroObjectEditor)
   .component('editorInterfaceTree', editorInterfaceTree)
