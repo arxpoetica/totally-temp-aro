@@ -84,7 +84,6 @@ import aroMultiSelect from './common/aro-multiselect'
 import mapObjectEditor from './common/map-object-editor'
 import contextMenu from './common/context-menu/context-menu'
 import dropTarget from './common/drop-target'
-import resourcePermissionsEditor from './common/resource-permissions-editor'
 import aroDrawingManager from './common/aro-drawing-manager'
 import tile from './tiles/tile'
 
@@ -117,7 +116,6 @@ app.component('boundaries', boundaries)
   .component('mapObjectEditor', mapObjectEditor)
   .component('contextMenu', contextMenu)
   .component('dropTarget', dropTarget)
-  .component('resourcePermissionsEditor', resourcePermissionsEditor)
   .component('aroDrawingManager', aroDrawingManager)
   .component('tile', tile)
   .component('aroObjectEditor', aroObjectEditor)
