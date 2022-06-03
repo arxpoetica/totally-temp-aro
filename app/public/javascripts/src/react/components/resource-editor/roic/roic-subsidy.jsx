@@ -73,7 +73,9 @@ function ROICSubsidy(props) {
     let stringValue = subsidyConfiguration().value
     const toNumber = Number(stringValue)
     if(!Number.isInteger(toNumber) && toNumber < 1) {
+      const multiplier = Math.pow(10, 2);
       stringValue = stringValue * 100
+      stringValue = Math.round(stringValue * multiplier) / multiplier;
     }
 
     return parseNumber(stringValue)
