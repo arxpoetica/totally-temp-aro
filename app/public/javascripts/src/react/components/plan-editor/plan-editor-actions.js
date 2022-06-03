@@ -367,7 +367,8 @@ function createFeature(feature) {
           subnetCopy.children = [...uniqueChildren]
         }
       }
-
+      let subnetDiffDict = {}
+      subnetDiffDict[subnetId] = subnetCopy
       batch(async() => {
         if (Object.keys(newDraftProps).length && newDraftEquipment.length) {
           await dispatch({ type: Actions.PLAN_EDITOR_MERGE_DRAFT_PROPS, payload: newDraftProps })
@@ -376,7 +377,7 @@ function createFeature(feature) {
           dispatch({ type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES, payload: newFeatures })
         }
         if (subnetCopy) {
-          dispatch({ type: Actions.PLAN_EDITOR_ADD_SUBNETS, payload: [subnetCopy] })
+          dispatch({ type: Actions.PLAN_EDITOR_ADD_SUBNETS, payload: subnetDiffDict })
         }
       })
     } catch (error) {
