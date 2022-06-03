@@ -391,7 +391,7 @@ function updateFeatureProperties(feature) {
     const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
     let parentSubnetId = null
     const subnetId = state.planEditor.subnetFeatures[feature.objectId].subnetId
-    if (subnetId) parentSubnetId = state.planEditor.subnets[subnetId].parentSubnetId
+    if (subnetId) parentSubnetId = state.planEditor.subnets[subnetId].parentSubnetId || subnetId
     try {
       // Do a PUT to send the equipment over to service 
       // parentSubnetId SHOULD be the parent BUT terminals are NOT subnets so it would use the CO 
