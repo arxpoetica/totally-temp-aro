@@ -73,6 +73,11 @@ export class RoicReportsSummary extends Component {
             )}
 
             <tr>
+              <td><strong>Total Subsidy</strong></td>
+              <td>{roicResults.demandSummary && currencyFormatter.format((roicResults.demandSummary.totalSubsidy / 1000).toFixed(1)) + ' K'}</td>
+            </tr>
+
+            <tr>
               <td><strong>Total Capex</strong></td>
               <td>{roicResults.priceModel && currencyFormatter.format((roicResults.priceModel.totalCost / 1000).toFixed(1)) + ' K'}</td>
             </tr>
