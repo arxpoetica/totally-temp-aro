@@ -538,7 +538,7 @@ class TileComponentController {
         // We'll be compleetly replacing this system - until then send info through state.js
         const { locations } = await this.getFeaturesUnderLatLng(event.latLng)
         const ids = locations.map(location => location.object_id)
-        this.setCursorLocationIds(ids)
+        this.setCursorLocationIds(ids) // hitch to new VTS 
       }, 100)
     })
     this.overlayMouseoutListener = this.mapRef.addListener('mouseout', () => {

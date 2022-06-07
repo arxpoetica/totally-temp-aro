@@ -487,7 +487,7 @@ class State {
       // plan edit rightclick action from tile.js
       if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_PLAN) {
         //console.log(options)
-        service.showContextMenuForLocations (options.locations, options.event)
+        service.showContextMenuForLocations (options.locations, options.event) // hitch to new VTS 
       }
     })
 
