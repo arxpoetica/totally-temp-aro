@@ -50,9 +50,8 @@ const getSelectedPlanThumbInformation = createSelector(
   }
 )
 
-// utility 
-//  not sure where this should go, should be exported 
-function getRootOfFeature (drafts, subnetFeatures, featureId) {
+// utility - not an asctual selector, but psuedo selector
+function getRootOfFeatureUtility (drafts, subnetFeatures, featureId) {
   // use draft
   let subnetId = featureId
   if (!drafts[subnetId]) subnetId = subnetFeatures[featureId] ? subnetFeatures[featureId].subnetId : null
@@ -70,7 +69,7 @@ function getRootOfFeature (drafts, subnetFeatures, featureId) {
 const getRootSubnetIdForSelected = createSelector(
   [getSelectedSubnetId, getSubnetFeatures, getDrafts],
   (selectedSubnetId, subnetFeatures, drafts) => {
-    return getRootOfFeature(drafts, subnetFeatures, selectedSubnetId)
+    return getRootOfFeatureUtility(drafts, subnetFeatures, selectedSubnetId)
   }
 )
 
@@ -408,6 +407,7 @@ const PlanEditorSelectors = Object.freeze({
   getLocationCounts,
   getSubnetFeatures,
   getSelectedPlanThumbInformation,
+  getRootOfFeatureUtility,
   getRootSubnetIdForSelected,
   getNearestSubnetIdOfSelected,
 })

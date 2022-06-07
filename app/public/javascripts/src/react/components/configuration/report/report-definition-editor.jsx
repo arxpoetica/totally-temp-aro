@@ -40,7 +40,7 @@ export class ReportDefinitionEditor extends Component {
       </div>
       <div className='form-row flex-grow-1' style={{ paddingTop: '10px', paddingBottom: '10px' }}>
         <div className='col' style={{ height: '100%' }}>
-          <Field name='query' className='form-control' component='textarea' type='text' style={{ height: '100%', fontFamily: 'Courier New', fontSize: '12px' }} />
+          <Field name='query' className='form-control' component='textarea' type='text' style={{ height: '100%', fontFamily: 'Courier New', fontSize: '12px', minHeight: '20em' }} />
         </div>
       </div>
     </form>

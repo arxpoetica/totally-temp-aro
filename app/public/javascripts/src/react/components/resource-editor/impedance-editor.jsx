@@ -117,7 +117,7 @@ export class ImpedanceEditor extends Component {
   }
 
   exitEditingMode(){
-    this.props.setIsResourceEditor(true);
+    this.props.onDiscard()
   }
 
   saveConfigurationToServer(){

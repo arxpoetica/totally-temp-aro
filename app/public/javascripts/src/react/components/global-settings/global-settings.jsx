@@ -36,7 +36,7 @@ const views = Object.freeze({
   BROADCAST: 'Broadcast'
 })
 
-export function GlobalSettings(props) {
+function GlobalSettings(props) {
   const [modal, setModal] = useState(true)
   const [breadCrumb, setBreadCrumb] = useState([])
   const [goPrevious, setGoPrevious] = useState(false)
@@ -121,6 +121,7 @@ export function GlobalSettings(props) {
     props.setShowGlobalSettings(false)
     props.setIsRrmManager(false)
     props.setGlobalSettingsView(false)
+    props.setEditingMode('LIST_RESOURCE_MANAGERS')
     if (props.currentViewProps === views.MY_ACCOUNT) { props.openAccountSettingsModal(false) }
   }
   
@@ -185,7 +186,7 @@ export function GlobalSettings(props) {
                 </button>
               )
             } else {
-              return <></>
+              return <React.Fragment key={buttonInfo.title}></React.Fragment>
             }
           })}
         </div>
@@ -199,7 +200,7 @@ export function GlobalSettings(props) {
       {breadCrumb.includes(views.MULTIFACTOR_AUTHENTICATION) &&
         <MultiFactor/>
       }
-      {breadCrumb.includes(views.MANAGE_USERS) &&
+      {currentBreadCrumb() === views.MANAGE_USERS &&
         <ManageUsers
           openUserSettingsForUserId={openUserSettingsForUserId}
           setGoPrevious={() => setGoPrevious(false)}

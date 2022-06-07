@@ -69,20 +69,20 @@ function ResourceEditor(props) {
   ]
 
   useEffect(() => {
-    props.getResourceTypes()
-    props.getResourceManagers(filterText)
-		props.canMakeNewFilter(filterText)
-		props.setModalTitle('Resource Managers')
+    props.getResourceTypes(props.filterText)
+    props.getResourceManagers(props.filterText)
+    props.canMakeNewFilter(props.filterText)
+    props.setModalTitle('Resource Managers')
   }, [])
 
   useEffect(() => {
-    if (filterText !== undefined && props.filterText !== undefined) {
-      if (filterText === '') {
-        setFilterText(props.filterText)
-        setSelectedResourceName(props.selectedResourceName)
-      }
+    if (props.selectedResourceName !== selectedResourceName && props.filterText !== filterText) {
+      props.getResourceManagers(props.filterText)
+      props.canMakeNewFilter(props.filterText)
+      setFilterText(props.filterText)
+      setSelectedResourceName(props.selectedResourceName)
     }
-  }, [props.filterText])
+  }, [props.selectedResourceName, props.filtertext])
 
   useEffect(() => {
     const { editingManager, managers } = props
@@ -94,7 +94,10 @@ function ResourceEditor(props) {
       && props.selectedEditingMode === 'EDIT_RESOURCE_MANAGER'
     ) {
       if (!openedManager) {
-        setOpenedManager(selectedManager.definition.managerType)
+        setOpenedManager(
+          selectedManager.definition.managerType
+          || editingManager.type
+        )
       }
       if (!props.breadCrumb.includes(selectedManager.resourceManagerName)) {
         addBreadCrumb(selectedManager.resourceManagerName)
@@ -108,10 +111,11 @@ function ResourceEditor(props) {
       }
       setOpenedManager('')
     }
-  }, [props.editingManager, props.selectedEditingMode, props.isResourceEditor])
+  }, [props.selectedEditingMode, props.isResourceEditor])
 
 	const handleOnDiscard = () => {
-		this.props.setIsResourceEditor(true)
+		props.setIsResourceEditor(true)
+    props.setEditingMode('LIST_RESOURCE_MANAGERS')
 	}
 
 	const onSortClick = (colName) => {
@@ -248,36 +252,32 @@ function ResourceEditor(props) {
 	}
 
 	const searchManagers = () => {
-		const searchText = searchText
 		props.searchManagers(searchText)
 		props.getResourceManagers(filterText)
-		setSearchText(searchText)
 	}
   
 	const handleChange = (event) => {
-    const searchText = event.target.value
-		event.target.name = searchText
-    setSearchText(searchText)
+    const newSearchText = event.target.value
+		event.target.name = newSearchText
+    setSearchText(newSearchText)
 	}
 
 	const handleEnter = (event) => {
 		if (event.key === 'Enter') {
-			const searchText = searchText
 			props.searchManagers(searchText)
 			props.getResourceManagers(filterText)
-			setSearchText(searchText)
 		}
 	}
 
 	const handlefilterManager = (event) => {
 		const filterText = event.target.value
 		const selectedResourceIndex = event.nativeEvent.target.selectedIndex
-		const selectedResourceName = event.nativeEvent.target[selectedResourceIndex].text
+		const newSelectedResourceName = event.nativeEvent.target[selectedResourceIndex].text
 
 		props.getResourceManagers(filterText)
 		props.canMakeNewFilter(filterText)
     setFilterText(filterText)
-    setSelectedResourceName(selectedResourceName)
+    setSelectedResourceName(newSelectedResourceName)
 	}
 
   const renderResourceEditorTable = () => {
@@ -514,23 +514,23 @@ function ResourceEditor(props) {
 				}
 				{
 					openedManager === 'price_book' &&
-					<PriceBookEditor/>
+					<PriceBookEditor onDiscard={handleOnDiscard} />
 				}
 				{
 					openedManager === 'tsm_manager' &&
-					<TsmEditor/>
+					<TsmEditor onDiscard={handleOnDiscard} />
 				}
 				{
 					openedManager === 'roic_manager' &&
-					<RoicEditor/>
+					<RoicEditor onDiscard={handleOnDiscard} />
 				}
 				{
 					openedManager === 'arpu_manager' &&
-					<ArpuEditor/>
+					<ArpuEditor onDiscard={handleOnDiscard} />
 				}
 				{
 					openedManager === 'impedance_mapping_manager' &&
-					<ImpedanceEditor/>
+					<ImpedanceEditor onDiscard={handleOnDiscard} />
 				}
 				{
 					cloneManagerType === 'rate_reach_manager' && openedManager !== 'rate_reach_manager' &&
@@ -538,11 +538,11 @@ function ResourceEditor(props) {
 				}
 				{
 					openedManager === 'rate_reach_manager' &&
-					<RateReachEditor/>
+					<RateReachEditor onDiscard={handleOnDiscard} />
 				}
 				{
 					openedManager === 'competition_manager' &&
-					<CompetitorEditor/>
+					<CompetitorEditor onDiscard={handleOnDiscard} />
 				}
 				{
 					openedManager === 'fusion_manager' &&
@@ -602,7 +602,8 @@ const mapDispatchToProps = (dispatch) => ({
 		ResourceActions.newManager(resourceType, resourceName, loggedInUser, sourceId)
 	),
 	setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title)),
+  setEditingMode: (mode) => dispatch(ResourceActions.setEditingMode(mode))
 })
 
 const ResourceEditorComponent = wrapComponentWithProvider(reduxStore, ResourceEditor, mapStateToProps, mapDispatchToProps)
-export default ResourceEditorComponent
+export default ResourceEditorComponent;

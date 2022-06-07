@@ -222,8 +222,8 @@ export class RateReachEditor extends Component {
   }
 
   exitEditingMode(){
-    this.props.setIsResourceEditor(true);
     this.props.setIsRrmManager(false)
+    this.props.onDiscard()
   }
 
   saveConfigurationToServer(){
