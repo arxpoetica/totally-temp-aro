@@ -33,11 +33,11 @@ export class PriceBookCreator extends Component {
             <form className="form-horizontal">
                {/* The source pricebook used when cloning  */}
                {
-                this.props.selectedResourceForClone &&
+                this.props.cloneManager &&
                   <div className="form-group">
                     <label className="col-sm-4 control-label">PriceBook to clone</label>
                     <div className="col-sm-8">
-                      <input disabled className="form-control" value={this.props.selectedResourceForClone.name}/>
+                      <input disabled className="form-control" value={this.props.cloneManager.name}/>
                     </div>
                   </div>
                }
@@ -46,12 +46,12 @@ export class PriceBookCreator extends Component {
               <div className="form-group">
                 <label className="col-sm-4 control-label">Price Strategy</label>
                 <div className="col-sm-8">
-                  <select className="form-control" disabled={this.props.selectedResourceForClone} name="strategy" onChange={(e)=>this.handleChange(e)} value={this.state.priceBook.strategy}>
+                  <select className="form-control" disabled={this.props.cloneManager} name="strategy" onChange={(e)=>this.handleChange(e)} value={this.state.priceBook.strategy}>
                   {this.props.priceBookStrategy.map(item => <option value={item.name} key={item.name}>{item.description}</option>)}
                   </select>
                   {/* If we are cloning an existing pricebook, show a message explaining why strategy is disabled */}
                   {
-                    this.props.selectedResourceForClone &&
+                    this.props.cloneManager &&
                       <small className="form-text text-muted">You cannot change strategy when cloning an existing PriceBook</small> 
                   }
                 </div>
@@ -102,7 +102,7 @@ export class PriceBookCreator extends Component {
   }
 
   handleCreatePriceBook(){
-    this.props.createPriceBook(this.state.priceBook, this.props.selectedResourceForClone);
+    this.props.createPriceBook(this.state.priceBook, this.props.cloneManager);
   }
 }
 
@@ -114,7 +114,7 @@ export class PriceBookCreator extends Component {
     getResourceTypes: () => dispatch(ResourceActions.getResourceTypes()),
     searchManagers: (searchText) => dispatch(ResourceActions.searchManagers(searchText)),
     getPriceBookStrategy: () => dispatch(ResourceActions.getPriceBookStrategy()),
-    createPriceBook: (priceBook, selectedResourceForClone) => dispatch(ResourceActions.createPriceBook(priceBook, selectedResourceForClone)),
+    createPriceBook: (priceBook, cloneManager) => dispatch(ResourceActions.createPriceBook(priceBook, cloneManager)),
     setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
     setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title)),
   })
