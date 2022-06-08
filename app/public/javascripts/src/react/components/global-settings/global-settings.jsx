@@ -54,8 +54,8 @@ function GlobalSettings(props) {
     { title: views.RELEASE_NOTES, className: "fa-bell", conditional: true },
     { title: views.CONFIGURATION_EDITOR, className: "fa-sliders-h", conditional: props.loggedInUser.isAdministrator },
     { title: views.REPORTS_EDITOR, className: "fa-file-download", conditional: props.loggedInUser.isAdministrator },
-    { title: views.DATA_UPLOAD, className: "fa-upload", conditional: props.loggedInUser.isAdministrator },
-    { title: views.RESOURCE_EDITOR, className: "fa-edit", conditional: props.loggedInUser.isAdministrator },
+    { title: views.DATA_UPLOAD, className: "fa-upload", conditional: true },
+    { title: views.RESOURCE_EDITOR, className: "fa-edit", conditional: true },
     { title: views.BROADCAST, className: "fa-bullhorn", conditional: props.loggedInUser.isAdministrator },
   ]
 
