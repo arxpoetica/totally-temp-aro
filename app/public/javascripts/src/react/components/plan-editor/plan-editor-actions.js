@@ -367,7 +367,8 @@ function createFeature(feature) {
           subnetCopy.children = [...uniqueChildren]
         }
       }
-
+      let subnetDiffDict = {}
+      subnetDiffDict[subnetId] = subnetCopy
       batch(async() => {
         if (Object.keys(newDraftProps).length && newDraftEquipment.length) {
           await dispatch({ type: Actions.PLAN_EDITOR_MERGE_DRAFT_PROPS, payload: newDraftProps })
@@ -376,7 +377,7 @@ function createFeature(feature) {
           dispatch({ type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES, payload: newFeatures })
         }
         if (subnetCopy) {
-          dispatch({ type: Actions.PLAN_EDITOR_ADD_SUBNETS, payload: [subnetCopy] })
+          dispatch({ type: Actions.PLAN_EDITOR_ADD_SUBNETS, payload: subnetDiffDict })
         }
       })
     } catch (error) {
@@ -387,20 +388,20 @@ function createFeature(feature) {
 
 function updateFeatureProperties(feature) {
   return async(dispatch, getState) => {
-    const state = getState()
-    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-    let parentSubnetId = null
-    const subnetId = state.planEditor.subnetFeatures[feature.objectId].subnetId
-    if (subnetId) parentSubnetId = state.planEditor.subnets[subnetId].parentSubnetId
+    const { planEditor } = getState()
+    const { transaction, features, drafts, subnetFeatures } = planEditor
+    const transactionId = transaction && transaction.id
+    const parentSubnetId = PlanEditorSelectors.getRootOfFeatureUtility(drafts, subnetFeatures, feature.objectId)
     try {
       // Do a PUT to send the equipment over to service 
       // parentSubnetId SHOULD be the parent BUT terminals are NOT subnets so it would use the CO 
       let url = `/service/plan-transaction/${transactionId}/subnet-equipment`
+      // by parentSubnetId it is meant `root` by terms of service definition
       if (parentSubnetId) url += `?parentSubnetId=${parentSubnetId}`
       const result = await AroHttp.put(url, feature)
 
       // Decorate the created feature with some default values
-      const featureEntry = state.planEditor.features[feature.objectId]
+      const featureEntry = features[feature.objectId]
       let crudAction = featureEntry.crudAction || 'read'
       if (crudAction === 'read') crudAction = 'update'
 
@@ -1631,6 +1632,14 @@ function parseSubnet (subnet) {
   // --- fix service typos - eventually this won't be needed --- //
   subnet.subnetNode = parseSubnetFeature(subnet.subnetId)
   delete subnet.subnetId
+
+  // subnet nodes are not draggable 
+  //  not entirely sure if this is where this should go, and I don't like hardcoding 
+  //  theoretically this should be set by service 
+  if (subnet.subnetNode.networkNodeType === 'subnet_node') {
+    subnet.subnetNode.locked = true
+  }
+
   subnet.children = subnet.children.map(feature => parseSubnetFeature(feature))
   subnet.coEquipments = subnet.coEquipments.map(feature => parseSubnetFeature(feature))
   // --- end typo section --- //
