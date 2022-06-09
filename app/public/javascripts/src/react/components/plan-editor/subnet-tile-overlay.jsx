@@ -1,7 +1,9 @@
+/* globals google */
 import React, { useState, useEffect, Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import PlanEditorSelectors from './plan-editor-selectors'
+import PlanEditorActions from './plan-editor-actions'
 import TileUtils from '../common/tile-overlay/tile-overlay-utils'
 import TileDataMutator from '../common/tile-overlay/tile-data-mutator'
 // global: tileCache.subnets
@@ -76,6 +78,9 @@ class _SubnetTileOverlay extends Component {
     this.overlayLayer = null
     // TODO: we will do two layers
     //  the bottom one will be all locations at half opacity
+    this.mousemoveTimer = null
+    this.overlayMouseMoveListener = null
+    this.overlayMouseOutListener = null
   }
 
   // --- renderer --- //
@@ -213,9 +218,48 @@ class _SubnetTileOverlay extends Component {
     if (this.props.mapRef && this.props.selectedSubnetId && !this.overlayLayer) {
       this.overlayLayer = this.makeOverlayLayer()
       this.props.mapRef.overlayMapTypes.push(this.overlayLayer) // this will cause a tile refresh
+
+      // --- add mouse listeners 
+      this.addListeners()
+
       return true
     }
     return false
+  }
+
+  onMouseMove = (event) => {
+    clearTimeout(this.mousemoveTimer)
+    this.mousemoveTimer = setTimeout(async() => {
+      if (!this.props.subnetTileData[this.props.selectedSubnetId]) return
+      let ts = performance.now()
+      //const { locations } = await this.getFeaturesUnderLatLng(event.latLng)
+      //console.log(event)
+      let zoom = this.props.mapRef.getZoom()
+      let points = TileDataMutator.getPointsUnderClick(
+        this.props.subnetTileData[this.props.selectedSubnetId], 
+        event.latLng, 
+        zoom
+      )
+      ts = performance.now() - ts
+      console.log(ts)
+      console.log(points)
+      //const ids = locations.map(location => location.object_id)
+      this.props.setCursorLocationIds(Object.keys(points)) // hitch to new VTS 
+    }, 20)
+  }
+
+  onMouseOut = (event) => {
+    clearTimeout(this.mousemoveTimer)
+    this.props.clearCursorLocationIds()
+  }
+
+  addListeners () {
+    //console.log(this.props.mapRef)
+    //if (!this.props.mapRef) return
+    this.removeListeners()
+    console.log(this)
+    this.overlayMouseMoveListener = google.maps.event.addListener(this.props.mapRef, 'mousemove', this.onMouseMove)
+    this.overlayMouseOutListener = google.maps.event.addListener(this.props.mapRef, 'mouseout', this.onMouseOut)
   }
 
   removeOverlayLayer () {
@@ -227,6 +271,12 @@ class _SubnetTileOverlay extends Component {
       }
     }
     return false
+  }
+
+  removeListeners () {
+    //if (!this.props.mapRef) return
+    google.maps.event.removeListener(this.overlayMouseMoveListener)
+    google.maps.event.removeListener(this.overlayMouseOutListener)
   }
 
   refreshTiles () {
@@ -260,6 +310,8 @@ class _SubnetTileOverlay extends Component {
 
   componentWillUnmount() {
     this.removeOverlayLayer()
+    console.log('component unmount')
+    this.removeListeners()
   }
 
 }
@@ -294,7 +346,8 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = dispatch => ({
-
+  setCursorLocationIds: ids => dispatch(PlanEditorActions.setCursorLocationIds(ids)),
+  clearCursorLocationIds: () => dispatch(PlanEditorActions.clearCursorLocationIds()),
 })
 
 const SubnetTileOverlay = wrapComponentWithProvider(reduxStore, _SubnetTileOverlay, mapStateToProps, mapDispatchToProps)

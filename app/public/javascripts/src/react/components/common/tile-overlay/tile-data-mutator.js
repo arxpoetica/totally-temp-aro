@@ -75,6 +75,10 @@ TileDataMutator.deletePoints = (tileData, tileCache, points) => {
 }
 
 TileDataMutator.getPointsForLeafTileRect = (tileData, nwTileId, seTileId) => {
+  // TODO: check for min and max tile IDs 
+  //  if there is a problem throw an error and return {}
+  //  this function can result in a long running loop 
+  //  if scaling by the parent is done incorrectly (I know cause I did exactly that and it crashed my browser)
   let minX = Math.min(nwTileId.x, seTileId.x)
   let maxX = Math.max(nwTileId.x, seTileId.x)
   let minY = Math.min(nwTileId.y, seTileId.y)
@@ -107,14 +111,16 @@ TileDataMutator.getPointsUnderClick = (tileData, latLng, zoom, size=null) => {
   let nwCoords = {}
   let seCoords = {}
   // scale size by zoom level
-  size = size * (1 << (TileUtils.MAX_ZOOM - zoom))
-  ['x', 'y'].forEach(dimention => {
+  size = size / (1 << zoom)
+  let dimentions = ['x', 'y']
+  dimentions.forEach(dimention => {
     nwCoords[dimention] = worldCoord[dimention] - size
     seCoords[dimention] = worldCoord[dimention] + size
   })
   let nwTileId = TileUtils.worldCoordToLeafTileId(nwCoords)
   let seTileId = TileUtils.worldCoordToLeafTileId(seCoords)
   let allPoints = TileDataMutator.getPointsForLeafTileRect(tileData, nwTileId, seTileId)
+  
   for (const [pointId, worldCoord] of Object.entries(allPoints)) {
     if ( nwCoords.x <= worldCoord.x
       && worldCoord.x < seCoords.x
