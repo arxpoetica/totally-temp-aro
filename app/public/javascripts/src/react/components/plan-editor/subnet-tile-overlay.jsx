@@ -81,6 +81,7 @@ class _SubnetTileOverlay extends Component {
     this.mousemoveTimer = null
     this.overlayMouseMoveListener = null
     this.overlayMouseOutListener = null
+    this.overlayRightClickListener = null
   }
 
   // --- renderer --- //
@@ -231,20 +232,18 @@ class _SubnetTileOverlay extends Component {
     clearTimeout(this.mousemoveTimer)
     this.mousemoveTimer = setTimeout(async() => {
       if (!this.props.subnetTileData[this.props.selectedSubnetId]) return
-      let ts = performance.now()
-      //const { locations } = await this.getFeaturesUnderLatLng(event.latLng)
-      //console.log(event)
+      //let ts = performance.now()
       let zoom = this.props.mapRef.getZoom()
       let points = TileDataMutator.getPointsUnderClick(
         this.props.subnetTileData[this.props.selectedSubnetId], 
         event.latLng, 
         zoom
       )
-      ts = performance.now() - ts
-      console.log(ts)
-      console.log(points)
+      // ts = performance.now() - ts
+      // console.log(ts)
+      // console.log(points)
       //const ids = locations.map(location => location.object_id)
-      this.props.setCursorLocationIds(Object.keys(points)) // hitch to new VTS 
+      this.props.setCursorLocationIds(Object.keys(points))
     }, 20)
   }
 
@@ -253,13 +252,24 @@ class _SubnetTileOverlay extends Component {
     this.props.clearCursorLocationIds()
   }
 
+  onRightClick = (event) => {
+    if (!this.props.subnetTileData[this.props.selectedSubnetId]) return
+    let zoom = this.props.mapRef.getZoom()
+    let points = TileDataMutator.getPointsUnderClick(
+      this.props.subnetTileData[this.props.selectedSubnetId], 
+      event.latLng, 
+      zoom
+    )
+    this.props.showContextMenuForLocations(Object.keys(points), event)
+  }
+
   addListeners () {
     //console.log(this.props.mapRef)
     //if (!this.props.mapRef) return
     this.removeListeners()
-    console.log(this)
     this.overlayMouseMoveListener = google.maps.event.addListener(this.props.mapRef, 'mousemove', this.onMouseMove)
     this.overlayMouseOutListener = google.maps.event.addListener(this.props.mapRef, 'mouseout', this.onMouseOut)
+    this.overlayRightClickListener = google.maps.event.addListener(this.props.mapRef, 'rightclick', this.onRightClick)
   }
 
   removeOverlayLayer () {
@@ -277,6 +287,7 @@ class _SubnetTileOverlay extends Component {
     //if (!this.props.mapRef) return
     google.maps.event.removeListener(this.overlayMouseMoveListener)
     google.maps.event.removeListener(this.overlayMouseOutListener)
+    google.maps.event.removeListener(this.overlayRightClickListener)
   }
 
   refreshTiles () {
@@ -309,9 +320,9 @@ class _SubnetTileOverlay extends Component {
   }
 
   componentWillUnmount() {
+    this.removeListeners()
     this.removeOverlayLayer()
     console.log('component unmount')
-    this.removeListeners()
   }
 
 }
@@ -348,6 +359,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = dispatch => ({
   setCursorLocationIds: ids => dispatch(PlanEditorActions.setCursorLocationIds(ids)),
   clearCursorLocationIds: () => dispatch(PlanEditorActions.clearCursorLocationIds()),
+  showContextMenuForLocations: (featureIds, event) => dispatch(PlanEditorActions.showContextMenuForLocations(featureIds, event)),
 })
 
 const SubnetTileOverlay = wrapComponentWithProvider(reduxStore, _SubnetTileOverlay, mapStateToProps, mapDispatchToProps)

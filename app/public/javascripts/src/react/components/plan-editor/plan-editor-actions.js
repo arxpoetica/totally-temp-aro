@@ -590,7 +590,8 @@ function showContextMenuForLocations (featureIds, event) {
       const coords = WktUtils.getXYFromEvent(event)
       var menuItemFeatures = []
       featureIds.forEach(location => {
-        let id = location.object_id
+        let id = location
+        if (typeof location === 'object') id = location.object_id
         var menuActions = []
         if (selectedSubnetLocations[id]) {
           // this location is a part of the selected FDT
@@ -629,7 +630,6 @@ function _updateSubnetFeatures (subnetFeatures) {
     let commands = []
     let subnetFeaturesById = {}
     let subnetIds = []
-    console.log(subnetFeatures)
     subnetFeatures.forEach(subnetFeature => {
       subnetFeaturesById[subnetFeature.feature.objectId] = subnetFeature
       let subnetId = subnetFeature.subnetId
