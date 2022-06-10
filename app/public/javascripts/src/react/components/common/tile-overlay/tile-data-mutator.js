@@ -75,15 +75,25 @@ TileDataMutator.deletePoints = (tileData, tileCache, points) => {
 }
 
 TileDataMutator.getPointsForLeafTileRect = (tileData, nwTileId, seTileId) => {
-  // TODO: check for min and max tile IDs 
-  //  if there is a problem throw an error and return {}
-  //  this function can result in a long running loop 
-  //  if scaling by the parent is done incorrectly (I know cause I did exactly that and it crashed my browser)
+  //  Check for min and max tile IDs 
+  //  if there is a problem throw an error and return default points.
+  //  Because if we don't this function can result in a long running loop 
+  //  if scaling by the parent is done incorrectly. 
+  //  (I know because I did exactly that and it crashed my browser)
   let minX = Math.min(nwTileId.x, seTileId.x)
   let maxX = Math.max(nwTileId.x, seTileId.x)
   let minY = Math.min(nwTileId.y, seTileId.y)
   let maxY = Math.max(nwTileId.y, seTileId.y)
   let points = {}
+  if (
+    minX < 0
+    || minY < 0
+    || maxX > TileUtils.MAX_LEAF_TILE_ID
+    || maxY > TileUtils.MAX_LEAF_TILE_ID
+  ) {
+    console.error('Tile IDs are outside of bounds')
+    return points
+  }
   
   for (let x=minX; x<=maxX; x++) {
     for (let y=minY; y<=maxY; y++) {
@@ -104,7 +114,7 @@ TileDataMutator.getPointsForTile = (tileData, tileId) => {
 
 TileDataMutator.getPointsUnderClick = (tileData, latLng, zoom, size=null) => {
   // size is number of pixels at current zoom level
-  if (null === size) size = 8
+  if (null === size) size = 16
   size = Math.ceil(size * 0.5)
   let points = {}
   let worldCoord = TileUtils.latLngToWorldCoord(latLng)

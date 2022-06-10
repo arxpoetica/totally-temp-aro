@@ -1,6 +1,9 @@
 // Lat Long to world coordinate via the mercator projection
 // https://developers.google.com/maps/documentation/javascript/examples/map-coordinates
 
+// "Because the basic Mercator Google Maps tile is 256 x 256 pixels, 
+//  the usable world coordinate space is {0-256}, {0-256}"
+
 let TileUtils = {}
 
 TileUtils.TILE_SIZE_MAGNITUDE = 8 // 2^x = TILE_SIZE, 2^8=256
@@ -114,6 +117,15 @@ TileUtils.getLeafTileRectForTile = (tileId) => {
   })
   return {nwTileId, seTileId}
 }
+
+// --- derived and cached data --- //
+
+TileUtils.MAX_LEAF_TILE_ID = TileUtils.worldCoordToLeafTileId({
+  'x': TileUtils.TILE_SIZE,
+  'y': TileUtils.TILE_SIZE,
+})
+
+// --- //
 
 Object.freeze(TileUtils)
 export default TileUtils
