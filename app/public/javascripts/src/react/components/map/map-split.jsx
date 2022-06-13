@@ -121,52 +121,8 @@ const MapSplit = (props) => {
     <ModalsProvider modals={{ OptimizationModal }}>
       {/* First define the container for both the map and the sidebar. */}
       <div className={`app_wrapper_container ${ARO_CLIENT === 'frontier' ? 'footer' : ''}`}>
-
-        {/* Define the canvas that will hold the map. */}
-        <div id="map-canvas-container" className="map-split-container" style={{ transition: transitionCSS }}>
-          <div id="map-canvas" className={`map-canvas map-split ${!isReportMode ? 'map-canvas-drop-shadow' : ''}`} />
-          {/* Technically the toolbar, etc should be a child of the map canvas, but putting these elements in the map canvas
-            causes the map to not show up */}
-
-          <div className="header-bar-container">
-            <div className="header-space" />
-            {/* Created a 'toolbar-container' to get the ToolBar component elements in tool-bar.jsx */}
-            <div className="toolbar-container">
-              <ErrorBoundary>
-                <ToolBar />
-              </ErrorBoundary>
-            </div>
-            <div className="sidebar-icon-space" />
-            { showToolBox && <ToolBox /> }
-          </div>
-          {/* Plan target map selector should be active only if we are in analysis mode */}
-          {/* Map Selector Plan Target */}
-          {
-            checkSelectedDisplayMode(displayModes.ANALYSIS) && !isRulerEnabled &&
-            <MapSelectorPlanTarget />
-          }
-          {/* Map Selector Export Locations */}
-          { checkSelectedDisplayMode(displayModes.VIEW)
-            && selectedTargetSelectionMode === targetSelectionModes.POLYGON_EXPORT_TARGET &&
-            <MapSelectorExportLocations />
-          }
-          <ToastContainer />
-          {/* A div that overlays on the map to denote disabled state. When shown, it will prevent any keyboard/mouse
-              interactions with the map. Useful when you have made a slow-ish request to service and want to prevent
-              further map interactions till you get a response. */}
-          {disableMap &&
-            <div className="map-spinner-container">
-              <div className="d-flex map-spinner">
-                <i className="fa fa-5x fa-spinner fa-spin spin-icon" />
-              </div>
-            </div>
-          }
-          <EquipmentDropTarget />
-          <ContextMenu />
-        </div>
-
-        {/* Define the sidebar */}
-        {!isReportMode &&
+                {/* Define the sidebar */}
+                {!isReportMode &&
           <div id="sidebar" className="sidebar-container" style={{ transition: transitionCSS }}>
             {/* Define the "expander widget" that can be clicked to collapse/uncollapse the sidebar. Note that putting
             the expander in one div affects the flow of elements in the sidebar, so we create a 0px by 0px div, and
@@ -234,6 +190,48 @@ const MapSplit = (props) => {
             }
           </div>
         }
+        {/* Define the canvas that will hold the map. */}
+        <div id="map-canvas-container" className="map-split-container" style={{ transition: transitionCSS }}>
+          <div id="map-canvas" className={`map-canvas map-split ${!isReportMode ? 'map-canvas-drop-shadow' : ''}`} />
+          {/* Technically the toolbar, etc should be a child of the map canvas, but putting these elements in the map canvas
+            causes the map to not show up */}
+
+          <div className="header-bar-container">
+            <div className="header-space" />
+            {/* Created a 'toolbar-container' to get the ToolBar component elements in tool-bar.jsx */}
+            <div className="toolbar-container">
+              <ErrorBoundary>
+                <ToolBar />
+              </ErrorBoundary>
+            </div>
+            <div className="sidebar-icon-space" />
+            { showToolBox && <ToolBox /> }
+          </div>
+          {/* Plan target map selector should be active only if we are in analysis mode */}
+          {/* Map Selector Plan Target */}
+          {
+            checkSelectedDisplayMode(displayModes.ANALYSIS) && !isRulerEnabled &&
+            <MapSelectorPlanTarget />
+          }
+          {/* Map Selector Export Locations */}
+          { checkSelectedDisplayMode(displayModes.VIEW)
+            && selectedTargetSelectionMode === targetSelectionModes.POLYGON_EXPORT_TARGET &&
+            <MapSelectorExportLocations />
+          }
+          <ToastContainer />
+          {/* A div that overlays on the map to denote disabled state. When shown, it will prevent any keyboard/mouse
+              interactions with the map. Useful when you have made a slow-ish request to service and want to prevent
+              further map interactions till you get a response. */}
+          {disableMap &&
+            <div className="map-spinner-container">
+              <div className="d-flex map-spinner">
+                <i className="fa fa-5x fa-spinner fa-spin spin-icon" />
+              </div>
+            </div>
+          }
+          <EquipmentDropTarget />
+          <ContextMenu />
+        </div>
       </div>
       <div className="ui-note ui-note-container">
         {/* There used to be a "spinner" icon here, which has been removed. On profiling, we found that the
