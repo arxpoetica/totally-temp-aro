@@ -77,26 +77,11 @@ import networkEquipment from './views/network-equipment'
 import copper from './views/copper'
 import cables from './views/cables'
 import conduits from './views/conduits'
-import networkPlanModal from './header/network-plan-modal'
 import fullScreenContainer from './full-screen/full-screen-container'
 import aroPanel from './common/aro-panel'
-import aroMultiSelect from './common/aro-multiselect'
-import mapObjectEditor from './common/map-object-editor'
 import contextMenu from './common/context-menu/context-menu'
-import dropTarget from './common/drop-target'
-import resourcePermissionsEditor from './common/resource-permissions-editor'
-import aroDrawingManager from './common/aro-drawing-manager'
-import accordion from './accordion/accordion'
-import accordionPanelContents from './accordion/accordion-panel-contents'
-import accordionPanelTitle from './accordion/accordion-panel-title'
 import tile from './tiles/tile'
 
-import aroObjectEditor from './common/editor-interfaces/aro-object-editor'
-import editorInterfaceTree from './common/editor-interfaces/editor-interface-tree'
-import editorInterfaceTable from './common/editor-interfaces/editor-interface-table'
-import editorInterfaceValue from './common/editor-interfaces/editor-interface-value'
-import editorInterfacePrimitive from './common/editor-interfaces/editor-interface-primitive'
-import editorInterfaceNullableNumber from './common/editor-interfaces/editor-interface-nullable-number'
 import utils from './common/utilities'
 
 import state from '../models/state'
@@ -112,26 +97,11 @@ app.component('boundaries', boundaries)
   .component('cables', cables)
   .component('copper', copper)
   .component('conduits', conduits)
-  .component('networkPlanModal', networkPlanModal)
-  // .component('uiNotification', uiNotification)
   .component('fullScreenContainer', fullScreenContainer)
   .component('aroPanel', aroPanel)
-  .component('aroMultiSelect', aroMultiSelect)
-  .component('mapObjectEditor', mapObjectEditor)
   .component('contextMenu', contextMenu)
-  .component('dropTarget', dropTarget)
-  .component('resourcePermissionsEditor', resourcePermissionsEditor)
-  .component('aroDrawingManager', aroDrawingManager)
-  .component('accordion', accordion)
-  .component('accordionPanelContents', accordionPanelContents)
-  .component('accordionPanelTitle', accordionPanelTitle)
   .component('tile', tile)
-  .component('aroObjectEditor', aroObjectEditor)
-  .component('editorInterfaceTree', editorInterfaceTree)
-  .component('editorInterfaceTable', editorInterfaceTable)
-  .component('editorInterfaceValue', editorInterfaceValue)
-  .component('editorInterfacePrimitive', editorInterfacePrimitive)
-  .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
+
 // ReactJS components
   .component('rMapSplit', react2angular(MapSplit))
   .component('rViewMode', react2angular(ViewMode))

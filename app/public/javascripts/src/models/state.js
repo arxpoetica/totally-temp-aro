@@ -280,7 +280,6 @@ class State {
     service.requestCreateMapOverlay = new Rx.BehaviorSubject(null)
     service.requestDestroyMapOverlay = new Rx.BehaviorSubject(null)
     service.showNetworkAnalysisOutput = false
-    service.networkPlanModal = new Rx.BehaviorSubject(false)
     service.requestSetMapCenter = new Rx.BehaviorSubject({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
     service.requestSetMapZoom = new Rx.BehaviorSubject(service.defaultPlanCoordinates.zoom)
     service.showDetailedLocationInfo = new Rx.BehaviorSubject()
