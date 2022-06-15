@@ -7,29 +7,77 @@ import RfpStatusActions from './actions'
 import RfpPlanList from './rfp-plan-list.jsx'
 import RfpSubmitter from './rfp-submitter.jsx'
 import RfpTemplateManager from './rfp-template-manager.jsx'
+import FullScreenActions from '../../../full-screen/full-screen-actions'
 
 export class RfpStatus extends Component {
   render () {
-    return <div className='container pt-5 pb-5 d-flex flex-column' style={{ height: '100%' }}>
-      <h2>RFP Plans</h2>
-      <ul className='nav nav-tabs mb-3'>
-        {
-          this.props.tabs.map(tab => (
-            <li key={tab.id} className='nav-item'>
-              <a
-                id={`rfpStatusTab_${tab.id}`}
-                className={`nav-link ${tab.id === this.props.selectedTabId ? 'active' : ''}`}
-                href='#'
-                onClick={() => this.props.setSelectedTabId(tab.id)}
-              >
-                {tab.description}
-              </a>
-            </li>
-          ))
+    return (
+      <>
+        {this.props.showFullScreenContainer && this.props.showAllRfpStatus &&
+          <div className="full-screen-container">
+            {/* A close button at the top right */}
+            <div className="full-screen-container-close"
+              onClick={() => this.props.hideFullScreenContainer()}
+              data-toggle="tooltip"
+              data-placement="bottom"
+              title="Close">
+              <i className="fas fa-4x fa-times"></i>
+            </div>
+            <div className='container pt-5 pb-5 d-flex flex-column' style={{ height: '100%' }}>
+              <h2>RFP Plans</h2>
+              <ul className='nav nav-tabs mb-3'>
+                {
+                  this.props.tabs.map(tab => (
+                    <li key={tab.id} className='nav-item'>
+                      <a
+                        id={`rfpStatusTab_${tab.id}`}
+                        className={`nav-link ${tab.id === this.props.selectedTabId ? 'active' : ''}`}
+                        href='#'
+                        onClick={() => this.props.setSelectedTabId(tab.id)}
+                      >
+                        {tab.description}
+                      </a>
+                    </li>
+                  ))
+                }
+              </ul>
+              {this.renderActiveComponent()}
+            </div>
+          </div>
         }
-      </ul>
-      {this.renderActiveComponent()}
-    </div>
+        <style jsx>{`
+          .full-screen-container {
+            position: absolute;
+            left: 0px;
+            right: 0px;
+            top: 0px;
+            bottom: 0px;
+            background-color: white;
+            z-index: 4; /* Required because our sidebar has a z-index, which is required because of the google maps control */
+          }
+        
+          .full-screen-container.ng-hide-remove {
+            animation: fadeInDown 300ms;
+          }
+        
+          .full-screen-container.ng-hide-add {
+            animation: fadeOutUp 300ms;
+          }
+        
+          .full-screen-container-close {
+            position: absolute;
+            padding: 0px 10px;
+            margin: 10px;
+            top: 0px;
+            right: 0px;
+            color: #777;
+            cursor: pointer;
+          }
+        `}
+      </style>
+      </>
+      
+    )
   }
 
   renderActiveComponent () {
@@ -60,12 +108,15 @@ RfpStatus.propTypes = {
 
 const mapStateToProps = state => ({
   tabs: state.optimization.rfp.tabs,
-  selectedTabId: state.optimization.rfp.selectedTabId
+  selectedTabId: state.optimization.rfp.selectedTabId,
+  showFullScreenContainer: state.fullScreen.showFullScreenContainer,
+  showAllRfpStatus: state.optimization.rfp.showAllRfpStatus,
 })
 
 const mapDispatchToProps = dispatch => ({
   setSelectedTabId: selectedTabId => dispatch(RfpStatusActions.setSelectedTabId(selectedTabId)),
-  clearRfpState: () => dispatch(RfpActions.clearRfpState())
+  clearRfpState: () => dispatch(RfpActions.clearRfpState()),
+  hideFullScreenContainer: () => dispatch(FullScreenActions.showOrHideFullScreenContainer(false)),
 })
 
 const RfpStatusComponent = wrapComponentWithProvider(reduxStore, RfpStatus, mapStateToProps, mapDispatchToProps)
