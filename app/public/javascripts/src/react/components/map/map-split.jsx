@@ -101,7 +101,7 @@ const MapSplit = (props) => {
     } else {
       // Save the current sizes and then collapse the sidebar
       setSizesBeforeCollapse(splitterObj.getSizes())
-      splitterObj.setSizes([99.5, 0.5])
+      splitterObj.setSizes([0.5, 99.5])
       setTimeout(() => window.dispatchEvent(toolBarResizeEvent), transitionTimeMsec + 50)
     }
     setCollapsed(!isCollapsed)
