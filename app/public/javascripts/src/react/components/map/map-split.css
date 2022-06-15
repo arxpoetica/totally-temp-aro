@@ -43,10 +43,11 @@
   border: #bbb solid 1px;
   border-top: none;
   border-left: none;
+  border-bottom: none;
   padding: 8px;
   color: #aaa;
   cursor: pointer;
-  box-shadow: #888 4px -4px 6px;
+  box-shadow: #888 7px -4px 6px;
   line-height: 55px;
   /* To vertically center the icon */
 }
