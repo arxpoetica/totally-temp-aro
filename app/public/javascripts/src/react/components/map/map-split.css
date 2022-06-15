@@ -104,6 +104,7 @@
   flex-direction: column;
   height: 100%;
   padding-right: 10px;
+  padding-left: 10px;
 }
 
 .display-mode-container .display-mode-buttons {
