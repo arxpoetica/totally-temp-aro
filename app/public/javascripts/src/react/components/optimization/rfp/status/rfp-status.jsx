@@ -7,7 +7,6 @@ import RfpStatusActions from './actions'
 import RfpPlanList from './rfp-plan-list.jsx'
 import RfpSubmitter from './rfp-submitter.jsx'
 import RfpTemplateManager from './rfp-template-manager.jsx'
-import FullScreenActions from '../../../full-screen/full-screen-actions'
 
 export class RfpStatus extends Component {
   render () {
@@ -120,14 +119,14 @@ RfpStatus.propTypes = {
 const mapStateToProps = state => ({
   tabs: state.optimization.rfp.tabs,
   selectedTabId: state.optimization.rfp.selectedTabId,
-  showFullScreenContainer: state.fullScreen.showFullScreenContainer,
+  showFullScreenContainer: state.optimization.rfp.showFullScreenContainer,
   showAllRfpStatus: state.optimization.rfp.showAllRfpStatus,
 })
 
 const mapDispatchToProps = dispatch => ({
   setSelectedTabId: selectedTabId => dispatch(RfpStatusActions.setSelectedTabId(selectedTabId)),
   clearRfpState: () => dispatch(RfpActions.clearRfpState()),
-  hideFullScreenContainer: () => dispatch(FullScreenActions.showOrHideFullScreenContainer(false)),
+  hideFullScreenContainer: () => dispatch(RfpActions.showOrHideFullScreenContainer(false)),
 })
 
 const RfpStatusComponent = wrapComponentWithProvider(reduxStore, RfpStatus, mapStateToProps, mapDispatchToProps)
