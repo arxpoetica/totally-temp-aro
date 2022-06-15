@@ -12,7 +12,7 @@
 
 .gutter.gutter-horizontal {
   cursor: ew-resize;
-  border-left: #bbb solid 1px;
+  border-right: #bbb solid 1px;
 }
 
 .gutter:hover {
@@ -26,9 +26,9 @@
 }
 
 .expander-position {
-  float: left;
+  float: right;
   position: relative;
-  left: -49px;
+  right: 0px;
   top: -10px;
   width: 0px;
   height: 0px;
@@ -36,17 +36,17 @@
 }
 
 .expander-content {
-  width: 40px;
+  width: 48px;
   height: 60px;
   background-color: #fff;
-  border-radius: 0px 0px 0px 5px;
+  border-radius: 0px 5px 5px 0px;
   border: #bbb solid 1px;
   border-top: none;
-  border-right: none;
+  border-left: none;
   padding: 8px;
   color: #aaa;
   cursor: pointer;
-  box-shadow: #888 -4px 4px 6px;
+  box-shadow: #888 4px -4px 6px;
   line-height: 55px;
   /* To vertically center the icon */
 }

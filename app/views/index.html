@@ -136,7 +136,7 @@
         NotificationProvider.setOptions({
           delay : 60000,
           maxCount : 1,
-          positionX: 'left',
+          positionX: 'right',
           positionY: 'bottom',
           container: '#map-canvas'
         });
@@ -157,6 +157,7 @@
         map = new google.maps.Map(document.getElementById('map-canvas'), {
           zoom: 12,
           tilt: 0,
+          disableDefaultUI: true,
           mapTypeId: google.maps.MapTypeId.ROADMAP,
           panControl: false,
           mapTypeControl: false,

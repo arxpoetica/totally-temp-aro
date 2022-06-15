@@ -62,9 +62,9 @@ const MapSplit = (props) => {
 
   useEffect(() => {
     if (!splitterObj && map) {
-      splitterObj = Split(['#map-canvas-container', '#sidebar'], {
-        sizes: [window.GLOBAL_MAP_SPLITTER_INITIAL_WIDTH || 75, window.GLOBAL_SIDEBAR_INITIAL_WIDTH || 25],
-        minSize: [680, 310],
+      splitterObj = Split(['#sidebar', '#map-canvas-container'], {
+        sizes: [window.GLOBAL_SIDEBAR_INITIAL_WIDTH || 25, window.GLOBAL_MAP_SPLITTER_INITIAL_WIDTH || 75],
+        minSize: [310, 680],
         onDragEnd: () => {
           // Trigger a resize so that any tiles that have been uncovered will be loaded
           if (map) { google.maps.event.trigger(map, 'resize') }
@@ -121,8 +121,8 @@ const MapSplit = (props) => {
     <ModalsProvider modals={{ OptimizationModal }}>
       {/* First define the container for both the map and the sidebar. */}
       <div className={`app_wrapper_container ${ARO_CLIENT === 'frontier' ? 'footer' : ''}`}>
-                {/* Define the sidebar */}
-                {!isReportMode &&
+        {/* Define the sidebar */}
+        {!isReportMode &&
           <div id="sidebar" className="sidebar-container" style={{ transition: transitionCSS }}>
             {/* Define the "expander widget" that can be clicked to collapse/uncollapse the sidebar. Note that putting
             the expander in one div affects the flow of elements in the sidebar, so we create a 0px by 0px div, and
@@ -146,8 +146,8 @@ const MapSplit = (props) => {
                     ${(!hovering && isCollapsed && checkSelectedDisplayMode(displayModes.EDIT_PLAN)) ? 'fa-pencil-alt' : ''}
                     ${(!hovering && isCollapsed && checkSelectedDisplayMode(displayModes.DEBUG)) ? 'fa-bug' : ''}
                     ${(!hovering && isCollapsed && checkSelectedDisplayMode(displayModes.PLAN_SETTINGS)) ? 'fa-cog' : ''}
-                    ${!isCollapsed ? 'fa-arrow-circle-right' : ''}
-                    ${(hovering && isCollapsed) ? 'fa-arrow-circle-left' : ''}
+                    ${!isCollapsed ? 'fa-arrow-circle-left' : ''}
+                    ${(hovering && isCollapsed) ? 'fa-arrow-circle-right' : ''}
                   `}
                 />
               </div>

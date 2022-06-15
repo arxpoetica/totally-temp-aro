@@ -200,7 +200,7 @@ export class ToolBar extends Component {
     }
 
     return (
-      <div className="tool-bar" style={{margin: marginPixels, backgroundColor: configuration.toolbar.toolBarColor}}>
+      <div className="tool-bar" style={{margin: marginPixels, backgroundColor: configuration.toolbar.toolBarColor, marginLeft: 0}}>
         { leftElement }
         <LocationSearch currentView='toolBarSearch'/>
         <div className="separator"></div>
