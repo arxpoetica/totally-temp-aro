@@ -45,6 +45,8 @@ const MapSplit = (props) => {
   const [isCollapsed, setCollapsed] = useState(false)
   const [sizesBeforeCollapse, setSizesBeforeCollapse] = useState(null)
   const mapViewToggle = useRef(null)
+  const [showPanel, setShowPanel] = useState(false)
+  const [measuredDistance, setMeasuredDistance] = useState(0)
 
   const {
     map,
@@ -53,12 +55,15 @@ const MapSplit = (props) => {
     disableMap,
     showToolBox,
     isReportMode,
+    appConfigUnits,
     isRulerEnabled,
     setSidebarWidth,
     areTilesRendering,
     selectedDisplayMode,
     selectedTargetSelectionMode,
   } = props
+
+  const {meters_to_length_units, length_units} = appConfigUnits
 
   useEffect(() => {
     if (!splitterObj && map) {
@@ -85,6 +90,13 @@ const MapSplit = (props) => {
     }
     if (map) { map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(mapViewToggle.current) }
   }, [map])
+
+  useEffect(() => {
+    window.addEventListener('measuredDistance', (measuredDistance) => { 
+      setShowPanel(!!measuredDistance.detail)
+      setMeasuredDistance(measuredDistance.detail)
+    })
+  }, [])
 
   const checkSelectedDisplayMode = (displayMode) => {
     return selectedDisplayMode === displayMode
@@ -252,6 +264,14 @@ const MapSplit = (props) => {
           <MapViewToggle />
         </div>
       }
+      {/* Ruler dispaly panel */}
+      {showPanel &&
+        <div className="map-tool panel panel-primary" id="measuring-stick-result">
+          <div className="panel-heading">
+            Measured distance: {(measuredDistance * meters_to_length_units).toFixed(0)} {length_units}
+          </div>
+        </div>
+      }
 
       <style jsx>{`
         :global(.mantine-Modal-title) {
@@ -279,6 +299,8 @@ const mapStateToProps = (state) => ({
   map: state.map.googleMaps && state.map.googleMaps,
   selectedTargetSelectionMode: state.toolbar.selectedTargetSelectionMode,
   isRulerEnabled: state.toolbar.isRulerEnabled,
+  appConfigUnits: Object.keys(state.toolbar.appConfiguration).length
+    && state.toolbar.appConfiguration.units,
 })
 
 const mapDispatchToProps = (dispatch) => ({
