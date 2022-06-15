@@ -11,29 +11,40 @@ import FullScreenActions from '../../../full-screen/full-screen-actions'
 
 export class RfpStatus extends Component {
   render () {
+
+    const {
+      tabs,
+      selectedTabId,
+      setSelectedTabId,
+      showAllRfpStatus,
+      hideFullScreenContainer,
+      showFullScreenContainer,
+    } = this.props
+
     return (
       <>
-        {this.props.showFullScreenContainer && this.props.showAllRfpStatus &&
+        {showFullScreenContainer && showAllRfpStatus &&
           <div className="full-screen-container">
             {/* A close button at the top right */}
             <div className="full-screen-container-close"
-              onClick={() => this.props.hideFullScreenContainer()}
+              onClick={() => hideFullScreenContainer()}
               data-toggle="tooltip"
               data-placement="bottom"
-              title="Close">
-              <i className="fas fa-4x fa-times"></i>
+              title="Close"
+            >
+              <i className="fas fa-4x fa-times" />
             </div>
             <div className='container pt-5 pb-5 d-flex flex-column' style={{ height: '100%' }}>
               <h2>RFP Plans</h2>
               <ul className='nav nav-tabs mb-3'>
                 {
-                  this.props.tabs.map(tab => (
+                  tabs.map(tab => (
                     <li key={tab.id} className='nav-item'>
                       <a
                         id={`rfpStatusTab_${tab.id}`}
-                        className={`nav-link ${tab.id === this.props.selectedTabId ? 'active' : ''}`}
+                        className={`nav-link ${tab.id === selectedTabId ? 'active' : ''}`}
                         href='#'
-                        onClick={() => this.props.setSelectedTabId(tab.id)}
+                        onClick={() => setSelectedTabId(tab.id)}
                       >
                         {tab.description}
                       </a>

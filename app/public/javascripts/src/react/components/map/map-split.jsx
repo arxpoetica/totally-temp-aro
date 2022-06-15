@@ -63,7 +63,7 @@ const MapSplit = (props) => {
     selectedTargetSelectionMode,
   } = props
 
-  const {meters_to_length_units, length_units} = appConfigUnits
+  const { meters_to_length_units, length_units } = appConfigUnits
 
   useEffect(() => {
     if (!splitterObj && map) {
