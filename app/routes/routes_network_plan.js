@@ -200,7 +200,7 @@ exports.configure = (api, middleware) => {
     models.NetworkPlan.getTargetsAddresses(locationIds)
       .then(jsonSuccess(response, next))
       .catch(next)
-  })
+  })//aro.location_entity
 
   // Get addresses for the specified service areas
   api.post('/network_plan/service_area/addresses', (request, response, next) => {

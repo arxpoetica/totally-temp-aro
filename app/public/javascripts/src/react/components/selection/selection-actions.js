@@ -32,7 +32,7 @@ function loadPlanTargetSelectionsFromServer (planId) {
           analysisAreas: results[2].data.map(item => +item.id),
           allServiceAreas: []
         }
-        dispatch(addPlanTargets(planId, planTargets))
+        dispatch(addPlanTargets(planId, planTargets)) // don't know if we to addPlanTargets for locations with the new API
       })
       .catch(err => console.error(err))
   }
@@ -44,8 +44,13 @@ function addPlanTargets (planId, planTargets) {
     dispatch({ type: Actions.SELECTION_ADD_PLAN_TARGETS, payload: planTargets })
     // Save targets on server
     if (planTargets.locations) {
-      AroHttp.post(`/network_plan/${planId}/addTargets`, { locationIds: Array.from(planTargets.locations) })
-        .catch(err => console.error(err))
+      // AroHttp.post(`/network_plan/${planId}/addTargets`, { locationIds: Array.from(planTargets.locations) })
+      //   .catch(err => console.error(err))
+      AroHttp.post(`/service/plan/selected_locations/cmd`, {
+        'cmdType': 'ADD',
+        'locationIds': Array.from(planTargets.locations),
+        'planId': planId,
+      }).catch(err => console.error(err))
     }
     if (planTargets.serviceAreas) {
       AroHttp.post(`/service_areas/${planId}/addServiceAreaTargets`, { serviceAreaIds: Array.from(planTargets.serviceAreas) })
@@ -109,8 +114,13 @@ function removePlanTargets (planId, planTargets) {
     dispatch({ type: Actions.SELECTION_REMOVE_PLAN_TARGETS, payload: planTargets })
     // Save targets on server
     if (planTargets.locations) {
-      AroHttp.post(`/network_plan/${planId}/removeTargets`, { locationIds: Array.from(planTargets.locations) })
-        .catch(err => console.error(err))
+      // AroHttp.post(`/network_plan/${planId}/removeTargets`, { locationIds: Array.from(planTargets.locations) })
+      //   .catch(err => console.error(err))
+      AroHttp.post(`/service/plan/selected_locations/cmd`, {
+        'cmdType': 'REMOVE',
+        'locationIds': Array.from(planTargets.locations),
+        'planId': planId,
+      }).catch(err => console.error(err))
     }
     if (planTargets.serviceAreas) {
       AroHttp.post(`/service_areas/${planId}/removeServiceAreaTargets`, { serviceAreaIds: Array.from(planTargets.serviceAreas) })
