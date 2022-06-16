@@ -19,15 +19,17 @@ function loadPlanTargetSelectionsFromServer (planId) {
 
     // Then get selections from the server
     var selectionPromises = [
-      AroHttp.get(`/locations/${planId}/selectedLocationIds`),
+      //AroHttp.get(`/locations/${planId}/selectedLocationIds`),
+      AroHttp.get(`/service/plan/${planId}/selected_locations`),
       AroHttp.get(`/service_areas/${planId}/selectedServiceAreaIds`),
       AroHttp.get(`/analysis_areas/${planId}/selectedAnalysisAreaIds`)
     ]
 
     Promise.all(selectionPromises)
       .then(results => {
+        console.log(results)
         const planTargets = {
-          locations: results[0].data.map(item => +item.id),
+          locations: results[0].data,
           serviceAreas: results[1].data.map(item => +item.id),
           analysisAreas: results[2].data.map(item => +item.id),
           allServiceAreas: []
