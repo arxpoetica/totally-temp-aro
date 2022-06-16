@@ -741,6 +741,11 @@ class MapTileRenderer {
       featureData.layerToFeatures.FEATURES_FLATTENED = featureData.layerToFeatures.FEATURES_FLATTENED
       .filter(tileObject => !deletedObjectIds
         .includes(tileObject.properties.object_id))
+
+      // Reomve deleted Uncommited MapObjects (Locations)
+      pointFeatureRendererList = pointFeatureRendererList.filter(
+        featureObj => !deletedObjectIds.includes(featureObj.feature.properties.object_id)
+      )
     }
     // render point feature
     PointFeatureRenderer.renderFeatures(pointFeatureRendererList, this.state.configuration.ARO_CLIENT, this.selectedSubnetLocations, this.locationAlerts)
