@@ -82,14 +82,13 @@
 .ui-note-persistent {
   display: inline-block;
   background: rgba(250, 250, 250, 0.7);
-  padding-right: 0.5em;
   border: solid 1px #c0c0c0;
 }
 
 .ui-note-button {
   pointer-events: all;
-  margin-right: 0.5em;
   cursor: pointer;
+  margin-left: 10px;
 }
 
 .sidebar-container {
