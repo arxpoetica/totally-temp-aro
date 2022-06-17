@@ -94,17 +94,17 @@ html, body {
   width: 100%;
 }
 
-#right-col-wrapper {
+#left-col-wrapper {
   position: absolute;
   top: 0px;
   bottom: 0px; /* footer height */
-  right: 0;
+  left: 0;
   z-index: 3;
   width: 400px;
   pointer-events: none;
 }
 
-#right-col {
+#left-col {
   padding: 0px;
   height: 100%;
   max-height: 100%;
@@ -117,17 +117,16 @@ html, body {
 
 .map-tools-buttons-container {
   position:absolute;
-  right: 0px;
+  left: 0px;
   top: 10px;
-  padding-right: 10px;
+  padding-left: 10px;
   height: 100%;
-  z-index: 1;
 }
 
 .map-tool-wrapper {
   position: absolute;
   top: 75px;
-  right: 85px;
+  left: 85px;
   z-index: 1;
 }
 
@@ -138,11 +137,11 @@ html, body {
 }
 
 .map-tool.ng-hide-remove {
-  animation: fadeInRight 0.5s;
+    animation: fadeInLeft 0.5s;
 }
 
 .map-tool.ng-hide-add {
-  animation: fadeOutRight 0.5s;
+    animation: fadeOutLeft 0.5s;
 }
 
 .loader {
