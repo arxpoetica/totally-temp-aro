@@ -279,8 +279,9 @@ function createFeature(feature) {
         const rootSubnet = Object.values(planEditor.drafts).find(draft => {
           return draft.nodeType === 'central_office' || draft.nodeType === 'subnet_node'
         })
-        if (!rootSubnet) throw new Error('No root node found.')
-        await dispatch(addSubnets({ subnetIds: [rootSubnet.subnetId] }))
+        if (rootSubnet) {
+          await dispatch(addSubnets({ subnetIds: [rootSubnet.subnetId] }))
+        }
       } else if (planEditor.subnetFeatures[selectedSubnetId].subnetId) {
         // otherwise get the correct `selectedSubnetId` since it exists
         selectedSubnetId = planEditor.subnetFeatures[selectedSubnetId].subnetId

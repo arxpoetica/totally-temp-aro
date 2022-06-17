@@ -134,7 +134,7 @@ export class AroFeatureEditorNode extends Component {
         case 'checkbox':
           eleProps.onChange = ((event) => this.props.onChange(event, !this.props.value, this.props.objPath))
           field = (
-            <input {...eleProps} checked={this.props.value === true ? 'checked' : null} className='checkboxfill layer-type-checkboxes'></input>
+            <input {...eleProps} checked={this.props.value} className='checkboxfill layer-type-checkboxes'></input>
           )
           break
         case 'multiSelect':
