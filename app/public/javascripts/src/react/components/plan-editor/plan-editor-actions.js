@@ -213,6 +213,9 @@ function subscribeToSocket() {
             break
           case DRAFT_STATES.END_SUBNET_TREE: break // no op
           case DRAFT_STATES.END_INITIALIZATION: break // no op
+          case DRAFT_STATES.SYNC_ROOT_LOCATIONS: 
+            console.log(data)
+            break
           case DRAFT_STATES.ERROR_SUBNET_TREE:
             message = `Type ${data.subnetNodeUpdateType} for SUBNET_DATA socket channel with `
             message += `user id ${userId}, transaction id ${planTransactionId}, `

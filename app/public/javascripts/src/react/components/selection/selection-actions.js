@@ -19,7 +19,6 @@ function loadPlanTargetSelectionsFromServer (planId) {
 
     // Then get selections from the server
     var selectionPromises = [
-      //AroHttp.get(`/locations/${planId}/selectedLocationIds`),
       AroHttp.get(`/service/plan/${planId}/selected_locations`),
       AroHttp.get(`/service_areas/${planId}/selectedServiceAreaIds`),
       AroHttp.get(`/analysis_areas/${planId}/selectedAnalysisAreaIds`)
@@ -116,8 +115,6 @@ function removePlanTargets (planId, planTargets) {
     dispatch({ type: Actions.SELECTION_REMOVE_PLAN_TARGETS, payload: planTargets })
     // Save targets on server
     if (planTargets.locations) {
-      // AroHttp.post(`/network_plan/${planId}/removeTargets`, { locationIds: Array.from(planTargets.locations) })
-      //   .catch(err => console.error(err))
       AroHttp.post(`/service/plan/selected_locations/cmd`, {
         'cmdType': 'REMOVE',
         'locationIds': Array.from(planTargets.locations),
