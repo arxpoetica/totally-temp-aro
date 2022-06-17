@@ -26,23 +26,30 @@
 }
 
 .expander-position {
-  position: absolute;
-  bottom: 10px;
-  left: calc(100% + 10px);
+  float: right;
+  position: relative;
+  right: 0px;
+  top: 94%;
+  width: 0px;
+  height: 0px;
   z-index: 2;
 }
 
 .expander-content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 46px;
-  height: 46px;
-  background-color: white;
+  width: 48px;
+  height: 60px;
+  background-color: #fff;
   border-radius: 0px 5px 5px 0px;
-  color: #bbb;
+  border: #bbb solid 1px;
+  border-top: none;
+  border-left: none;
+  border-bottom: none;
+  padding: 8px;
+  color: #aaa;
   cursor: pointer;
-  box-shadow: #999 2px 2px 4px;
+  box-shadow: #888 10px -4px 6px;
+  line-height: 55px;
+  /* To vertically center the icon */
 }
 
 .expander-content :hover {
@@ -85,7 +92,6 @@
 }
 
 .sidebar-container {
-  position: relative;
   float: left;
   background-color: #fff;
   height: 100%;
