@@ -98,8 +98,7 @@
         <!-- For the sub-menu, the top is calculated by offsetting by the index of the item, plus the
              height of the scroll button (if it exists). Would be better if these constants can be removed -->
         <ul class="dropdown-menu sub-menu"
-          ng-if="menuItem.actions && menuItem.actions.length > 0"
-          ng-style="{ top: ($index * 38 + ($ctrl.menuItems.length > $ctrl.MAX_MENU_ITEMS ? 20 : 0)) + 'px', padding: '0px' }">
+          ng-if="menuItem.actions && menuItem.actions.length > 0">
           <li ng-repeat="option in menuItem.actions" class="dropdown-item aro-dropdown-item"
             ng-click="$ctrl.onOptionClick(option.callback, menuItem.data)">
             <a href="#" class="dropdown-item aro-dropdown-item" style="padding: 0px;">

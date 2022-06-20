@@ -393,7 +393,9 @@ export class NetworkOptimizationInputFormProto extends Component {
     this.props.values.optimization.algorithm = newVal.id
     this.props.dispatch(change(Constants.NETWORK_OPTIMIZATION_INPUT_FORM, 'optimization.algorithm', newVal.algorithm))
     this.props.setOptimizationInputs(this.props.values)
-
+    if (newVal.id !== 'IRR_THRESH') {
+      this.props.values.optimization.preIrrThreshold = null
+    }
     newVal.excludedFields.forEach(fieldName => {
       this.props.dispatch(change(Constants.NETWORK_OPTIMIZATION_INPUT_FORM, fieldName, null))
     })
