@@ -260,6 +260,22 @@ function fileUpload (dispatch, uploadDetails, libraryId, loggedInUser, libraryIt
       NotificationInterface.updateNotification(dispatch, noteId, `${processNote} ${progressNote}`)
     }
   })
+
+
+  var unsubscribeETLClose = SocketManager.subscribe('ETL_CLOSE', msg => {
+      if (msg.properties.headers.libraryId === libraryId) {
+        const content = uInt8ArrayToJSON(msg.content)
+        const pct = content.validCount && content.totalCount ? ((content.validCount / content.totalCount) * 100).toFixed(2) : 0
+        const progressNote = `${pct}% | ${content.errorCount} errors`
+        NotificationInterface.updateNotification(dispatch, noteId, `${processNote} ${progressNote}`)
+        NotificationInterface.updateNotification(dispatch, noteId, `${file.name} COMPLETE!`, false, NotificationTypes['USER_EXPIRE'])
+        if (libraryItem && libraryItem.dataType) {
+          dispatch(setAllLibraryItems(libraryItem.dataType, libraryItem))
+          // load new lib info from server
+          PlanActions.loadLibraryEntryById(libraryId)
+        }
+      }
+    })
   
 
   var options = {
@@ -281,6 +297,7 @@ function fileUpload (dispatch, uploadDetails, libraryId, loggedInUser, libraryIt
   }
 
   AroHttp._fetch(url, options).then((e) => {
+
     
     
     // the note will be auto-removed in 4 seconds
@@ -288,33 +305,24 @@ function fileUpload (dispatch, uploadDetails, libraryId, loggedInUser, libraryIt
     // this.isUpLoad = false
     unsubscribeETLStart()
     unsubscribeETLUpdate()
+    unsubscribeETLClose()
 
-    SocketManager.subscribe('ETL_ERROR', msg => {
-      if (msg.properties.headers.libraryId === libraryId) {
-        const content = uInt8ArrayToJSON(msg.content)
-        NotificationInterface.updateNotification(
-          dispatch,
-          noteId,
-          `${file.name} FAILED with ${content.errorCount} errors`,
-          false,
-          NotificationTypes['USER_EXPIRE']
-        )
-      }
-    })
-    SocketManager.subscribe('ETL_CLOSE', msg => {
-      if (msg.properties.headers.libraryId === libraryId) {
-        const content = uInt8ArrayToJSON(msg.content)
-        const pct = content.validCount && content.totalCount ? ((content.validCount / content.totalCount) * 100).toFixed(2) : 0
-        const progressNote = `${pct}% | ${content.errorCount} errors`
-        NotificationInterface.updateNotification(dispatch, noteId, `${processNote} ${progressNote}`)
-        NotificationInterface.updateNotification(dispatch, noteId, `${file.name} COMPLETE!`, false, NotificationTypes['USER_EXPIRE'])
-        if (libraryItem && libraryItem.dataType) {
-          dispatch(setAllLibraryItems(libraryItem.dataType, libraryItem))
-          // load new lib info from server
-          PlanActions.loadLibraryEntryById(libraryId)
-        }
-      }
-    })
+    // SocketManager.subscribe('ETL_ERROR', msg => {
+    //   console.log({ETL_ERROR: msg})
+    //   if (msg.properties.headers.libraryId === libraryId) {
+    //     const content = uInt8ArrayToJSON(msg.content)
+    //     NotificationInterface.updateNotification(
+    //       dispatch,
+    //       noteId,
+    //       `${file.name} FAILED with ${content.errorCount} errors`,
+    //       false,
+    //       NotificationTypes['USER_EXPIRE']
+    //     )
+    //   }
+    // })
+
+
+    
   }).catch((e) => {
     console.error(e)
     // NotificationInterface.removeNotification(dispatch, noteId)
