@@ -276,6 +276,19 @@ function fileUpload (dispatch, uploadDetails, libraryId, loggedInUser, libraryIt
         }
       }
     })
+
+  var unsubscribeETLError = SocketManager.subscribe('ETL_ERROR', msg => {
+    if (msg.properties.headers.libraryId === libraryId) {
+      const content = uInt8ArrayToJSON(msg.content)
+      NotificationInterface.updateNotification(
+        dispatch,
+        noteId,
+        `${file.name} FAILED with ${content.errorCount} errors`,
+        false,
+        NotificationTypes['USER_EXPIRE']
+      )
+    }
+  })
   
 
   var options = {
@@ -297,43 +310,20 @@ function fileUpload (dispatch, uploadDetails, libraryId, loggedInUser, libraryIt
   }
 
   AroHttp._fetch(url, options).then((e) => {
-
-    
-    
     // the note will be auto-removed in 4 seconds
     // NotificationInterface.removeNotification(dispatch, noteId, 4000)
     // this.isUpLoad = false
     unsubscribeETLStart()
     unsubscribeETLUpdate()
+    unsubscribeETLError()
     unsubscribeETLClose()
-
-    // SocketManager.subscribe('ETL_ERROR', msg => {
-    //   console.log({ETL_ERROR: msg})
-    //   if (msg.properties.headers.libraryId === libraryId) {
-    //     const content = uInt8ArrayToJSON(msg.content)
-    //     NotificationInterface.updateNotification(
-    //       dispatch,
-    //       noteId,
-    //       `${file.name} FAILED with ${content.errorCount} errors`,
-    //       false,
-    //       NotificationTypes['USER_EXPIRE']
-    //     )
-    //   }
-    // })
-
-
-    
   }).catch((e) => {
     console.error(e)
-    // NotificationInterface.removeNotification(dispatch, noteId)
     NotificationInterface.updateNotification(dispatch, noteId, `${file.name} FAILED`, false, NotificationTypes['USER_EXPIRE'])
-    // this.isUpLoad = false
     unsubscribeETLStart()
     unsubscribeETLUpdate()
     swal('Error', e.statusText, 'error')
   })
-  // ---
-
 }
 
 function setIsUploading (status){
