@@ -142,6 +142,18 @@ export class CompetitorEditor extends Component {
           </div>
         }
 
+        {
+          this.state.recalcState === recalcStateMap.REQUIRE_RECALC &&  <Alert title="Some changes occured" color="yellow">
+            Some changes occured, Needs to be recalculated!
+          </Alert>
+        }
+
+        {
+          this.state.recalcState === recalcStateMap.RECALCING && <Alert title="Recalculation in Progress" color="yellow">
+            Recalculation is in Progress, It might take some time!
+          </Alert>
+        }
+
         {!this.state.regionSelectEnabled &&
           <div>
             <ul className="nav nav-tabs">
