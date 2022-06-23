@@ -215,6 +215,15 @@ function subscribeToSocket() {
           case DRAFT_STATES.END_INITIALIZATION: break // no op
           case DRAFT_STATES.SYNC_ROOT_LOCATIONS: 
             console.log(data)
+            
+            // dispatch({
+            //   type: Actions.PLAN_EDITOR_SET_DRAFT_LOCATIONS,
+            //   payload: {
+            //     rootSubnetId: data.rootSubnetId,
+            //     rootLocations: data.rootLocations,
+            //   }
+            // })
+
             break
           case DRAFT_STATES.ERROR_SUBNET_TREE:
             message = `Type ${data.subnetNodeUpdateType} for SUBNET_DATA socket channel with `
@@ -377,7 +386,7 @@ function createFeature(feature) {
       subnetDiffDict[subnetId] = subnetCopy
       batch(async() => {
         if (Object.keys(newDraftProps).length && newDraftEquipment.length) {
-          await dispatch({ type: Actions.PLAN_EDITOR_MERGE_DRAFT_PROPS, payload: newDraftProps })
+          await dispatch({ type: Actions.PLAN_EDITOR_MERGE_DRAFT_PROPS, payload: newDraftProps }) // TODO: why is this an await? maybe just outside the batch?
         }
         if (Object.keys(newFeatures).length) {
           dispatch({ type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES, payload: newFeatures })
@@ -1270,7 +1279,11 @@ function addSubnets({ subnetIds = [], forceReload = false }) {
       // TODO: break this out into fiber actions
       for (const subnetId of uncachedSubnetIds) {
         const subnetUrl = `/service/plan-transaction/${transaction.id}/subnet/${subnetId}`
-        const { data: subnet } = await AroHttp.get(subnetUrl)
+        console.log('--------')
+        const response = await AroHttp.get(subnetUrl).then(response => console.log(response))
+        console.log(response)
+        const subnet = response.data.subnet
+        
         if (!subnet.parentSubnetId) {
           dispatch(getConsructionAreaByRoot(subnet))
           dispatch(getFiberAnnotations(subnetId))
@@ -1294,7 +1307,7 @@ function addSubnets({ subnetIds = [], forceReload = false }) {
 }
 
 function setSelectedSubnetId (selectedSubnetId) {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
 
     if (!selectedSubnetId) {
       dispatch({
@@ -1302,27 +1315,26 @@ function setSelectedSubnetId (selectedSubnetId) {
         payload: null,
       })
     } else {
-      batch(async() => {
-        try {
-          const { planEditor } = getState()
-          const { drafts } = planEditor
-          // only load a new subnet if you have a subnet selected
-          if (drafts[selectedSubnetId]) await dispatch(addSubnets({ subnetIds: [selectedSubnetId] }))
-          // otherwise it's just a piece of equipment
-          // so go ahead and pass the `selectedSubnetId` along...
-          dispatch({
-            type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
-            payload: selectedSubnetId,
-          })
-        } catch (error) {
-          handleError(error)
-          dispatch({
-            type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
-            payload: null,
-          })
-        }
-
-      })
+      const { planEditor } = getState()
+      const { drafts } = planEditor
+      // only load a new subnet if you have a subnet selected
+      try {
+        // only load a new subnet if you have a subnet selected
+        if (drafts[selectedSubnetId]) await dispatch(addSubnets({ subnetIds: [selectedSubnetId] }))
+        // otherwise it's just a piece of equipment
+        // so go ahead and pass the `selectedSubnetId` along...
+        dispatch({
+          type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
+          payload: selectedSubnetId,
+        })
+      } catch (error) {
+        console.log(error)
+        handleError(error)
+        dispatch({
+          type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
+          payload: null,
+        })
+      }
     }
   }
 }
