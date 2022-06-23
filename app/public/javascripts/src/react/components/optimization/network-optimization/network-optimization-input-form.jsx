@@ -390,7 +390,7 @@ export class NetworkOptimizationInputFormProto extends Component {
 
   onAlgorithmChange (newVal, event) {
     this.setState({ algorithmComposite: newVal })
-    this.props.values.optimization.algorithm = newVal.id
+    this.props.values.optimization.algorithm = newVal.algorithm
     this.props.dispatch(change(Constants.NETWORK_OPTIMIZATION_INPUT_FORM, 'optimization.algorithm', newVal.algorithm))
     this.props.setOptimizationInputs(this.props.values)
     if (newVal.id !== 'IRR_THRESH') {
