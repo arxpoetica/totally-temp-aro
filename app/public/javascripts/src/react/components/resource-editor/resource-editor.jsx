@@ -396,23 +396,6 @@ function ResourceEditor(props) {
 										{paginationElement}
 									</div>
 								</div>								
-								{
-									props.isMakeNewFilter &&
-										<div style={{flex: '0 0 auto'}}>
-											<div className="form-group row justify-content-end">
-												<div className="col-sm-6">
-													<button
-														onClick={() => handleCanMakeNewFilter(selectedResourceName)}
-														value={selectedResourceName}
-														className="btn btn-light btn-block"
-													>
-														<i className="fa fa-file action-button-icon"></i>
-														New {selectedResourceName}
-													</button>
-												</div>
-											</div>
-										</div>
-								}
 							</div>
 						)
 					}
