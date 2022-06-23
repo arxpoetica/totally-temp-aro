@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import ResourceActions from './resource-actions'
 import Select from "react-select"
+import { Alert } from '@mantine/core';
 
 const styles = {
   multiValue: (base, state) => {
@@ -21,6 +22,13 @@ const orderOptions = values => {
   return values.filter(v => v.isFixed).concat(values.filter(v => !v.isFixed))
 }
 
+const recalcStateMap = {
+  CLEAN: "clean",
+  REQUIRE_RECALC: "requireRecalc",
+  RECALCING: "recalcing", 
+  RECALCULATED: "recalculated"
+}
+
 export class CompetitorEditor extends Component {
   constructor (props) {
     super(props)
@@ -33,6 +41,7 @@ export class CompetitorEditor extends Component {
       openTab: 0,
       strengthsById: '',
       hasChanged: false,
+      recalcState: recalcStateMap.CLEAN,
     }
   }
 
@@ -254,13 +263,39 @@ export class CompetitorEditor extends Component {
         <div style={{flex: '0 0 auto'}}>
           <div style={{textAlign: 'right', paddingTop: '15px'}}>
             <button className="btn btn-light mr-2" onClick={() => this.exitEditingMode()}>
-              <i className="fa fa-undo action-button-icon"></i>Discard changes
+              <i className="fa fa-undo action-button-icon"></i> Discard changes
             </button>
+            {
+              this.state.hasChanged && this.state.recalcState === recalcStateMap.REQUIRE_RECALC && 
+              <button 
+                className="btn btn-primary mr-2" 
+                onClick={() => {
+                  this.setState({ recalcState: recalcStateMap.RECALCING })
+
+                  // TODO-  need to call a recalcing api 
+                  // after recalcing api get finished
+                  // TODO - this.setState({ recalcState: recalcStateMap.RECALCULATED })
+
+                  setTimeout(()=>{
+                    this.setState({ recalcState: recalcStateMap.RECALCULATED })
+                  },5000)
+                }}>
+                <i className="fa fa-undo action-button-icon"></i> Recalc
+              </button>
+            }
             <button
               className="btn btn-primary"
-              onClick={() => this.saveConfigurationToServer()}
-              disabled={!this.state.hasChanged || this.state.regionSelectEnabled}>
-              <i className="fa fa-save action-button-icon"></i>Save
+              onClick={() => {
+                if(this.state.recalcState === recalcStateMap.RECALCULATED){
+                  this.saveConfigurationToServer()
+                  return
+                }
+                if(this.state.recalcState === recalcStateMap.CLEAN){
+                  this.setState({ recalcState: recalcStateMap.REQUIRE_RECALC })
+                }
+              }}
+              disabled={!this.state.hasChanged || this.state.regionSelectEnabled || this.state.recalcState === recalcStateMap.RECALCING}>
+              <i className="fa fa-save action-button-icon"></i> Save
             </button>
           </div>
         </div>
