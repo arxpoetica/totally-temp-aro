@@ -52,7 +52,6 @@ const MapSelectorPlanTarget = (props) => {
   const prevMapFeatures = usePrevious(mapFeatures)
   useEffect(() => {
     if (prevMapFeatures && !dequal(prevMapFeatures, mapFeatures)) {
-      //addOrRemoveSelection(mapFeatures.locations || [], mapHitFeatures.LOCATIONS, 'location_id')
       addOrRemoveSelection(mapFeatures.locations || [], mapHitFeatures.LOCATIONS, 'object_id')
       addOrRemoveSelection(mapFeatures.serviceAreas || [], mapHitFeatures.SERVICE_AREAS, 'id')
       addOrRemoveSelection(mapFeatures.analysisAreas || [], mapHitFeatures.ANALYSIS_AREAS, 'id')

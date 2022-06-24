@@ -44,8 +44,6 @@ function addPlanTargets (planId, planTargets) {
     dispatch({ type: Actions.SELECTION_ADD_PLAN_TARGETS, payload: planTargets })
     // Save targets on server
     if (planTargets.locations) {
-      // AroHttp.post(`/network_plan/${planId}/addTargets`, { locationIds: Array.from(planTargets.locations) })
-      //   .catch(err => console.error(err))
       AroHttp.post(`/service/plan/selected_locations/cmd`, {
         'cmdType': 'ADD',
         'locationIds': Array.from(planTargets.locations),
