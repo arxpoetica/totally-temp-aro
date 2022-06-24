@@ -116,7 +116,7 @@ const PlanEditorDrafts = props => {
         return (
           <EquipmentNode
             key={`${id}_${keyId}`}
-            id={subnetId}
+            id={id}
             point={point}
             iconUrl={equipments[networkNodeType].iconUrl}
             // using functional approach to avoid race conditions
