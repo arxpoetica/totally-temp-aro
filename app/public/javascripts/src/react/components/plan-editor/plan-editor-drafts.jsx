@@ -92,7 +92,7 @@ const PlanEditorDrafts = props => {
         return (
           <Boundary
             key={`${subnetId}_${keyId}`}
-            id={`${subnetId}_${keyId}`}
+            id={subnetId}
             polygon={subnetBoundary.polygon}
             options={options}
             // using functional approach to avoid race conditions
@@ -116,7 +116,7 @@ const PlanEditorDrafts = props => {
         return (
           <EquipmentNode
             key={`${id}_${keyId}`}
-            id={`${id}_${keyId}`}
+            id={id}
             point={point}
             iconUrl={equipments[networkNodeType].iconUrl}
             // using functional approach to avoid race conditions
