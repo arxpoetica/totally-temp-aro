@@ -4,10 +4,9 @@ import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 import Point from '../../../common/point'
 import RfpActions from './rfp-actions'
-import RfpFileImporter from './rfp-file-importer.jsx'
+import { RfpFileImporter } from './rfp-file-importer.jsx'
 import RfpTargetsMap from './rfp-targets-map.jsx'
 import Constants from '../../../common/constants'
-import './rfp-targets.css'
 
 export class RfpTargets extends Component {
   constructor (props) {
@@ -30,7 +29,7 @@ export class RfpTargets extends Component {
         {
           this.state.showNewTargetInputs
             ? null // Dont show button if we already have the inputs shown
-            : <div className='float-right'>
+            : <div>
               <RfpFileImporter displayOnly={this.props.displayOnly} />
               <button id='btnAddTargetManual'
                 className='btn btn-sm btn-light'
@@ -93,26 +92,38 @@ export class RfpTargets extends Component {
   }
 
   renderRegularTarget (target, index) {
-    return <tr id={`trTarget_${index}`} key={index} onClick={event => this.props.setSelectedTarget(target)}
-      className={'tr-rfp-target' + (this.props.selectedTarget === target ? ' selected-target-row ' : '')}>
-      <td>{target.id}</td>
-      <td>{this.limitLatLongPrecision(target.lat)}</td>
-      <td>{this.limitLatLongPrecision(target.lng)}</td>
-      <td>
-        <button id={`btnEditTarget_${index}`} className='btn btn-sm btn-light' disabled={this.props.displayOnly} onClick={() => this.startEditingTarget(index)}>
-          <i className='fa fa-edit' />
-        </button>
-        <button id={`btnDeleteTarget_${index}`}
-          className='btn btn-sm btn-danger'
-          disabled={this.props.displayOnly}
-          onClick={event => {
-            this.props.removeTarget(index)
-            event.stopPropagation()
-          }}>
-          <i className='fa fa-trash-alt' />
-        </button>
-      </td>
-    </tr>
+    return <>
+      <tr id={`trTarget_${index}`} key={index} onClick={event => this.props.setSelectedTarget(target)}
+        className={'tr-rfp-target' + (this.props.selectedTarget === target ? ' selected-target-row ' : '')}>
+        <td>{target.id}</td>
+        <td>{this.limitLatLongPrecision(target.lat)}</td>
+        <td>{this.limitLatLongPrecision(target.lng)}</td>
+        <td>
+          <button id={`btnEditTarget_${index}`} className='btn btn-sm btn-light' disabled={this.props.displayOnly} onClick={() => this.startEditingTarget(index)}>
+            <i className='fa fa-edit' />
+          </button>
+          <button id={`btnDeleteTarget_${index}`}
+            className='btn btn-sm btn-danger'
+            disabled={this.props.displayOnly}
+            onClick={event => {
+              this.props.removeTarget(index)
+              event.stopPropagation()
+            }}>
+            <i className='fa fa-trash-alt' />
+          </button>
+        </td>
+      </tr>
+      <style jsx>{`
+        .selected-target-row {
+          background-color: #777;
+          color: white;
+          border: solid 2px black;
+        }
+        .tr-rfp-target {
+          cursor: pointer;
+        }
+      `}</style>
+    </>
   }
 
   renderTargetBeingEdited (target, index) {
@@ -122,54 +133,66 @@ export class RfpTargets extends Component {
     const clashesWithNewPointId = (this.state.showNewTargetInputs && this.state.newTargetId === this.state.indexToEditableTarget[index].id)
     const disableSave = clashesWithNewPointId || clashesWithExistingTargetId
 
-    return <tr id={`trTarget_${index}`} key={index} onClick={event => this.props.setSelectedTarget(target)}
-      className={'tr-rfp-target' + (this.props.selectedTarget === target ? ' selected-target-row ' : '')}>
-      <td>
-        <input
-          id={`inpTargetId_${index}`}
-          type='text'
-          className='form-control form-control-sm'
-          disabled={this.props.displayOnly}
-          value={this.state.indexToEditableTarget[index].id}
-          onChange={event => this.setEditingTargetProperty(index, 'id', event.target.value)}
-        />
-      </td>
-      <td>
-        <input
-          id={`inpTargetLatitude_${index}`}
-          type='text'
-          className='form-control form-control-sm'
-          disabled={this.props.displayOnly}
-          value={this.state.indexToEditableTarget[index].lat}
-          onChange={event => this.setEditingTargetProperty(index, 'lat', event.target.value)}
-        />
-      </td>
-      <td>
-        <input
-          id={`inpTargetLongitude_${index}`}
-          type='text'
-          className='form-control form-control-sm'
-          disabled={this.props.displayOnly}
-          value={this.state.indexToEditableTarget[index].lng}
-          onChange={event => this.setEditingTargetProperty(index, 'lng', event.target.value)}
-        />
-      </td>
-      <td>
-        {/* Must have a unique id. If not, disable the save button */}
-        <button id={`btnSaveTarget_${index}`}
-          className='btn btn-sm btn-light'
-          disabled={disableSave || this.props.displayOnly}
-          onClick={event => {
-            this.saveEditingTarget(index)
-            event.stopPropagation()
-          }}>
-          <i className='fa fa-save' />
-        </button>
-        <button id={`btnCancelEditTarget_${index}`} className='btn btn-sm btn-light' onClick={() => this.cancelEditingTarget(index)}>
-          Cancel
-        </button>
-      </td>
-    </tr>
+    return <>
+      <tr id={`trTarget_${index}`} key={index} onClick={event => this.props.setSelectedTarget(target)}
+        className={'tr-rfp-target' + (this.props.selectedTarget === target ? ' selected-target-row ' : '')}>
+        <td>
+          <input
+            id={`inpTargetId_${index}`}
+            type='text'
+            className='form-control form-control-sm'
+            disabled={this.props.displayOnly}
+            value={this.state.indexToEditableTarget[index].id}
+            onChange={event => this.setEditingTargetProperty(index, 'id', event.target.value)}
+          />
+        </td>
+        <td>
+          <input
+            id={`inpTargetLatitude_${index}`}
+            type='text'
+            className='form-control form-control-sm'
+            disabled={this.props.displayOnly}
+            value={this.state.indexToEditableTarget[index].lat}
+            onChange={event => this.setEditingTargetProperty(index, 'lat', event.target.value)}
+          />
+        </td>
+        <td>
+          <input
+            id={`inpTargetLongitude_${index}`}
+            type='text'
+            className='form-control form-control-sm'
+            disabled={this.props.displayOnly}
+            value={this.state.indexToEditableTarget[index].lng}
+            onChange={event => this.setEditingTargetProperty(index, 'lng', event.target.value)}
+          />
+        </td>
+        <td>
+          {/* Must have a unique id. If not, disable the save button */}
+          <button id={`btnSaveTarget_${index}`}
+            className='btn btn-sm btn-light'
+            disabled={disableSave || this.props.displayOnly}
+            onClick={event => {
+              this.saveEditingTarget(index)
+              event.stopPropagation()
+            }}>
+            <i className='fa fa-save' />
+          </button>
+          <button id={`btnCancelEditTarget_${index}`} className='btn btn-sm btn-light' onClick={() => this.cancelEditingTarget(index)}>
+            Cancel
+          </button>
+        </td>
+      </tr>
+      <style jsx>{`
+        .selected-target-row {
+          background-color: #777;
+          color: white;
+          border: solid 2px black;
+        }
+        .tr-rfp-target {
+          cursor: pointer;
+        }
+      `}</style>
+    </>
   }
 
   limitLatLongPrecision (number) {
