@@ -11,6 +11,7 @@ docker12
 docker12/
 docker12/*
 /docker-*
+docker/postgres-data
 
 ######################
 # Env Variables

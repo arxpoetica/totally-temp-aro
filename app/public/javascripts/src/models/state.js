@@ -157,6 +157,12 @@ class State {
       })
     })
 
+    service.setMapReadyPromise = () => {
+      $ngRedux.dispatch(MapLayerActions.setMapReadyPromise(service.mapReadyPromise))
+    }
+
+    service.setMapReadyPromise()
+
     // toolbar actions
     service.toolbarActions = Object.freeze({
       SINGLE_SELECT: 1,
@@ -367,93 +373,6 @@ class State {
         checked: false
       }
     ]
-
-    // Competition display
-    service.competition = {
-      allCompetitorTypes: [
-        {
-          id: 'retail',
-          label: 'Retail'
-        },
-        {
-          id: 'wholesale',
-          label: 'Wholesale'
-        },
-        {
-          id: 'tower',
-          label: 'Cell Towers'
-        }
-      ],
-      selectedCompetitorType: null,
-      allCompetitors: [],
-      selectedCompetitors: [],
-      useAllCompetitors: false,
-      useNBMDataSource: true,
-      useGeotelDataSource: false,
-      speedThreshold: 100,
-      showCensusBlocks: true,
-      showFiberRoutes: false,
-      showFiberRoutesBuffer: false,
-      allRenderingOptions: [
-        {
-          label: 'Presence',
-          alphaRender: false
-        },
-        {
-          label: 'Competitive Strength',
-          aggregate: {
-            individual: {
-              'census-block': {
-                aggregateById: 'gid',
-                aggregateProperty: 'strength'
-              },
-              'census-block-group': {
-                aggregateById: 'cbg_id',
-                aggregateProperty: 'strength'
-              }
-            },
-            all: {
-              'census-block': {
-                aggregateById: 'gid',
-                aggregateProperty: 'sum_strength'
-              },
-              'census-block-group': {
-                aggregateById: 'cbg_id',
-                aggregateProperty: 'sum_strength'
-              }
-            }
-          }
-        },
-        {
-          label: 'Speed Intensity',
-          alphaRender: true,
-          alphaThresholdProperty: 'download_speed',
-          aggregate: {
-            individual: {
-              'census-block': {
-                aggregateById: 'gid',
-                aggregateProperty: 'download_speed'
-              },
-              'census-block-group': {
-                aggregateById: 'cbg_id',
-                aggregateProperty: 'download_speed'
-              }
-            },
-            all: {
-              'census-block': {
-                aggregateById: 'gid',
-                aggregateProperty: 'max_download'
-              },
-              'census-block-group': {
-                aggregateById: 'cbg_id',
-                aggregateProperty: 'max_download'
-              }
-            }
-          }
-        }
-      ],
-      selectedRenderingOption: null
-    }
     
     // feature clicked on map
     service.hackRaiseEvent = (features) => {
@@ -489,51 +408,6 @@ class State {
         service.showContextMenuForLocations (options.locations, options.event)
       }
     })
-
-    // We are going to use the golden ratio method from http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
-    // (Furthermore, it is a property of the golden ratio, Φ, that each subsequent hash value divides the interval into which it falls according to the golden ratio!)
-    var golden_ratio_conjugate = 0.618033988749895
-    var hue = Math.random()
-    var getRandomColors = () => {
-      hue += golden_ratio_conjugate
-      hue %= 1
-      // We are changing the hue while keeping saturation/value the same. Also the fill colors are lighter than stroke colors.
-      return {
-        strokeStyle: hsvToRgb(hue, 0.5, 0.5),
-        fillStyle: hsvToRgb(hue, 0.8, 0.5)
-      }
-    }
-
-    // Select the first entry in the list
-    service.competition.selectedCompetitorType = service.competition.allCompetitorTypes[0]
-    service.competition.selectedRenderingOption = service.competition.allRenderingOptions[0]
-    service.reloadCompetitors = () => {
-      if (map) {
-        var bounds = map.getBounds()
-        var params = {
-          maxY: bounds.getNorthEast().lat(),
-          maxX: bounds.getNorthEast().lng(),
-          minY: bounds.getSouthWest().lat(),
-          minX: bounds.getSouthWest().lng()
-        }
-      }
-      var temp = map != null ? params : {}
-      var args = {
-        params: temp
-      }
-      return $http.get(`/competitors/v1/competitors/carriers/${service.competition.selectedCompetitorType.id}`, args)
-        .then((response) => {
-          if (response.status >= 200 && response.status <= 299) {
-            service.competition.allCompetitors = $filter('orderBy')(response.data, 'name')
-            // For now just populate random colors for each competitor. This can later come from the api.
-            for (var iCompetitor = 0; iCompetitor < service.competition.allCompetitors.length; ++iCompetitor) {
-              var randomColors = getRandomColors()
-              service.competition.allCompetitors[iCompetitor].strokeStyle = randomColors.strokeStyle
-              service.competition.allCompetitors[iCompetitor].fillStyle = randomColors.fillStyle
-            }
-          }
-        })
-    }
 
     // Hold all the selected tile elements like locations, service areas, etc.
     service.selection = {
@@ -607,6 +481,12 @@ class State {
     service.setLayerVisibility = (layer, isVisible) => {
       $ngRedux.dispatch(MapLayerActions.setLayerVisibility(layer, isVisible))
     }
+
+    service.setAngularMapLayersInRedux = () => {
+      $ngRedux.dispatch(MapLayerActions.setAngularMapLayerSubject(service.mapLayers))
+    }
+
+    service.setAngularMapLayersInRedux()
 
     service.getVisibleAnalysisLayers = () => $ngRedux.getState().mapLayers.boundary.filter(item => item.checked && (item.key === 'analysis_layer'))
 
@@ -1734,6 +1614,7 @@ class State {
       deletedUncommitedMapObjects: reduxState.toolbar.deletedUncommitedMapObjects,
       rHeatmapOptions: reduxState.toolbar.heatmapOptions,
       isRecreateTiles: reduxState.viewSettings.isRecreateTiles,
+      reduxMapTools: reduxState.map.map_tools,
     }
   }
 
@@ -1785,6 +1666,7 @@ class State {
       showContextMenuForLocations: (featureIds, event) => dispatch(PlanEditorActions.showContextMenuForLocations(featureIds, event)),
       setUserGroupsMsg: (userGroupsMsg) => dispatch(GlobalSettingsActions.setUserGroupsMsg(userGroupsMsg)),
       setRecreateTilesAndCache: (mapSelection) => dispatch(ViewSettingsActions.recreateTilesAndCache(mapSelection)),
+      setReduxMapTools: (mapTools) => dispatch(MapActions.setMapTools(mapTools)),
       setAreTilesRenderingInRedux: value => dispatch(MapActions.setAreTilesRendering(value)),
     }
   }

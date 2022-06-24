@@ -71,12 +71,7 @@ import NetworkArchitectureEditor from '../react/components/resource-manager/netw
 import ToolBox from '../react/components/tool/tool-box.jsx'
 import UINotifications from '../react/components/notification/ui-notifications.jsx'
 
-import boundaries from './views/boundaries'
-import locations from './views/locations'
-import networkEquipment from './views/network-equipment'
-import copper from './views/copper'
-import cables from './views/cables'
-import conduits from './views/conduits'
+import MapDisplayTools from '../react/components/map-tools/map-display-tools.jsx'
 import fullScreenContainer from './full-screen/full-screen-container'
 import aroPanel from './common/aro-panel'
 import contextMenu from './common/context-menu/context-menu'
@@ -91,18 +86,14 @@ import tileDataService from '../components/tiles/tile-data-service'
 
 import reduxConfig from '../redux-config'
 
-app.component('boundaries', boundaries)
-  .component('locations', locations)
-  .component('networkEquipment', networkEquipment)
-  .component('cables', cables)
-  .component('copper', copper)
-  .component('conduits', conduits)
+app
   .component('fullScreenContainer', fullScreenContainer)
   .component('aroPanel', aroPanel)
   .component('contextMenu', contextMenu)
   .component('tile', tile)
 
 // ReactJS components
+  .component('rMapDisplayTools', react2angular(MapDisplayTools))
   .component('rMapSplit', react2angular(MapSplit))
   .component('rViewMode', react2angular(ViewMode))
   .component('rDisplayModeButtons', react2angular(DisplayModeButtons))
