@@ -26,7 +26,6 @@ function loadPlanTargetSelectionsFromServer (planId) {
 
     Promise.all(selectionPromises)
       .then(results => {
-        console.log(results)
         const planTargets = {
           locations: results[0].data,
           serviceAreas: results[1].data.map(item => +item.id),

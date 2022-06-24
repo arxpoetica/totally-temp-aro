@@ -213,17 +213,14 @@ function subscribeToSocket() {
             break
           case DRAFT_STATES.END_SUBNET_TREE: break // no op
           case DRAFT_STATES.END_INITIALIZATION: break // no op
-          case DRAFT_STATES.SYNC_ROOT_LOCATIONS: 
-            console.log(data)
-            
-            // dispatch({
-            //   type: Actions.PLAN_EDITOR_SET_DRAFT_LOCATIONS,
-            //   payload: {
-            //     rootSubnetId: data.rootSubnetId,
-            //     rootLocations: data.rootLocations,
-            //   }
-            // })
-
+          case DRAFT_STATES.SYNC_ROOT_LOCATIONS:
+            dispatch({
+              type: Actions.PLAN_EDITOR_SET_DRAFT_LOCATIONS,
+              payload: {
+                rootSubnetId: data.rootSubnetId,
+                rootLocations: data.rootLocations,
+              }
+            })
             break
           case DRAFT_STATES.ERROR_SUBNET_TREE:
             message = `Type ${data.subnetNodeUpdateType} for SUBNET_DATA socket channel with `
@@ -1279,11 +1276,9 @@ function addSubnets({ subnetIds = [], forceReload = false }) {
       // TODO: break this out into fiber actions
       for (const subnetId of uncachedSubnetIds) {
         const subnetUrl = `/service/plan-transaction/${transaction.id}/subnet/${subnetId}`
-        console.log('--------')
-        const response = await AroHttp.get(subnetUrl).then(response => console.log(response))
-        console.log(response)
-        const subnet = response.data.subnet
-        
+        const response = await AroHttp.get(subnetUrl)
+        const subnet = response.data
+        // TODO: what happens if service doesn't return a subnet?
         if (!subnet.parentSubnetId) {
           dispatch(getConsructionAreaByRoot(subnet))
           dispatch(getFiberAnnotations(subnetId))
@@ -1328,7 +1323,6 @@ function setSelectedSubnetId (selectedSubnetId) {
           payload: selectedSubnetId,
         })
       } catch (error) {
-        console.log(error)
         handleError(error)
         dispatch({
           type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,

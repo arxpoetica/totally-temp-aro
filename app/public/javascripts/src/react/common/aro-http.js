@@ -66,7 +66,6 @@ class AroHttp {
         }
       })
       .then(result => {
-        if (url.startsWith('/service/plan-transaction/')) console.log(result)
         let resultToSend = returnRawResult
           ? result
           : {
