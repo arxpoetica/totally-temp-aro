@@ -92,8 +92,8 @@ export class RfpTargets extends Component {
   }
 
   renderRegularTarget (target, index) {
-    return <>
-      <tr id={`trTarget_${index}`} key={index} onClick={event => this.props.setSelectedTarget(target)}
+    return <React.Fragment key={index}>
+      <tr id={`trTarget_${index}`} onClick={event => this.props.setSelectedTarget(target)}
         className={'tr-rfp-target' + (this.props.selectedTarget === target ? ' selected-target-row ' : '')}>
         <td>{target.id}</td>
         <td>{this.limitLatLongPrecision(target.lat)}</td>
@@ -123,7 +123,7 @@ export class RfpTargets extends Component {
           cursor: pointer;
         }
       `}</style>
-    </>
+    </React.Fragment>
   }
 
   renderTargetBeingEdited (target, index) {
@@ -133,8 +133,8 @@ export class RfpTargets extends Component {
     const clashesWithNewPointId = (this.state.showNewTargetInputs && this.state.newTargetId === this.state.indexToEditableTarget[index].id)
     const disableSave = clashesWithNewPointId || clashesWithExistingTargetId
 
-    return <>
-      <tr id={`trTarget_${index}`} key={index} onClick={event => this.props.setSelectedTarget(target)}
+    return <React.Fragment key={index}>
+      <tr id={`trTarget_${index}`} onClick={event => this.props.setSelectedTarget(target)}
         className={'tr-rfp-target' + (this.props.selectedTarget === target ? ' selected-target-row ' : '')}>
         <td>
           <input
@@ -192,7 +192,7 @@ export class RfpTargets extends Component {
           cursor: pointer;
         }
       `}</style>
-    </>
+    </React.Fragment>
   }
 
   limitLatLongPrecision (number) {
