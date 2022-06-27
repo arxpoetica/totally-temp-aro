@@ -14,7 +14,7 @@ function setLayerVisibility (layer, newVisibility) {
     const list = ['location', 'constructionSite', 'boundary']
     list.forEach(key => {
       const layers = state[key]
-      layers.forEach((stateLayer, index) => {
+      layers.forEach((stateLayer) => {
         if (stateLayer.key === layer.key && stateLayer.uiLayerId === layer.uiLayerId) {
           layerType = key
         }
@@ -45,7 +45,7 @@ function setLayerVisibility (layer, newVisibility) {
         dispatch({
           type: Actions.NETWORK_OPTIMIZATION_SET_LOCATION_TYPE,
           payload: {
-            locationType: layer.plannerKey, // ToDo: layer.key,
+            locationType: layer.key, // ToDo: layer.key,
             isIncluded: newVisibility
           }
         })
@@ -169,7 +169,6 @@ function setBoundaryLayers (boundaryLayers) {
           layer.categories[group.category.id] = group.category
         }
 
-        layer.selectedCategory = null
         return layer
       })
 
@@ -305,6 +304,20 @@ function setActiveMapLayers (activeMapLayers) {
   }
 }
 
+function setAngularMapLayerSubject (mapLayers) {
+  return {
+    type: Actions.LAYERS_SET_ANGULAR_MAP_LAYER_SUBSCRIBER,
+    payload: mapLayers
+  }
+}
+
+function setMapReadyPromise (mapReadyPromise) {
+  return {
+    type: Actions.LAYERS_SET_MAP_READY_PROMISE,
+    payload: mapReadyPromise
+  }
+}
+
 export default {
   setLayerVisibility,
   setNetworkEquipmentLayerVisibility,
@@ -331,4 +344,6 @@ export default {
   setEdgeConstructionTypeVisibility,
   loadEdgeConstructionTypeIds,
   setActiveMapLayers,
+  setAngularMapLayerSubject,
+  setMapReadyPromise
 }

@@ -259,6 +259,8 @@ function unsubscribeFromSocket() {
 }
 
 function createFeature(feature) {
+  console.log(feature)
+  //return Promise.resolve()
   return async(dispatch, getState) => {
     try {
 
@@ -277,8 +279,9 @@ function createFeature(feature) {
         const rootSubnet = Object.values(planEditor.drafts).find(draft => {
           return draft.nodeType === 'central_office' || draft.nodeType === 'subnet_node'
         })
-        if (!rootSubnet) throw new Error('No root node found.')
-        await dispatch(addSubnets({ subnetIds: [rootSubnet.subnetId] }))
+        if (rootSubnet) {
+          await dispatch(addSubnets({ subnetIds: [rootSubnet.subnetId] }))
+        }
       } else if (planEditor.subnetFeatures[selectedSubnetId].subnetId) {
         // otherwise get the correct `selectedSubnetId` since it exists
         selectedSubnetId = planEditor.subnetFeatures[selectedSubnetId].subnetId
@@ -320,7 +323,7 @@ function createFeature(feature) {
       for (const update of subnetUpdates) {
         const { subnet, subnetBoundary } = update
         const type = subnet.networkNodeType
-        const isRoot = type !== 'fiber_distribution_hub'
+        const isRoot = type !== 'fiber_distribution_hub' // this is wrong TODO: fix it #182406504
 
         // unfortunately have to make the extra call to get the fault tree
         // also, sometimes subnetBoundary is `null` so need to perchance call that
@@ -343,7 +346,7 @@ function createFeature(feature) {
         newDraftProps[subnet.id] = {
           subnetId: subnet.id,
           nodeType: subnet.networkNodeType,
-          parentSubnetId: isRoot ? null : data.parentSubnetId,
+          parentSubnetId: data.parentSubnetId, // TODO: fix it #182406504 //isRoot ? null : data.parentSubnetId,
           nodeSynced: true,
           equipment: isRoot ? newDraftEquipment : [],
           subnetBoundary: subnetBoundary || data.subnetBoundary,

@@ -70,31 +70,11 @@ import FusionEditor from '../react/components/resource-manager/fusion-editor.jsx
 import NetworkArchitectureEditor from '../react/components/resource-manager/network-architecture-editor.jsx'
 import ToolBox from '../react/components/tool/tool-box.jsx'
 import UINotifications from '../react/components/notification/ui-notifications.jsx'
+import MapDisplayTools from '../react/components/map-tools/map-display-tools.jsx'
 
-import boundaries from './views/boundaries'
-import locations from './views/locations'
-import networkEquipment from './views/network-equipment'
-import copper from './views/copper'
-import cables from './views/cables'
-import conduits from './views/conduits'
-import networkPlanModal from './header/network-plan-modal'
-import aroMultiSelect from './common/aro-multiselect'
-import mapObjectEditor from './common/map-object-editor'
 import contextMenu from './common/context-menu/context-menu'
-import dropTarget from './common/drop-target'
-import resourcePermissionsEditor from './common/resource-permissions-editor'
-import aroDrawingManager from './common/aro-drawing-manager'
-import accordion from './accordion/accordion'
-import accordionPanelContents from './accordion/accordion-panel-contents'
-import accordionPanelTitle from './accordion/accordion-panel-title'
 import tile from './tiles/tile'
 
-import aroObjectEditor from './common/editor-interfaces/aro-object-editor'
-import editorInterfaceTree from './common/editor-interfaces/editor-interface-tree'
-import editorInterfaceTable from './common/editor-interfaces/editor-interface-table'
-import editorInterfaceValue from './common/editor-interfaces/editor-interface-value'
-import editorInterfacePrimitive from './common/editor-interfaces/editor-interface-primitive'
-import editorInterfaceNullableNumber from './common/editor-interfaces/editor-interface-nullable-number'
 import utils from './common/utilities'
 
 import state from '../models/state'
@@ -104,31 +84,11 @@ import tileDataService from '../components/tiles/tile-data-service'
 
 import reduxConfig from '../redux-config'
 
-app.component('boundaries', boundaries)
-  .component('locations', locations)
-  .component('networkEquipment', networkEquipment)
-  .component('cables', cables)
-  .component('copper', copper)
-  .component('conduits', conduits)
-  .component('networkPlanModal', networkPlanModal)
-  // .component('uiNotification', uiNotification)
-  .component('aroMultiSelect', aroMultiSelect)
-  .component('mapObjectEditor', mapObjectEditor)
-  .component('contextMenu', contextMenu)
-  .component('dropTarget', dropTarget)
-  .component('resourcePermissionsEditor', resourcePermissionsEditor)
-  .component('aroDrawingManager', aroDrawingManager)
-  .component('accordion', accordion)
-  .component('accordionPanelContents', accordionPanelContents)
-  .component('accordionPanelTitle', accordionPanelTitle)
+app.component('contextMenu', contextMenu)
   .component('tile', tile)
-  .component('aroObjectEditor', aroObjectEditor)
-  .component('editorInterfaceTree', editorInterfaceTree)
-  .component('editorInterfaceTable', editorInterfaceTable)
-  .component('editorInterfaceValue', editorInterfaceValue)
-  .component('editorInterfacePrimitive', editorInterfacePrimitive)
-  .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
+
 // ReactJS components
+  .component('rMapDisplayTools', react2angular(MapDisplayTools))
   .component('rMapSplit', react2angular(MapSplit))
   .component('rViewMode', react2angular(ViewMode))
   .component('rDisplayModeButtons', react2angular(DisplayModeButtons))
