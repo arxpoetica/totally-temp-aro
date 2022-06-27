@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
-const FrontierFooter = ({ configuration }) => {
+const CustomFooter = ({ configuration }) => {
   return (
     configuration.ARO_CLIENT === 'frontier'
     && <>
@@ -74,4 +74,4 @@ const mapStateToProps = (state) => ({
   configuration: state.toolbar.appConfiguration,
 })
 
-export default connect(mapStateToProps, null)(FrontierFooter)
+export default connect(mapStateToProps, null)(CustomFooter)
