@@ -25,7 +25,7 @@ const orderOptions = values => {
 const recalcStateMap = {
   CLEAN: "clean",
   REQUIRE_RECALC: "requireRecalc",
-  RECALCING: "recalcing", 
+  RECALCING: "recalcing",
   RECALCULATED: "recalculated"
 }
 
@@ -282,14 +282,14 @@ export class CompetitorEditor extends Component {
               <button 
                 className="btn btn-primary mr-2" 
                 onClick={() => {
-                  this.setState({ recalcState: recalcStateMap.RECALCING })
+                  this.setState({ recalcState: recalcStateMap.RECALCING, hasChanged: false })
 
                   // TODO-  need to call a recalcing api 
                   // after recalcing api get finished
-                  // TODO - this.setState({ recalcState: recalcStateMap.RECALCULATED })
+                  // TODO - this.setState({ recalcState: recalcStateMap.CLEAN })
 
                   setTimeout(()=>{
-                    this.setState({ recalcState: recalcStateMap.RECALCULATED })
+                    this.setState({ recalcState: recalcStateMap.CLEAN })
                   },5000)
                 }}>
                 <i className="fa fa-undo action-button-icon"></i> Recalc
@@ -298,15 +298,15 @@ export class CompetitorEditor extends Component {
             <button
               className="btn btn-primary"
               onClick={() => {
-                if(this.state.recalcState === recalcStateMap.RECALCULATED){
-                  this.saveConfigurationToServer()
-                  return
-                }
+                if(!this.state.hasChanged) return
+
+                this.saveConfigurationToServer()
+
                 if(this.state.recalcState === recalcStateMap.CLEAN){
                   this.setState({ recalcState: recalcStateMap.REQUIRE_RECALC })
                 }
               }}
-              disabled={!this.state.hasChanged || this.state.regionSelectEnabled || this.state.recalcState === recalcStateMap.RECALCING}>
+              disabled={ this.state.regionSelectEnabled }>
               <i className="fa fa-save action-button-icon"></i> Save
             </button>
           </div>
@@ -322,7 +322,7 @@ export class CompetitorEditor extends Component {
   saveConfigurationToServer(){
     this.props.saveCompManConfig(this.props.editingManager.id,
       this.props.loadStrength.pristineStrengthsById, this.state.strengthsById
-    )
+    ) 
   }
 
   handleStrengthChange(e, strengthObj, carrierId, providerType){

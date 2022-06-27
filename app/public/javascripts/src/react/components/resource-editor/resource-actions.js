@@ -1000,10 +1000,10 @@ function saveCompManConfig(competitorManagerId, pristineStrengthsById, strengths
               if (result.data.modifiedCount > 0){
                 //this.doRecalc = true
               }
-              dispatch(setIsResourceEditor(true))
+              // dispatch(setIsResourceEditor(true))
             })
           }else{
-            dispatch(setIsResourceEditor(true))
+            // dispatch(setIsResourceEditor(true))
           }
         })
         .catch((err) => console.error(err))
