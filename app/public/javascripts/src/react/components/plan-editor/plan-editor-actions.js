@@ -300,6 +300,8 @@ function createFeature(feature) {
       if (isRingPlan && selectedSubnetId) {
         commandsBody.subnetId = selectedSubnetId
       }
+      // this can return a 500 if adding a CO to a blank plan 
+      // bug: #182578571 
       const updateResponse = await AroHttp.post(url, { commands: [commandsBody] })
       const { subnetUpdates, equipmentUpdates } = updateResponse.data
 
@@ -381,10 +383,10 @@ function createFeature(feature) {
       }
       let subnetDiffDict = {}
       subnetDiffDict[subnetId] = subnetCopy
+      if (Object.keys(newDraftProps).length && newDraftEquipment.length) {
+        dispatch({ type: Actions.PLAN_EDITOR_MERGE_DRAFT_PROPS, payload: newDraftProps })
+      }
       batch(async() => {
-        if (Object.keys(newDraftProps).length && newDraftEquipment.length) {
-          await dispatch({ type: Actions.PLAN_EDITOR_MERGE_DRAFT_PROPS, payload: newDraftProps }) // TODO: why is this an await? maybe just outside the batch?
-        }
         if (Object.keys(newFeatures).length) {
           dispatch({ type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES, payload: newFeatures })
         }
@@ -1266,7 +1268,6 @@ function addSubnets({ subnetIds = [], forceReload = false }) {
       let uncachedSubnetIds = subnetIds.filter(id => forceReload || !cachedSubnetIds.includes(id))
       // we have everything, no need to query service
       if (uncachedSubnetIds.length <= 0) {
-        // dispatch(setIsCalculatingSubnets(false))
         return subnetIds
       }
 
@@ -1278,7 +1279,7 @@ function addSubnets({ subnetIds = [], forceReload = false }) {
         const subnetUrl = `/service/plan-transaction/${transaction.id}/subnet/${subnetId}`
         const response = await AroHttp.get(subnetUrl)
         const subnet = response.data
-        // TODO: what happens if service doesn't return a subnet?
+        // what happens if service doesn't return a subnet? Not sure that's possible here
         if (!subnet.parentSubnetId) {
           dispatch(getConsructionAreaByRoot(subnet))
           dispatch(getFiberAnnotations(subnetId))

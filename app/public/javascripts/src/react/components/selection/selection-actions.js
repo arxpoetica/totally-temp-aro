@@ -1,5 +1,6 @@
 import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
+import { handleError } from '../../common/notifications'
 
 function setActiveSelectionMode (selectionModeId) {
   return {
@@ -32,9 +33,9 @@ function loadPlanTargetSelectionsFromServer (planId) {
           analysisAreas: results[2].data.map(item => +item.id),
           allServiceAreas: []
         }
-        dispatch(addPlanTargets(planId, planTargets)) // don't know if we to addPlanTargets for locations with the new API
+        dispatch(addPlanTargets(planId, planTargets))
       })
-      .catch(err => console.error(err))
+      .catch(err => handleError(err))
   }
 }
 
@@ -48,15 +49,15 @@ function addPlanTargets (planId, planTargets) {
         'cmdType': 'ADD',
         'locationIds': Array.from(planTargets.locations),
         'planId': planId,
-      }).catch(err => console.error(err))
+      }).catch(err => handleError(err))
     }
     if (planTargets.serviceAreas) {
       AroHttp.post(`/service_areas/${planId}/addServiceAreaTargets`, { serviceAreaIds: Array.from(planTargets.serviceAreas) })
-        .catch(err => console.error(err))
+        .catch(err => handleError(err))
     }
     if (planTargets.analysisAreas) {
       AroHttp.post(`/analysis_areas/${planId}/addAnalysisAreaTargets`, { analysisAreaIds: Array.from(planTargets.analysisAreas) })
-        .catch(err => console.error(err))
+        .catch(err => handleError(err))
     }
     // Get descriptions for added plan targets, then save them to the client state
     var descriptionPromises = [
@@ -102,7 +103,7 @@ function addPlanTargets (planId, planTargets) {
           })
         }
       })
-      .catch(err => console.error(err))
+      .catch(err => handleError(err))
   }
 }
 
@@ -116,15 +117,15 @@ function removePlanTargets (planId, planTargets) {
         'cmdType': 'REMOVE',
         'locationIds': Array.from(planTargets.locations),
         'planId': planId,
-      }).catch(err => console.error(err))
+      }).catch(err => handleError(err))
     }
     if (planTargets.serviceAreas) {
       AroHttp.post(`/service_areas/${planId}/removeServiceAreaTargets`, { serviceAreaIds: Array.from(planTargets.serviceAreas) })
-        .catch(err => console.error(err))
+        .catch(err => handleError(err))
     }
     if (planTargets.analysisAreas) {
       AroHttp.post(`/analysis_areas/${planId}/removeAnalysisAreaTargets`, { analysisAreaIds: Array.from(planTargets.analysisAreas) })
-        .catch(err => console.error(err))
+        .catch(err => handleError(err))
     }
   }
 }
