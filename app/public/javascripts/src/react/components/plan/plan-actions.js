@@ -690,6 +690,21 @@ function editActivePlan (plan) {
   }
 }
 
+// NOT and action, this needs to move elsewhere
+function exportPlan (userId, planId) {
+  let payload = {
+    "inlcudeLinkedResources": true,
+    "planIds": [planId],
+    "projectIds": [],
+    "resourceIds": [],
+  }
+  return AroHttp.post(`/service/v1/export-svc/export-plan-data.zip?user_id=${userId}`, payload)
+}
+
+function importPlan (file) {
+  return {}
+}
+
 export default {
   setActivePlan,
   setActivePlanState,
@@ -717,5 +732,7 @@ export default {
   deletePlan,
   getOrCreateEphemeralPlan,
   editActivePlan,
-  setActivePlanErrors
+  setActivePlanErrors,
+
+  exportPlan, // TODO: move this
 }

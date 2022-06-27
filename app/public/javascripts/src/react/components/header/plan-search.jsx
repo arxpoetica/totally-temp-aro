@@ -313,15 +313,26 @@ export class PlanSearch extends Component {
                   </td>
                   <td>
                     {plan.progress &&
-                      <a className="btn btn-success" onClick={() => this.stopOptimization(plan)}>
+                      <a className="btn btn-success" 
+                        style={{ margin: '2px' }}
+                        onClick={() => this.stopOptimization(plan)}>
                         <span className="fa fa-stop"></span>
                       </a>
                     }
                     {!plan.progress && showPlanDeleteButton &&
-                      <a className="btn btn-danger" onClick={() => this.onPlanDeleteClicked(plan)}>
+                      <a className="btn btn-danger" 
+                        style={{ margin: '2px' }}
+                        onClick={() => this.onPlanDeleteClicked(plan)}>
                         <span className="fa fa-trash-alt text-white"></span>
                       </a>
                     }
+
+                    <a className="btn btn-primary" 
+                      style={{ margin: '2px' }}
+                      onClick={() => this.onPlanExportClicked(plan)}>
+                      <span className="fa fa-download text-white"></span>
+                    </a>
+
                   </td>
                 </tr>
               )}
@@ -703,6 +714,12 @@ export class PlanSearch extends Component {
   onPlanDeleteRequested(plan) {
     return this.props.deletePlan(plan)
   }
+
+  onPlanExportClicked(plan) {
+    console.log(plan)
+    let ret = this.props.exportPlan(this.props.loggedInUser.id, plan.id)
+    console.log(ret)
+  }
 }
 
 const mapStateToProps = (state) => ({
@@ -723,6 +740,8 @@ const mapDispatchToProps = (dispatch) => ({
   ),
   loadPlan: (planId) => dispatch(ToolBarActions.loadPlan(planId)),
   deletePlan: (plan) => dispatch(PlanActions.deletePlan(plan)),
+
+  exportPlan: (userId, planId) => PlanActions.exportPlan(userId, planId), // TODO: temporary
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlanSearch)
