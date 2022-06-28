@@ -86,8 +86,8 @@ class PointFeatureRenderer {
         return
       }
     }
-    
-    if (feature.properties.object_id && selection.planTargets.locations.has(feature.properties.object_id) &&
+
+    if (feature.properties.location_id && selection.planTargets.locations.has(+feature.properties.location_id) &&
         // show selected location icon at analysis mode -> selection type is locations
         selectedDisplayMode == displayModes.ANALYSIS && analysisSelectionMode == selectionModes.SELECTED_LOCATIONS) {
       // Draw selected icon
@@ -225,6 +225,7 @@ class PointFeatureRenderer {
       }
       labelCenterY += labelYOffset
       // Draw the box for the label
+      // console.log(feature)
       const fontSize = mapLayer.drawingOptions.labels.fontSize
       ctx.font = (mapLayer.drawingOptions.labels.fontBold ? 'bold ' : '') + `${fontSize}px ${mapLayer.drawingOptions.labels.fontFamily}`
       const labelText = feature.properties[labelProperty]
