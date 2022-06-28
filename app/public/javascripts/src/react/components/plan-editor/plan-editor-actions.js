@@ -213,15 +213,6 @@ function subscribeToSocket() {
             break
           case DRAFT_STATES.END_SUBNET_TREE: break // no op
           case DRAFT_STATES.END_INITIALIZATION: break // no op
-          case DRAFT_STATES.SYNC_ROOT_LOCATIONS:
-            dispatch({
-              type: Actions.PLAN_EDITOR_SET_DRAFT_LOCATIONS,
-              payload: {
-                rootSubnetId: data.rootSubnetId,
-                rootLocations: data.rootLocations,
-              }
-            })
-            break
           case DRAFT_STATES.ERROR_SUBNET_TREE:
             message = `Type ${data.subnetNodeUpdateType} for SUBNET_DATA socket channel with `
             message += `user id ${userId}, transaction id ${planTransactionId}, `
@@ -300,8 +291,6 @@ function createFeature(feature) {
       if (isRingPlan && selectedSubnetId) {
         commandsBody.subnetId = selectedSubnetId
       }
-      // this can return a 500 if adding a CO to a blank plan 
-      // bug: #182578571 
       const updateResponse = await AroHttp.post(url, { commands: [commandsBody] })
       const { subnetUpdates, equipmentUpdates } = updateResponse.data
 
@@ -383,10 +372,10 @@ function createFeature(feature) {
       }
       let subnetDiffDict = {}
       subnetDiffDict[subnetId] = subnetCopy
-      if (Object.keys(newDraftProps).length && newDraftEquipment.length) {
-        dispatch({ type: Actions.PLAN_EDITOR_MERGE_DRAFT_PROPS, payload: newDraftProps })
-      }
       batch(async() => {
+        if (Object.keys(newDraftProps).length && newDraftEquipment.length) {
+          await dispatch({ type: Actions.PLAN_EDITOR_MERGE_DRAFT_PROPS, payload: newDraftProps })
+        }
         if (Object.keys(newFeatures).length) {
           dispatch({ type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES, payload: newFeatures })
         }
@@ -1268,6 +1257,7 @@ function addSubnets({ subnetIds = [], forceReload = false }) {
       let uncachedSubnetIds = subnetIds.filter(id => forceReload || !cachedSubnetIds.includes(id))
       // we have everything, no need to query service
       if (uncachedSubnetIds.length <= 0) {
+        // dispatch(setIsCalculatingSubnets(false))
         return subnetIds
       }
 
@@ -1277,9 +1267,7 @@ function addSubnets({ subnetIds = [], forceReload = false }) {
       // TODO: break this out into fiber actions
       for (const subnetId of uncachedSubnetIds) {
         const subnetUrl = `/service/plan-transaction/${transaction.id}/subnet/${subnetId}`
-        const response = await AroHttp.get(subnetUrl)
-        const subnet = response.data
-        // what happens if service doesn't return a subnet? Not sure that's possible here
+        const { data: subnet } = await AroHttp.get(subnetUrl)
         if (!subnet.parentSubnetId) {
           dispatch(getConsructionAreaByRoot(subnet))
           dispatch(getFiberAnnotations(subnetId))
@@ -1303,7 +1291,7 @@ function addSubnets({ subnetIds = [], forceReload = false }) {
 }
 
 function setSelectedSubnetId (selectedSubnetId) {
-  return async (dispatch, getState) => {
+  return (dispatch, getState) => {
 
     if (!selectedSubnetId) {
       dispatch({
@@ -1311,25 +1299,27 @@ function setSelectedSubnetId (selectedSubnetId) {
         payload: null,
       })
     } else {
-      const { planEditor } = getState()
-      const { drafts } = planEditor
-      // only load a new subnet if you have a subnet selected
-      try {
-        // only load a new subnet if you have a subnet selected
-        if (drafts[selectedSubnetId]) await dispatch(addSubnets({ subnetIds: [selectedSubnetId] }))
-        // otherwise it's just a piece of equipment
-        // so go ahead and pass the `selectedSubnetId` along...
-        dispatch({
-          type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
-          payload: selectedSubnetId,
-        })
-      } catch (error) {
-        handleError(error)
-        dispatch({
-          type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
-          payload: null,
-        })
-      }
+      batch(async() => {
+        try {
+          const { planEditor } = getState()
+          const { drafts } = planEditor
+          // only load a new subnet if you have a subnet selected
+          if (drafts[selectedSubnetId]) await dispatch(addSubnets({ subnetIds: [selectedSubnetId] }))
+          // otherwise it's just a piece of equipment
+          // so go ahead and pass the `selectedSubnetId` along...
+          dispatch({
+            type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
+            payload: selectedSubnetId,
+          })
+        } catch (error) {
+          handleError(error)
+          dispatch({
+            type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
+            payload: null,
+          })
+        }
+
+      })
     }
   }
 }
