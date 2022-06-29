@@ -26,7 +26,7 @@ import PlanSettings from '../plan/plan-settings.jsx'
 import UINotifications from '../notification/ui-notifications.jsx'
 import MapViewToggle from './map-view-toggle.jsx'
 import './map-split.css'
-import FrontierFooter from '../footer/frontier-footer.jsx'
+import CustomFooter from '../footer/custom-footer.jsx'
 import MapSelectorExportLocations from '../map/map-selector-export-locations.jsx'
 import MapSelectorPlanTarget from '../map/map-selector-plan-target.jsx'
 import ErrorBoundary from '../common/ErrorBoundary.jsx'
@@ -256,8 +256,8 @@ const MapSplit = (props) => {
           <UINotifications />
         </div>
       </div>
-      {/* Frontier Footer */}
-      <FrontierFooter />
+      {/* Custom Footer */}
+      <CustomFooter />
       {/* Remove the Visiblity and Push it into the googlemap */}
       {map &&
         <div style={{ visibility: 'hidden' }} ref={mapViewToggle}>

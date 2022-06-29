@@ -322,8 +322,6 @@ function createFeature(feature) {
       const newDraftProps = {}
       for (const update of subnetUpdates) {
         const { subnet, subnetBoundary } = update
-        const type = subnet.networkNodeType
-        const isRoot = type !== 'fiber_distribution_hub' // this is wrong TODO: fix it #182406504
 
         // unfortunately have to make the extra call to get the fault tree
         // also, sometimes subnetBoundary is `null` so need to perchance call that
@@ -331,6 +329,7 @@ function createFeature(feature) {
         const url = `/service/plan-transaction/${transactionId}/subnet/${subnet.id}?${query}`
         const { data } = await AroHttp.get(url)
 
+        const isRoot = data.parentSubnetId === null
         if (isRoot) {
           // get original root/co draft subnet
           const rootDraftClone = draftsClone[subnet.id]
@@ -346,7 +345,7 @@ function createFeature(feature) {
         newDraftProps[subnet.id] = {
           subnetId: subnet.id,
           nodeType: subnet.networkNodeType,
-          parentSubnetId: data.parentSubnetId, // TODO: fix it #182406504 //isRoot ? null : data.parentSubnetId,
+          parentSubnetId: data.parentSubnetId,
           nodeSynced: true,
           equipment: isRoot ? newDraftEquipment : [],
           subnetBoundary: subnetBoundary || data.subnetBoundary,
