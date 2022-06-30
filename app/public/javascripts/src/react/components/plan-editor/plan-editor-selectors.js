@@ -25,6 +25,10 @@ const getRootDrafts = createSelector([getDrafts], (drafts) => {
   }
   return rootDrafts
 })
+const getDraftProgressTuple = state => state.planEditor.draftProgressTuple
+const getDraftsLoadedProgress = createSelector([getDraftProgressTuple], ([countLoaded, totalCountToLoad]) => {
+  return Math.round(countLoaded / totalCountToLoad * 100)
+})
 
 const getSelectedPlanThumbInformation = createSelector(
   [getSelectedSubnet, getPlanThumbInformation],
@@ -383,6 +387,7 @@ const PlanEditorSelectors = Object.freeze({
   getAlertsForSubnetTree,
   locationWarnImgByType,
   getRootDrafts,
+  getDraftsLoadedProgress,
   getSelectedSubnetLocations,
   getCursorLocations,
   getLocationCounts,

@@ -2,7 +2,10 @@ import React from 'react'
 import { connect } from 'react-redux'
 import PlanEditorActions from '../plan-editor-actions'
 import PlanEditorSelectors from '../plan-editor-selectors'
-import { Button, Menu } from '@mantine/core'
+import { constants } from '../shared'
+const { DRAFT_STATES } = constants
+import { Button, Menu, Alert } from '@mantine/core'
+import { ProgressBar } from '../../common/progress-bar.jsx'
 import { StateIcon } from '../../common/state-icon.jsx'
 
 const DropdownCaret = () => {
@@ -13,8 +16,11 @@ const DropdownCaret = () => {
         height: 6px;
         background-color: white;
         mask-image: url('/svg/dropdown-caret.svg');
+        -webkit-mask-image: url('/svg/dropdown-caret.svg');
         mask-repeat: no-repeat;
+        -webkit-mask-repeat: no-repeat;
         mask-size: contain;
+        -webkit-mask-size: contain;
       }
     `}</style>
   </span>
@@ -26,6 +32,8 @@ const PlanTransactionTools = props => {
     transactionId,
     discardTransaction,
     fiberAnnotations,
+    draftsState,
+    draftsLoadedProgress,
     isChangesSaved,
     isRecalculating,
     isCommittingTransaction,
@@ -46,58 +54,71 @@ const PlanTransactionTools = props => {
   return (
 
     <div className="transaction-tools">
-      <div className="state">
-        <StateIcon state={isLoading ? 'loading' : 'good'} size="sm"/>
-        <div className="text">{stateText}</div>
-      </div>
 
-      <div className="columns">
-        <div className="column">
-          <Button
-            fullWidth
-            variant="default"
-            onClick={() => discardTransaction(transactionId)}
-            disabled={isLoading}
-          >
-            Discard
-          </Button>
+      {draftsState !== DRAFT_STATES.END_INITIALIZATION &&
+        <div className="drafts-state">
+          <ProgressBar progress={draftsLoadedProgress} />
+          <Alert title="Initializing" color="yellow">
+            Please wait while the plan is prepared for editing.
+            After your first commit you will be able to edit more quickly.
+          </Alert>
+        </div>
+      }
+
+      {draftsState === DRAFT_STATES.END_INITIALIZATION && <>
+        <div className="state">
+          <StateIcon state={isLoading ? 'loading' : 'good'} size="sm"/>
+          <div className="text">{stateText}</div>
         </div>
 
-        <div className="column">
-          <Menu
-            control={
-              <Button
-                fullWidth
-                rightIcon={<DropdownCaret/>}
+        <div className="columns">
+          <div className="column">
+            <Button
+              fullWidth
+              variant="default"
+              onClick={() => discardTransaction(transactionId)}
+              disabled={isLoading}
+            >
+              Discard
+            </Button>
+          </div>
+
+          <div className="column">
+            <Menu
+              control={
+                <Button
+                  fullWidth
+                  rightIcon={<DropdownCaret/>}
+                  disabled={isLoading}
+                >
+                  Recalculate / Commit
+                </Button>
+              }
+              size="xl"
+              styles={{ root: { display: 'block' } }}
+            >
+
+              <Menu.Item
+                onClick={() => recalculate({ ...props, hasAnnotations })}
+                variant="outline"
+                color={hasAnnotations ? 'red' : undefined}
                 disabled={isLoading}
               >
-                Recalculate / Commit
-              </Button>
-            }
-            size="xl"
-            styles={{ root: { display: 'block' } }}
-          >
+                Recalulate Hubs &amp; Terminals
+              </Menu.Item>
 
-            <Menu.Item
-              onClick={() => recalculate({ ...props, hasAnnotations })}
-              variant="outline"
-              color={hasAnnotations ? 'red' : undefined}
-              disabled={isLoading}
-            >
-              Recalulate Hubs &amp; Terminals
-            </Menu.Item>
+              <Menu.Item
+                onClick={() => checkAndCommitTransaction({ ...props, hasAnnotations })}
+                variant="outline"
+                disabled={isLoading}
+              >
+                Commit Changes &amp; Exit
+              </Menu.Item>
 
-            <Menu.Item
-              onClick={() => checkAndCommitTransaction({ ...props, hasAnnotations })}
-              variant="outline"
-              disabled={isLoading}
-            >
-              Commit Changes &amp; Exit
-            </Menu.Item>
-
-          </Menu>
+            </Menu>
+          </div>
         </div>
-      </div>
+      </>}
 
       <style jsx>{`
         .transaction-tools {
@@ -105,6 +126,13 @@ const PlanTransactionTools = props => {
           flex-direction: column;
           align-items: center;
           margin: 0 0 20px;
+        }
+        .transaction-tools :global(.mantine-Progress-root) {
+          margin: 0 0 12px;
+        }
+        .drafts-state {
+          width: 100%;
+          margin: 12px 0 0;
         }
         .state {
           display: flex;
@@ -133,6 +161,9 @@ const mapStateToProps = state => ({
   transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
   selectedSubnetId: state.planEditor.selectedSubnetId,
   fiberAnnotations: state.planEditor.fiberAnnotations || {},
+  draftsState: state.planEditor.draftsState,
+  draftProgressTuple: state.planEditor.draftProgressTuple,
+  draftsLoadedProgress: PlanEditorSelectors.getDraftsLoadedProgress(state),
   isChangesSaved: PlanEditorSelectors.getIsChangesSaved(state),
   isRecalculating: state.planEditor.isRecalculating,
   isCommittingTransaction: state.planEditor.isCommittingTransaction,

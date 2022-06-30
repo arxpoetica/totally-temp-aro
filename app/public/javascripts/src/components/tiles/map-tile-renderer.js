@@ -741,7 +741,18 @@ class MapTileRenderer {
       featureData.layerToFeatures.FEATURES_FLATTENED = featureData.layerToFeatures.FEATURES_FLATTENED
       .filter(tileObject => !deletedObjectIds
         .includes(tileObject.properties.object_id))
+
+      // Reomve deleted Uncommited MapObjects (Locations)
+      pointFeatureRendererList = pointFeatureRendererList.filter(
+        featureObj => !deletedObjectIds.includes(featureObj.feature.properties.object_id)
+      )
     }
+
+    // For https://www.pivotaltracker.com/story/show/182452408/comments/231867324
+    pointFeatureRendererList = pointFeatureRendererList.filter(
+      featureObj => featureObj.featureData.hasOwnProperty('icon')
+    )
+
     // render point feature
     PointFeatureRenderer.renderFeatures(pointFeatureRendererList, this.state.configuration.ARO_CLIENT, this.selectedSubnetLocations, this.locationAlerts)
     // render polygon feature

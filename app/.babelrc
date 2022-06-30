@@ -2,6 +2,6 @@
   "presets": ["@babel/preset-env", "@babel/preset-react"],
   "plugins": [
     "@babel/plugin-transform-runtime",
-    "styled-jsx/babel"
+    ["styled-jsx/babel", { "vendorPrefixes": false }]
   ]
 }

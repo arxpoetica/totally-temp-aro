@@ -37,7 +37,7 @@ function getSelectedEquipmentIds (flattenDeep, networkNodeTypes, configuration) 
 function loadEntityList (entityType, filterObj, select, searchColumn, configuration) {
   return (dispatch, getState) => {
     const state = getState()
-    const planId = state.plan.activePlan.id
+    const planId = state.plan.activePlan && state.plan.activePlan.id
     const dataItems = state.plan.dataItems
     const nameToServiceLayers = state.toolbar.nameToServiceLayers
     const networkNodeTypes = state.roicReports.networkNodeTypes

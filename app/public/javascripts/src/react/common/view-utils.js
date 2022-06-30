@@ -33,6 +33,20 @@ export const hsvToRgb = (h, s, v) => {
   return color
 }
 
+// We are going to use the golden ratio method from http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
+// (Furthermore, it is a property of the golden ratio, Φ, that each subsequent hash value divides the interval into which it falls according to the golden ratio!)
+const golden_ratio_conjugate = 0.618033988749895
+let hue = Math.random()
+export const getRandomColors = () => {
+  hue += golden_ratio_conjugate
+  hue %= 1
+  // We are changing the hue while keeping saturation/value the same. Also the fill colors are lighter than stroke colors.
+  return {
+    strokeStyle: hsvToRgb(hue, 0.5, 0.5),
+    fillStyle: hsvToRgb(hue, 0.8, 0.5)
+  }
+}
+
 export const selectStyles = {
   placeholder: provided => ({
     ...provided,

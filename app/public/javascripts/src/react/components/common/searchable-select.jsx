@@ -19,14 +19,19 @@ export class SearchableSelect extends Component {
   render () {
     return (
       <div className='btn-group'>
-        <input type='text'
+        <input
+          type='text'
           onChange={event => this.onSearchInput(event)}
           placeholder='Search Users'
           className='form-control'
           value={this.state.searchTerm}
           id='dropdownMenu'
           autoComplete='off'
-          data-toggle='dropdown' aria-haspopup='true' aria-expanded='false' />
+          data-toggle='dropdown'
+          aria-haspopup='true'
+          aria-expanded='false'
+          style={{ width: 'unset' }}
+        />
         {this.props.onButton
           ? (
             <button className={'btn ' + (this.state.selectedItem ? 'btn-primary' : 'btn-secondary')}

@@ -56,7 +56,6 @@ const AnalysisErrors = props => {
     return [errorMessage, baseErrorMessage]
   }
 
-
   const generateErrorBody = (errorCategory, serviceCode) => {
     let [errorMessage, baseErrorMessage] = generateMessage(errorCategory, serviceCode);
     return (
