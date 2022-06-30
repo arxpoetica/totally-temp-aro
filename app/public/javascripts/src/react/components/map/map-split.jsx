@@ -96,6 +96,8 @@ const MapSplit = (props) => {
       setShowPanel(!!measuredDistance.detail)
       setMeasuredDistance(measuredDistance.detail)
     })
+
+    return () => window.removeEventListener('measuredDistance')
   }, [])
 
   const checkSelectedDisplayMode = (displayMode) => {

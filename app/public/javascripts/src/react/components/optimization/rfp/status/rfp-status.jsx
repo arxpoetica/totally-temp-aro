@@ -23,7 +23,10 @@ export class RfpStatus extends Component {
     return (
       <>
         {showFullScreenContainer && showAllRfpStatus &&
-          <div className="full-screen-container">
+          <div
+            className="full-screen-container"
+            style={{ animation: (showFullScreenContainer && showAllRfpStatus) ? 'fadeInDown 300ms' : 'fadeOutUp 300ms' }}
+          >
             {/* A close button at the top right */}
             <div className="full-screen-container-close"
               onClick={() => hideFullScreenContainer()}
@@ -64,14 +67,6 @@ export class RfpStatus extends Component {
             bottom: 0px;
             background-color: white;
             z-index: 4; /* Required because our sidebar has a z-index, which is required because of the google maps control */
-          }
-        
-          .full-screen-container.ng-hide-remove {
-            animation: fadeInDown 300ms;
-          }
-        
-          .full-screen-container.ng-hide-add {
-            animation: fadeOutUp 300ms;
           }
         
           .full-screen-container-close {

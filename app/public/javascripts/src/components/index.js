@@ -74,17 +74,14 @@ import MapDisplayTools from '../react/components/map-tools/map-display-tools.jsx
 
 import contextMenu from './common/context-menu/context-menu'
 import tile from './tiles/tile'
-
 import utils from './common/utilities'
-
 import state from '../models/state'
 import rxState from '../react/common/rxState'
-
 import tileDataService from '../components/tiles/tile-data-service'
-
 import reduxConfig from '../redux-config'
 
-app.component('contextMenu', contextMenu)
+app
+  .component('contextMenu', contextMenu)
   .component('tile', tile)
 
 // ReactJS components
