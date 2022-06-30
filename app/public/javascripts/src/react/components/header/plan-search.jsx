@@ -11,6 +11,7 @@ import { getPlanCreatorName, getTagCategories } from '../sidebar/view/plan-info-
 import { uniqBy, arrayComparer } from '../../common/view-utils.js'
 import ReactPaginate from 'react-paginate'
 
+
 const createOption = (label) => ({
   label,
   value: label,
@@ -96,6 +97,7 @@ export class PlanSearch extends Component {
         pageCount: 0,
         marginPagesDisplayed: 2,
       },
+      file: null, // temp 
     }
 
     this.optionSetTextArray = [
@@ -717,9 +719,12 @@ export class PlanSearch extends Component {
 
   onPlanExportClicked(plan) {
     console.log(plan)
-    let ret = this.props.exportPlan(this.props.loggedInUser.id, plan.id)
-    console.log(ret)
+    let filename = plan.name.replace(' ', '_') + '.zip'
+    this.props.exportPlan(this.props.loggedInUser.id, plan.id, filename)
   }
+
+
+
 }
 
 const mapStateToProps = (state) => ({
