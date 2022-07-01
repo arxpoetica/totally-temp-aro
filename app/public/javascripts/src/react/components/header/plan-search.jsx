@@ -718,12 +718,9 @@ export class PlanSearch extends Component {
   }
 
   onPlanExportClicked(plan) {
-    console.log(plan)
     let filename = plan.name.replace(' ', '_') + '.zip'
     this.props.exportPlan(this.props.loggedInUser.id, plan.id, filename)
   }
-
-
 
 }
 
@@ -746,7 +743,7 @@ const mapDispatchToProps = (dispatch) => ({
   loadPlan: (planId) => dispatch(ToolBarActions.loadPlan(planId)),
   deletePlan: (plan) => dispatch(PlanActions.deletePlan(plan)),
 
-  exportPlan: (userId, planId) => PlanActions.exportPlan(userId, planId), // TODO: temporary
+  exportPlan: (userId, planId, filename) => PlanActions.exportPlan(userId, planId, filename), // NOT an action, TODO: temporary
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlanSearch)

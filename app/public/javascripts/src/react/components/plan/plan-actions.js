@@ -691,7 +691,7 @@ function editActivePlan (plan) {
 }
 
 // NOT and action, this needs to move elsewhere
-function exportPlan (userId, planId, downloadFileName) {
+function exportPlan (userId, planId, filename) {
   let payload = {
     "inlcudeLinkedResources": true,
     "planIds": [planId],
@@ -700,7 +700,7 @@ function exportPlan (userId, planId, downloadFileName) {
   }
   AroHttp.post(`/service/v1/export-svc/export-plan-data.zip?user_id=${userId}`, payload, true)
   .then(rawResult => {
-    saveAs(new Blob([rawResult]), downloadFileName)
+    saveAs(new Blob([rawResult]), filename)
   })
 }
 
