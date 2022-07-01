@@ -998,7 +998,8 @@ function saveCompManConfig(competitorManagerId, pristineStrengthsById, strengths
             AroHttp.get(`/service/v1/competitor-manager/${competitorManagerId}/state`)
             .then((result) => {
               if (result.data.modifiedCount > 0){
-                //this.doRecalc = true
+                // this.doRecalc = true
+                dispatch(setRecalcState("requireRecalc"))
               }
               // dispatch(setIsResourceEditor(true))
             })
@@ -1011,6 +1012,18 @@ function saveCompManConfig(competitorManagerId, pristineStrengthsById, strengths
       console.log('Competitor Editor: No models were changed. Nothing to save.')
     }
   }
+}
+
+// Recalcing
+function executeRecalc(competitorManagerId){
+  dispatch(setRecalcState("recalcing"))
+
+  // call the api
+  AroHttp.get(`/service/v1/competitor-manager/${competitorManagerId}/refresh`)
+    .then((result) =>{
+      dispatch(setRecalcState("recalcuted")) // or set to Clean
+    })
+    .catch((err)=> console.error(err))
 }
 
 // Roic Manager
@@ -1333,6 +1346,13 @@ function convertMetersToLengthUnits (input) {
   }
 }
 
+function setRecalcState(recalc) {
+  return {
+    type: Actions.RESOURCE_EDITOR_SET_RECALC_STATE,
+    payload: recalc,
+  }
+}
+
 export default {
   getResourceTypes,
   getResourceManagers,
@@ -1371,4 +1391,6 @@ export default {
   convertMetersToLengthUnits,
   convertlengthUnitsToMeters,
   setEditingMode,
+  setRecalcState,
+  executeRecalc
 }

@@ -41,7 +41,6 @@ export class CompetitorEditor extends Component {
       openTab: 0,
       strengthsById: '',
       hasChanged: false,
-      recalcState: recalcStateMap.CLEAN,
     }
   }
 
@@ -278,34 +277,16 @@ export class CompetitorEditor extends Component {
               <i className="fa fa-undo action-button-icon"></i> Discard changes
             </button>
             {
-              this.state.hasChanged && this.state.recalcState === recalcStateMap.REQUIRE_RECALC && 
+              this.state.recalcState === recalcStateMap.REQUIRE_RECALC && 
               <button 
                 className="btn btn-primary mr-2" 
-                onClick={() => {
-                  this.setState({ recalcState: recalcStateMap.RECALCING, hasChanged: false })
-
-                  // TODO-  need to call a recalcing api 
-                  // after recalcing api get finished
-                  // TODO - this.setState({ recalcState: recalcStateMap.CLEAN })
-
-                  setTimeout(()=>{
-                    this.setState({ recalcState: recalcStateMap.CLEAN })
-                  },5000)
-                }}>
+                onClick={() => executeRecalc(this.props.editingManager.id) }>
                 <i className="fa fa-undo action-button-icon"></i> Recalc
               </button>
             }
             <button
               className="btn btn-primary"
-              onClick={() => {
-                if(!this.state.hasChanged) return
-
-                this.saveConfigurationToServer()
-
-                if(this.state.recalcState === recalcStateMap.CLEAN){
-                  this.setState({ recalcState: recalcStateMap.REQUIRE_RECALC })
-                }
-              }}
+              onClick={() => this.state.hasChanged && this.saveConfigurationToServer() }
               disabled={ this.state.regionSelectEnabled }>
               <i className="fa fa-save action-button-icon"></i> Save
             </button>
@@ -323,6 +304,7 @@ export class CompetitorEditor extends Component {
     this.props.saveCompManConfig(this.props.editingManager.id,
       this.props.loadStrength.pristineStrengthsById, this.state.strengthsById
     ) 
+    this.setState({ hasChanged: false })
   }
 
   handleStrengthChange(e, strengthObj, carrierId, providerType){
@@ -409,6 +391,7 @@ const mapStateToProps = (state) => ({
   compManMeta: state.resourceEditor.compManMeta,
   resourceManagerName: state.resourceManager.editingManager
     && state.resourceManager.managers[state.resourceManager.editingManager.id].resourceManagerName,
+  recalcState: state.resourceEditor.recalcState
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -421,7 +404,9 @@ const mapDispatchToProps = (dispatch) => ({
   ),
   setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
   loadCompManMeta: (competitorManagerId) => dispatch(ResourceActions.loadCompManMeta(competitorManagerId)),
-  setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title))
+  setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title)),
+  setRecalcState: (recalc) => dispatch(ResourceActions.setRecalcState(recalc)),
+  executeRecalc: (competitorManagerId) => dispatch(ResourceActions.executeRecalc(competitorManagerId)),
 })
 
 const CompetitorEditorComponent = connect(mapStateToProps, mapDispatchToProps)(CompetitorEditor)

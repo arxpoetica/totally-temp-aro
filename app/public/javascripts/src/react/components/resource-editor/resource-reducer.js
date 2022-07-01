@@ -32,7 +32,8 @@ const defaultState = {
   searchText: '',
   selectedResourceKey: '',
   roicManager: {},
-  roicManagerConfiguration: {}
+  roicManagerConfiguration: {},
+  recalcState: "clean"
 }
 
 function setResourceTypes (state, resourceTypes) {
@@ -273,6 +274,12 @@ function setIsRrmManager (state, isRrmManager) {
   }
 }
 
+function setRecalcState(state, recalc) {
+  return { ...state,
+    recalcState: recalc
+  }
+}
+
 function resourceReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.RESOURCE_EDITOR_SET_RESOURCE_TYPES:
@@ -372,6 +379,10 @@ function resourceReducer (state = defaultState, action) {
 
     case Actions.RESOURCE_EDITOR_IS_RRM_MANAGER:
       return setIsRrmManager(state, action.payload)
+
+    case Actions.RESOURCE_EDITOR_SET_RECALC_STATE:
+      return setRecalcState(state, action.payload)
+
 
   default:
     return state
