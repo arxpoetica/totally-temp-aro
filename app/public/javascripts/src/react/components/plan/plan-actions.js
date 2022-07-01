@@ -702,10 +702,31 @@ function exportPlan (userId, planId, filename) {
   .then(rawResult => {
     saveAs(new Blob([rawResult]), filename)
   })
+  .catch(error => {
+    handleError(error)
+  })
 }
 
-function importPlan (file) {
-  return {}
+// NOT and action, this needs to move elsewhere
+function importPlan (userId, file) {
+  if (!file) return
+  var formData = new FormData()
+  formData.append('file', file)
+  const url = `/service/v1/export-svc/import-plan-data?as_new=true&user_id=${userId}`
+  const options = {
+    method: 'POST',
+    withCredentials: true,
+    //headers: {'Content-type': 'multipart/form-data'}, // keep blank so Chrome will fill it in and give us a file boundary 
+    body: formData, //JSON.stringify(body)
+  }
+  AroHttp._fetch(url, options)
+  .then(response => {
+    console.log('upload done')
+    console.log(response)
+  })
+  .catch(error => {
+    handleError(error)
+  })
 }
 
 export default {
@@ -738,4 +759,5 @@ export default {
   setActivePlanErrors,
 
   exportPlan, // TODO: move this
+  importPlan, // TODO: move this
 }

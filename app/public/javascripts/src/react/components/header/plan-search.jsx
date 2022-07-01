@@ -195,6 +195,31 @@ export class PlanSearch extends Component {
 
     return (
       <div className="aro-plan">
+
+        <div>
+          <div className="form-group row"
+            style={{ 'marginTop': '1rem' }}
+          >
+            <label className="col-sm-4 col-form-label">Upload Plan: </label>
+            <div className="col-sm-8">
+              <input name="file" type="file" onChange={event => this.onFileSelect(event)} className="form-control"/>
+            </div>
+          </div>
+          <div className="form-group row"
+            style={{ 'marginTop': '-0.8rem' }}
+          >
+            <label className="col-sm-4 col-form-label"> </label>
+            <div className="col-sm-8">
+              <button className="btn btn-primary" 
+                style={{ margin: '2px' }}
+                disabled={!this.state.file}
+                onClick={() => this.onUpload()}>
+                <span className="fa fa-upload text-white"></span> Upload
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div className="input-group">
           <CreatableSelect
             isMulti
@@ -717,9 +742,22 @@ export class PlanSearch extends Component {
     return this.props.deletePlan(plan)
   }
 
+  // temp
   onPlanExportClicked(plan) {
     let filename = plan.name.replace(' ', '_') + '.zip'
     this.props.exportPlan(this.props.loggedInUser.id, plan.id, filename)
+  }
+  // temp
+  onFileSelect (event) {
+    event.preventDefault();
+    let file = event.target.files[0];
+    this.setState({ file: file })
+  }
+  // temp
+  onUpload () {
+    if (this.state.file) {
+      this.props.importPlan(this.props.loggedInUser.id, this.state.file)
+    }
   }
 
 }
@@ -744,6 +782,7 @@ const mapDispatchToProps = (dispatch) => ({
   deletePlan: (plan) => dispatch(PlanActions.deletePlan(plan)),
 
   exportPlan: (userId, planId, filename) => PlanActions.exportPlan(userId, planId, filename), // NOT an action, TODO: temporary
+  importPlan: (userId, file) => PlanActions.importPlan(userId, file), // NOT an action, TODO: temporary
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlanSearch)
