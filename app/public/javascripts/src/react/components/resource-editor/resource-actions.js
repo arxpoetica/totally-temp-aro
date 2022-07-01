@@ -1015,15 +1015,17 @@ function saveCompManConfig(competitorManagerId, pristineStrengthsById, strengths
 }
 
 // Recalcing
-function executeRecalc(competitorManagerId){
-  dispatch(setRecalcState("recalcing"))
-
-  // call the api
-  AroHttp.get(`/service/v1/competitor-manager/${competitorManagerId}/refresh`)
-    .then((result) =>{
-      dispatch(setRecalcState("recalcuted")) // or set to Clean
-    })
-    .catch((err)=> console.error(err))
+function executeRecalc(userId, competitorManagerId){
+  return dispatch => {
+    dispatch(setRecalcState("recalcing"))
+  
+    // call the api
+    AroHttp.post(`/service/v1/competitor-manager/${competitorManagerId}/refresh/?user_id=${userId}`)
+      .then((result) =>{
+        dispatch(setRecalcState("clean")) // or set to Recalculated
+      })
+      .catch((err)=> console.error(err))
+  }
 }
 
 // Roic Manager

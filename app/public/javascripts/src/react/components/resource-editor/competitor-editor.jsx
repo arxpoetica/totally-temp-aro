@@ -64,6 +64,8 @@ export class CompetitorEditor extends Component {
       return {"id": regionValue.gid, "value": regionValue.stusps, "label": regionValue.name}
     })
 
+    console.log({recalcState: this.props.recalcState})
+
     return (
       <div>
         <strong>Regions</strong>
@@ -142,13 +144,13 @@ export class CompetitorEditor extends Component {
         }
 
         {
-          this.state.recalcState === recalcStateMap.REQUIRE_RECALC &&  <Alert title="Some changes occured" color="yellow">
+          this.props.recalcState === recalcStateMap.REQUIRE_RECALC &&  <Alert title="Some changes occured" color="yellow">
             Some changes occured, Needs to be recalculated!
           </Alert>
         }
 
         {
-          this.state.recalcState === recalcStateMap.RECALCING && <Alert title="Recalculation in Progress" color="yellow">
+          this.props.recalcState === recalcStateMap.RECALCING && <Alert title="Recalculation in Progress" color="yellow">
             Recalculation is in Progress, It might take some time!
           </Alert>
         }
@@ -277,10 +279,10 @@ export class CompetitorEditor extends Component {
               <i className="fa fa-undo action-button-icon"></i> Discard changes
             </button>
             {
-              this.state.recalcState === recalcStateMap.REQUIRE_RECALC && 
+              this.props.recalcState === recalcStateMap.REQUIRE_RECALC && 
               <button 
                 className="btn btn-primary mr-2" 
-                onClick={() => executeRecalc(this.props.editingManager.id) }>
+                onClick={() => this.props.executeRecalc(this.props.loggedInUser.id, this.props.editingManager.id) }>
                 <i className="fa fa-undo action-button-icon"></i> Recalc
               </button>
             }
@@ -406,7 +408,7 @@ const mapDispatchToProps = (dispatch) => ({
   loadCompManMeta: (competitorManagerId) => dispatch(ResourceActions.loadCompManMeta(competitorManagerId)),
   setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title)),
   setRecalcState: (recalc) => dispatch(ResourceActions.setRecalcState(recalc)),
-  executeRecalc: (competitorManagerId) => dispatch(ResourceActions.executeRecalc(competitorManagerId)),
+  executeRecalc: (userId, competitorManagerId) => dispatch(ResourceActions.executeRecalc(userId, competitorManagerId)),
 })
 
 const CompetitorEditorComponent = connect(mapStateToProps, mapDispatchToProps)(CompetitorEditor)
