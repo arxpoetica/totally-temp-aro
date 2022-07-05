@@ -749,13 +749,17 @@ export class PlanSearch extends Component {
   }
   // temp
   onFileSelect (event) {
-    event.preventDefault();
-    let file = event.target.files[0];
+    event.preventDefault()
+    let file = event.target.files[0]
+    console.log(event.target.files)
+    console.log(file)
     this.setState({ file: file })
+    
   }
   // temp
   onUpload () {
     if (this.state.file) {
+      console.log(this.state.file)
       this.props.importPlan(this.props.loggedInUser.id, this.state.file)
     }
   }

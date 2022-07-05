@@ -712,14 +712,15 @@ function importPlan (userId, file) {
   if (!file) return
   var formData = new FormData()
   formData.append('file', file)
-  const url = `/service/v1/export-svc/import-plan-data?as_new=true&user_id=${userId}`
+  const url = `/service/v1/export-svc/import-plan-data?user_id=${userId}&as_new=true`
   const options = {
     method: 'POST',
-    withCredentials: true,
+    //withCredentials: true,
     //headers: {'Content-type': 'multipart/form-data'}, // keep blank so Chrome will fill it in and give us a file boundary 
     body: formData, //JSON.stringify(body)
   }
-  AroHttp._fetch(url, options)
+  AroHttp._fetch(url, options, true)
+  //AroHttp.postRaw(url, formData)
   .then(response => {
     console.log('upload done')
     console.log(response)
