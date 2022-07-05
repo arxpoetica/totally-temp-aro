@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import ResourceActions from './resource-actions'
 import Select from "react-select"
 import { Alert } from '@mantine/core';
+import AroHttp from '../../common/aro-http'
 
 const styles = {
   multiValue: (base, state) => {
@@ -47,6 +48,13 @@ export class CompetitorEditor extends Component {
   componentDidMount () {
     this.props.getRegions()
     this.props.setModalTitle(this.props.resourceManagerName)
+
+    AroHttp.get(`/service/v1/competitor-manager/${this.props.editingManager.id}/state`)
+      .then((result) => {
+        if (result.data.modifiedCount > 0){
+          this.props.setRecalcState("requireRecalc")
+        }
+      })
   }
 
   static getDerivedStateFromProps(nextProps) {
@@ -63,8 +71,6 @@ export class CompetitorEditor extends Component {
     const regionsList = this.props.regions && this.props.regions.map(function(regionValue) {
       return {"id": regionValue.gid, "value": regionValue.stusps, "label": regionValue.name}
     })
-
-    console.log({recalcState: this.props.recalcState})
 
     return (
       <div>
@@ -144,14 +150,14 @@ export class CompetitorEditor extends Component {
         }
 
         {
-          this.props.recalcState === recalcStateMap.REQUIRE_RECALC &&  <Alert title="Some changes occured" color="yellow">
-            Some changes occured, Needs to be recalculated!
+          this.props.recalcState === recalcStateMap.REQUIRE_RECALC &&  <Alert title="Recalc Required" color="yellow">
+            Some changes occurred, you need to recalculate for them to take affect.
           </Alert>
         }
 
         {
-          this.props.recalcState === recalcStateMap.RECALCING && <Alert title="Recalculation in Progress" color="yellow">
-            Recalculation is in Progress, It might take some time!
+          this.props.recalcState === recalcStateMap.RECALCING && <Alert title="Recalcing..." color="yellow">
+            Recalculation is in progress, it may take some time, once it is complete this message will disappear and changes will take affect.
           </Alert>
         }
 
