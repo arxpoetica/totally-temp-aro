@@ -105,6 +105,10 @@ const NetworkEquipmentPanel = (props) => {
     return (mapZoomSize > zoomThreshold) ? 'select' : 'smooth_absolute'
   }
 
+  const getPolygonTransformForLayer = (zoomThreshold) => {
+    return (mapZoomSize > zoomThreshold) ? 'select' : 'smooth'
+  }
+
   const createSingleMapLayer = (equipmentOrFiberKey, categoryType, networkEquipment, existingOrPlanned, libraryId, rootPlanId) => {
     const existingOrPlannedzIndex = tileDefinitions[categoryType][existingOrPlanned].zIndex
     const tileDefinition = klona(tileDefinitions[categoryType][existingOrPlanned])
