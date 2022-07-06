@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { connect } from 'react-redux'
 import { displayModes } from './constants'
 import ToolTip from '../common/tooltip.jsx'
@@ -15,39 +15,32 @@ const DisplayModeButtons = props => {
     displayModeButtons,
     selection,
     draftsState,
+    equipmentCosts
   } = props
 
-  const disableEditPlan = () => {
-    return !!(
-      // Disable if no plan present
-      !plan || plan.ephemeral ||
-      // Disable if plan has not been ran
-      plan.planState !== 'COMPLETED' ||
-      (
-        // TEMPORARY UNTIL WE ALLOW MULTIPLE SERVICE AREA PLAN EDIT
-        // Disable if there is more than 1 service area in a plan
-        selection.planTargetDescriptions &&
-        Object.keys(selection.planTargetDescriptions.serviceAreas).length > 1
-      )
-    )
-  }
+  const [toolTip, setToolTip] = useState('')
 
-  const editPlanToolTipText = () => {
+  useEffect(() => {
+    calculateIsDisabled()
+  }, [
+    JSON.stringify(equipmentCosts),
+    JSON.stringify(selection.planTargetDescriptions),
+    plan && plan.planState
+  ])
+
+  const calculateIsDisabled = () => {
     let baseMessage = 'Edit mode is only available for '
     if (!plan || plan.ephemeral) {
       baseMessage += 'a plan that has been saved, created, and run.'
     } else if (plan.planState !== 'COMPLETED') {
       baseMessage += 'a plan that has been run.'
-    } else if (
-      selection.planTargetDescriptions &&
-      Object.keys(selection.planTargetDescriptions.serviceAreas).length > 1
-    ) {
-      baseMessage += 'one service area at a time.'
+    } else if (isMultipleServiceAreasOrCOs()) {
+      baseMessage += 'one central office at a time.'
     } else {
       baseMessage = ''
     }
 
-    return baseMessage
+    setToolTip(baseMessage)
   }
 
   const disabledButton = () => {
@@ -55,6 +48,16 @@ const DisplayModeButtons = props => {
     if (editMode && draftsState !== DRAFT_STATES.END_INITIALIZATION) {
       return 'disabled'
     }
+  }
+
+  const isMultipleServiceAreasOrCOs = () => {
+    const centralOffice = equipmentCosts && equipmentCosts.find(equipment => equipment.costCode === "central_office")
+    return (
+      selection.planTargetDescriptions &&
+        Object.keys(selection.planTargetDescriptions.serviceAreas).length > 1
+    ) || (
+      centralOffice && centralOffice.quantity > 1 && planType !== "RING"
+    )
   }
 
   return (
@@ -75,14 +78,14 @@ const DisplayModeButtons = props => {
 
         {displayModeButtons.EDIT_PLAN && currentUser.perspective !== 'sales' &&
           <ToolTip
-            isActive={disableEditPlan()}
-            toolTipText={editPlanToolTipText()}
+            isActive={!!toolTip}
+            toolTipText={toolTip}
             minWidth="350%"
           >
             <DisplayButton
               title="Edit Plan"
               mode="EDIT_PLAN"
-              disabled={disableEditPlan() ? 'disabled' : null}
+              disabled={toolTip && 'disabled'}
             />
           </ToolTip>
         }
@@ -110,6 +113,7 @@ const mapStateToProps = (state) => ({
   planType: state.plan.activePlan && state.plan.activePlan.planType,
   selection: state.selection,
   draftsState: state.planEditor.draftsState,
+  equipmentCosts: state.roicReports.roicResults && state.roicReports.roicResults.priceModel.equipmentCosts
 })
 
 const mapDispatchToProps = (dispatch) => ({})
