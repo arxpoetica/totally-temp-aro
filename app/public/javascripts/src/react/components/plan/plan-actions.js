@@ -11,6 +11,7 @@ import NetworkOptimizationActions from '../optimization/network-optimization/net
 import UserActions from '../user/user-actions'
 import ToolBarActions from '../header/tool-bar-actions.js'
 import AroHttp from '../../common/aro-http'
+import fetch from 'cross-fetch'
 import { handleError } from '../../common/notifications'
 
 function setActivePlanState (planState) {
@@ -690,7 +691,7 @@ function editActivePlan (plan) {
   }
 }
 
-// NOT and action, this needs to move elsewhere
+// NOT an action, this needs to move elsewhere #182441351
 function exportPlan (userId, planId, filename) {
   let payload = {
     "inlcudeLinkedResources": true,
@@ -707,27 +708,32 @@ function exportPlan (userId, planId, filename) {
   })
 }
 
-// NOT and action, this needs to move elsewhere
+// only sort of an action, this needs to move elsewhere #182441351
 function importPlan (userId, file) {
-  if (!file) return
-  var formData = new FormData()
-  formData.append('file', file)
-  const url = `/service/v1/export-svc/import-plan-data?user_id=${userId}&as_new=true`
-  const options = {
-    method: 'POST',
-    //withCredentials: true,
-    //headers: {'Content-type': 'multipart/form-data'}, // keep blank so Chrome will fill it in and give us a file boundary 
-    body: formData, //JSON.stringify(body)
+  return (dispatch) => {
+    if (!file) return Promise.resolve()
+    var formData = new FormData()
+    formData.append('file', file)
+    const url = `/uploadservice/v1/export-svc/import-plan-data?user_id=${userId}&as_new=true`
+    dispatch({
+      type: Actions.PLAN_SET_UPLOAD_NAME,
+      payload: file.name,
+    })
+    AroHttp.postRaw(url, formData)
+    .then(response => {
+      dispatch({
+        type: Actions.PLAN_SET_UPLOAD_NAME,
+        payload: null,
+      })
+    })
+    .catch(error => {
+      handleError(error)
+      dispatch({
+        type: Actions.PLAN_SET_UPLOAD_NAME,
+        payload: null,
+      })
+    })
   }
-  AroHttp._fetch(url, options, true)
-  //AroHttp.postRaw(url, formData)
-  .then(response => {
-    console.log('upload done')
-    console.log(response)
-  })
-  .catch(error => {
-    handleError(error)
-  })
 }
 
 export default {
@@ -759,6 +765,6 @@ export default {
   editActivePlan,
   setActivePlanErrors,
 
-  exportPlan, // TODO: move this
-  importPlan, // TODO: move this
+  exportPlan, // TODO: move this #182441351
+  importPlan, // TODO: move this #182441351
 }

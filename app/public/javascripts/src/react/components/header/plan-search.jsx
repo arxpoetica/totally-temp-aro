@@ -97,7 +97,7 @@ export class PlanSearch extends Component {
         pageCount: 0,
         marginPagesDisplayed: 2,
       },
-      file: null, // temp 
+      file: null, // temp #182441351
     }
 
     this.optionSetTextArray = [
@@ -116,13 +116,28 @@ export class PlanSearch extends Component {
     if (this.props.sidebarWidth !== prevProps.sidebarWidth) {
       this.setPage()
     }
+    // TODO: this is wrong, the list of plans should live in state
+    //  so we can refresh when an upload completes.
+    //  Pagination should live in local state though
+    if (prevProps.uploadName !== null && this.props.uploadName === null) {
+      this.loadPlans(1)
+      this.setPage()
+    }
   }
 
   render() {
-    const { loggedInUser, listOfTags, listOfServiceAreaTags, showPlanDeleteButton, systemActors} = this.props
+    const { loggedInUser, listOfTags, listOfServiceAreaTags, showPlanDeleteButton, systemActors, uploadName} = this.props
     const { searchText, plans, idToServiceAreaCode, creatorsSearchList,
       optionSetText, isDropDownOption, sortByField, allPlans, pageableData } = this.state
 
+    // TODO: temp #182441351
+    if (this.props.uploadName !== null) {
+      return (
+        <div>
+          <i className="fa fa-spinner fa-spin" aria-hidden="true"></i> Uploading {this.props.uploadName}
+        </div>
+      )
+    }
     // To customize MultiValuelabel in react-select
     // https://codesandbox.io/s/znxjxj556l?file=/src/index.js:76-90
     const MultiValue = props => {
@@ -195,7 +210,7 @@ export class PlanSearch extends Component {
 
     return (
       <div className="aro-plan">
-
+        
         <div>
           <div className="form-group row"
             style={{ 'marginTop': '1rem' }}
@@ -219,7 +234,7 @@ export class PlanSearch extends Component {
             </div>
           </div>
         </div>
-
+        
         <div className="input-group">
           <CreatableSelect
             isMulti
@@ -577,7 +592,7 @@ export class PlanSearch extends Component {
           const planOptions = this.state.planOptions
           planOptions.params = {}
           this.setState({ planOptions })
-
+          // TODO: this doesn't belong here - we need to reload this once an upload is completed 
           AroHttp.get('/optimization/processes').then((running) => {
             this.totalData = []
             this.totalData = response.data.sort((a, b) => (a[this.state.sortByField] < b[this.state.sortByField]) ? 1 : -1)
@@ -742,24 +757,21 @@ export class PlanSearch extends Component {
     return this.props.deletePlan(plan)
   }
 
-  // temp
+  // temp #182441351
   onPlanExportClicked(plan) {
     let filename = plan.name.replace(' ', '_') + '.zip'
     this.props.exportPlan(this.props.loggedInUser.id, plan.id, filename)
   }
-  // temp
+  // temp #182441351
   onFileSelect (event) {
     event.preventDefault()
     let file = event.target.files[0]
-    console.log(event.target.files)
-    console.log(file)
     this.setState({ file: file })
     
   }
-  // temp
+  // temp #182441351
   onUpload () {
     if (this.state.file) {
-      console.log(this.state.file)
       this.props.importPlan(this.props.loggedInUser.id, this.state.file)
     }
   }
@@ -772,6 +784,7 @@ const mapStateToProps = (state) => ({
   listOfServiceAreaTags: state.toolbar.listOfServiceAreaTags,
   sidebarWidth: state.toolbar.sidebarWidth,
   systemActors: state.user.systemActors,
+  uploadName: state.plan.uploadName,
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -785,8 +798,8 @@ const mapDispatchToProps = (dispatch) => ({
   loadPlan: (planId) => dispatch(ToolBarActions.loadPlan(planId)),
   deletePlan: (plan) => dispatch(PlanActions.deletePlan(plan)),
 
-  exportPlan: (userId, planId, filename) => PlanActions.exportPlan(userId, planId, filename), // NOT an action, TODO: temporary
-  importPlan: (userId, file) => PlanActions.importPlan(userId, file), // NOT an action, TODO: temporary
+  importPlan: (userId, file) => dispatch(PlanActions.importPlan(userId, file)), // TODO: temporary #182441351
+  exportPlan: (userId, planId, filename) => PlanActions.exportPlan(userId, planId, filename), // NOT an action, TODO: temporary #182441351
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlanSearch)
