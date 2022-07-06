@@ -35,7 +35,6 @@ function setShowRoicReportsModal (showRoicReportsModal) {
 }
 
 function loadROICResultsForPlan (planId) {
-  console.log("HITTTTTTT----------------------------------------------")
   return dispatch => {
     AroHttp.get(`/service/report/plan/${planId}`)
       .then(result => {
