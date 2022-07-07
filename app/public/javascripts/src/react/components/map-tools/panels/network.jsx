@@ -22,7 +22,7 @@ const usePointAggregate = false
 const objectKeyReplace = (obj, searchText, replaceText) => {
   Object.keys(obj).forEach((key) => {
     if (typeof obj[key] === 'string') {
-      obj[key] = obj[key].replace(searchText, replaceText)
+      obj[key] = obj[key].replaceAll(searchText, replaceText)
     }
   })
 }
@@ -117,7 +117,7 @@ const NetworkEquipmentPanel = (props) => {
     objectKeyReplace(tileDefinition, '{fiberType}', equipmentOrFiberKey)
     objectKeyReplace(tileDefinition, '{libraryId}', libraryId)
     objectKeyReplace(tileDefinition, '{rootPlanId}', rootPlanId)
-
+    
     if (networkEquipment.equipmentType === 'point') {
       const pointTransform = getPointTransformForLayer(+networkEquipment.aggregateZoomThreshold)
       objectKeyReplace(tileDefinition, '{pointTransform}', pointTransform)
