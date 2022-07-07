@@ -22,7 +22,7 @@ const usePointAggregate = false
 const objectKeyReplace = (obj, searchText, replaceText) => {
   Object.keys(obj).forEach((key) => {
     if (typeof obj[key] === 'string') {
-      obj[key] = obj[key].replace(searchText, replaceText)
+      obj[key] = obj[key].replaceAll(searchText, replaceText)
     }
   })
 }
@@ -105,6 +105,10 @@ const NetworkEquipmentPanel = (props) => {
     return (mapZoomSize > zoomThreshold) ? 'select' : 'smooth_absolute'
   }
 
+  const getPolygonTransformForLayer = (zoomThreshold) => {
+    return (mapZoomSize > zoomThreshold) ? 'select' : 'smooth'
+  }
+
   const createSingleMapLayer = (equipmentOrFiberKey, categoryType, networkEquipment, existingOrPlanned, libraryId, rootPlanId) => {
     const existingOrPlannedzIndex = tileDefinitions[categoryType][existingOrPlanned].zIndex
     const tileDefinition = klona(tileDefinitions[categoryType][existingOrPlanned])
@@ -113,7 +117,7 @@ const NetworkEquipmentPanel = (props) => {
     objectKeyReplace(tileDefinition, '{fiberType}', equipmentOrFiberKey)
     objectKeyReplace(tileDefinition, '{libraryId}', libraryId)
     objectKeyReplace(tileDefinition, '{rootPlanId}', rootPlanId)
-
+    
     if (networkEquipment.equipmentType === 'point') {
       const pointTransform = getPointTransformForLayer(+networkEquipment.aggregateZoomThreshold)
       objectKeyReplace(tileDefinition, '{pointTransform}', pointTransform)
@@ -341,7 +345,7 @@ const NetworkEquipmentPanel = (props) => {
                               type="checkbox"
                               className="checkboxfill"
                               disabled={mapZoomSize <= equipmentLayer.aggregateZoomThreshold && equipmentLayer.equipmentType === 'point'}
-                              checked={equipmentLayer.subtypes[0]}
+                              checked={equipmentLayer.subtypes[0] ? equipmentLayer.subtypes[0] : ''}
                               onClick={() => updateLayerVisibility('equipments', equipmentLayer, !equipmentLayer.subtypes[0])}
                             />
                           </div>
@@ -368,7 +372,7 @@ const NetworkEquipmentPanel = (props) => {
                                 type="checkbox"
                                 className="checkboxfill"
                                 disabled={mapZoomSize <= equipmentLayer.aggregateZoomThreshold && equipmentLayer.equipmentType === 'point'}
-                                checked={equipmentLayer.subtypes[subtypeLayer.id]}
+                                checked={equipmentLayer.subtypes[subtypeLayer.id] ? equipmentLayer.subtypes[subtypeLayer.id] : ''}
                                 onClick={() => setNetworkEquipmentSubtypeVisibility('equipments', equipmentLayer, subtypeLayer.id, !equipmentLayer.subtypes[subtypeLayer.id])}
                               />
                             </div>

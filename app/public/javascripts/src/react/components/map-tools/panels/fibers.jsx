@@ -438,6 +438,7 @@ const getCablesArray = createSelector([getAllNetworkEquipmentLayers], (networkEq
       cablesArray.push(networkEquipmentLayers.cables[key]),
     )
   }
+  cablesArray.sort( (a,b) => a.listIndex - b.listIndex )
   return cablesArray
 })
 
