@@ -102,16 +102,16 @@ const MapDisplayTools = ({ mapRef }) => {
   const [mapToolState, dispatch] = useReducer(mapToolReducer, mapToolIntialState)
 
   const { tools : { available_tools } } = mapToolState
-
+  // TODO: a lot of repeat code with network.jsx 
   const globalMethods = {
     MapToolActions,
     isMapToolVisible: (visible, disabled, toolName) =>
       Boolean(visible.indexOf(toolName) !== -1 && isMapToolEnabled(disabled, toolName)),
     isMapToolExpanded: (collapsed, toolName) => !Boolean(collapsed[toolName]),
-    objectKeyReplace: (obj, searchText, replaceText) => {
+    objectKeyReplace: (obj, searchText, replaceText) => { // TODO: this should probably be a global util, its not context dependent; it should never change
       Object.keys(obj).forEach((key) => {
         if (typeof obj[key] === 'string') {
-          obj[key] = obj[key].replace(searchText, replaceText)
+          obj[key] = obj[key].replaceAll(searchText, replaceText)
         }
       })
     },
