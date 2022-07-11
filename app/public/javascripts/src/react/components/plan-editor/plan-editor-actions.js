@@ -1527,9 +1527,12 @@ function parseRecalcEvents (recalcData) {
   // this needs to be redone and I think we should make a sealed subnet manager
   // that will manage the subnetFeatures list with changes to a subnet (deleting children etc)
   return async(dispatch, getState) => {
-    const { subnets: cachedSubnets, subnetFeatures } = getState().planEditor
+    const state = getState()
+    const { subnets: cachedSubnets, subnetFeatures, drafts } = state.planEditor
     let newSubnetFeatures = klona(subnetFeatures)
+    let clonedDrafts = klona(drafts)
     let updatedSubnets = {}
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
 
     // NOTE: Technically this is a workaround for a bug that was exposed in service
     // when we switched APIs from this commit:
@@ -1553,7 +1556,7 @@ function parseRecalcEvents (recalcData) {
 
     // need to recapture state because we've altered it w/ `addSubnets`
     const { planEditor: { subnets } } = getState()
-    recalcData.subnets.forEach(subnetRecalc => {
+    recalcData.subnets.forEach(async (subnetRecalc) => {
       let subnetId = subnetRecalc.feature.objectId
       // TODO: looks like this needs to be rewritten 
       if (subnets[subnetId]) {
@@ -1597,6 +1600,15 @@ function parseRecalcEvents (recalcData) {
           }
         })
         updatedSubnets[subnetId] = subnetCopy
+
+        // update draft fault tree
+        const updateFaultTreeUrl = `/service/plan-transaction/${transactionId}/subnet/${subnetId}?selectionTypes=FAULT_TREE`
+        try {
+          const faultTreeCount = await AroHttp.get(updateFaultTreeUrl)
+          clonedDrafts[subnetId].faultTreeSummary = faultTreeCount.data.faultTree.faultTreeSummary
+        } catch (e) {
+          handleError(e)
+        }
       }
     })
 
@@ -1608,6 +1620,10 @@ function parseRecalcEvents (recalcData) {
       dispatch({
         type: Actions.PLAN_EDITOR_ADD_SUBNETS,
         payload: updatedSubnets,
+      })
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_DRAFTS,
+        payload: clonedDrafts
       })
     })
   }
