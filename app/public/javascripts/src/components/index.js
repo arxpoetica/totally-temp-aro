@@ -9,7 +9,7 @@ import NetworkPlan from '../react/components/sidebar/network-plan.jsx'
 import MapViewToggle from '../react/components/map/map-view-toggle.jsx'
 import MapSelectorPlanTarget from '../react/components/map/map-selector-plan-target.jsx'
 import MapSelectorExportLocations from '../react/components/map/map-selector-export-locations.jsx'
-import FrontierFooter from '../react/components/footer/frontier-footer.jsx'
+import CustomFooter from '../react/components/footer/custom-footer.jsx'
 import ServiceLayerEditor from '../react/components/sidebar/view/service-layer-editor.jsx'
 import LocationEditor from '../react/components/sidebar/view/location-editor.jsx'
 import EquipmentDetail from '../react/components/sidebar/view/equipment-info/equipment-detail.jsx'
@@ -70,39 +70,22 @@ import FusionEditor from '../react/components/resource-manager/fusion-editor.jsx
 import NetworkArchitectureEditor from '../react/components/resource-manager/network-architecture-editor.jsx'
 import ToolBox from '../react/components/tool/tool-box.jsx'
 import UINotifications from '../react/components/notification/ui-notifications.jsx'
+import MapDisplayTools from '../react/components/map-tools/map-display-tools.jsx'
 
-import boundaries from './views/boundaries'
-import locations from './views/locations'
-import networkEquipment from './views/network-equipment'
-import copper from './views/copper'
-import cables from './views/cables'
-import conduits from './views/conduits'
-import fullScreenContainer from './full-screen/full-screen-container'
-import aroPanel from './common/aro-panel'
 import contextMenu from './common/context-menu/context-menu'
 import tile from './tiles/tile'
-
 import utils from './common/utilities'
-
 import state from '../models/state'
 import rxState from '../react/common/rxState'
-
 import tileDataService from '../components/tiles/tile-data-service'
-
 import reduxConfig from '../redux-config'
 
-app.component('boundaries', boundaries)
-  .component('locations', locations)
-  .component('networkEquipment', networkEquipment)
-  .component('cables', cables)
-  .component('copper', copper)
-  .component('conduits', conduits)
-  .component('fullScreenContainer', fullScreenContainer)
-  .component('aroPanel', aroPanel)
+app
   .component('contextMenu', contextMenu)
   .component('tile', tile)
 
 // ReactJS components
+  .component('rMapDisplayTools', react2angular(MapDisplayTools))
   .component('rMapSplit', react2angular(MapSplit))
   .component('rViewMode', react2angular(ViewMode))
   .component('rDisplayModeButtons', react2angular(DisplayModeButtons))
@@ -110,7 +93,7 @@ app.component('boundaries', boundaries)
   .component('rMapViewToggle', react2angular(MapViewToggle))
   .component('rMapSelectorPlanTarget', react2angular(MapSelectorPlanTarget))
   .component('rMapSelectorExportLocations', react2angular(MapSelectorExportLocations))
-  .component('rFrontierFooter', react2angular(FrontierFooter))
+  .component('rCustomFooter', react2angular(CustomFooter))
   .component('rServiceLayerEditor', react2angular(ServiceLayerEditor))
   .component('rLocationEditor', react2angular(LocationEditor))
   .component('rEquipmentDetail', react2angular(EquipmentDetail))

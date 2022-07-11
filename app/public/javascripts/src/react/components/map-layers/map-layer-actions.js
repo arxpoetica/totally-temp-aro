@@ -14,7 +14,7 @@ function setLayerVisibility (layer, newVisibility) {
     const list = ['location', 'constructionSite', 'boundary']
     list.forEach(key => {
       const layers = state[key]
-      layers.forEach((stateLayer, index) => {
+      layers.forEach((stateLayer) => {
         if (stateLayer.key === layer.key && stateLayer.uiLayerId === layer.uiLayerId) {
           layerType = key
         }
@@ -45,8 +45,13 @@ function setLayerVisibility (layer, newVisibility) {
         dispatch({
           type: Actions.NETWORK_OPTIMIZATION_SET_LOCATION_TYPE,
           payload: {
-            locationType: layer.plannerKey, // ToDo: layer.key,
-            isIncluded: newVisibility
+            // TODO: potentially rewrite logic to use `layer.key`?
+            // this is an older comment (from Brian?) that I've put back in place
+            // as well as putting `layer.plannerKey` back too.
+            // This was broken with the Map Tools React migration in this commit:
+            // https://github.com/avco-aro/aro-app/pull/703/commits/1e5b106dee2c419330f57499f2ee6dfc603ec856#diff-296befdaf4359d3a66c6e6edfd9dad283b5fe6365e7988e432d9b1ef714b6199R48
+            locationType: layer.plannerKey,
+            isIncluded: newVisibility,
           }
         })
       }
@@ -169,7 +174,6 @@ function setBoundaryLayers (boundaryLayers) {
           layer.categories[group.category.id] = group.category
         }
 
-        layer.selectedCategory = null
         return layer
       })
 
@@ -305,6 +309,20 @@ function setActiveMapLayers (activeMapLayers) {
   }
 }
 
+function setAngularMapLayerSubject (mapLayers) {
+  return {
+    type: Actions.LAYERS_SET_ANGULAR_MAP_LAYER_SUBSCRIBER,
+    payload: mapLayers
+  }
+}
+
+function setMapReadyPromise (mapReadyPromise) {
+  return {
+    type: Actions.LAYERS_SET_MAP_READY_PROMISE,
+    payload: mapReadyPromise
+  }
+}
+
 export default {
   setLayerVisibility,
   setNetworkEquipmentLayerVisibility,
@@ -331,4 +349,6 @@ export default {
   setEdgeConstructionTypeVisibility,
   loadEdgeConstructionTypeIds,
   setActiveMapLayers,
+  setAngularMapLayerSubject,
+  setMapReadyPromise
 }

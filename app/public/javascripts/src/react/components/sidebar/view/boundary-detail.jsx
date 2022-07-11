@@ -317,7 +317,7 @@ export const BoundaryDetail = (props) => {
                 <div key={index}>
                   {tag.layerCatDescription} :
                   <div
-                    classname="outlineLegendIcon"
+                    className="outlineLegendIcon"
                     style={{ borderColor: `${tag.tagInfo.colourHash}`, backgroundColor: `${tag.tagInfo.colourHash}33` }}
                   />
                     {tag.tagInfo.description}

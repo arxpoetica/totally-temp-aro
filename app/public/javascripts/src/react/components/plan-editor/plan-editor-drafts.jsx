@@ -81,15 +81,17 @@ const PlanEditorDrafts = props => {
     allEquipment = allEquipment.concat(draft.equipment)
   })
 
+  let keyId = 0 // guard against react ID warning that can cause an infinite loop
+
   return <>
     {draftsArray.map(draft => {
       const { subnetId, subnetBoundary, nodeSynced } = draft
       const options = { strokeOpacity: nodeSynced ? 1 : 0.5 }
-
+      keyId++
       if (selectedSubnetId !== subnetId) { // do NOT show selected boundary, it's editable and handled elsewhere
         return (
           <Boundary
-            key={subnetId}
+            key={`${subnetId}_${keyId}`}
             id={subnetId}
             polygon={subnetBoundary.polygon}
             options={options}
@@ -104,6 +106,7 @@ const PlanEditorDrafts = props => {
     {allEquipment.map(node => {
       const { id, point, networkNodeType } = node
       const nodeSynced = drafts[id] && drafts[id].nodeSynced
+      keyId++
       if (
         nodeSynced
         && selectedSubnetId !== id
@@ -112,7 +115,7 @@ const PlanEditorDrafts = props => {
       ) {
         return (
           <EquipmentNode
-            key={id}
+            key={`${id}_${keyId}`}
             id={id}
             point={point}
             iconUrl={equipments[networkNodeType].iconUrl}
