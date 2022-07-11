@@ -70,25 +70,17 @@ import FusionEditor from '../react/components/resource-manager/fusion-editor.jsx
 import NetworkArchitectureEditor from '../react/components/resource-manager/network-architecture-editor.jsx'
 import ToolBox from '../react/components/tool/tool-box.jsx'
 import UINotifications from '../react/components/notification/ui-notifications.jsx'
-
 import MapDisplayTools from '../react/components/map-tools/map-display-tools.jsx'
-import fullScreenContainer from './full-screen/full-screen-container'
-import aroPanel from './common/aro-panel'
+
 import contextMenu from './common/context-menu/context-menu'
 import tile from './tiles/tile'
-
 import utils from './common/utilities'
-
 import state from '../models/state'
 import rxState from '../react/common/rxState'
-
 import tileDataService from '../components/tiles/tile-data-service'
-
 import reduxConfig from '../redux-config'
 
 app
-  .component('fullScreenContainer', fullScreenContainer)
-  .component('aroPanel', aroPanel)
   .component('contextMenu', contextMenu)
   .component('tile', tile)
 
