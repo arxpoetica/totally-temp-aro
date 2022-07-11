@@ -1537,11 +1537,23 @@ function parseRecalcEvents (recalcData) {
   // this needs to be redone and I think we should make a sealed subnet manager
   // that will manage the subnetFeatures list with changes to a subnet (deleting children etc)
   return async(dispatch, getState) => {
-    const { subnetFeatures } = getState().planEditor
+    const { subnets: cachedSubnets, subnetFeatures } = getState().planEditor
     let newSubnetFeatures = klona(subnetFeatures)
     let updatedSubnets = {}
 
-    const recalcedSubnetIds = [...new Set(recalcData.subnets.map(subnet => subnet.feature.objectId))]
+    // NOTE: Technically this is a workaround for a bug that was exposed in service
+    // when we switched APIs from this commit:
+    // https://github.com/avco-aro/aro-app/commit/09b50a532c3a778d3571cf76d664379f56c7586c
+    // This workaround solves it without changing service.
+    // Just checking the cache so we don't call recalc Object IDs that should be removed
+    // on the recalc data returned.
+    let recalcedSubnetIds = recalcData.subnets
+      .map(subnet => {
+        const subnetId = subnet.feature.objectId
+        return cachedSubnets[subnetId] ? subnetId : false
+      })
+      .filter(Boolean)
+    recalcedSubnetIds = [...new Set(recalcedSubnetIds)]
     // TODO: ??? --->
     // this may have some redundancy in it-- we're only telling the cache to
     // (sadly) clear because we need to reload locations that are in or our of a modified
