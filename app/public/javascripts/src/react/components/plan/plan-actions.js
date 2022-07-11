@@ -13,6 +13,7 @@ import ToolBarActions from '../header/tool-bar-actions.js'
 import AroHttp from '../../common/aro-http'
 import fetch from 'cross-fetch'
 import { handleError } from '../../common/notifications'
+import RoicReportsActions from '../sidebar/analysis/roic-reports/roic-reports-actions'
 
 function setActivePlanState (planState) {
   return dispatch => {
@@ -44,10 +45,12 @@ function setActivePlanErrors() {
         data.forEach(error => {
           activePlanErrors[error.errorCategory][error.serviceAreaCode] = error.errorMessage
         })
-
-        dispatch({
-          type: Actions.PLAN_SET_ACTIVE_PLAN_ERRORS,
-          payload: activePlanErrors,
+        batch(() => {
+          dispatch({
+            type: Actions.PLAN_SET_ACTIVE_PLAN_ERRORS,
+            payload: activePlanErrors,
+          })
+          dispatch(RoicReportsActions.loadROICResultsForPlan(activePlan.id))
         })
       })
   }

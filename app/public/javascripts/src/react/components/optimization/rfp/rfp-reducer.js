@@ -29,7 +29,8 @@ const defaultState = {
   planListOffset: 0,
   planListLimit: 10,
   progress: 0,
-  reportsBeingDownloaded: new Set() // A set of URLs that are being downloaded (the server can take time to generate reports)
+  reportsBeingDownloaded: new Set(), // A set of URLs that are being downloaded (the server can take time to generate reports)
+  showFullScreenContainer: false,
 }
 
 function clearState () {
@@ -219,6 +220,9 @@ function rfpReducer (state = defaultState, action) {
     
     case Actions.RFP_SET_OPTIMIZATION_PROGRESS_PERCENT:
       return setOptimizationProgressPercent(state, action.payload)
+
+    case Actions.RFP_FULL_SCREEN_SHOW_HIDE_CONTAINER:
+      return { ...state, showFullScreenContainer: action.payload }
 
     default:
       return state

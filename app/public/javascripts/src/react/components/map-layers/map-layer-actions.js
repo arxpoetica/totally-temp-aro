@@ -45,8 +45,13 @@ function setLayerVisibility (layer, newVisibility) {
         dispatch({
           type: Actions.NETWORK_OPTIMIZATION_SET_LOCATION_TYPE,
           payload: {
-            locationType: layer.key, // ToDo: layer.key,
-            isIncluded: newVisibility
+            // TODO: potentially rewrite logic to use `layer.key`?
+            // this is an older comment (from Brian?) that I've put back in place
+            // as well as putting `layer.plannerKey` back too.
+            // This was broken with the Map Tools React migration in this commit:
+            // https://github.com/avco-aro/aro-app/pull/703/commits/1e5b106dee2c419330f57499f2ee6dfc603ec856#diff-296befdaf4359d3a66c6e6edfd9dad283b5fe6365e7988e432d9b1ef714b6199R48
+            locationType: layer.plannerKey,
+            isIncluded: newVisibility,
           }
         })
       }
