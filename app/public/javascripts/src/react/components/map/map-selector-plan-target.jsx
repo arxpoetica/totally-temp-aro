@@ -52,7 +52,7 @@ const MapSelectorPlanTarget = (props) => {
   const prevMapFeatures = usePrevious(mapFeatures)
   useEffect(() => {
     if (prevMapFeatures && !dequal(prevMapFeatures, mapFeatures)) {
-      addOrRemoveSelection(mapFeatures.locations || [], mapHitFeatures.LOCATIONS, 'location_id')
+      addOrRemoveSelection(mapFeatures.locations || [], mapHitFeatures.LOCATIONS, 'object_id')
       addOrRemoveSelection(mapFeatures.serviceAreas || [], mapHitFeatures.SERVICE_AREAS, 'id')
       addOrRemoveSelection(mapFeatures.analysisAreas || [], mapHitFeatures.ANALYSIS_AREAS, 'id')
     }
@@ -63,10 +63,10 @@ const MapSelectorPlanTarget = (props) => {
     const idsToAdd = new Set()
     const idsToRemove = new Set()
     entities.forEach((entity) => {
-      if (planTargets[planTargetKey].has(+entity[entityIdKey])) {
-        idsToRemove.add(+entity[entityIdKey])
+      if (planTargets[planTargetKey].has(entity[entityIdKey])) {
+        idsToRemove.add(entity[entityIdKey])
       } else {
-        idsToAdd.add(+entity[entityIdKey])
+        idsToAdd.add(entity[entityIdKey])
       }
     })
     if (idsToAdd.size) { addPlanTargets(planId, { [planTargetKey]: idsToAdd }) }

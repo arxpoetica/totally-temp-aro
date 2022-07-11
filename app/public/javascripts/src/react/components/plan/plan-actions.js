@@ -11,6 +11,7 @@ import NetworkOptimizationActions from '../optimization/network-optimization/net
 import UserActions from '../user/user-actions'
 import ToolBarActions from '../header/tool-bar-actions.js'
 import AroHttp from '../../common/aro-http'
+import fetch from 'cross-fetch'
 import { handleError } from '../../common/notifications'
 import RoicReportsActions from '../sidebar/analysis/roic-reports/roic-reports-actions'
 
@@ -693,6 +694,51 @@ function editActivePlan (plan) {
   }
 }
 
+// NOT an action, this needs to move elsewhere #182441351
+function exportPlan (userId, planId, filename) {
+  let payload = {
+    "inlcudeLinkedResources": true,
+    "planIds": [planId],
+    "projectIds": [],
+    "resourceIds": [],
+  }
+  AroHttp.post(`/service/v1/export-svc/export-plan-data.zip?user_id=${userId}`, payload, true)
+  .then(rawResult => {
+    saveAs(new Blob([rawResult]), filename)
+  })
+  .catch(error => {
+    handleError(error)
+  })
+}
+
+// only sort of an action, this needs to move elsewhere #182441351
+function importPlan (userId, file) {
+  return (dispatch) => {
+    if (!file) return Promise.resolve()
+    var formData = new FormData()
+    formData.append('file', file)
+    const url = `/uploadservice/v1/export-svc/import-plan-data?user_id=${userId}&as_new=true`
+    dispatch({
+      type: Actions.PLAN_SET_UPLOAD_NAME,
+      payload: file.name,
+    })
+    AroHttp.postRaw(url, formData)
+    .then(response => {
+      dispatch({
+        type: Actions.PLAN_SET_UPLOAD_NAME,
+        payload: null,
+      })
+    })
+    .catch(error => {
+      handleError(error)
+      dispatch({
+        type: Actions.PLAN_SET_UPLOAD_NAME,
+        payload: null,
+      })
+    })
+  }
+}
+
 export default {
   setActivePlan,
   setActivePlanState,
@@ -720,5 +766,8 @@ export default {
   deletePlan,
   getOrCreateEphemeralPlan,
   editActivePlan,
-  setActivePlanErrors
+  setActivePlanErrors,
+
+  exportPlan, // TODO: move this #182441351
+  importPlan, // TODO: move this #182441351
 }

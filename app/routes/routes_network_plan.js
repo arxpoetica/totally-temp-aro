@@ -194,7 +194,7 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  // Get addresses for the specified locations
+  // Get addresses for the specified locations from table aro.location_entity
   api.post('/network_plan/targets/addresses', (request, response, next) => {
     var locationIds = request.body.locationIds
     models.NetworkPlan.getTargetsAddresses(locationIds)
