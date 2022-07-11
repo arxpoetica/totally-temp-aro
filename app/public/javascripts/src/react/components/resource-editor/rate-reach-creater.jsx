@@ -20,8 +20,8 @@ export class RateReachManager extends Component {
   }
 
   componentDidMount () {
-    if (this.props.selectedResourceForClone && this.props.selectedResourceForClone.id) {
-      this.props.reloadRateReachManagerConfiguration(this.props.selectedResourceForClone.id, this.props.loggedInUser)
+    if (this.props.cloneManager && this.props.cloneManager.id) {
+      this.props.reloadRateReachManagerConfiguration(this.props.cloneManager.id, this.props.loggedInUser)
     }
     this.props.setModalTitle('Create Rate Reach Manager')
   }
@@ -45,11 +45,11 @@ export class RateReachManager extends Component {
           <div style={{flex: '1 1 auto'}}>
             <form className="form-horizontal form-rr-creator">
               {/* The source rate reach manager used when cloning */}
-              {this.props.selectedResourceForClone &&
+              {this.props.cloneManager &&
                 <div className="form-group row">
                   <label className="col-sm-4 control-label">Rate Reach Manager to clone</label>
                   <div className="col-sm-8">
-                    <input className="form-control" disabled value={this.props.selectedResourceForClone.name}/>
+                    <input className="form-control" disabled value={this.props.cloneManager.name}/>
                   </div>
                 </div>
               }
@@ -76,7 +76,7 @@ export class RateReachManager extends Component {
               <div className="form-group row">
                 <label className="col-sm-4 control-label">Category Type</label>
                 <div className="col-sm-8">
-                  <select id="cboCategoryTypes" disabled={this.props.selectedResourceForClone}  className="form-control" name="category" 
+                  <select id="cboCategoryTypes" disabled={this.props.cloneManager}  className="form-control" name="category" 
                     onChange={(e)=>this.handleChange(e)} 
                     value={this.props.rateReachManagerConfigs && this.props.rateReachManagerConfigs.rateReachConfig ? this.props.rateReachManagerConfigs.rateReachConfig.categoryType : undefined}> 
                     {this.categoryTypes.map(item => <option value={item.id} key={item.id}>{item.description}</option>)}
@@ -114,9 +114,9 @@ export class RateReachManager extends Component {
   handleCreateRateReachManager(){
     var rateReachManager = { ...this.state.rateReachManager }
     // rateReachManager.category = this.props.rateReachManagerConfigs.rateReachConfig.categoryType
-    let selectedResourceForClone = this.props.selectedResourceForClone;
+    let cloneManager = this.props.cloneManager;
     let loggedInUser = this.props.loggedInUser;
-    this.props.createRateReachManager(rateReachManager, selectedResourceForClone, loggedInUser);
+    this.props.createRateReachManager(rateReachManager, cloneManager, loggedInUser);
   }
 }
 
@@ -128,7 +128,7 @@ export class RateReachManager extends Component {
 	const mapDispatchToProps = (dispatch) => ({
 		getResourceTypes: () => dispatch(ResourceActions.getResourceTypes()),
 		searchManagers: (searchText) => dispatch(ResourceActions.searchManagers(searchText)),
-    createRateReachManager: (rateReachManager, selectedResourceForClone, loggedInUser) => dispatch(ResourceActions.createRateReachManager(rateReachManager, selectedResourceForClone, loggedInUser)),
+    createRateReachManager: (rateReachManager, cloneManager, loggedInUser) => dispatch(ResourceActions.createRateReachManager(rateReachManager, cloneManager, loggedInUser)),
     setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
     setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title)),
     reloadRateReachManagerConfiguration: (rateReachManagerId, loggedInUser) => dispatch(ResourceActions.reloadRateReachManagerConfiguration(rateReachManagerId, loggedInUser))
