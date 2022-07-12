@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import AroHttp from '../../common/aro-http'
 import ToolBarActions from '../header/tool-bar-actions'
-import TopProgressBar from './top-progress-bar.jsx'
+import OptimizationProgressBar from './optimization-progress-bar.jsx'
 import { StateIcon } from '../common/state-icon.jsx'
 import { displayModes } from './constants'
 
@@ -117,7 +117,7 @@ const NetworkPlan = (props) => {
           Modified {displayTimestamp(updatedDate)}
         </div>
       }
-      {planInProgress && <TopProgressBar /> }
+      {planInProgress && <OptimizationProgressBar/>}
 
       <style jsx>{`
         .network-plan {

@@ -19,8 +19,8 @@ const defaultState = {
   isEnteringTransaction: false,
   isCommittingTransaction: false,
   draftsState: null,
+  draftProgressTuple: [0, 1], // -> [count loaded, total count to load]
   drafts: {},
-  requestedSubnetIds: [],
   subnets: {},
   subnetFeatures: {},
   selectedSubnetId: null, // need to rename this now that a terminal can be selected, lets do "activeFeature" // unselected this should be null not ''
@@ -179,20 +179,6 @@ function mergeDraftProps(state, draftProps) {
   return { ...state, drafts: { ...state.drafts, ...mergedDrafts } }
 }
 
-function addRequestedSubnetIds (state, subnetIds) {
-  let updatedRequestedSubnetIds = [ ...new Set(state.requestedSubnetIds.concat(subnetIds))]
-  return { ...state,
-    requestedSubnetIds: updatedRequestedSubnetIds,
-  }
-}
-
-function removeRequestedSubnetIds (state, subnetIds) {
-  let updatedRequestedSubnetIds = state.requestedSubnetIds.filter(subnetId => !subnetIds.includes(subnetId))
-  return { ...state,
-    requestedSubnetIds: updatedRequestedSubnetIds,
-  }
-}
-
 function updateSubnetBoundary (state, subnetId, geometry) {
   if (!state.subnets[subnetId]) return state
   
@@ -227,10 +213,6 @@ function removeSubnetFeatures (state, featureIds) {
       state.subnetFeatures[featureId].feature.networkNodeType === 'central_office'
       || state.subnetFeatures[featureId].feature.networkNodeType === 'fiber_distribution_hub'
     ) {
-      // removes each of the children from subnet features
-      updatedSubnets[featureId].children.forEach(child => {
-        delete updatedSubnetFeatures[child]
-      })
       // removes from subnets and subnet features
       delete updatedSubnets[featureId]
       delete updatedSubnetFeatures[featureId]
@@ -239,6 +221,7 @@ function removeSubnetFeatures (state, featureIds) {
       const subnetId = updatedSubnetFeatures[featureId].subnetId
       delete updatedSubnetFeatures[featureId]
       if (subnetId) {
+        updatedSubnets[subnetId].children = updatedSubnets[subnetId].children || []
         updatedSubnets[subnetId].children = updatedSubnets[subnetId].children.filter(childId => childId !== featureId)
       }
     }
@@ -358,6 +341,9 @@ function planEditorReducer (state = defaultState, { type, payload }) {
     case Actions.PLAN_EDITOR_SET_DRAFTS_STATE:
       return { ...state, draftsState: payload }
 
+    case Actions.PLAN_EDITOR_SET_DRAFTS_PROGRESS_TUPLE:
+      return { ...state, draftProgressTuple: payload }
+
     case Actions.PLAN_EDITOR_SET_DRAFTS: {
       return { ...state, drafts: { ...state.drafts, ...payload } }
     }
@@ -378,12 +364,6 @@ function planEditorReducer (state = defaultState, { type, payload }) {
     case Actions.PLAN_EDITOR_MERGE_DRAFT_PROPS: {
       return mergeDraftProps(state, payload)
     }
-
-    case Actions.PLAN_EDITOR_ADD_REQUESTED_SUBNET_IDS:
-      return addRequestedSubnetIds(state, payload)
-
-    case Actions.PLAN_EDITOR_REMOVE_REQUESTED_SUBNET_IDS:
-      return removeRequestedSubnetIds(state, payload)
 
     case Actions.PLAN_EDITOR_ADD_SUBNETS:
       return { ...state, subnets: { ...state.subnets, ...payload } }

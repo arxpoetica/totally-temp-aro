@@ -81,16 +81,6 @@ export const constants = Object.freeze({
 
 })
 
-const { DRAFT_STATES } = constants
-export const isDraftLoadingOrLoaded = draftsState => {
-  return (
-    draftsState === DRAFT_STATES.START_SUBNET_TREE
-    || draftsState === DRAFT_STATES.SUBNET_NODE_SYNCED
-    || draftsState === DRAFT_STATES.END_SUBNET_TREE
-    || draftsState === DRAFT_STATES.END_INITIALIZATION
-  )
-}
-
 export const getIconUrl = (feature, { equipments, constructionAreas, locationAlerts, ARO_CLIENT }) => {
   const { objectId, networkNodeType, dataType } = feature
   let { iconUrl } = networkNodeType ? equipments[networkNodeType] : constructionAreas[dataType]

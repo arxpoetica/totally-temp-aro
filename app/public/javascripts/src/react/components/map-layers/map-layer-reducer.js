@@ -30,6 +30,8 @@ const defaultState = {
       planned: false
     }
   },
+  angularMapLayers: {},
+  mapReadyPromise: {},
   showSegmentsByTag: false, // I want to rename this 
   edgeConstructionTypes: { // todo change the indecies if edgeConstructionTypes to the ID 
     'estimated': {
@@ -333,6 +335,13 @@ function setEdgeConstructionTypeIds (state, apiTypes) {
   return { ...state, edgeConstructionTypes: newEdgeConstructionTypes}
 }
 
+function setAngularMapLayerSubject(state, mapLayerSubject) {
+  return {
+    ...state,
+    angularMapLayers: mapLayerSubject
+  }
+}
+
 function mapLayersReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.LAYERS_SET_LOCATION:
@@ -416,8 +425,14 @@ function mapLayersReducer (state = defaultState, action) {
     case Actions.LAYERS_SET_EDGE_CONSTRUCTION_TYPE_IDS:
       return setEdgeConstructionTypeIds(state, action.payload)
 
+    case Actions.LAYERS_SET_ANGULAR_MAP_LAYER_SUBSCRIBER:
+      return setAngularMapLayerSubject(state, action.payload)
+
     case Actions.LAYERS_SET_ACTIVE_MAP_LAYERS:
       return { ...state, activeMapLayers: action.payload }
+
+    case Actions.LAYERS_SET_MAP_READY_PROMISE:
+      return { ...state, mapReadyPromise: action.payload }
 
     default:
       return state

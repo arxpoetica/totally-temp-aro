@@ -1,28 +1,4 @@
-
-<locations></locations>
-
 <construction-sites></construction-sites>
-
-<boundaries></boundaries>
-
-<div class="map-tool-wrapper" ng-controller="fiber_plant_controller">
-  <div ng-show="map_tools.is_visible('fiber_plant')" class="card map-tool">
-    <div class="card-header map-tools-card-header bg-primary text-white">
-      <span class="float-right aro-pointer" ng-show="map_tools.is_expanded('fiber_plant')" ng-click="map_tools.collapse('fiber_plant')">
-        <span style="color:white" class="fa fa-chevron-up"></span>
-      </span>
-      <span class="float-right aro-pointer" ng-show="!map_tools.is_expanded('fiber_plant')" ng-click="map_tools.expand('fiber_plant')">
-        <span style="color:white" class="fa fa-chevron-down"></span>
-      </span>
-      <h5 class="map-tool-title-text">Competition</h5>
-    </div>
-    <div class="card-body map-tools-card-body" ng-show="map_tools.is_expanded('fiber_plant')">
-      <% include controller_fiber_plant.html %>
-    </div>
-  </div>
-</div>
-
-<network-equipment></network-equipment>
 
 <cables></cables>
 
@@ -31,20 +7,5 @@
 <conduits></conduits>
 
 <div class="map-tools-buttons-container">
-  <div ng-controller="map_tools_controller"
-    ng-class="{ 'map_tools_container': true, 'map-tools-vertical-center': state.configuration.perspective.mapTools.centerVertically }">
-    <div ng-repeat="tool in map_tools.available_tools">
-      <hr ng-if="tool.separator">
-      <p ng-show="!tool.separator && state.configuration.perspective.mapTools.isVisible[tool.id]">
-        <a class="btn btn-primary map-tools-button text-white" ng-attr-id="map_tools_toggle_{{tool.id}}"
-          ng-class="{'active': map_tools.is_visible(tool.id), 'disabled': (!map_tools.isEnabled(tool.id)) }"
-          ng-click="map_tools.toggle(tool)">
-          <span ng-attr-class="{{tool.icon}} map-tools-button-icon"></span>
-        </a>
-        <div ng-if="state.configuration.perspective.mapTools.isVisible[tool.id] && state.configuration.perspective.mapTools.showLabels" class="map_tool_label">
-          {{tool.name}}
-        </div>
-      </p>
-    </div>
-  </div>
+  <r-map-display-tools></r-map-display-tools>
 </div>
