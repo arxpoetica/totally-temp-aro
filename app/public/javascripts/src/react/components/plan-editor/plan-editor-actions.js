@@ -213,6 +213,15 @@ function subscribeToSocket() {
             break
           case DRAFT_STATES.END_SUBNET_TREE: break // no op
           case DRAFT_STATES.END_INITIALIZATION: break // no op
+          case DRAFT_STATES.SYNC_ROOT_LOCATIONS:
+            dispatch({
+              type: Actions.PLAN_EDITOR_SET_DRAFT_LOCATIONS,
+              payload: {
+                rootSubnetId: data.rootSubnetId,
+                rootLocations: data.rootLocations,
+              }
+            })
+            break
           case DRAFT_STATES.ERROR_SUBNET_TREE:
             message = `Type ${data.subnetNodeUpdateType} for SUBNET_DATA socket channel with `
             message += `user id ${userId}, transaction id ${planTransactionId}, `
@@ -291,6 +300,8 @@ function createFeature(feature) {
       if (isRingPlan && selectedSubnetId) {
         commandsBody.subnetId = selectedSubnetId
       }
+      // this can return a 500 if adding a CO to a blank plan 
+      // bug: #182578571 
       const updateResponse = await AroHttp.post(url, { commands: [commandsBody] })
       const { subnetUpdates, equipmentUpdates } = updateResponse.data
 
@@ -371,10 +382,10 @@ function createFeature(feature) {
       }
       let subnetDiffDict = {}
       subnetDiffDict[subnetId] = subnetCopy
+      if (Object.keys(newDraftProps).length && newDraftEquipment.length) {
+        dispatch({ type: Actions.PLAN_EDITOR_MERGE_DRAFT_PROPS, payload: newDraftProps })
+      }
       batch(async() => {
-        if (Object.keys(newDraftProps).length && newDraftEquipment.length) {
-          await dispatch({ type: Actions.PLAN_EDITOR_MERGE_DRAFT_PROPS, payload: newDraftProps })
-        }
         if (Object.keys(newFeatures).length) {
           dispatch({ type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES, payload: newFeatures })
         }
@@ -1256,7 +1267,6 @@ function addSubnets({ subnetIds = [], forceReload = false }) {
       let uncachedSubnetIds = subnetIds.filter(id => forceReload || !cachedSubnetIds.includes(id))
       // we have everything, no need to query service
       if (uncachedSubnetIds.length <= 0) {
-        // dispatch(setIsCalculatingSubnets(false))
         return subnetIds
       }
 
@@ -1266,7 +1276,9 @@ function addSubnets({ subnetIds = [], forceReload = false }) {
       // TODO: break this out into fiber actions
       for (const subnetId of uncachedSubnetIds) {
         const subnetUrl = `/service/plan-transaction/${transaction.id}/subnet/${subnetId}`
-        const { data: subnet } = await AroHttp.get(subnetUrl)
+        const response = await AroHttp.get(subnetUrl)
+        const subnet = response.data
+        // what happens if service doesn't return a subnet? Not sure that's possible here
         if (!subnet.parentSubnetId) {
           dispatch(getConsructionAreaByRoot(subnet))
           dispatch(getFiberAnnotations(subnetId))
@@ -1290,7 +1302,7 @@ function addSubnets({ subnetIds = [], forceReload = false }) {
 }
 
 function setSelectedSubnetId (selectedSubnetId) {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
 
     if (!selectedSubnetId) {
       dispatch({
@@ -1298,27 +1310,25 @@ function setSelectedSubnetId (selectedSubnetId) {
         payload: null,
       })
     } else {
-      batch(async() => {
-        try {
-          const { planEditor } = getState()
-          const { drafts } = planEditor
-          // only load a new subnet if you have a subnet selected
-          if (drafts[selectedSubnetId]) await dispatch(addSubnets({ subnetIds: [selectedSubnetId] }))
-          // otherwise it's just a piece of equipment
-          // so go ahead and pass the `selectedSubnetId` along...
-          dispatch({
-            type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
-            payload: selectedSubnetId,
-          })
-        } catch (error) {
-          handleError(error)
-          dispatch({
-            type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
-            payload: null,
-          })
-        }
-
-      })
+      const { planEditor } = getState()
+      const { drafts } = planEditor
+      // only load a new subnet if you have a subnet selected
+      try {
+        // only load a new subnet if you have a subnet selected
+        if (drafts[selectedSubnetId]) await dispatch(addSubnets({ subnetIds: [selectedSubnetId] }))
+        // otherwise it's just a piece of equipment
+        // so go ahead and pass the `selectedSubnetId` along...
+        dispatch({
+          type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
+          payload: selectedSubnetId,
+        })
+      } catch (error) {
+        handleError(error)
+        dispatch({
+          type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
+          payload: null,
+        })
+      }
     }
   }
 }
@@ -1527,11 +1537,26 @@ function parseRecalcEvents (recalcData) {
   // this needs to be redone and I think we should make a sealed subnet manager
   // that will manage the subnetFeatures list with changes to a subnet (deleting children etc)
   return async(dispatch, getState) => {
-    const { subnetFeatures } = getState().planEditor
+    const state = getState()
+    const { subnets: cachedSubnets, subnetFeatures, drafts } = state.planEditor
     let newSubnetFeatures = klona(subnetFeatures)
+    let clonedDrafts = klona(drafts)
     let updatedSubnets = {}
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
 
-    const recalcedSubnetIds = [...new Set(recalcData.subnets.map(subnet => subnet.feature.objectId))]
+    // NOTE: Technically this is a workaround for a bug that was exposed in service
+    // when we switched APIs from this commit:
+    // https://github.com/avco-aro/aro-app/commit/09b50a532c3a778d3571cf76d664379f56c7586c
+    // This workaround solves it without changing service.
+    // Just checking the cache so we don't call recalc Object IDs that should be removed
+    // on the recalc data returned.
+    let recalcedSubnetIds = recalcData.subnets
+      .map(subnet => {
+        const subnetId = subnet.feature.objectId
+        return cachedSubnets[subnetId] ? subnetId : false
+      })
+      .filter(Boolean)
+    recalcedSubnetIds = [...new Set(recalcedSubnetIds)]
     // TODO: ??? --->
     // this may have some redundancy in it-- we're only telling the cache to
     // (sadly) clear because we need to reload locations that are in or our of a modified
@@ -1541,7 +1566,7 @@ function parseRecalcEvents (recalcData) {
 
     // need to recapture state because we've altered it w/ `addSubnets`
     const { planEditor: { subnets } } = getState()
-    recalcData.subnets.forEach(subnetRecalc => {
+    recalcData.subnets.forEach(async (subnetRecalc) => {
       let subnetId = subnetRecalc.feature.objectId
       // TODO: looks like this needs to be rewritten 
       if (subnets[subnetId]) {
@@ -1585,6 +1610,15 @@ function parseRecalcEvents (recalcData) {
           }
         })
         updatedSubnets[subnetId] = subnetCopy
+
+        // update draft fault tree
+        const updateFaultTreeUrl = `/service/plan-transaction/${transactionId}/subnet/${subnetId}?selectionTypes=FAULT_TREE`
+        try {
+          const faultTreeCount = await AroHttp.get(updateFaultTreeUrl)
+          clonedDrafts[subnetId].faultTreeSummary = faultTreeCount.data.faultTree.faultTreeSummary
+        } catch (e) {
+          handleError(e)
+        }
       }
     })
 
@@ -1596,6 +1630,10 @@ function parseRecalcEvents (recalcData) {
       dispatch({
         type: Actions.PLAN_EDITOR_ADD_SUBNETS,
         payload: updatedSubnets,
+      })
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_DRAFTS,
+        payload: clonedDrafts
       })
     })
   }

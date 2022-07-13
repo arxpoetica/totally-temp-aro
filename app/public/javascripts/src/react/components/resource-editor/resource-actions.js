@@ -236,7 +236,7 @@ function getPriceBookStrategy () {
   }
 }
 
-function createPriceBook (priceBook, selectedResourceForClone) {
+function createPriceBook (priceBook, cloneManager) {
   // Create a new pricebook with the specified name and description
   let createdManagerId = null
   let sourcePriceBookId = null
@@ -249,7 +249,7 @@ function createPriceBook (priceBook, selectedResourceForClone) {
     })
     .then((result) => {
       createdManagerId = result.data.id
-      sourcePriceBookId = selectedResourceForClone.id
+      sourcePriceBookId = cloneManager.id
       // Return the assignments of either the 0th pricebook (if creating a new one) or the source pricebook (if cloning)
       if (sourcePriceBookId) {
         return AroHttp.get(`/service/v1/pricebook/${sourcePriceBookId}/assignment`)
@@ -562,9 +562,9 @@ function saveAssignmentsToServer (pristineAssignments, structuredPriceBookDefini
 
 //Rate-Reach_Manager
 
-function createRateReachManager (rateReachManager, selectedResourceForClone, loggedInUser) {
+function createRateReachManager (rateReachManager, cloneManager, loggedInUser) {
   // Create a new rate reach manager with the specified name and description
-  const sourceRateReachManagerId = selectedResourceForClone.id
+  const sourceRateReachManagerId = cloneManager.id
   let createUrl = `/service/rate-reach-matrix/resource`
   if (sourceRateReachManagerId) {
     createUrl += `?source_resource_manager=${sourceRateReachManagerId}`

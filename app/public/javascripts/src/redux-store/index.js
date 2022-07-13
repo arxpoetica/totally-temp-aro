@@ -16,7 +16,6 @@ import opReport from '../react/components/optimization/reports/reports-reducer'
 import rfp from '../react/components/optimization/rfp/rfp-reducer'
 import contextMenu from '../react/components/context-menu/reducer'
 import coverage from '../react/components/coverage/coverage-reducer'
-import fullScreen from '../react/components/full-screen/full-screen-reducer'
 import map from '../react/components/map/map-reducer'
 import mapLayers from '../react/components/map-layers/map-layer-reducer'
 import mapReports from '../react/components/map-reports/map-reports-reducer'
@@ -61,7 +60,6 @@ let reducer = combineReducers({
   contextMenu,
   coverage,
   etlTemplates,
-  fullScreen,
   map,
   mapLayers,
   mapReports,
