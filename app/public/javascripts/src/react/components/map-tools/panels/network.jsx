@@ -294,7 +294,7 @@ const NetworkEquipmentPanel = (props) => {
                 <input
                   type="checkbox"
                   className="checkboxfill layer-type-checkboxes"
-                  value={equipmentLayerTypeVisibility.existing}
+                  checked={equipmentLayerTypeVisibility.existing ? 'checked' : ''}
                   onChange={() => onUpdateTypeVisibility('equipment', 'existing', equipmentLayerTypeVisibility.existing)}
                 />
                 <span>&nbsp;Existing</span>
@@ -305,7 +305,7 @@ const NetworkEquipmentPanel = (props) => {
                 <input
                   type="checkbox"
                   className="checkboxfill layer-type-checkboxes"
-                  value={equipmentLayerTypeVisibility.planned}
+                  checked={equipmentLayerTypeVisibility.planned ? 'checked' : ''}
                   onChange={() => onUpdateTypeVisibility('equipment', 'planned', equipmentLayerTypeVisibility.planned)}
                 />
                 <span>&nbsp;Planned</span>
@@ -346,7 +346,7 @@ const NetworkEquipmentPanel = (props) => {
                               className="checkboxfill"
                               disabled={mapZoomSize <= equipmentLayer.aggregateZoomThreshold && equipmentLayer.equipmentType === 'point'}
                               checked={equipmentLayer.subtypes[0] ? equipmentLayer.subtypes[0] : ''}
-                              onClick={() => updateLayerVisibility('equipments', equipmentLayer, !equipmentLayer.subtypes[0])}
+                              onChange={() => updateLayerVisibility('equipments', equipmentLayer, !equipmentLayer.subtypes[0])}
                             />
                           </div>
                         </>
@@ -373,7 +373,7 @@ const NetworkEquipmentPanel = (props) => {
                                 className="checkboxfill"
                                 disabled={mapZoomSize <= equipmentLayer.aggregateZoomThreshold && equipmentLayer.equipmentType === 'point'}
                                 checked={equipmentLayer.subtypes[subtypeLayer.id] ? equipmentLayer.subtypes[subtypeLayer.id] : ''}
-                                onClick={() => setNetworkEquipmentSubtypeVisibility('equipments', equipmentLayer, subtypeLayer.id, !equipmentLayer.subtypes[subtypeLayer.id])}
+                                onChange={() => setNetworkEquipmentSubtypeVisibility('equipments', equipmentLayer, subtypeLayer.id, !equipmentLayer.subtypes[subtypeLayer.id])}
                               />
                             </div>
                           </div>
