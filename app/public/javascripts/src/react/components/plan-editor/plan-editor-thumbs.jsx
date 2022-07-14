@@ -64,13 +64,11 @@ const PlanEditorHeader = props => {
   }
 
   function totalCounts(id) {
-    console.log('hit')
     const isNumber = typeof locationCounts[id] === "number"
     const connectedLocations = isNumber
       ? locationCounts[id]
       : locationCounts[id].connected
     let countText = `Location connections: ${connectedLocations}`
-    console.log(countText, isNumber, connectedLocations)
     if (!isNumber) {
       countText += '\n'
       countText += `Locations in boundary: ${locationCounts[id].total}`
