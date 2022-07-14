@@ -211,7 +211,7 @@ const CopperPanel = (props) => {
                                 <input
                                   type="checkbox"
                                   className="checkboxfill"
-                                  checked={copperLayer.checked || false}
+                                  checked={copperLayer.checked ? 'checked' : ''}
                                   onChange={() =>
                                     updateLayerVisibility(
                                       'UNKNOWN',
