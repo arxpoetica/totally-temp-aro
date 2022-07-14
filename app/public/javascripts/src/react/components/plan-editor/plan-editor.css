@@ -135,7 +135,13 @@
 }
 .plan-editor-thumb img { margin: 0 12px 0 0; }
 .plan-editor-thumb h2 { margin: 0; }
-.plan-editor-thumb .household-connections { margin: 0; font-size: 16px; font-weight: 700; }
+.plan-editor-thumb .household-connections {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  white-space: pre-wrap;
+  margin-bottom: 4px;
+}
 .plan-editor-thumb .subinfo {
   display: grid;
   grid-auto-flow: column;
