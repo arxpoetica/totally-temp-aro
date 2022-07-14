@@ -426,7 +426,7 @@ export const LocationsPanel = (props) => {
                                   type="checkbox"
                                   className="checkboxfill"
                                   checked={rule.isChecked}
-                                  onClick={() =>
+                                  onChange={() =>
                                     setLocationFilterChecked(
                                       filterName,
                                       rule.ruleKey,
