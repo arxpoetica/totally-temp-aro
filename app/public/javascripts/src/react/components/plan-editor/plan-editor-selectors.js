@@ -361,9 +361,15 @@ const getLocationCounts = createSelector(
       // TODO: not a fan of hardcoding by type
       if (subnet && type === 'fiber_distribution_hub') {
         const locations = Object.values(subnet.subnetLocationsById)
-        locationCountsById[id] = locations
-          .filter(location => !!location.parentEquipmentId)
-          .length
+        locationCountsById[id] = { total: 0, connected: 0 }
+        locations.forEach(location => {
+          if(!!location.parentEquipmentId) {
+            locationCountsById[id].connected++
+          }
+
+          locationCountsById[id].total++
+        })
+
       } else if (subnet && type === 'dslam') {
         locationCountsById[id] = Object.keys(subnet.subnetLocationsById).length
       } else if ((type === 'fiber_distribution_terminal' || type === 'location_connector') && feature.feature.dropLinks) {
