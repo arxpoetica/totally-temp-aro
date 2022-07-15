@@ -597,7 +597,6 @@ function showContextMenuForLocations (featureIds, event) {
           if (state.planEditor.subnets[subnetId]
             && state.planEditor.subnets[subnetId].subnetLocationsById[id])
           {
-            console.log({subnetId, id})
             menuActions.push(new MenuItemAction('ADD', 'Assign to terminal', 'PlanEditorActions', 'assignLocation', id, selectedSubnetId))
           }
         }
