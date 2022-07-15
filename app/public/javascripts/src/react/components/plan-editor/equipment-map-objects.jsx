@@ -231,6 +231,7 @@ export class EquipmentMapObjects extends Component {
         path: [parentPt, { lat: latitude, lng: longitude }],
         strokeColor: '#84d496',
         strokeWeight: 1.5,
+        clickable: false,
       })
       this.droplinks[droplinkId].setMap(this.props.googleMaps)
     }
