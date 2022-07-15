@@ -11,17 +11,11 @@ import SocketManager from '../../common/socket-manager'
 import { batch } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import PlanEditorSelectors from './plan-editor-selectors'
-import { constants } from './shared'
+import { constants, validSubnetTypes, validLocationConnectionTypes } from './shared'
 import { displayModes } from '../sidebar/constants'
 const { DRAFT_STATES, BLOCKER, INCLUSION } = constants
 import { handleError } from '../../common/notifications'
 
-let validSubnetTypes = [
-  'central_office',
-  'fiber_distribution_hub',
-  'dslam',
-  'subnet_node',
-]
 
 function resumeOrCreateTransaction() {
   return async(dispatch, getState) => {
@@ -594,7 +588,7 @@ function showContextMenuForLocations (featureIds, event) {
     const selectedSubnetId = state.planEditor.selectedSubnetId
     if (featureIds.length > 0
       && state.planEditor.subnetFeatures[selectedSubnetId] 
-      && state.planEditor.subnetFeatures[selectedSubnetId].feature.dropLinks
+      && validLocationConnectionTypes.includes( state.planEditor.subnetFeatures[selectedSubnetId].feature.networkNodeType )
     ) {
       let subnetId = state.planEditor.subnetFeatures[selectedSubnetId].subnetId
       // we have locations AND the active feature has drop links
@@ -612,6 +606,7 @@ function showContextMenuForLocations (featureIds, event) {
           if (state.planEditor.subnets[subnetId]
             && state.planEditor.subnets[subnetId].subnetLocationsById[id])
           {
+            console.log({subnetId, id})
             menuActions.push(new MenuItemAction('ADD', 'Assign to terminal', 'PlanEditorActions', 'assignLocation', id, selectedSubnetId))
           }
         }
@@ -693,6 +688,7 @@ function _spliceLocationFromTerminal (state, locationId, terminalId) {
 }
 
 function unassignLocation (locationId, terminalId) {
+  // TODO: shouldn't need the terminal ID - we should unassign from what ever terminal the location is assigned to
   return (dispatch, getState) => {
     const state = getState()
     let subnetFeature = _spliceLocationFromTerminal(state, locationId, terminalId)
@@ -1711,6 +1707,7 @@ function parseSubnet (subnet) {
       feature.dropLinks.forEach(dropLink => {
         dropLink.locationLinks.forEach(locationLink => {
           if (!subnet.subnetLocationsById[locationLink.locationId]) {
+            // TODO: lets look at this again, I think drop links are listed in subnet locationsById but maybe not every location in that link?
             console.warn(`location ${locationLink.locationId} of feature ${feature.objectId} is not in the location list of subnet ${subnetId}`)
           } else {
             subnet.subnetLocationsById[locationLink.locationId].parentEquipmentId = feature.objectId

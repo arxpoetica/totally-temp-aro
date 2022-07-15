@@ -1,5 +1,5 @@
 import { createSelector } from 'reselect'
-import { constants } from './shared'
+import { constants, validLocationConnectionTypes } from './shared'
 const { ALERT_TYPES } = constants
 
 const getAllBoundaryLayers = state => state.mapLayers.boundary
@@ -142,7 +142,8 @@ const getSelectedSubnetLocations = createSelector(
       selectedSubnetLocations = selectedSubnet.subnetLocationsById
     } else if (subnetFeatures[selectedSubnetId]
       && subnetFeatures[selectedSubnetId].subnetId
-      && subnetFeatures[selectedSubnetId].feature.dropLinks
+      //&& subnetFeatures[selectedSubnetId].feature.dropLinks
+      && validLocationConnectionTypes.includes( subnetFeatures[selectedSubnetId].feature.networkNodeType )
     ) {
       let parentSubnetId = subnetFeatures[selectedSubnetId].subnetId
       subnetFeatures[selectedSubnetId].feature.dropLinks.forEach(dropLink => {
@@ -165,7 +166,8 @@ const getCursorLocations = createSelector(
       selectedSubnetLocations = selectedSubnet.subnetLocationsById
     } else if (subnetFeatures[selectedSubnetId]
       && subnetFeatures[selectedSubnetId].subnetId
-      && subnetFeatures[selectedSubnetId].feature.dropLinks
+      //&& subnetFeatures[selectedSubnetId].feature.dropLinks
+      && validLocationConnectionTypes.includes( subnetFeatures[selectedSubnetId].feature.networkNodeType )
     ) {
       let parentSubnetId = subnetFeatures[selectedSubnetId].subnetId
       if (subnets[parentSubnetId]) {
@@ -372,7 +374,11 @@ const getLocationCounts = createSelector(
 
       } else if (subnet && type === 'dslam') {
         locationCountsById[id] = Object.keys(subnet.subnetLocationsById).length
-      } else if ((type === 'fiber_distribution_terminal' || type === 'location_connector') && feature.feature.dropLinks) {
+      } else if (
+        (type === 'fiber_distribution_terminal' || type === 'location_connector') 
+        //&& validLocationConnectionTypes.includes( type )
+        && feature.feature.dropLinks
+      ) {
         locationCountsById[id] = feature.feature.dropLinks.length
       } else {
         const locationDistanceMap = subnet && subnet.fiber && subnet.fiber.locationDistanceMap
