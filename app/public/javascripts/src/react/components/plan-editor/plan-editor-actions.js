@@ -589,6 +589,9 @@ function showContextMenuForLocations (featureIds, event) {
         var menuActions = []
         if (selectedSubnetLocations[id]) {
           // this location is a part of the selected FDT
+          // this is an option if:
+          //  - child of selected node
+          //  or - (TODO: #182738669) selected node is the subnet node of the location AND the location is NOT abandoned 
           menuActions.push(new MenuItemAction('REMOVE', 'Unassign from terminal', 'PlanEditorActions', 'unassignLocation', id, selectedSubnetId))
         } else {
           // check that the location is part of the same subnet as the FDT
@@ -677,7 +680,7 @@ function _spliceLocationFromTerminal (state, locationId, terminalId) {
 }
 
 function unassignLocation (locationId, terminalId) {
-  // TODO: shouldn't need the terminal ID - we should unassign from what ever terminal the location is assigned to
+  // TODO #182738669 : shouldn't need the terminal ID - we should unassign from what ever terminal the location is assigned to
   return (dispatch, getState) => {
     const state = getState()
     let subnetFeature = _spliceLocationFromTerminal(state, locationId, terminalId)
