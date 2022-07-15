@@ -142,7 +142,6 @@ const getSelectedSubnetLocations = createSelector(
       selectedSubnetLocations = selectedSubnet.subnetLocationsById
     } else if (subnetFeatures[selectedSubnetId]
       && subnetFeatures[selectedSubnetId].subnetId
-      //&& subnetFeatures[selectedSubnetId].feature.dropLinks
       && validLocationConnectionTypes.includes( subnetFeatures[selectedSubnetId].feature.networkNodeType )
     ) {
       let parentSubnetId = subnetFeatures[selectedSubnetId].subnetId
@@ -166,7 +165,6 @@ const getCursorLocations = createSelector(
       selectedSubnetLocations = selectedSubnet.subnetLocationsById
     } else if (subnetFeatures[selectedSubnetId]
       && subnetFeatures[selectedSubnetId].subnetId
-      //&& subnetFeatures[selectedSubnetId].feature.dropLinks
       && validLocationConnectionTypes.includes( subnetFeatures[selectedSubnetId].feature.networkNodeType )
     ) {
       let parentSubnetId = subnetFeatures[selectedSubnetId].subnetId
@@ -189,7 +187,6 @@ const getCursorLocations = createSelector(
 const getAlertsForSubnetTree = createSelector(
   [getSubnets, getSubnetFeatures, getNetworkConfig],
   (subnets, subnetFeatures, networkConfig) => {
-
     // this should theoretically be it's own selector 
     //  BUT I want to encourage the use of similar functions that get info from the draft
     let rootSubnets = []

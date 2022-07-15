@@ -262,7 +262,6 @@ function unsubscribeFromSocket() {
 }
 
 function createFeature(feature) {
-  console.log(feature)
   //return Promise.resolve()
   return async(dispatch, getState) => {
     try {
@@ -609,7 +608,6 @@ function showContextMenuForLocations (featureIds, event) {
           if (state.planEditor.subnets[subnetId]
             && state.planEditor.subnets[subnetId].subnetLocationsById[id])
           {
-            console.log({subnetId, id})
             menuActions.push(new MenuItemAction('ADD', 'Assign to terminal', 'PlanEditorActions', 'assignLocation', id, selectedSubnetId))
           }
         }
@@ -639,7 +637,6 @@ function _updateSubnetFeatures (subnetFeatures) {
     let commands = []
     let subnetFeaturesById = {}
     let subnetIds = []
-    console.log(subnetFeatures)
     subnetFeatures.forEach(subnetFeature => {
       subnetFeaturesById[subnetFeature.feature.objectId] = subnetFeature
       let subnetId = subnetFeature.subnetId
@@ -1054,8 +1051,6 @@ function deleteFeatures (featureIds) {
       const url = `/service/plan-transaction/${transactionId}/subnet_cmd/update-children`
       let nextSelectedSubnetId = selectedSubnetId
       let commands = []
-      console.log("delete")
-      console.log(featureIds)
       // TODO: check for construction_area and run deleteConstructionArea
       featureIds.forEach(featureId => {
         const { subnetId, feature } = klona(planEditor.subnetFeatures[featureId])

@@ -191,7 +191,6 @@ export class EquipmentMapObjects extends Component {
           const { feature } = subnetFeatures[id]
           if (
             id === selectedSubnetId
-            //&& feature.networkNodeType === 'fiber_distribution_terminal'
             && validLocationConnectionTypes.includes( feature.networkNodeType )
             && 'dropLinks' in feature
             && feature.dropLinks.length > 0
