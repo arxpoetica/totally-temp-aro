@@ -371,11 +371,7 @@ const getLocationCounts = createSelector(
 
       } else if (subnet && type === 'dslam') {
         locationCountsById[id] = Object.keys(subnet.subnetLocationsById).length
-      } else if (
-        (type === 'fiber_distribution_terminal' || type === 'location_connector') 
-        //&& validLocationConnectionTypes.includes( type )
-        && feature.feature.dropLinks
-      ) {
+      } else if ( validLocationConnectionTypes.includes( type ) ) {
         locationCountsById[id] = feature.feature.dropLinks.length
       } else {
         const locationDistanceMap = subnet && subnet.fiber && subnet.fiber.locationDistanceMap
