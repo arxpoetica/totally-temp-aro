@@ -568,59 +568,6 @@ function showContextMenuForList (features, coords) {
     }
   }
 }
-/*
-function showContextMenuForLocations (featureIds, event) {
-  return (dispatch, getState) => {
-    // TODO: if there are more than one add a menu item remove all, add all
-    const state = getState()
-    const selectedSubnetId = state.planEditor.selectedSubnetId
-    if (featureIds.length > 0
-      && state.planEditor.subnetFeatures[selectedSubnetId] 
-      && validLocationConnectionTypes.includes( state.planEditor.subnetFeatures[selectedSubnetId].feature.networkNodeType )
-    ) {
-      let subnetId = state.planEditor.subnetFeatures[selectedSubnetId].subnetId
-      // we have locations AND the active feature has drop links
-      const selectedSubnetLocations = PlanEditorSelectors.getSelectedSubnetLocations(state)
-      const coords = WktUtils.getXYFromEvent(event)
-      var menuItemFeatures = []
-      featureIds.forEach(location => {
-        let id = location.object_id
-        var menuActions = []
-        if (selectedSubnetLocations[id]) {
-          // this location is a part of the selected FDT
-          // this is an option if:
-          //  - child of selected node
-          //  or - (TODO: #182738669) selected node is the subnet node of the location AND the location is NOT abandoned 
-          menuActions.push(new MenuItemAction('REMOVE', 'Unassign from terminal', 'PlanEditorActions', 'unassignLocation', id, selectedSubnetId))
-        } else {
-          // check that the location is part of the same subnet as the FDT
-          if (state.planEditor.subnets[subnetId]
-            && state.planEditor.subnets[subnetId].subnetLocationsById[id])
-          {
-            menuActions.push(new MenuItemAction('ADD', 'Assign to terminal', 'PlanEditorActions', 'assignLocation', id, selectedSubnetId))
-          }
-        }
-        if (menuActions.length > 0) {
-          menuItemFeatures.push(new MenuItemFeature('LOCATION', 'Location', menuActions))
-        }
-      })
-
-      // Show context menu
-      if (menuItemFeatures.length > 0) {
-        dispatch(ContextMenuActions.setContextMenuItems(menuItemFeatures))
-        dispatch(ContextMenuActions.showContextMenu(coords.x, coords.y))
-      } else {
-        return Promise.resolve()
-      }
-    } else {
-      return Promise.resolve()
-    }
-  }
-}
-*/
-
-
-
 
 function showContextMenuForLocations (featureIds, event) {
   return (dispatch, getState) => {
@@ -685,22 +632,6 @@ function showContextMenuForLocations (featureIds, event) {
     dispatch(ContextMenuActions.showContextMenu(coords.x, coords.y))
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // helper
 function _updateSubnetFeatures (subnetFeatures) {
@@ -1115,7 +1046,6 @@ function moveConstructionArea (objectId, newCoordinates) {
   }
 }
 
-// TODO: accept list
 // accept ConstructionArea then pass to deleteConstructionArea
 function deleteFeature (featureId) {
   return deleteFeatures([featureId])
@@ -1157,7 +1087,7 @@ function deleteFeatures (featureIds) {
       })
       
       batch(() => {
-        // TODO: make these plural
+        // TODO: make these dispatches plural so we don't need the foreach
         featureIds.forEach(featureId => {
           dispatch({ type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE, payload: featureId })
           dispatch({ type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE, payload: featureId })
