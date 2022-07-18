@@ -11,17 +11,11 @@ import SocketManager from '../../common/socket-manager'
 import { batch } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import PlanEditorSelectors from './plan-editor-selectors'
-import { constants } from './shared'
+import { constants, validSubnetTypes, validLocationConnectionTypes } from './shared'
 import { displayModes } from '../sidebar/constants'
 const { DRAFT_STATES, BLOCKER, INCLUSION } = constants
 import { handleError } from '../../common/notifications'
 
-let validSubnetTypes = [
-  'central_office',
-  'fiber_distribution_hub',
-  'dslam',
-  'subnet_node',
-]
 
 function resumeOrCreateTransaction() {
   return async(dispatch, getState) => {
@@ -268,7 +262,6 @@ function unsubscribeFromSocket() {
 }
 
 function createFeature(feature) {
-  console.log(feature)
   //return Promise.resolve()
   return async(dispatch, getState) => {
     try {
@@ -594,7 +587,7 @@ function showContextMenuForLocations (featureIds, event) {
     const selectedSubnetId = state.planEditor.selectedSubnetId
     if (featureIds.length > 0
       && state.planEditor.subnetFeatures[selectedSubnetId] 
-      && state.planEditor.subnetFeatures[selectedSubnetId].feature.dropLinks
+      && validLocationConnectionTypes.includes( state.planEditor.subnetFeatures[selectedSubnetId].feature.networkNodeType )
     ) {
       let subnetId = state.planEditor.subnetFeatures[selectedSubnetId].subnetId
       // we have locations AND the active feature has drop links
@@ -606,6 +599,9 @@ function showContextMenuForLocations (featureIds, event) {
         var menuActions = []
         if (selectedSubnetLocations[id]) {
           // this location is a part of the selected FDT
+          // this is an option if:
+          //  - child of selected node
+          //  or - (TODO: #182738669) selected node is the subnet node of the location AND the location is NOT abandoned 
           menuActions.push(new MenuItemAction('REMOVE', 'Unassign from terminal', 'PlanEditorActions', 'unassignLocation', id, selectedSubnetId))
         } else {
           // check that the location is part of the same subnet as the FDT
@@ -641,7 +637,6 @@ function _updateSubnetFeatures (subnetFeatures) {
     let commands = []
     let subnetFeaturesById = {}
     let subnetIds = []
-    console.log(subnetFeatures)
     subnetFeatures.forEach(subnetFeature => {
       subnetFeaturesById[subnetFeature.feature.objectId] = subnetFeature
       let subnetId = subnetFeature.subnetId
@@ -693,6 +688,7 @@ function _spliceLocationFromTerminal (state, locationId, terminalId) {
 }
 
 function unassignLocation (locationId, terminalId) {
+  // TODO #182738669 : shouldn't need the terminal ID - we should unassign from what ever terminal the location is assigned to
   return (dispatch, getState) => {
     const state = getState()
     let subnetFeature = _spliceLocationFromTerminal(state, locationId, terminalId)
@@ -1055,8 +1051,6 @@ function deleteFeatures (featureIds) {
       const url = `/service/plan-transaction/${transactionId}/subnet_cmd/update-children`
       let nextSelectedSubnetId = selectedSubnetId
       let commands = []
-      console.log("delete")
-      console.log(featureIds)
       // TODO: check for construction_area and run deleteConstructionArea
       featureIds.forEach(featureId => {
         const { subnetId, feature } = klona(planEditor.subnetFeatures[featureId])
@@ -1711,6 +1705,7 @@ function parseSubnet (subnet) {
       feature.dropLinks.forEach(dropLink => {
         dropLink.locationLinks.forEach(locationLink => {
           if (!subnet.subnetLocationsById[locationLink.locationId]) {
+            // TODO: lets look at this again, I think drop links are listed in subnet locationsById but maybe not every location in that link?
             console.warn(`location ${locationLink.locationId} of feature ${feature.objectId} is not in the location list of subnet ${subnetId}`)
           } else {
             subnet.subnetLocationsById[locationLink.locationId].parentEquipmentId = feature.objectId
