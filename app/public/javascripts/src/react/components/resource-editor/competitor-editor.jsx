@@ -4,6 +4,7 @@ import ResourceActions from './resource-actions'
 import Select from "react-select"
 import { Alert } from '@mantine/core';
 import AroHttp from '../../common/aro-http'
+import SocketManager from '../../common/socket-manager';
 
 const styles = {
   multiValue: (base, state) => {
@@ -39,7 +40,21 @@ export class CompetitorEditor extends Component {
       strengthsById: '',
       hasChanged: false,
     }
+    SocketManager.joinRoom('competition-updates')
+    SocketManager.subscribe('competition-updates', msg => {
+      console.log({msg})
+    })
+    SocketManager.subscribe('REBUILD_STARTED', msg => {
+      console.log('REBUILD_STARTED', {msg})
+    })
+    SocketManager.subscribe('REBUILD_ENDED', msg => {
+      console.log('REBUILD_ENDED', {msg})
+    })
+    SocketManager.subscribe('REBUILD_FAILED', msg => {
+      console.log('REBUILD_FAILED', {msg})
+    })
   }
+
 
   componentDidMount () {
     this.props.getRegions()

@@ -8,6 +8,7 @@ const SocketNamespaces = Object.freeze([
   'broadcast',
   'tileInvalidation',
   'subnet',
+  'competition-updates'
 ])
 
 class SocketManager {

@@ -129,7 +129,7 @@ function ResourceEditor(props) {
 
 	const handleOnDiscard = () => {
 		props.setIsResourceEditor(true)
-    props.setEditingMode('LIST_RESOURCE_MANAGERS')
+		props.setEditingMode('LIST_RESOURCE_MANAGERS')
 	}
 
 	const onSortClick = (colName) => {
