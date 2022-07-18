@@ -579,7 +579,7 @@ function showContextMenuForList (features, coords) {
     }
   }
 }
-
+/*
 function showContextMenuForLocations (featureIds, event) {
   return (dispatch, getState) => {
     // TODO: if there are more than one add a menu item remove all, add all
@@ -628,6 +628,90 @@ function showContextMenuForLocations (featureIds, event) {
     }
   }
 }
+*/
+
+
+
+
+function showContextMenuForLocations (featureIds, event) {
+  return (dispatch, getState) => {
+    // TODO: if there are more than one add a menu item remove all, add all
+    const state = getState()
+    const selectedSubnetId = state.planEditor.selectedSubnetId
+    if (featureIds.length <= 0 || !selectedSubnetId) return Promise.resolve()
+    // selectedSubnetLocations will be connected locations IF the selectedSubnetId is a location connector type
+    //  if not it will be the list of all subnet locations
+    const selectedSubnetLocations = PlanEditorSelectors.getSelectedSubnetLocations(state)
+    let terminalId = null
+    let terminalLocations = null
+    let subnetId = null
+    let subnetLocations = null
+    // state.planEditor.subnets[subnetId].subnetLocationsById[locationId].parentEquipmentId
+    if ( validLocationConnectionTypes.includes(state.planEditor.subnetFeatures[selectedSubnetId].feature.networkNodeType) ) {
+      // the selected feature can have location connections
+      terminalId = selectedSubnetId
+      terminalLocations = selectedSubnetLocations
+      subnetId = state.planEditor.subnetFeatures[terminalId].subnetId
+      subnetLocations = state.planEditor.subnets[subnetId].subnetLocationsById
+    } else {
+      // the selected feature can NOT have locations attached so their children or grandchildren must 
+      subnetId = selectedSubnetId
+      subnetLocations = selectedSubnetLocations
+    }
+
+    var menuItemFeatures = []
+    featureIds.forEach(location => {
+      let locationId = location.object_id
+      if (subnetLocations[locationId]){
+        // the location is in the focused subnet
+        var menuActions = []
+        if (!terminalLocations) {
+          // the selected node is NOT a location connector type so all locations get the disconnect option
+          // filter out abandoned locations
+          if (state.planEditor.subnets[subnetId]
+            && state.planEditor.subnets[subnetId].subnetLocationsById[locationId]
+            && state.planEditor.subnets[subnetId].subnetLocationsById[locationId].parentEquipmentId
+          ) {
+            // TODO: avoid duplicate unassignLocation code
+            menuActions.push(new MenuItemAction('REMOVE', 'Unassign from terminal', 'PlanEditorActions', 'unassignLocation', locationId, subnetId))
+          }
+        } else {
+          // there IS a location connector type selected so filter for add remove
+          if (terminalLocations[locationId]) {
+            menuActions.push(new MenuItemAction('REMOVE', 'Unassign from terminal', 'PlanEditorActions', 'unassignLocation', locationId, subnetId))
+          } else {
+            // either there is not a location connector type choosen OR the location isn't a part
+            menuActions.push(new MenuItemAction('ADD', 'Assign to terminal', 'PlanEditorActions', 'assignLocation', locationId, terminalId))
+          }
+        }
+
+        if (menuActions.length > 0) {
+          menuItemFeatures.push(new MenuItemFeature('LOCATION', 'Location', menuActions))
+        }
+      }// else the location is NOT in the focused subnet so do not include it in the menu
+    })
+    if (menuItemFeatures.length <= 0) return Promise.resolve()
+    const coords = WktUtils.getXYFromEvent(event)
+    dispatch(ContextMenuActions.setContextMenuItems(menuItemFeatures))
+    dispatch(ContextMenuActions.showContextMenu(coords.x, coords.y))
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // helper
 function _updateSubnetFeatures (subnetFeatures) {
@@ -668,8 +752,17 @@ function _updateSubnetFeatures (subnetFeatures) {
 }
 
 // helper
-function _spliceLocationFromTerminal (state, locationId, terminalId) {
+function _spliceLocationFromTerminal (state, locationId, subnetId) {
+  let terminalId = null
+  if (state.planEditor.subnets[subnetId].subnetLocationsById[locationId]
+    && state.planEditor.subnets[subnetId].subnetLocationsById[locationId].parentEquipmentId
+  ) {
+    terminalId = state.planEditor.subnets[subnetId].subnetLocationsById[locationId].parentEquipmentId
+  }
+  if (!terminalId) return null
+
   let subnetFeature = state.planEditor.subnetFeatures[terminalId]
+  if (!subnetFeature) return null
   subnetFeature = klona(subnetFeature)
   
   let index = subnetFeature.feature.dropLinks.findIndex(dropLink => {
@@ -687,11 +780,12 @@ function _spliceLocationFromTerminal (state, locationId, terminalId) {
   }
 }
 
-function unassignLocation (locationId, terminalId) {
-  // TODO #182738669 : shouldn't need the terminal ID - we should unassign from what ever terminal the location is assigned to
+function unassignLocation (locationId, subnetId) {
+  // we require the subnet ID to avoid a search (most times the caller already has this info)
   return (dispatch, getState) => {
     const state = getState()
-    let subnetFeature = _spliceLocationFromTerminal(state, locationId, terminalId)
+    let subnetFeature = _spliceLocationFromTerminal(state, locationId, subnetId)
+    // removeing location's parentEquipmentId is unneeded because we do an immeadiate recalc which will update the location list
     if (subnetFeature) {
       return dispatch(_updateSubnetFeatures([subnetFeature]))
     } else {
@@ -709,13 +803,9 @@ function assignLocation (locationId, terminalId) {
     toFeature = klona(toFeature)
     let subnetId = toFeature.subnetId
 
-    let fromTerminalId = state.planEditor.subnets[subnetId].subnetLocationsById[locationId].parentEquipmentId
-
     // unassign location if location is assigned
-    if (fromTerminalId && state.planEditor.subnetFeatures[fromTerminalId]){
-      let fromFeature = _spliceLocationFromTerminal(state, locationId, fromTerminalId)
-      if (fromFeature) features.push(fromFeature)
-    }
+    let fromFeature = _spliceLocationFromTerminal(state, locationId, subnetId)
+    if (fromFeature) features.push(fromFeature)
 
     // assign location
     let defaultDropLink = {
