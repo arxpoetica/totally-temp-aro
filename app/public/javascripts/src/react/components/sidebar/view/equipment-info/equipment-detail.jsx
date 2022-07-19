@@ -150,14 +150,12 @@ export const equipmentDetail = (props) => {
 
   const updateFiberFeatures = (fiberFeatures) => {
     const newSelection = cloneSelection()
-    newSelection.editable.equipment = {}
     newSelection.details.fiberSegments = fiberFeatures
     setMapSelection(newSelection)
   }
 
   const updateSelectedState = (selectedFeature) => {
     const newSelection = cloneSelection()
-    newSelection.editable.equipment = {}
     newSelection.details.fiberSegments = new Set()
     if (selectedFeature) {
       newSelection.editable.equipment[selectedFeature.object_id || selectedFeature.objectId] = selectedFeature
