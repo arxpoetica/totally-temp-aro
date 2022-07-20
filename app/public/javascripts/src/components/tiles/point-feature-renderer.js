@@ -61,6 +61,7 @@ class PointFeatureRenderer {
         newGlobalAlpha = 0.4
         if (selectedSubnetLocations[feature.properties.object_id]) newGlobalAlpha = 1.0
         if (locationAlerts[feature.properties.object_id]) {
+          // TODO: #182773584 for only locations in the selected subnet
           newGlobalAlpha = 1.0
           entityImage = PlanEditorSelectors.locationWarnImgByType[feature.properties.location_entity_type]
         }

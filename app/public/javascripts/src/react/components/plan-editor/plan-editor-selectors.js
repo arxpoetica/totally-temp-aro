@@ -200,6 +200,7 @@ const getAlertsForSubnetTree = createSelector(
 
     let alerts = {}
     let subnetList = []
+    // TODO: #182773584 get these from planEditor.drafts
     rootSubnets.forEach(rootSubnet => {
       const childrenHubSubnets = rootSubnet.children
         .filter(id => subnets[id])
@@ -210,7 +211,7 @@ const getAlertsForSubnetTree = createSelector(
     subnetList.forEach(subnet => {
       alerts = { ...alerts, ...getAlertsFromSubnet(subnet, subnetFeatures, networkConfig) }
     })
-
+    console.log(alerts)
     return alerts
   }
 )
