@@ -139,11 +139,15 @@ const getSelectedSubnetLocations = createSelector(
   (selectedSubnetId, selectedSubnet, subnetFeatures, subnets) => {
     let selectedSubnetLocations = {}
     if (selectedSubnet) {
+      // the selectedSubnetId is that of a subnet node type (not a location connector type)
+      //  so return the list of all locations in the subnet
       selectedSubnetLocations = selectedSubnet.subnetLocationsById
     } else if (subnetFeatures[selectedSubnetId]
       && subnetFeatures[selectedSubnetId].subnetId
       && validLocationConnectionTypes.includes( subnetFeatures[selectedSubnetId].feature.networkNodeType )
     ) {
+      // the selectedSubnetId is of a location connector type not a true subnet node type 
+      //  so return the list of connected locations
       let parentSubnetId = subnetFeatures[selectedSubnetId].subnetId
       subnetFeatures[selectedSubnetId].feature.dropLinks.forEach(dropLink => {
         dropLink.locationLinks.forEach(locationLink => {
