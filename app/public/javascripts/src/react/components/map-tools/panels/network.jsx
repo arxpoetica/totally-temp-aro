@@ -168,7 +168,7 @@ const NetworkEquipmentPanel = (props) => {
       opacity: networkEquipment.drawingOptions.opacity || 0.5,
       drawingOptions,
       selectable: true,
-      zIndex: networkEquipment.zIndex + (existingOrPlannedzIndex || 0),
+      zIndex: existingOrPlannedzIndex,
       highlightStyle: networkEquipment.highlightStyle,
       subtypes,
     }
@@ -294,7 +294,7 @@ const NetworkEquipmentPanel = (props) => {
                 <input
                   type="checkbox"
                   className="checkboxfill layer-type-checkboxes"
-                  value={equipmentLayerTypeVisibility.existing}
+                  checked={equipmentLayerTypeVisibility.existing ? 'checked' : ''}
                   onChange={() => onUpdateTypeVisibility('equipment', 'existing', equipmentLayerTypeVisibility.existing)}
                 />
                 <span>&nbsp;Existing</span>
@@ -305,7 +305,7 @@ const NetworkEquipmentPanel = (props) => {
                 <input
                   type="checkbox"
                   className="checkboxfill layer-type-checkboxes"
-                  value={equipmentLayerTypeVisibility.planned}
+                  checked={equipmentLayerTypeVisibility.planned ? 'checked' : ''}
                   onChange={() => onUpdateTypeVisibility('equipment', 'planned', equipmentLayerTypeVisibility.planned)}
                 />
                 <span>&nbsp;Planned</span>

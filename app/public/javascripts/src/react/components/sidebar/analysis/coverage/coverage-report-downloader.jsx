@@ -38,7 +38,7 @@ export class coverageReportDownloader extends Component {
             {reports.map((report) =>
               <li className="pt-1 pb-1" key={report.id}>
                 <input type="checkbox" style={{marginRight: '5px'}} className="checkboxfill"
-                  value={report.selectedForDownload}
+                  checked={report.selectedForDownload}
                   onChange={() => this.updateDownloadFilenameAndMediaType(report.id)}
                 />
                 {report.displayName}

@@ -221,7 +221,7 @@ const ConduitsPanel = (props) => {
                             <input
                               type="checkbox"
                               className="checkboxfill"
-                              checked={roadLayer.checked || false}
+                              checked={roadLayer.checked ? 'checked' : ''}
                               onChange={() => {
                                 setUpdateMapLayerCalled(!updateMapLayerCalled)
                                 updateLayerVisibility('roads', roadLayer, !roadLayer.checked)
@@ -246,7 +246,7 @@ const ConduitsPanel = (props) => {
                             <input
                               type="checkbox"
                               className="checkboxfill"
-                              checked={conduitLayer.checked || false}
+                              checked={conduitLayer.checked ? 'checked' : ''}
                               onChange={() => {
                                 setUpdateMapLayerCalled(!updateMapLayerCalled)
                                 updateLayerVisibility(

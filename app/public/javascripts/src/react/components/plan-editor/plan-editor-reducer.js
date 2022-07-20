@@ -226,10 +226,6 @@ function removeSubnetFeatures (state, featureIds) {
       state.subnetFeatures[featureId].feature.networkNodeType === 'central_office'
       || state.subnetFeatures[featureId].feature.networkNodeType === 'fiber_distribution_hub'
     ) {
-      // removes each of the children from subnet features
-      updatedSubnets[featureId].children.forEach(child => {
-        delete updatedSubnetFeatures[child]
-      })
       // removes from subnets and subnet features
       delete updatedSubnets[featureId]
       delete updatedSubnetFeatures[featureId]
@@ -238,6 +234,7 @@ function removeSubnetFeatures (state, featureIds) {
       const subnetId = updatedSubnetFeatures[featureId].subnetId
       delete updatedSubnetFeatures[featureId]
       if (subnetId) {
+        updatedSubnets[subnetId].children = updatedSubnets[subnetId].children || []
         updatedSubnets[subnetId].children = updatedSubnets[subnetId].children.filter(childId => childId !== featureId)
       }
     }
