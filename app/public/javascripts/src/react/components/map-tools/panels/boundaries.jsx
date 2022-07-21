@@ -42,6 +42,7 @@ const BoundariesPanel = (props) => {
   const { MapToolActions, isMapToolExpanded, isMapToolVisible } = globalMethods
 
   const {
+    activePlanId,
     mapToolName,
     boundaryLayers,
     updateLayerVisibility,
@@ -81,7 +82,7 @@ const BoundariesPanel = (props) => {
       || (prevSelectedLibraryItems && !dequal(prevSelectedLibraryItems, selectedLibraryItems))) {
         updateMapLayers()
     }
-  }, [boundaryLayers, selectedLibraryItems])
+  }, [activePlanId, boundaryLayers, selectedLibraryItems])
 
   const reloadVisibleLayers = async() => {
     try {
@@ -317,6 +318,7 @@ const getAllBoundaryLayers = state => state.mapLayers.boundary
 const getBoundaryLayersList = createSelector([getAllBoundaryLayers], (boundaryLayer) => boundaryLayer.toJS())
 
 const mapStateToProps = (state) => ({
+  activePlanId: state.plan.activePlan && state.plan.activePlan.id,
   boundaryLayers: getBoundaryLayersList(state),
   mapZoomChanged: state.map.zoom,
   dataItems: state.plan.dataItems,
