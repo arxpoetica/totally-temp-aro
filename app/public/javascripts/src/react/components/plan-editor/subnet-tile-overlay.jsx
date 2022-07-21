@@ -6,69 +6,49 @@ import PlanEditorSelectors from './plan-editor-selectors'
 import PlanEditorActions from './plan-editor-actions'
 import TileUtils from '../common/tile-overlay/tile-overlay-utils'
 import TileDataMutator from '../common/tile-overlay/tile-data-mutator'
+import { func } from 'prop-types'
 // global: tileCache.subnets
 
 // --- helpers --- //
 const TWO_PI = 2 * Math.PI
 
-// this will be it's own importable file
-let mapIcons = {
-  'small_businesses': {
-    image: null,
-    size: {
-      w: 16,
-      h: 16,
-    },
-    // offset: { // if not present will use center
-    //   x: 0,
-    //   y: 0,
-    // },
-  },
-}
-var loadImg_small_businesses = new Image()
-loadImg_small_businesses.addEventListener('load', function() {
-  console.log(`image loaded ${this}`)
-  mapIcons['small_businesses'].image = this
-  mapIcons['small_businesses'].size.w = this.width
-  mapIcons['small_businesses'].size.h = this.height
-  if (!mapIcons['small_businesses'].offset) {
-    mapIcons['small_businesses'].offset = {
+function loadIcon (src, callback) {
+  var loadImg = new Image()
+  loadImg.addEventListener('load', function(){
+    console.log(`image loaded ${this}`)
+    let icon = {
+      image: null,
+      size: {
+        w: 16,
+        h: 16,
+      },
+      offset: {
+        x: 0,
+        y: 0,
+      },
+    }
+    icon.image = this
+    icon.size.w = this.width
+    icon.size.h = this.height
+    icon.offset = {
       x: Math.floor(this.width * 0.5),
       y: Math.floor(this.height * 0.5),
     }
-  }
-}, false)
-loadImg_small_businesses.src = '/images/map_icons/aro/businesses_small_default.png'
+    callback(icon)
+  }, false)
 
-let iconsBadges = {
-  'alert': {
-    image: null,
-    size: {
-      w: 16,
-      h: 16,
-    },
-    offset: { // if not present will use center
-      x: -1,
-      y: 12,
-    },
-  },
+  loadImg.src = src
 }
-var loadImg_alert = new Image()
-loadImg_alert.addEventListener('load', function() {
-  console.log(`image loaded ${this}`)
-  iconsBadges['alert'].image = this
-  iconsBadges['alert'].size.w = this.width
-  iconsBadges['alert'].size.h = this.height
-  if (!iconsBadges['alert'].offset) {
-    iconsBadges['alert'].offset = {
-      x: Math.floor(this.width * 0.5),
-      y: Math.floor(this.height * 0.5),
-    }
-  }
-}, false)
-loadImg_alert.src = '/images/map_icons/badges/badge_alert.png'
 
 
+let mapIcons = {}
+let iconsBadges = {}
+loadIcon('/images/map_icons/aro/businesses_small_default.png', icon => mapIcons['small_businesses'] = icon)
+loadIcon('/images/map_icons/badges/badge_alert.png', icon => {
+  icon.offset.x = -1
+  icon.offset.y = 12
+  iconsBadges['alert'] = icon
+})
 
 
 // needs to be a class instance becasue is needs to keep a scope for the getTile callback functions
