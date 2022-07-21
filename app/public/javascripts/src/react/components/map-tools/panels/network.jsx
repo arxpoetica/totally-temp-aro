@@ -60,6 +60,7 @@ const NetworkEquipmentPanel = (props) => {
   useEffect(() => {
     updateMapLayers()
   }, [
+    planId,
     mapLayers,
     mapZoomSize,
     selectedDisplayMode,
