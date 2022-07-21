@@ -187,30 +187,15 @@ const getCursorLocations = createSelector(
   }
 )
 
-// can have multiple subnets
 const getAlertsForSubnetTree = createSelector(
   [getSubnets, getSubnetFeatures, getNetworkConfig],
   (subnets, subnetFeatures, networkConfig) => {
-    // this should theoretically be it's own selector 
-    //  BUT I want to encourage the use of similar functions that get info from the draft
-    let rootSubnets = []
-    Object.values(subnets).forEach(subnet => {
-      if (!subnet.parentSubnetId) rootSubnets.push(subnet)
-    })
-
+    // TODO: replace with drafts (should happen with new Vector Tile system)
     let alerts = {}
-    let subnetList = []
-    rootSubnets.forEach(rootSubnet => {
-      const childrenHubSubnets = rootSubnet.children
-        .filter(id => subnets[id])
-        .map(id => subnets[id])
-
-        subnetList = subnetList.concat( [rootSubnet, ...childrenHubSubnets] )
-    })
-    subnetList.forEach(subnet => {
+    Object.values(subnets).forEach(subnet => {
       alerts = { ...alerts, ...getAlertsFromSubnet(subnet, subnetFeatures, networkConfig) }
     })
-
+    
     return alerts
   }
 )
