@@ -134,7 +134,9 @@ locationWarnImgByType['3'].src = '/images/map_icons/aro/businesses_large_default
 locationWarnImgByType['4'].src = '/images/map_icons/aro/households_default_alert.png'
 locationWarnImgByType['5'].src = '/images/map_icons/aro/tower_alert.png'
 
-const getSelectedSubnetLocations = createSelector(
+//getLocationsForSelectedFeature
+//getLocationsForSelectedSubnet
+const getLocationsForSelectedFeature = createSelector(
   [getSelectedSubnetId, getSelectedSubnet, getSubnetFeatures, getSubnets],
   (selectedSubnetId, selectedSubnet, subnetFeatures, subnets) => {
     let selectedSubnetLocations = {}
@@ -382,7 +384,7 @@ const PlanEditorSelectors = Object.freeze({
   locationWarnImgByType,
   getRootDrafts,
   getDraftsLoadedProgress,
-  getSelectedSubnetLocations,
+  getLocationsForSelectedFeature,
   getCursorLocations,
   getLocationCounts,
   getSubnetFeatures,
