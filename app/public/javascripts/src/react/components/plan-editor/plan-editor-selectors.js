@@ -134,7 +134,29 @@ locationWarnImgByType['3'].src = '/images/map_icons/aro/businesses_large_default
 locationWarnImgByType['4'].src = '/images/map_icons/aro/households_default_alert.png'
 locationWarnImgByType['5'].src = '/images/map_icons/aro/tower_alert.png'
 
-const getSelectedSubnetLocations = createSelector(
+const getLocationsForSelectedSubnet = createSelector(
+  [getSelectedSubnetId, getSelectedSubnet, getSubnetFeatures, getSubnets],
+  (selectedSubnetId, selectedSubnet, subnetFeatures, subnets) => {
+    let selectedSubnetLocations = {}
+    if (selectedSubnet) {
+      // the selectedSubnetId is that of a subnet node type (not a location connector type)
+      //  so return the list of all locations in the subnet
+      selectedSubnetLocations = selectedSubnet.subnetLocationsById
+    } else if (subnetFeatures[selectedSubnetId]
+      && subnetFeatures[selectedSubnetId].subnetId
+      && validLocationConnectionTypes.includes( subnetFeatures[selectedSubnetId].feature.networkNodeType )
+    ) {
+      // the selectedSubnetId is of a location connector type not a true subnet node type 
+      //  so return the list of locations of parent
+      let parentSubnetId = subnetFeatures[selectedSubnetId].subnetId
+      selectedSubnetLocations = subnets[parentSubnetId].subnetLocationsById
+    }
+    
+    return selectedSubnetLocations
+  }
+)
+
+const getLocationsForSelectedFeature = createSelector(
   [getSelectedSubnetId, getSelectedSubnet, getSubnetFeatures, getSubnets],
   (selectedSubnetId, selectedSubnet, subnetFeatures, subnets) => {
     let selectedSubnetLocations = {}
@@ -382,7 +404,8 @@ const PlanEditorSelectors = Object.freeze({
   locationWarnImgByType,
   getRootDrafts,
   getDraftsLoadedProgress,
-  getSelectedSubnetLocations,
+  getLocationsForSelectedFeature,
+  getLocationsForSelectedSubnet,
   getCursorLocations,
   getLocationCounts,
   getSubnetFeatures,

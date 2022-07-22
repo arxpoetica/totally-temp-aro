@@ -263,7 +263,7 @@ const mapStateToProps = state => ({
   focusedEquipmentIds: PlanEditorSelectors.getFocusedEquipmentIds(state),
   selectedSubnetId: state.planEditor.selectedSubnetId,
   subnetFeatures: state.planEditor.subnetFeatures,
-  selectedLocations: PlanEditorSelectors.getSelectedSubnetLocations(state),
+  selectedLocations: PlanEditorSelectors.getLocationsForSelectedFeature(state),
   cursorLocations: PlanEditorSelectors.getCursorLocations(state),
   // DO NOT DELETE `locationAlerts`: `getIconUrl` chokes without this.
   // The wiring is not "hard," but state still depends on it.
