@@ -836,7 +836,7 @@ class TileComponentController {
       rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel,
       subnetFeatures: reduxState.planEditor.subnetFeatures,
       locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(reduxState),
-      selectedSubnetLocations: PlanEditorSelectors.getSelectedSubnetLocations(reduxState),
+      selectedSubnetLocations: PlanEditorSelectors.getLocationsForSelectedSubnet(reduxState), 
       selectionIds: reduxState.selection.planEditorFeatures,
       polygonCoordinates: reduxState.selection.polygonCoordinates,
       rPlanState: reduxState.plan && reduxState.plan.activePlan && reduxState.plan.activePlan.planState,

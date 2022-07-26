@@ -59,10 +59,11 @@ class PointFeatureRenderer {
       // not sure if this is reliable 
       if (feature.properties._data_type && feature.properties._data_type === 'location') {
         newGlobalAlpha = 0.4
-        if (selectedSubnetLocations[feature.properties.object_id]) newGlobalAlpha = 1.0
-        if (locationAlerts[feature.properties.object_id]) {
+        if (selectedSubnetLocations[feature.properties.object_id]) {
           newGlobalAlpha = 1.0
-          entityImage = PlanEditorSelectors.locationWarnImgByType[feature.properties.location_entity_type]
+          if (locationAlerts[feature.properties.object_id]) {
+            entityImage = PlanEditorSelectors.locationWarnImgByType[feature.properties.location_entity_type]
+          }
         }
       }
       ctx.globalAlpha = newGlobalAlpha

@@ -589,7 +589,7 @@ function showContextMenuForLocations (featureIds, event) {
     if (featureIds.length <= 0 || !selectedSubnetId) return Promise.resolve()
     // selectedSubnetLocations will be connected locations IF the selectedSubnetId is a location connector type
     //  if not it will be the list of all subnet locations
-    const selectedSubnetLocations = PlanEditorSelectors.getSelectedSubnetLocations(state)
+    const selectedSubnetLocations = PlanEditorSelectors.getLocationsForSelectedFeature(state)
     let terminalId = null
     let terminalLocations = null
     let subnetId = null

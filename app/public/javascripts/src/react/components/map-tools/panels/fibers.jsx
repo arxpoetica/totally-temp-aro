@@ -72,6 +72,7 @@ const FibersPanel = (props) => {
   useEffect(() => {
     updateMapLayers()
   }, [
+    planId,
     zoom,
     dataItems.fiber && dataItems.fiber.selectedLibraryItems.length,
     updateMapLayerCalled,

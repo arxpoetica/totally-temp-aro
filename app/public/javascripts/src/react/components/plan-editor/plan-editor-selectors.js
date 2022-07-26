@@ -147,7 +147,29 @@ locationWarnImgByType['3'].src = '/images/map_icons/aro/businesses_large_default
 locationWarnImgByType['4'].src = '/images/map_icons/aro/households_default_alert.png'
 locationWarnImgByType['5'].src = '/images/map_icons/aro/tower_alert.png'
 
-const getSelectedSubnetLocations = createSelector(
+const getLocationsForSelectedSubnet = createSelector(
+  [getSelectedSubnetId, getSelectedSubnet, getSubnetFeatures, getSubnets],
+  (selectedSubnetId, selectedSubnet, subnetFeatures, subnets) => {
+    let selectedSubnetLocations = {}
+    if (selectedSubnet) {
+      // the selectedSubnetId is that of a subnet node type (not a location connector type)
+      //  so return the list of all locations in the subnet
+      selectedSubnetLocations = selectedSubnet.subnetLocationsById
+    } else if (subnetFeatures[selectedSubnetId]
+      && subnetFeatures[selectedSubnetId].subnetId
+      && validLocationConnectionTypes.includes( subnetFeatures[selectedSubnetId].feature.networkNodeType )
+    ) {
+      // the selectedSubnetId is of a location connector type not a true subnet node type 
+      //  so return the list of locations of parent
+      let parentSubnetId = subnetFeatures[selectedSubnetId].subnetId
+      selectedSubnetLocations = subnets[parentSubnetId].subnetLocationsById
+    }
+    
+    return selectedSubnetLocations
+  }
+)
+
+const getLocationsForSelectedFeature = createSelector(
   [getSelectedSubnetId, getSelectedSubnet, getSubnetFeatures, getSubnets],
   (selectedSubnetId, selectedSubnet, subnetFeatures, subnets) => {
     let selectedSubnetLocations = {}
@@ -200,31 +222,15 @@ const getCursorLocations = createSelector(
   }
 )
 
-// can have multiple subnets
-// TODO: do we still need this now that we use fault trees?
 const getAlertsForSubnetTree = createSelector(
   [getSubnets, getSubnetFeatures, getNetworkConfig],
   (subnets, subnetFeatures, networkConfig) => {
-    // this should theoretically be it's own selector 
-    //  BUT I want to encourage the use of similar functions that get info from the draft
-    let rootSubnets = []
-    Object.values(subnets).forEach(subnet => {
-      if (!subnet.parentSubnetId) rootSubnets.push(subnet)
-    })
-
+    // TODO: replace with drafts (should happen with new Vector Tile system)
     let alerts = {}
-    let subnetList = []
-    rootSubnets.forEach(rootSubnet => {
-      const childrenHubSubnets = rootSubnet.children
-        .filter(id => subnets[id])
-        .map(id => subnets[id])
-
-        subnetList = subnetList.concat( [rootSubnet, ...childrenHubSubnets] )
-    })
-    subnetList.forEach(subnet => {
+    Object.values(subnets).forEach(subnet => {
       alerts = { ...alerts, ...getAlertsFromSubnet(subnet, subnetFeatures, networkConfig) }
     })
-
+    
     return alerts
   }
 )
@@ -411,7 +417,8 @@ const PlanEditorSelectors = Object.freeze({
   locationWarnImgByType,
   getRootDrafts,
   getDraftsLoadedProgress,
-  getSelectedSubnetLocations,
+  getLocationsForSelectedFeature,
+  getLocationsForSelectedSubnet,
   getCursorLocations,
   getLocationCounts,
   getSubnetFeatures,
