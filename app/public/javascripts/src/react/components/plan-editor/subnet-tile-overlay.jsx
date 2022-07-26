@@ -18,18 +18,12 @@ function loadIcon (src, callback) {
     console.log(`image loaded ${this}`)
     let icon = {
       image: null,
-      size: {
-        w: 16,
-        h: 16,
-      },
       offset: {
         x: 0,
         y: 0,
       },
     }
     icon.image = this
-    icon.size.w = this.width
-    icon.size.h = this.height
     icon.offset = {
       x: Math.floor(this.width * 0.5),
       y: Math.floor(this.height * 0.5),
@@ -45,8 +39,12 @@ let mapIcons = {}
 let iconsBadges = {}
 loadIcon('/images/map_icons/aro/businesses_small_default.png', icon => mapIcons['small_businesses'] = icon)
 loadIcon('/images/map_icons/badges/badge_alert.png', icon => {
-  icon.offset.x = -1
-  icon.offset.y = 12
+  icon.offset.x = -9
+  icon.offset.y = -4
+  icon.offsetMult = { // percent of icon width and height
+    w: 1.0,
+    h: 0.0,
+  }
   iconsBadges['alert'] = icon
 })
 
@@ -83,20 +81,28 @@ class _SubnetTileOverlay extends Component {
       // ctx.beginPath()
       // ctx.arc(px.x+TileUtils.TILE_MARGIN, px.y+TileUtils.TILE_MARGIN, 5, 0, TWO_PI)
       // ctx.fill()
+      let imageCoord = {
+        x: px.x - mapIcons['small_businesses'].offset.x,
+        y: px.y - mapIcons['small_businesses'].offset.y,
+      }
       ctx.drawImage(
         mapIcons['small_businesses'].image, 
-        px.x - mapIcons['small_businesses'].offset.x, 
-        px.y - mapIcons['small_businesses'].offset.y
+        imageCoord.x, 
+        imageCoord.y,
       )
       // figure badges
       // for each badge
       // TODO: should be stored in Redux as a dictionary
       let hasAlertBadge = Object.values(state.alertLocationIds).find(faultNode => faultNode.faultReference.objectId === id)
       if (hasAlertBadge) {
+        let badgeCoord = {
+          x: imageCoord.x + iconsBadges['alert'].offset.x + (mapIcons['small_businesses'].image.width * iconsBadges['alert'].offsetMult.w),
+          y: imageCoord.y + iconsBadges['alert'].offset.y + (mapIcons['small_businesses'].image.width * iconsBadges['alert'].offsetMult.h)
+        }
         ctx.drawImage(
           iconsBadges['alert'].image, 
-          px.x - iconsBadges['alert'].offset.x, 
-          px.y - iconsBadges['alert'].offset.y
+          badgeCoord.x, 
+          badgeCoord.y,
         )
       }
     }
