@@ -31,6 +31,7 @@ import { hsvToRgb } from '../react/common/view-utils'
 import StateViewModeActions from '../react/components/state-view-mode/state-view-mode-actions'
 import PlanEditorActions from '../react/components/plan-editor/plan-editor-actions'
 import RxState from '../react/common/rxState'
+import tileIcons from '../react/components/common/tile-overlay/tile-icons'
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllLocationLayers = reduxState => reduxState.mapLayers.location
@@ -472,10 +473,11 @@ class State {
         }
       })
 
-      $ngRedux.dispatch({
-        type: Actions.LAYERS_SET_LOCATION,
-        payload: locationTypesForRedux
-      })
+      // $ngRedux.dispatch({
+      //   type: Actions.LAYERS_SET_LOCATION,
+      //   payload: locationTypesForRedux
+      // })
+      service.setLocationTypes(locationTypesForRedux)
     }
 
     service.setLayerVisibility = (layer, isVisible) => {
@@ -1371,6 +1373,14 @@ class State {
         .then(result => {
           var config = result.data
 
+          // TODO: this doesn't really belong here
+          //  when new tile system is complete move this to an init function
+          tileIcons.setBadge(
+            'alert',
+            '/images/map_icons/badges/badge_alert.png',
+            {x: -9, y:-4},
+            {w: 1.0, h: 0.0},
+          )
           // filter out conduits that are not to be shown
           // this code may belong in cache.js instead
           var conduits = config.appConfiguration.networkEquipment.conduits || {}
@@ -1660,6 +1670,7 @@ class State {
       setConstructionAreaLayers: constructionAreaLayers => dispatch(MapLayerActions.setConstructionAreaLayers(constructionAreaLayers)),
       setCopperLayers: copperLayers => dispatch(MapLayerActions.setCopperLayers(copperLayers)),
       updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible)),
+      setLocationTypes: locationTypes => dispatch(MapLayerActions.setLocationTypes(locationTypes)),
       setLocationFilters: locationFilters => dispatch(MapLayerActions.setLocationFilters(locationFilters)),
       setLocationFilterChecked: locationFilters => dispatch(MapLayerActions.setLocationFilterChecked(filterType, ruleKey, isChecked)),
       onFeatureSelectedRedux: features => dispatch(RingEditActions.onFeatureSelected(features)),

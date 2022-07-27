@@ -220,10 +220,14 @@
       var globalServiceLayers = <%- JSON.stringify(serviceLayers) %>;
       var globalAnalysisLayers = <%- JSON.stringify(analysisLayers) %>;
       var mapTypeId = <%- JSON.stringify(mapType) %>;
-      // this should maybe be a singleson to be imported
+      // these should maybe be a singleson to be imported
       var tileCache = {
         subnets: {},
         unbounded: {},
+      }
+      var iconSets = {
+        mapIcons: {},
+        iconBadges: {},
       }
 
       $(document).ready(initialize);

@@ -6,12 +6,14 @@ import PlanEditorSelectors from './plan-editor-selectors'
 import PlanEditorActions from './plan-editor-actions'
 import TileUtils from '../common/tile-overlay/tile-overlay-utils'
 import TileDataMutator from '../common/tile-overlay/tile-data-mutator'
-import { func } from 'prop-types'
+import tileIcons from '../common/tile-overlay/tile-icons'
 // global: tileCache.subnets
 
+let mapIcons = tileIcons.mapIcons
+let iconBadges = tileIcons.iconBadges
 // --- helpers --- //
 const TWO_PI = 2 * Math.PI
-
+/*
 function loadIcon (src, callback) {
   var loadImg = new Image()
   loadImg.addEventListener('load', function(){
@@ -35,8 +37,8 @@ function loadIcon (src, callback) {
 }
 
 
-let mapIcons = {}
-let iconsBadges = {}
+//let mapIcons = {}
+//let iconBadges = {}
 loadIcon('/images/map_icons/aro/businesses_small_default.png', icon => mapIcons['small_businesses'] = icon)
 loadIcon('/images/map_icons/badges/badge_alert.png', icon => {
   icon.offset.x = -9
@@ -45,9 +47,9 @@ loadIcon('/images/map_icons/badges/badge_alert.png', icon => {
     w: 1.0,
     h: 0.0,
   }
-  iconsBadges['alert'] = icon
+  iconBadges['alert'] = icon
 })
-
+*/
 
 // needs to be a class instance becasue is needs to keep a scope for the getTile callback functions
 class _SubnetTileOverlay extends Component {
@@ -70,13 +72,15 @@ class _SubnetTileOverlay extends Component {
     canvas.width = TileUtils.TILE_SIZE + (2 * TileUtils.TILE_MARGIN)
     canvas.height = TileUtils.TILE_SIZE + (2 * TileUtils.TILE_MARGIN)
     var ctx = canvas.getContext('2d')
-
+    console.log(tileIcons)
+    console.log(state)
     ctx.fillStyle = '#99FF99'
     for (const [id, point] of Object.entries(points)) {
       let px = TileUtils.worldCoordToTilePixel(point, tileId)
       px.x += TileUtils.TILE_MARGIN
       px.y += TileUtils.TILE_MARGIN
       // get icon type
+      //let iconType = state.subnetLocationsById[]. YET TO IMPLEMENT 
       // //ctx.arc(x, y, radius, startAngle, endAngle, counterclockwise)
       // ctx.beginPath()
       // ctx.arc(px.x+TileUtils.TILE_MARGIN, px.y+TileUtils.TILE_MARGIN, 5, 0, TWO_PI)
@@ -96,11 +100,11 @@ class _SubnetTileOverlay extends Component {
       let hasAlertBadge = Object.values(state.alertLocationIds).find(faultNode => faultNode.faultReference.objectId === id)
       if (hasAlertBadge) {
         let badgeCoord = {
-          x: imageCoord.x + iconsBadges['alert'].offset.x + (mapIcons['small_businesses'].image.width * iconsBadges['alert'].offsetMult.w),
-          y: imageCoord.y + iconsBadges['alert'].offset.y + (mapIcons['small_businesses'].image.width * iconsBadges['alert'].offsetMult.h)
+          x: imageCoord.x + iconBadges['alert'].offset.x + (mapIcons['small_businesses'].image.width * iconBadges['alert'].offsetMult.w),
+          y: imageCoord.y + iconBadges['alert'].offset.y + (mapIcons['small_businesses'].image.width * iconBadges['alert'].offsetMult.h)
         }
         ctx.drawImage(
-          iconsBadges['alert'].image, 
+          iconBadges['alert'].image, 
           badgeCoord.x, 
           badgeCoord.y,
         )
@@ -118,7 +122,7 @@ class _SubnetTileOverlay extends Component {
       //console.log(points)
       if (Object.keys(points).length) {
         // render tile
-        tile = this.renderTileCanvas(ownerDocument, points, tileId, {alertLocationIds: this.props.alertLocationIds})
+        tile = this.renderTileCanvas(ownerDocument, points, tileId, {alertLocationIds: this.props.alertLocationIds, subnetLocationsById: this.props.subnetLocationsById})
         tileCache.addTile(tile, tileId)
       }
     }
@@ -320,6 +324,7 @@ const mapStateToProps = (state) => {
   // TODO: this should probably be a selector 
   //  OR we make it a dictionary in state
   let alertLocationIds = {}
+  let subnetLocationsById = {}
   if (
     selectedSubnetId
     && state.planEditor.subnets[selectedSubnetId]
@@ -329,6 +334,7 @@ const mapStateToProps = (state) => {
     //   alertLocationIds[faultNode.faultReference.objectId] = faultNode
     // })
     alertLocationIds = state.planEditor.subnets[selectedSubnetId].faultTree.rootNode.childNodes
+    subnetLocationsById = state.planEditor.subnets[selectedSubnetId].subnetLocationsById
   }
   return {
     mapRef: state.map.googleMaps,
@@ -339,6 +345,7 @@ const mapStateToProps = (state) => {
     // tile data, useEffect: on change tell overlayLayer to run getTile on all visible tiles using clearTileCache
     // tileOverlay.clearTileCache();
     alertLocationIds, // TODO: when this changes the action creator needs to clear the cache
+    subnetLocationsById, 
   }
 }
 
