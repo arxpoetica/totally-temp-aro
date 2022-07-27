@@ -1,10 +1,12 @@
 import React, { Component } from 'react'
+import { Popover, Text, Button, Loader } from '@mantine/core';
 import { connect } from 'react-redux'
 import ResourceActions from './resource-actions'
 import Select from "react-select"
-import { Alert } from '@mantine/core';
+// import { Alert } from '@mantine/core';
 import AroHttp from '../../common/aro-http'
 import SocketManager from '../../common/socket-manager';
+// import Loader from '../common/Loader.jsx';
 
 const styles = {
   multiValue: (base, state) => {
@@ -39,9 +41,12 @@ export class CompetitorEditor extends Component {
       openTab: 0,
       strengthsById: '',
       hasChanged: false,
+      recalcPopOverOpen: false
     }
-    SocketManager.joinRoom('competition-updates')
-    SocketManager.subscribe('competition-updates', msg => {
+    // console.log({SocketManager});
+    
+    SocketManager.joinRoom('competition-updates', this.props.editingManager.id)
+    SocketManager.subscribe('MODIFY', msg => {
       console.log({msg})
     })
     SocketManager.subscribe('REBUILD_STARTED', msg => {
@@ -160,17 +165,17 @@ export class CompetitorEditor extends Component {
           </div>
         }
 
-        {
+        {/* {
           this.props.recalcState === recalcStateMap.REQUIRE_RECALC &&  <Alert title="Recalc Required" color="yellow">
             Some changes occurred, you need to recalculate for them to take effect.
           </Alert>
-        }
+        } */}
 
-        {
+        {/* {
           this.props.recalcState === recalcStateMap.RECALCING && <Alert title="Recalcing..." color="yellow">
             Recalculation is in progress, it may take up to an hour. Once it is complete this message will disappear and changes will take effect.
           </Alert>
-        }
+        } */}
 
         {!this.state.regionSelectEnabled &&
           <div>
@@ -296,17 +301,66 @@ export class CompetitorEditor extends Component {
               <i className="fa fa-undo action-button-icon"></i> Discard changes
             </button>
             {
-              this.props.recalcState === recalcStateMap.REQUIRE_RECALC && 
-              <button 
-                className="btn btn-primary mr-2" 
-                onClick={() => this.props.executeRecalc(this.props.loggedInUser.id, this.props.editingManager.id) }>
-                <i className="fa fa-undo action-button-icon"></i> Recalc
-              </button>
+              this.props.recalcState === recalcStateMap.REQUIRE_RECALC ? (
+                <Popover
+                  opened={this.state.recalcPopOverOpen}
+                  onClose={() => this.setState({ recalcPopOverOpen: false })}
+                  target={
+                    <Button
+                      leftIcon={<i className="fa fa-undo action-button-icon"></i>}
+                      style={{ marginTop: '2px', marginRight: '7px'}}
+                      onClick={() => {
+                        this.props.executeRecalc(
+                          this.props.loggedInUser.id,
+                          this.props.editingManager.id
+                        )
+                      }}
+                    >
+                      Recalc
+                    </Button>
+                  }
+                  width={260}
+                  position="top"
+                  placement="center"
+                  withCloseButton
+                >
+                  <div>
+                    <Text size="sm">
+                      Recalculation is required in order to apply the changes you made. It
+                      may take a few minutes...
+                    </Text>
+                  </div>
+                </Popover>
+              ) : this.props.recalcState === recalcStateMap.RECALCING ? (
+                <Button
+                  variant="outline"
+                  radius={0}
+                  leftIcon={<Loader/>}
+                  style={{ marginBotom: '-8px', marginRight: '8px', height: '34px'}}
+                  size={'md'}
+                  loading={this.props.recalcState === recalcStateMap.RECALCING}
+                >
+                  Recalculating...
+                </Button>
+              ) : null
             }
             <button
               className="btn btn-primary"
-              onClick={() => this.state.hasChanged && this.saveConfigurationToServer() }
-              disabled={ this.state.regionSelectEnabled }>
+              onClick={() => {
+                console.log("save btn");
+                if (
+                  this.props.recalcState === recalcStateMap.REQUIRE_RECALC &&
+                  !this.state.recalcPopOverOpen
+                ) {
+                  console.log('in if state', this.props.recalcState, this.state.recalcPopOverOpen);
+                  this.setState({ recalcPopOverOpen: true });
+                  return
+                }
+                this.setState({ recalcPopOverOpen: true })
+                this.state.hasChanged && this.saveConfigurationToServer()
+              }}
+              // disabled={ this.state.regionSelectEnabled }
+            >
               <i className="fa fa-save action-button-icon"></i> Save
             </button>
           </div>
@@ -320,9 +374,10 @@ export class CompetitorEditor extends Component {
   }
 
   saveConfigurationToServer(){
+    console.log('saveConfigurationToServer');
     this.props.saveCompManConfig(this.props.editingManager.id,
       this.props.loadStrength.pristineStrengthsById, this.state.strengthsById
-    ) 
+    )
     this.setState({ hasChanged: false })
   }
 

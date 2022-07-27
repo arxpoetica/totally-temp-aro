@@ -33,17 +33,17 @@ function ResourceEditor(props) {
   const [selectedColumn, setSelectedColumn] = useState('')
 
 	const resourceTypeUserPermissionMap = {
-		all: ["admin", "super_user"],
-		price_book: ["admin", "super_user", "public"],
-		tsm_manager: ["admin", "super_user", "public"],
-		competition_manager: ["admin", "super_user"],
-		roic_manager: ["admin", "super_user", "public"],
-		arpu_manager: ["admin", "super_user", "public"],
-		impedance_mapping_manager: ["admin", "super_user", "public"],
-		rate_reach_manager: ["admin", "super_user", "public"],
-		network_architecture_manager: ["admin", "super_user", "public"],
-		fusion_manager: ["admin", "super_user", "public"],
-		planning_constraints_manager: ["admin", "super_user", "public"],
+		all: ['admin', 'super_user'],
+		price_book: ['admin', 'super_user', 'public', 'default'],
+		tsm_manager: ['admin', 'super_user', 'public', 'default'],
+		competition_manager: ['admin', 'super_user'],
+		roic_manager: ['admin', 'super_user', 'public', 'default'],
+		arpu_manager: ['admin', 'super_user', 'public', 'default'],
+		impedance_mapping_manager: ['admin', 'super_user', 'public', 'default'],
+		rate_reach_manager: ['admin', 'super_user', 'public', 'default'],
+		network_architecture_manager: ['admin', 'super_user', 'public', 'default'],
+		fusion_manager: ['admin', 'super_user', 'public', 'default'],
+		planning_constraints_manager: ['admin', 'super_user', 'public', 'default'],
 	}
 	
   const actionsECD = [

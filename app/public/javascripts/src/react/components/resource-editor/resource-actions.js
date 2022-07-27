@@ -978,6 +978,7 @@ function  getDefaultStrength (carrierId) {
 }
 
 function saveCompManConfig(competitorManagerId, pristineStrengthsById, strengthsById){
+  console.log('saveCompManConfig');
 
   return dispatch => {
 
@@ -1017,14 +1018,15 @@ function saveCompManConfig(competitorManagerId, pristineStrengthsById, strengths
 // Recalcing
 function executeRecalc(userId, competitorManagerId){
   return dispatch => {
-    dispatch(setRecalcState("recalcing"))
-  
+    dispatch(setRecalcState('recalcing'))
     // call the api
-    AroHttp.post(`/service/v1/competitor-manager/${competitorManagerId}/refresh/?user_id=${userId}`)
+    setTimeout(() => {
+      AroHttp.post(`/service/v1/competitor-manager/${competitorManagerId}/refresh/?user_id=${userId}`)
       .then((result) =>{
-        dispatch(setRecalcState("clean")) // or set to Recalculated
+        dispatch(setRecalcState('clean')) // or set to Recalculated
       })
       .catch((err)=> console.error(err))
+    }, 5000)
   }
 }
 
