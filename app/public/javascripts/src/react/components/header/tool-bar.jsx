@@ -9,7 +9,6 @@ import ToolBarActions from './tool-bar-actions'
 import MapReportsActions from '../map-reports/map-reports-actions'
 import ToolActions from '../tool/tool-actions'
 import MapReportsListMapObjects from '../map-reports/map-reports-list-map-objects.jsx'
-import FullScreenActions from '../full-screen/full-screen-actions'
 import RfpActions from '../optimization/rfp/rfp-actions'
 import AroHttp from '../../common/aro-http'
 import { createSelector } from 'reselect'
@@ -1162,7 +1161,7 @@ const mapDispatchToProps = (dispatch) => ({
     dispatch(MapReportsActions.showMapObjects(isVisible))
   },
   showFullScreenContainer: () => {
-    dispatch(FullScreenActions.showOrHideFullScreenContainer(true))
+    dispatch(RfpActions.showOrHideFullScreenContainer(true))
     dispatch(RfpActions.showOrHideAllRfpStatus(true))
   },
   selectedToolBarAction: (value) => dispatch(ToolBarActions.selectedToolBarAction(value)),
