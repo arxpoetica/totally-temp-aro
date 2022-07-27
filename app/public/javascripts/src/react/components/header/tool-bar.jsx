@@ -697,6 +697,7 @@ export class ToolBar extends Component {
   }
 
   toggleSiteBoundary () {
+    if (!this.props.showSiteBoundary) this.props.setSelectedBoundaryType(this.props.boundaryTypes[0])
     this.props.setShowSiteBoundary(!this.props.showSiteBoundary)
     this.rxState.viewSettingsChanged.sendMessage() // This will also refresh the map layer
   }

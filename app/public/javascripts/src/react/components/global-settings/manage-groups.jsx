@@ -149,10 +149,10 @@ export class ManageGroups extends Component {constructor (props) {
 																		</td>
 																		<td>
 																				{!group.isEditing &&
-																						<input type="checkbox" disabled={true} className="checkboxfill" checked={group.isAdministrator === true ? 'checked' : null}/>
+																						<input type="checkbox" disabled={true} className="checkboxfill" checked={group.isAdministrator === true ? 'checked' : ''}/>
 																				}
 																				{group.isEditing &&
-																						<input type="checkbox" name="isAdministrator" onChange={(e)=>this.handleAdminChange(e)} className="checkboxfill" checked={this.state.group.isAdministrator === true ? 'checked' : null}/>
+																						<input type="checkbox" name="isAdministrator" onChange={(e)=>this.handleAdminChange(e)} className="checkboxfill" checked={this.state.group.isAdministrator === true ? 'checked' : ''}/>
 																				}
 																		</td>
 																		<td style={{width: '90px'}}>

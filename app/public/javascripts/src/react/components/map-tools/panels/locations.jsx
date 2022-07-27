@@ -61,6 +61,7 @@ export const LocationsPanel = (props) => {
   const [updateMapLayerCalled, setUpdateMapLayerCalled] = useState(false)
 
   const {
+    activePlanId,
     locationLayers,
     locationFilters,
     orderedLocationFilters,
@@ -104,6 +105,7 @@ export const LocationsPanel = (props) => {
   useEffect(() => {
     updateMapLayers()
   }, [
+    activePlanId,
     zoom,
     selectedDisplayMode,
     selectedHeatMapOption,
@@ -426,7 +428,7 @@ export const LocationsPanel = (props) => {
                                   type="checkbox"
                                   className="checkboxfill"
                                   checked={rule.isChecked}
-                                  onClick={() =>
+                                  onChange={() =>
                                     setLocationFilterChecked(
                                       filterName,
                                       rule.ruleKey,
@@ -626,6 +628,7 @@ const mapStateToProps = (state) => {
     map: state.map,
     selectedDisplayMode: state.toolbar.rSelectedDisplayMode,
     plan: state.plan.activePlan,
+    activePlanId: state.plan.activePlan && state.plan.activePlan.id,
     labelDrawingOptions: state.mapLayers.networkEquipment.labelDrawingOptions,
     mapReadyPromise: state.mapLayers.mapReadyPromise,
   }
