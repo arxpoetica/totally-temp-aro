@@ -97,7 +97,7 @@ const allRulerActions = Object.freeze({
 
 export const MapToolContext = createContext()
 
-const MapDisplayTools = ({ mapRef, mapTools }) => {
+const MapDisplayTools = ({ mapRef }) => {
 
   const [mapToolState, dispatch] = useReducer(mapToolReducer, mapToolIntialState)
 
@@ -128,19 +128,13 @@ const MapDisplayTools = ({ mapRef, mapTools }) => {
     }
   }
 
+
   return (
     <div className="map-display-tools">
       <MapToolContext.Provider value={{ mapToolState, dispatch, globalMethods }}>
         {available_tools.map(({id, toolName}) => {
           const MapToolComponent = MapToolPanels[id]
-          return (
-            MapToolComponent && <>
-              <MapToolComponent key={id} mapToolName={toolName} />
-              {objectHasLength(mapTools) > 0 && mapTools.isVisible[id] && mapTools.showLabels
-                && <div className="map_tool_label label-align">{toolName}</div>
-              }
-            </>
-          )
+          return MapToolComponent && <MapToolComponent key={id} mapToolName={toolName} />
         })}
       </MapToolContext.Provider>
       {/*
@@ -150,23 +144,14 @@ const MapDisplayTools = ({ mapRef, mapTools }) => {
       <style jsx>{`
         .map-display-tools :global(.show) { animation: ${`fadeInLeft`} 0.5s; }
         .map-display-tools :global(.hide) { animation: ${`fadeOutLeft`} 0.5s; }
-        .label-align {
-          margin-top: 0px;
-          margin-bottom: 1rem;
-          text-align: center;
-        }
       `}</style>
     </div>
   )
 }
 
-const objectHasLength = (obj) => { return Object.keys(obj || {}).length }
-
 const mapStateToProps = (state) => {
   return {
     mapRef: state.map.googleMaps,
-    mapTools: objectHasLength(state.toolbar.appConfiguration)
-     ? state.toolbar.appConfiguration.perspective.mapTools : [],
   }
 }
 

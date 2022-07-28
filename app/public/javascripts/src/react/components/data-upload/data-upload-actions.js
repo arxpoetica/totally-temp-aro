@@ -229,7 +229,6 @@ function addConduit(uploadDetails) {
     .catch((err) => console.error(err))
 }
 
-// TODO: make parts of this generic for any file upload to any API point
 function fileUpload (dispatch, uploadDetails, libraryId, loggedInUser, libraryItem) {
   var formData = new FormData()
   var file = uploadDetails.file

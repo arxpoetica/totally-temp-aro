@@ -4,6 +4,7 @@ import { PropTypes } from 'prop-types'
 import ReportDefinitionPropType from './report-definition-prop-type'
 import RfpReportDownloadCell from './rfp-report-download-cell.jsx'
 import PlanActions from '../../../plan/plan-actions'
+import FullScreenActions from '../../../full-screen/full-screen-actions'
 
 export class RfpStatusRow extends Component {
   render () {
@@ -68,7 +69,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   loadPlan: (planId) => dispatch(PlanActions.loadPlan(planId)),
-  hideFullScreenContainer: () => dispatch(RfpActions.showOrHideFullScreenContainer(false)),
+  hideFullScreenContainer: () => dispatch(FullScreenActions.showOrHideFullScreenContainer(false))
 })
 
 const RfpStatusRowComponent = connect(mapStateToProps, mapDispatchToProps)(RfpStatusRow)

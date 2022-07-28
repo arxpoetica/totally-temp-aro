@@ -1,0 +1,46 @@
+<!-- This container will take up all the space in its positioned parent. For it to be a "full screen" container,
+     make sure that it is a child of the <body> tag -->
+<style inline>
+  .full-screen-container {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    bottom: 0px;
+    background-color: white;
+    z-index: 4; /* Required because our sidebar has a z-index, which is required because of the google maps control */
+  }
+
+  .full-screen-container.ng-hide-remove {
+    animation: fadeInDown 300ms;
+  }
+
+  .full-screen-container.ng-hide-add {
+    animation: fadeOutUp 300ms;
+  }
+
+  .full-screen-container-close {
+    position: absolute;
+    padding: 0px 10px;
+    margin: 10px;
+    top: 0px;
+    right: 0px;
+    color: #777;
+    cursor: pointer;
+  }
+</style>
+
+<div class="full-screen-container" ng-show="$ctrl.showFullScreenContainer">
+
+  <!-- ng-transclude: This is where the custom content goes -->
+  <ng-transclude></ng-transclude>
+
+  <!-- A close button at the top right -->
+  <div class="full-screen-container-close"
+    ng-click="$ctrl.hideFullScreenContainer()"
+    data-toggle="tooltip"
+    data-placement="bottom"
+    title="Close">
+    <i class="fas fa-4x fa-times"></i>
+  </div>
+</div>

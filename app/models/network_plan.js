@@ -79,15 +79,15 @@ module.exports = class NetworkPlan {
     if (!_.isArray(locationIds) || locationIds.length === 0) return Promise.resolve()
 
     var sql = `
-      SELECT id, object_id, INITCAP(address) as address,ST_X(geom) as lng, ST_Y(geom) as lat
-      FROM location_entity
-      WHERE object_id IN ($1)
+      SELECT id, INITCAP(address) as address,ST_X(geom) as lng, ST_Y(geom) as lat
+      FROM locations
+      WHERE id IN ($1)
     `
     return database.query(sql, [locationIds])
     .then(result => {
       // Convert array to a keyed object, then return it.
       var idToLocation = {}
-      result.forEach(location => idToLocation[location.object_id] = location)
+      result.forEach(location => idToLocation[location.id] = location)
       return idToLocation
     })
   }

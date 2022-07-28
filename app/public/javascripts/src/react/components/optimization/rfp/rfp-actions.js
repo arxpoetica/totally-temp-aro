@@ -170,13 +170,6 @@ function setOptimizationProgress (percent) {
   }
 }
 
-function showOrHideFullScreenContainer (showFullScreenContainer) {
-  return {
-    type: Actions.RFP_FULL_SCREEN_SHOW_HIDE_CONTAINER,
-    payload: showFullScreenContainer
-  }
-}
-
 export default {
   addTargets,
   clearRfpState,
@@ -190,5 +183,4 @@ export default {
   setClickMapToAddTarget,
   showOrHideAllRfpStatus,
   setOptimizationProgress,
-  showOrHideFullScreenContainer,
 }

@@ -18,7 +18,6 @@ const defaultState = {
   parentProjectForNewProject: null,
   selectedProjectId: '',
   resourceItems: {},
-  uploadName: null, // temp #182441351
 }
 
 // Set the superuser flag for the currently logged in user
@@ -235,10 +234,6 @@ function planReducer (state = defaultState, action) {
       
     case Actions.PLAN_EDIT_ACTIVE_PLAN:
       return editActivePlan(state, action.payload)
-    
-    // temp #182441351
-    case Actions.PLAN_SET_UPLOAD_NAME:
-      return { ...state, uploadName: action.payload}
 
     default:
       return state

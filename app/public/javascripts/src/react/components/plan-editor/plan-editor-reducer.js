@@ -179,19 +179,6 @@ function mergeDraftProps(state, draftProps) {
   return { ...state, drafts: { ...state.drafts, ...mergedDrafts } }
 }
 
-function setDraftLocations(state, subnetId, locations) {
-  return {
-    ...state, 
-    drafts: {
-      ...state.drafts, 
-      [subnetId]: {
-        ...state.drafts[subnetId],
-        locations: locations,
-      }
-    }
-  } 
-}
-
 function updateSubnetBoundary (state, subnetId, geometry) {
   if (!state.subnets[subnetId]) return state
   
@@ -359,10 +346,6 @@ function planEditorReducer (state = defaultState, { type, payload }) {
 
     case Actions.PLAN_EDITOR_SET_DRAFTS: {
       return { ...state, drafts: { ...state.drafts, ...payload } }
-    }
-
-    case Actions.PLAN_EDITOR_SET_DRAFT_LOCATIONS: {
-      return setDraftLocations(state, payload.rootSubnetId, payload.rootLocations)
     }
 
     case Actions.PLAN_EDITOR_CLEAR_DRAFTS:
