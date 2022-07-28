@@ -11,11 +11,17 @@ import SocketManager from '../../common/socket-manager'
 import { batch } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import PlanEditorSelectors from './plan-editor-selectors'
-import { constants, validSubnetTypes, validLocationConnectionTypes } from './shared'
+import { constants } from './shared'
 import { displayModes } from '../sidebar/constants'
 const { DRAFT_STATES, BLOCKER, INCLUSION } = constants
 import { handleError } from '../../common/notifications'
 
+let validSubnetTypes = [
+  'central_office',
+  'fiber_distribution_hub',
+  'dslam',
+  'subnet_node',
+]
 
 function resumeOrCreateTransaction() {
   return async(dispatch, getState) => {
@@ -262,6 +268,7 @@ function unsubscribeFromSocket() {
 }
 
 function createFeature(feature) {
+  console.log(feature)
   //return Promise.resolve()
   return async(dispatch, getState) => {
     try {
@@ -585,62 +592,44 @@ function showContextMenuForLocations (featureIds, event) {
     // TODO: if there are more than one add a menu item remove all, add all
     const state = getState()
     const selectedSubnetId = state.planEditor.selectedSubnetId
-    if (featureIds.length <= 0 || !selectedSubnetId) return Promise.resolve()
-    // selectedSubnetLocations will be connected locations IF the selectedSubnetId is a location connector type
-    //  if not it will be the list of all subnet locations
-    const selectedSubnetLocations = PlanEditorSelectors.getLocationsForSelectedFeature(state)
-    let terminalId = null
-    let terminalLocations = null
-    let subnetId = null
-    let subnetLocations = null
-    // state.planEditor.subnets[subnetId].subnetLocationsById[locationId].parentEquipmentId
-    if ( validLocationConnectionTypes.includes(state.planEditor.subnetFeatures[selectedSubnetId].feature.networkNodeType) ) {
-      // the selected feature can have location connections
-      terminalId = selectedSubnetId
-      terminalLocations = selectedSubnetLocations
-      subnetId = state.planEditor.subnetFeatures[terminalId].subnetId
-      subnetLocations = state.planEditor.subnets[subnetId].subnetLocationsById
-    } else {
-      // the selected feature can NOT have locations attached so their children or grandchildren must 
-      subnetId = selectedSubnetId
-      subnetLocations = selectedSubnetLocations
-    }
-
-    var menuItemFeatures = []
-    featureIds.forEach(location => {
-      let locationId = location.object_id
-      if (subnetLocations[locationId]){
-        // the location is in the focused subnet
+    if (featureIds.length > 0
+      && state.planEditor.subnetFeatures[selectedSubnetId] 
+      && state.planEditor.subnetFeatures[selectedSubnetId].feature.dropLinks
+    ) {
+      let subnetId = state.planEditor.subnetFeatures[selectedSubnetId].subnetId
+      // we have locations AND the active feature has drop links
+      const selectedSubnetLocations = PlanEditorSelectors.getSelectedSubnetLocations(state)
+      const coords = WktUtils.getXYFromEvent(event)
+      var menuItemFeatures = []
+      featureIds.forEach(location => {
+        let id = location.object_id
         var menuActions = []
-        if (!terminalLocations) {
-          // the selected node is NOT a location connector type so all locations get the disconnect option
-          // filter out abandoned locations
-          if (state.planEditor.subnets[subnetId]
-            && state.planEditor.subnets[subnetId].subnetLocationsById[locationId]
-            && state.planEditor.subnets[subnetId].subnetLocationsById[locationId].parentEquipmentId
-          ) {
-            // TODO: avoid duplicate unassignLocation code
-            menuActions.push(new MenuItemAction('REMOVE', 'Unassign from terminal', 'PlanEditorActions', 'unassignLocation', locationId, subnetId))
-          }
+        if (selectedSubnetLocations[id]) {
+          // this location is a part of the selected FDT
+          menuActions.push(new MenuItemAction('REMOVE', 'Unassign from terminal', 'PlanEditorActions', 'unassignLocation', id, selectedSubnetId))
         } else {
-          // there IS a location connector type selected so filter for add remove
-          if (terminalLocations[locationId]) {
-            menuActions.push(new MenuItemAction('REMOVE', 'Unassign from terminal', 'PlanEditorActions', 'unassignLocation', locationId, subnetId))
-          } else {
-            // either there is not a location connector type choosen OR the location isn't a part
-            menuActions.push(new MenuItemAction('ADD', 'Assign to terminal', 'PlanEditorActions', 'assignLocation', locationId, terminalId))
+          // check that the location is part of the same subnet as the FDT
+          if (state.planEditor.subnets[subnetId]
+            && state.planEditor.subnets[subnetId].subnetLocationsById[id])
+          {
+            menuActions.push(new MenuItemAction('ADD', 'Assign to terminal', 'PlanEditorActions', 'assignLocation', id, selectedSubnetId))
           }
         }
-
         if (menuActions.length > 0) {
           menuItemFeatures.push(new MenuItemFeature('LOCATION', 'Location', menuActions))
         }
-      }// else the location is NOT in the focused subnet so do not include it in the menu
-    })
-    if (menuItemFeatures.length <= 0) return Promise.resolve()
-    const coords = WktUtils.getXYFromEvent(event)
-    dispatch(ContextMenuActions.setContextMenuItems(menuItemFeatures))
-    dispatch(ContextMenuActions.showContextMenu(coords.x, coords.y))
+      })
+
+      // Show context menu
+      if (menuItemFeatures.length > 0) {
+        dispatch(ContextMenuActions.setContextMenuItems(menuItemFeatures))
+        dispatch(ContextMenuActions.showContextMenu(coords.x, coords.y))
+      } else {
+        return Promise.resolve()
+      }
+    } else {
+      return Promise.resolve()
+    }
   }
 }
 
@@ -652,6 +641,7 @@ function _updateSubnetFeatures (subnetFeatures) {
     let commands = []
     let subnetFeaturesById = {}
     let subnetIds = []
+    console.log(subnetFeatures)
     subnetFeatures.forEach(subnetFeature => {
       subnetFeaturesById[subnetFeature.feature.objectId] = subnetFeature
       let subnetId = subnetFeature.subnetId
@@ -683,17 +673,8 @@ function _updateSubnetFeatures (subnetFeatures) {
 }
 
 // helper
-function _spliceLocationFromTerminal (state, locationId, subnetId) {
-  let terminalId = null
-  if (state.planEditor.subnets[subnetId].subnetLocationsById[locationId]
-    && state.planEditor.subnets[subnetId].subnetLocationsById[locationId].parentEquipmentId
-  ) {
-    terminalId = state.planEditor.subnets[subnetId].subnetLocationsById[locationId].parentEquipmentId
-  }
-  if (!terminalId) return null
-
+function _spliceLocationFromTerminal (state, locationId, terminalId) {
   let subnetFeature = state.planEditor.subnetFeatures[terminalId]
-  if (!subnetFeature) return null
   subnetFeature = klona(subnetFeature)
   
   let index = subnetFeature.feature.dropLinks.findIndex(dropLink => {
@@ -711,12 +692,10 @@ function _spliceLocationFromTerminal (state, locationId, subnetId) {
   }
 }
 
-function unassignLocation (locationId, subnetId) {
-  // we require the subnet ID to avoid a search (most times the caller already has this info)
+function unassignLocation (locationId, terminalId) {
   return (dispatch, getState) => {
     const state = getState()
-    let subnetFeature = _spliceLocationFromTerminal(state, locationId, subnetId)
-    // removeing location's parentEquipmentId is unneeded because we do an immeadiate recalc which will update the location list
+    let subnetFeature = _spliceLocationFromTerminal(state, locationId, terminalId)
     if (subnetFeature) {
       return dispatch(_updateSubnetFeatures([subnetFeature]))
     } else {
@@ -734,9 +713,13 @@ function assignLocation (locationId, terminalId) {
     toFeature = klona(toFeature)
     let subnetId = toFeature.subnetId
 
+    let fromTerminalId = state.planEditor.subnets[subnetId].subnetLocationsById[locationId].parentEquipmentId
+
     // unassign location if location is assigned
-    let fromFeature = _spliceLocationFromTerminal(state, locationId, subnetId)
-    if (fromFeature) features.push(fromFeature)
+    if (fromTerminalId && state.planEditor.subnetFeatures[fromTerminalId]){
+      let fromFeature = _spliceLocationFromTerminal(state, locationId, fromTerminalId)
+      if (fromFeature) features.push(fromFeature)
+    }
 
     // assign location
     let defaultDropLink = {
@@ -1057,6 +1040,7 @@ function moveConstructionArea (objectId, newCoordinates) {
   }
 }
 
+// TODO: accept list
 // accept ConstructionArea then pass to deleteConstructionArea
 function deleteFeature (featureId) {
   return deleteFeatures([featureId])
@@ -1071,6 +1055,8 @@ function deleteFeatures (featureIds) {
       const url = `/service/plan-transaction/${transactionId}/subnet_cmd/update-children`
       let nextSelectedSubnetId = selectedSubnetId
       let commands = []
+      console.log("delete")
+      console.log(featureIds)
       // TODO: check for construction_area and run deleteConstructionArea
       featureIds.forEach(featureId => {
         const { subnetId, feature } = klona(planEditor.subnetFeatures[featureId])
@@ -1098,7 +1084,7 @@ function deleteFeatures (featureIds) {
       })
       
       batch(() => {
-        // TODO: make these dispatches plural so we don't need the foreach
+        // TODO: make these plural
         featureIds.forEach(featureId => {
           dispatch({ type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE, payload: featureId })
           dispatch({ type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE, payload: featureId })
@@ -1725,7 +1711,6 @@ function parseSubnet (subnet) {
       feature.dropLinks.forEach(dropLink => {
         dropLink.locationLinks.forEach(locationLink => {
           if (!subnet.subnetLocationsById[locationLink.locationId]) {
-            // TODO: lets look at this again, I think drop links are listed in subnet locationsById but maybe not every location in that link?
             console.warn(`location ${locationLink.locationId} of feature ${feature.objectId} is not in the location list of subnet ${subnetId}`)
           } else {
             subnet.subnetLocationsById[locationLink.locationId].parentEquipmentId = feature.objectId

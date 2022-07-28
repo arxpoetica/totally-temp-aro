@@ -92,9 +92,8 @@ export const equipmentDetail = (props) => {
           displayEquipment(plan.id, equipment.object_id)
           .then((equipmentInfo) => { checkForBounds(equipmentInfo) })
         }
-      }
-      
-      if (fiberFeatures && fiberFeatures.size > 0) {
+      } else if (fiberFeatures && fiberFeatures.size > 0) {
+
         AroHttp.get(`/service/plan/subnets/annotations?plan_id=${plan.id}`)
           .then(({ data: annotationsBySubnet }) => {
 
@@ -125,8 +124,9 @@ export const equipmentDetail = (props) => {
                 return fiber
               })
               setFiberMeta(newFiberMeta)
-              updateFiberFeatures(fiberFeatures)
+              updatefiberFeatures(fiberFeatures)
               activeViewModePanelAction(viewModePanels.EQUIPMENT_INFO)
+              clearEquipmentStates()
             }
 
           })
@@ -147,8 +147,9 @@ export const equipmentDetail = (props) => {
     return validEquipments
   }
 
-  const updateFiberFeatures = (fiberFeatures) => {
+  const updatefiberFeatures = (fiberFeatures) => {
     const newSelection = cloneSelection()
+    newSelection.editable.equipment = {}
     newSelection.details.fiberSegments = fiberFeatures
     setMapSelection(newSelection)
   }

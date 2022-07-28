@@ -72,7 +72,6 @@ const FibersPanel = (props) => {
   useEffect(() => {
     updateMapLayers()
   }, [
-    planId,
     zoom,
     dataItems.fiber && dataItems.fiber.selectedLibraryItems.length,
     updateMapLayerCalled,
@@ -271,7 +270,7 @@ const FibersPanel = (props) => {
                     <input
                       type="checkbox"
                       className="checkboxfill layer-type-checkboxes"
-                      checked={cableLayerTypeVisibility.existing ? 'checked' : ''}
+                      value={cableLayerTypeVisibility.existing || false}
                       onChange={() => onUpdateExistingCableVisibility()}
                     />
                     <span>&nbsp;Existing</span>
@@ -284,7 +283,7 @@ const FibersPanel = (props) => {
                     <input
                       type="checkbox"
                       className="checkboxfill layer-type-checkboxes"
-                      checked={cableLayerTypeVisibility.planned ? 'checked' : ''}
+                      value={cableLayerTypeVisibility.planned || false}
                       onChange={() => onUpdatePlannedCableVisibility()}
                     />
                     <span>&nbsp;Planned</span>
@@ -321,7 +320,7 @@ const FibersPanel = (props) => {
                                 <input
                                   type="checkbox"
                                   className="checkboxfill"
-                                  checked={cableLayer.checked ? 'checked' : ''}
+                                  checked={cableLayer.checked || false}
                                   onChange={() =>
                                     updateLayerVisibility('cables', cableLayer, !cableLayer.checked)
                                   }
@@ -350,7 +349,9 @@ const FibersPanel = (props) => {
                                         <input
                                           type="checkbox"
                                           className="checkboxfill"
-                                          checked={cableLayer.conduitVisibility[conduitLayer.key] ? 'checked' : ''}
+                                          checked={
+                                            cableLayer.conduitVisibility[conduitLayer.key] || false
+                                          }
                                           onChange={() => {
                                             setUpdateMapLayerCalled(!updateMapLayerCalled)
                                             setCableConduitVisibility(

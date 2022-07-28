@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import PlanEditorActions from './plan-editor-actions'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import PlanEditorSelectors from './plan-editor-selectors'
-import { constants, getIconUrl, getMetersPerPixel, validLocationConnectionTypes } from './shared'
+import { constants, getIconUrl, getMetersPerPixel } from './shared'
 
 export class EquipmentMapObjects extends Component {
   constructor(props) {
@@ -191,15 +191,11 @@ export class EquipmentMapObjects extends Component {
           const { feature } = subnetFeatures[id]
           if (
             id === selectedSubnetId
-            && validLocationConnectionTypes.includes( feature.networkNodeType )
+            //&& feature.networkNodeType === 'fiber_distribution_terminal'
             && 'dropLinks' in feature
             && feature.dropLinks.length > 0
           ) {
             const [lng, lat] = feature.geometry.coordinates
-            // TODO: this needs to change! 
-            //  we're not drawing a line to locations in the drop list 
-            //  we're drawing to every selectedLocation (connected locations in the subnet)
-            //  which just happens to be the same for nodes that can link to locations
             for (const [droplinkId, location] of Object.entries(selectedLocations)) {
               this.makeDropLink(location, {lng, lat}, droplinkId)
             }
@@ -230,7 +226,6 @@ export class EquipmentMapObjects extends Component {
         path: [parentPt, { lat: latitude, lng: longitude }],
         strokeColor: '#84d496',
         strokeWeight: 1.5,
-        clickable: false,
       })
       this.droplinks[droplinkId].setMap(this.props.googleMaps)
     }
@@ -263,7 +258,7 @@ const mapStateToProps = state => ({
   focusedEquipmentIds: PlanEditorSelectors.getFocusedEquipmentIds(state),
   selectedSubnetId: state.planEditor.selectedSubnetId,
   subnetFeatures: state.planEditor.subnetFeatures,
-  selectedLocations: PlanEditorSelectors.getLocationsForSelectedFeature(state),
+  selectedLocations: PlanEditorSelectors.getSelectedSubnetLocations(state),
   cursorLocations: PlanEditorSelectors.getCursorLocations(state),
   // DO NOT DELETE `locationAlerts`: `getIconUrl` chokes without this.
   // The wiring is not "hard," but state still depends on it.

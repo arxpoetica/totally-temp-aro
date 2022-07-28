@@ -141,7 +141,6 @@ const CompetitionPanel = (props) => {
   const [showBlockHeatMap, setShowBlockHeatMap] = useState(false)
 
   const {
-    activePlanId,
     mapToolName,
     competitorNetworks,
     competitionManager,
@@ -160,7 +159,7 @@ const CompetitionPanel = (props) => {
 
   useEffect(() => {
     updateMapLayers()
-  }, [activePlanId, zoom, defaultPlanCoordinates, minAggregatedValue, maxAggregatedValue, showBlockHeatMap])
+  }, [zoom, defaultPlanCoordinates, minAggregatedValue, maxAggregatedValue, showBlockHeatMap])
 
   const formatCompetitorsData = (allCompetitorsData) => {
     return allCompetitorsData.map((allCompetitors) => {
@@ -613,7 +612,6 @@ const CompetitionPanel = (props) => {
 }
 
 const mapStateToProps = (state) => ({
-  activePlanId: state.plan.activePlan && state.plan.activePlan.id,
   mapTools: state.map.map_tools,
   map: state.map,
   mapReadyPromise: state.mapLayers.mapReadyPromise,

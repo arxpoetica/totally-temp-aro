@@ -42,7 +42,6 @@ const conduitsLayerState = {
 
 const ConduitsPanel = (props) => {
   const {
-    activePlanId,
     networkEquipmentLayers,
     conduitsArray,
     roadsArray,
@@ -83,7 +82,7 @@ const ConduitsPanel = (props) => {
   // Update map layers when the display mode button changes
   useEffect(() => {
     updateMapLayers()
-  }, [activePlanId, zoom, dataItems.edge && dataItems.edge.selectedLibraryItems.length, updateMapLayerCalled])
+  }, [zoom, dataItems.edge && dataItems.edge.selectedLibraryItems.length, updateMapLayerCalled])
 
   rxState.viewSettingsChanged
     .getMessage()
@@ -222,7 +221,7 @@ const ConduitsPanel = (props) => {
                             <input
                               type="checkbox"
                               className="checkboxfill"
-                              checked={roadLayer.checked ? 'checked' : ''}
+                              checked={roadLayer.checked || false}
                               onChange={() => {
                                 setUpdateMapLayerCalled(!updateMapLayerCalled)
                                 updateLayerVisibility('roads', roadLayer, !roadLayer.checked)
@@ -247,7 +246,7 @@ const ConduitsPanel = (props) => {
                             <input
                               type="checkbox"
                               className="checkboxfill"
-                              checked={conduitLayer.checked ? 'checked' : ''}
+                              checked={conduitLayer.checked || false}
                               onChange={() => {
                                 setUpdateMapLayerCalled(!updateMapLayerCalled)
                                 updateLayerVisibility(
@@ -291,7 +290,6 @@ const ConduitsPanel = (props) => {
 
 const mapStateToProps = (state) => {
   return {
-    activePlanId: state.plan.activePlan && state.plan.activePlan.id,
     networkEquipmentLayers: getNetworkEquipmentLayersList(state),
     conduitsArray: getConduitsArray(state).sort((a, b) => a.listIndex - b.listIndex),
     roadsArray: getRoadsArray(state).sort((a, b) => a.listIndex - b.listIndex),

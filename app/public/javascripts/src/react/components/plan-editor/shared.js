@@ -2,21 +2,6 @@
 // build replace plugin?
 const ARO_CLIENT = 'aro'
 
-export const validSubnetTypes = [
-  'central_office',
-  'fiber_distribution_hub',
-  'dslam',
-  'subnet_node',
-]
-
-export const validLocationConnectionTypes = [
-  'fiber_distribution_terminal', 
-  'multiple_dwelling_unit', 
-  'bulk_distribution_terminal', 
-  'cell_5g', 
-  'location_connector',
-]
-
 export const constants = Object.freeze({
   Z_INDEX_CO_SUBNET: 5,
   Z_INDEX_HUB_SUBNET: 6,

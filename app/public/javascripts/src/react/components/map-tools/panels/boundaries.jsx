@@ -42,7 +42,6 @@ const BoundariesPanel = (props) => {
   const { MapToolActions, isMapToolExpanded, isMapToolVisible } = globalMethods
 
   const {
-    activePlanId,
     mapToolName,
     boundaryLayers,
     updateLayerVisibility,
@@ -82,7 +81,7 @@ const BoundariesPanel = (props) => {
       || (prevSelectedLibraryItems && !dequal(prevSelectedLibraryItems, selectedLibraryItems))) {
         updateMapLayers()
     }
-  }, [activePlanId, boundaryLayers, selectedLibraryItems])
+  }, [boundaryLayers, selectedLibraryItems])
 
   const reloadVisibleLayers = async() => {
     try {
@@ -209,10 +208,10 @@ const BoundariesPanel = (props) => {
     setMapSelection(newSelection)
   }
 
-  const updateSelectedCategory = (uiLayerId, categoryId) => {
+  const updateSelectedCategory = (selectedType, categoryId) => {
     boundaryLayers.forEach((layer) => {
-      if (layer.uiLayerId === uiLayerId && parseInt(categoryId) > 0) {
-        layer.selectedCategory = layer.categories[categoryId]
+      if (layer.type === selectedType && parseInt(categoryId) > 0) {
+        layer.selectedCategory = layer.categories[1]
       } else {
         layer.selectedCategory = null
       }
@@ -265,7 +264,7 @@ const BoundariesPanel = (props) => {
                           className='form-control dropdown'
                           value={layer.selectedCategory ? layer.selectedCategory.id : 0}
                           onChange={(event) => {
-                            updateSelectedCategory(layer.uiLayerId, event.target.value)
+                            updateSelectedCategory(layer.type, event.target.value),
                             onSelectCategory(layer.selectedCategory)
                           }}
                         >
@@ -318,7 +317,6 @@ const getAllBoundaryLayers = state => state.mapLayers.boundary
 const getBoundaryLayersList = createSelector([getAllBoundaryLayers], (boundaryLayer) => boundaryLayer.toJS())
 
 const mapStateToProps = (state) => ({
-  activePlanId: state.plan.activePlan && state.plan.activePlan.id,
   boundaryLayers: getBoundaryLayersList(state),
   mapZoomChanged: state.map.zoom,
   dataItems: state.plan.dataItems,

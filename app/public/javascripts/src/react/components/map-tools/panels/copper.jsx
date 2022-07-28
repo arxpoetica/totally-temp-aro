@@ -31,7 +31,6 @@ const copperLayerState = {
 
 const CopperPanel = (props) => {
   const {
-    activePlanId,
     mapToolName,
     copperLayers,
     copperArray,
@@ -70,7 +69,6 @@ const CopperPanel = (props) => {
   useEffect(() => {
     updateMapLayers()
   }, [
-    activePlanId,
     zoom,
     dataItems.fiber && dataItems.fiber.selectedLibraryItems.length,
     dataItems.copper_cable && dataItems.copper_cable.selectedLibraryItems.length,
@@ -213,7 +211,7 @@ const CopperPanel = (props) => {
                                 <input
                                   type="checkbox"
                                   className="checkboxfill"
-                                  checked={copperLayer.checked ? 'checked' : ''}
+                                  checked={copperLayer.checked || false}
                                   onChange={() =>
                                     updateLayerVisibility(
                                       'UNKNOWN',
@@ -279,7 +277,6 @@ const CopperPanel = (props) => {
 
 const mapStateToProps = (state) => {
   return {
-    activePlanId: state.plan.activePlan && state.plan.activePlan.id,
     map: state.map,
     copperLayers: getCopperLayersList(state),
     copperArray: getCopperArray(state),

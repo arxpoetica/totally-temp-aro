@@ -105,14 +105,10 @@ function GlobalSettings(props) {
   const handleChangeView = (currentView) => {
     const breadCrumbClone = klona(breadCrumb);
     breadCrumbClone.push(currentView)
-    setBreadCrumb(
-      currentView === "Global Settings"
-      ? [currentView]
-      : breadCrumbClone
-    )
     setResourceEditorProps('all')
     setDataUploadProps('location')
     setDataSelectionID(1)
+    setBreadCrumb(currentView === "Global Settings" ? [currentView] : breadCrumbClone)
     props.setIsRrmManager(false)
     props.searchManagers('')
     props.setGlobalSettingsView(false)
@@ -125,7 +121,7 @@ function GlobalSettings(props) {
     props.setShowGlobalSettings(false)
     props.setIsRrmManager(false)
     props.setGlobalSettingsView(false)
-    showResourceManagerTable()
+    props.setEditingMode('LIST_RESOURCE_MANAGERS')
     if (props.currentViewProps === views.MY_ACCOUNT) { props.openAccountSettingsModal(false) }
   }
   
@@ -136,17 +132,13 @@ function GlobalSettings(props) {
       !viewValues.includes(currentBreadCrumb())
       && breadCrumb.includes("Resource Managers")
     ) {
-      showResourceManagerTable()
+      props.setIsResourceEditor(true)
+      props.setEditingMode('LIST_RESOURCE_MANAGERS')
     } else {
       const breadCrumbClone = klona(breadCrumb);
       breadCrumbClone.pop()
       setBreadCrumb(breadCrumbClone)
     }
-  }
-
-  const showResourceManagerTable = () => {
-    props.setIsResourceEditor(true)
-    props.setEditingMode('LIST_RESOURCE_MANAGERS')
   }
 
   const currentBreadCrumb = () => {

@@ -142,6 +142,7 @@ export const BoundaryCoverage = (props) => {
         locCoverage.totalCount += location.entityCount
         boundsCoverage.totalLocations += location.entityCount
         const tags = formatCensusBlockData(location.censusBlockTagInfo)
+
         for (const catId in tags) {
           if (layerCategories.hasOwnProperty(catId)) {
             tags[catId].forEach((tagId) => {
@@ -285,8 +286,8 @@ export const BoundaryCoverage = (props) => {
                     {cat.description}
                   </div>
                   {
-                    Object.entries(cat.tags).map(([tagKey, tag]) => (
-                      <div className="bounds-coverage-layer-tag" key={tagKey}>
+                    cat.tags.map((tag, tagIndex) => (
+                      <div className="bounds-coverage-layer-tag" key={tagIndex}>
                         <div className="outlineLegendIcon" style={{ borderColor: tag.colourHash, backgroundColor: tag.colourHash }} />
                         {tag.description}:
                         {
