@@ -43,7 +43,6 @@ function setTransaction (state, transaction) {
 function setTransactionIdOnly (state, transactionId) {
   return { ...state,
     transaction: {
-      ...state.transaction,
       id: transactionId
     }
   }
