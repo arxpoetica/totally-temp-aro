@@ -17,9 +17,11 @@ const _OptimizationModal = props => {
     copyEphemeralPlan,
     modifyOptimization,
     commitTransaction,
+    getActiveTransaction
   } = props
 
   useEffect(() => {
+    getActiveTransaction()
     if (activePlan.ephemeral) {
       // This is an ephemeral plan...don't show any modals to the user...
       // instead copy this plan over to a new ephemeral plan
@@ -69,6 +71,7 @@ const mapDispatchToProps = dispatch => ({
   copyEphemeralPlan: plan => dispatch(NetworkOptimizationActions.copyEphemeralPlan(plan)),
   modifyOptimization: plan => dispatch(NetworkOptimizationActions.modifyOptimization(plan)),
   commitTransaction: transactionId => dispatch(PlanEditorActions.commitTransaction(transactionId)),
+  getActiveTransaction: () => dispatch(PlanEditorActions.getActiveTransaction()),
 })
 
 export const OptimizationModal = connect(mapStateToProps, mapDispatchToProps)(_OptimizationModal)
