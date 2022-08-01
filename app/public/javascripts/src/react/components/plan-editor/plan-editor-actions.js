@@ -138,6 +138,22 @@ function discardTransaction (transactionId) {
     }
   }
 }
+function getActiveTransaction() {
+  return async(dispatch, getState) => {
+    const { plan } = getState();
+    try {
+      const { data } = await AroHttp.get(`/service/plan-transaction?plan_id=${plan.activePlan.id}`)
+      if (data[0]) {
+        dispatch({
+          type: Actions.PLAN_EDITOR_SET_TRANSACTION_ID_ONLY,
+          payload: data[0].id
+        })
+      }
+    } catch (error) {
+      handleError(error)
+    }
+  }
+}
 
 const utf8decoder = new TextDecoder()
 function subscribeToSocket() {
@@ -1808,6 +1824,7 @@ export default {
   commitTransaction,
   clearTransaction,
   discardTransaction,
+  getActiveTransaction,
   resumeOrCreateTransaction,
   createFeature,
   updateFeatureProperties,
