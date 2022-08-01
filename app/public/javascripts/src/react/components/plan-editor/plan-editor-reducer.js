@@ -40,6 +40,15 @@ function setTransaction (state, transaction) {
   }
 }
 
+function setTransactionIdOnly (state, transactionId) {
+  return { ...state,
+    transaction: {
+      ...state.transaction,
+      id: transactionId
+    }
+  }
+}
+
 function clearTransaction () {
   return klona(defaultState)
 }
@@ -341,6 +350,9 @@ function planEditorReducer (state = defaultState, { type, payload }) {
 
     case Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION:
       return setIsEnteringTransaction(state, payload)
+
+    case Actions.PLAN_EDITOR_SET_TRANSACTION_ID_ONLY:
+      return setTransactionIdOnly(state, payload)
 
     case Actions.PLAN_EDITOR_SET_SELECTED_EDIT_FEATURE_IDS:
       return setSelectedEditFeatureIds(state, payload)
