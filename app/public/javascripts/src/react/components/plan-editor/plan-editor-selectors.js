@@ -384,19 +384,23 @@ const getLocationCounts = createSelector(
       // TODO: not a fan of hardcoding by type
       if (subnet && type === 'fiber_distribution_hub') {
         const locations = Object.values(subnet.subnetLocationsById)
-        locationCountsById[id] = { total: 0, connected: 0 }
-        locations.forEach(location => {
+        const uniqueConnected = new Set()
+        const uniqueTotal = new Set()
+        for (const location of locations) {
           if(!!location.parentEquipmentId) {
-            locationCountsById[id].connected++
+            location.objectIds.forEach(id => uniqueConnected.add(id))
           }
-
-          locationCountsById[id].total++
-        })
-
+          location.objectIds.forEach(id => uniqueTotal.add(id))
+        }
+        locationCountsById[id] = {
+          connected: uniqueConnected.size,
+          total: uniqueTotal.size,
+        }
       } else if (subnet && type === 'dslam') {
         locationCountsById[id] = Object.keys(subnet.subnetLocationsById).length
-      } else if ( validLocationConnectionTypes.includes( type ) ) {
-        locationCountsById[id] = feature.feature.dropLinks.length
+      } else if (validLocationConnectionTypes.includes(type)) {
+        locationCountsById[id] = feature.feature.dropLinks
+          .reduce((count, dropLink) => count + dropLink.locationLinks.length, 0)
       } else {
         const locationDistanceMap = subnet && subnet.fiber && subnet.fiber.locationDistanceMap
         locationCountsById[id] = locationDistanceMap
