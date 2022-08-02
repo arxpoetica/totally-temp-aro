@@ -151,7 +151,7 @@ function subscribeToSocket() {
         const data = JSON.parse(utf8decoder.decode(rawData.content))
         let message
         const { userId, updateSession, planTransactionId, rootSubnetId } = data
-
+        console.log(data)
         // asynchronous set up of skeleton from socket data
         switch (data.subnetNodeUpdateType) {
           case DRAFT_STATES.START_INITIALIZATION: break // no op
@@ -209,11 +209,39 @@ function subscribeToSocket() {
           case DRAFT_STATES.END_SUBNET_TREE: break // no op
           case DRAFT_STATES.END_INITIALIZATION: break // no op
           case DRAFT_STATES.SYNC_ROOT_LOCATIONS:
+            // TODO: parse locations to dict
+            // TODO: Harry fix your enums! 
+            let enumPatch = {
+              'small': 'small_businesses', 
+              'medium': 'medium_businesses',
+              'large': 'large_businesses',
+            }
+            let locations = {}
+            for (const location of data.rootLocations) {
+              if (!location.ids.length) {
+                //console.log(location)
+                // TODO: thses are dropcoils what do we do with dropcoils?
+              } else {
+                
+                let locationId = location.ids[0].uuid // what is there are more than one?
+                // TODO: system wide change ALL "xx_businesses" to "xx" eg "medium_businesses" to "medium" - a lot in settings 
+                for (let subLocation of location.ids) {
+                  if (enumPatch[subLocation.locationEntityType]) {
+                    subLocation.locationEntityType = enumPatch[subLocation.locationEntityType]
+                  }
+                }
+                locations[locationId] = location
+              }
+              if (location.ids.length > 1) {
+                console.log('------------ HERE ------------')
+                console.log(location)
+              }
+            }
             dispatch({
               type: Actions.PLAN_EDITOR_SET_DRAFT_LOCATIONS,
               payload: {
                 rootSubnetId: data.rootSubnetId,
-                rootLocations: data.rootLocations,
+                rootLocations: locations,
               }
             })
             break

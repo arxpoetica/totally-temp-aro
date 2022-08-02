@@ -26,7 +26,7 @@ const SubnetDetail = props => {
 
     // no location alert found, better search elsewhere
     let equipment
-
+    // TODO: we shouldn't need to search, we should use a dictionary 
     // search among draft equipment first
     let allEquipment = []
     const drafts = Object.values(props.rootDrafts)
