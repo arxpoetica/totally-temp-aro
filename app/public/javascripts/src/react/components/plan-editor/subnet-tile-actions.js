@@ -61,7 +61,6 @@ function setSubnetData (subnetId, locations) { // will make this generic in te f
 }
 
 function setSubnetsData (subnetsData) {
-  console.log(subnetsData)
   // gaurd against empty set?
   return (dispatch) => {
     return batch(() => {

@@ -167,7 +167,6 @@ function subscribeToSocket() {
         const data = JSON.parse(utf8decoder.decode(rawData.content))
         let message
         const { userId, updateSession, planTransactionId, rootSubnetId } = data
-        console.log(data)
         // asynchronous set up of skeleton from socket data
         switch (data.subnetNodeUpdateType) {
           case DRAFT_STATES.START_INITIALIZATION: break // no op
@@ -239,14 +238,15 @@ function subscribeToSocket() {
                 // TODO: thses are dropcoils what do we do with dropcoils?
               } else {
                 
-                let locationId = location.ids[0].uuid // what is there are more than one?
+                //let locationId = location.ids[0].uuid // what is there are more than one?
                 // TODO: system wide change ALL "xx_businesses" to "xx" eg "medium_businesses" to "medium" - a lot in settings 
                 for (let subLocation of location.ids) {
                   if (enumPatch[subLocation.locationEntityType]) {
                     subLocation.locationEntityType = enumPatch[subLocation.locationEntityType]
                   }
+                  locations[subLocation.uuid] = subLocation
                 }
-                locations[locationId] = location
+                //locations[locationId] = location
               }
               if (location.ids.length > 1) {
                 console.log('------------ HERE ------------')

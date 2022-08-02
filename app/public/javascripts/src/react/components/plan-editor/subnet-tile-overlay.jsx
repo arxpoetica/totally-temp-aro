@@ -13,43 +13,6 @@ let mapIcons = tileIcons.mapIcons
 let iconBadges = tileIcons.iconBadges
 // --- helpers --- //
 const TWO_PI = 2 * Math.PI
-/*
-function loadIcon (src, callback) {
-  var loadImg = new Image()
-  loadImg.addEventListener('load', function(){
-    console.log(`image loaded ${this}`)
-    let icon = {
-      image: null,
-      offset: {
-        x: 0,
-        y: 0,
-      },
-    }
-    icon.image = this
-    icon.offset = {
-      x: Math.floor(this.width * 0.5),
-      y: Math.floor(this.height * 0.5),
-    }
-    callback(icon)
-  }, false)
-
-  loadImg.src = src
-}
-
-
-//let mapIcons = {}
-//let iconBadges = {}
-loadIcon('/images/map_icons/aro/businesses_small_default.png', icon => mapIcons['small_businesses'] = icon)
-loadIcon('/images/map_icons/badges/badge_alert.png', icon => {
-  icon.offset.x = -9
-  icon.offset.y = -4
-  icon.offsetMult = { // percent of icon width and height
-    w: 1.0,
-    h: 0.0,
-  }
-  iconBadges['alert'] = icon
-})
-*/
 
 // needs to be a class instance becasue is needs to keep a scope for the getTile callback functions
 class _SubnetTileOverlay extends Component {
@@ -72,28 +35,17 @@ class _SubnetTileOverlay extends Component {
     canvas.width = TileUtils.TILE_SIZE + (2 * TileUtils.TILE_MARGIN)
     canvas.height = TileUtils.TILE_SIZE + (2 * TileUtils.TILE_MARGIN)
     var ctx = canvas.getContext('2d')
-    //console.log(tileIcons)
-    //console.log(state)
     ctx.fillStyle = '#99FF99'
     for (const [id, point] of Object.entries(points)) {
       let px = TileUtils.worldCoordToTilePixel(point, tileId)
       px.x += TileUtils.TILE_MARGIN
       px.y += TileUtils.TILE_MARGIN
       // get icon type
-      let iconType = state.locationsById[id].ids[0].locationEntityType
-      //console.log(iconType)
+      let iconType = state.locationsById[id].locationEntityType
       let icon = mapIcons[iconType]
       // TODO: locationEntityType is not consistent across Service
       //  eg: sometimes it's "medium_businesses" 
       //      in drafts it's "medium"
-
-      //let iconType = state.locationsById[]. YET TO IMPLEMENT 
-      // planEditor.drafts["f142cb6c-f7b2-11ec-be9f-1392a9f467e2"].locations["eb455414-f7b2-11ec-969d-4b92ff1c5854"].ids[0].locationEntityType
-      // //ctx.arc(x, y, radius, startAngle, endAngle, counterclockwise)
-      // ctx.beginPath()
-      // ctx.arc(px.x+TileUtils.TILE_MARGIN, px.y+TileUtils.TILE_MARGIN, 5, 0, TWO_PI)
-      // ctx.fill()
-      
       let imageCoord = {
         x: px.x - icon.offset.x,
         y: px.y - icon.offset.y,
