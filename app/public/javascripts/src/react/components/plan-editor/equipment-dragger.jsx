@@ -5,40 +5,41 @@ import { constants } from './shared'
 
 export const EquipmentDragger = props => {
 
-  const { activePlan, perspective, mapLayers } = props
-  const [editableEquipmentTypes, setEditableEquipmentTypes] = useState([])
-  const [equipmentDefinitions, setEquipmentDefinitions] = useState({})
+  const { activePlan, perspective, mapLayers, features, selectedSubnetId } = props
+  const [visibleEquipmentTypes, setVisibleEquipmentTypes] = useState([])
+
+
+  let { planType } = activePlan
+  let constructionPlanType = planType
+  if (!(planType in perspective.networkEquipment.planEdit)) planType = 'default'
+  if (!(constructionPlanType in perspective.constructionAreas.planEdit)) constructionPlanType = 'default'
+  const equipmentDefinitions = {
+    ...mapLayers.networkEquipment.equipments,
+    ...mapLayers.constructionAreas.construction_areas,
+  }
+  const addableEquipmentTypes = perspective && perspective.networkEquipment.planEdit[planType].areAddable || []
+  const addableEdgeConstructionTypes = perspective && perspective.constructionAreas.planEdit[constructionPlanType].areAddable || []
+  const addableTypes = [...addableEquipmentTypes, ...addableEdgeConstructionTypes]
 
   useEffect(() => {
-    let { planType } = activePlan
-    let constructionPlanType = planType
-    if (!(planType in perspective.networkEquipment.planEdit)) planType = 'default'
-    if (!(constructionPlanType in perspective.constructionAreas.planEdit)) constructionPlanType = 'default'
-    const definitions = {
-      ...mapLayers.networkEquipment.equipments,
-      ...mapLayers.constructionAreas.construction_areas,
+    if (selectedSubnetId) {
+      const { networkNodeType } = features[selectedSubnetId].feature
+      const visibleEquipmentTypes = addableTypes.filter(type => {
+        return equipmentDefinitions[networkNodeType].allowedChildEquipment.includes(type)
+      })
+      setVisibleEquipmentTypes(visibleEquipmentTypes)
+    } else {
+      setVisibleEquipmentTypes([])
     }
+  }, [selectedSubnetId])
 
-    setEquipmentDefinitions(definitions)
-    const networkNodeTypes = Object.keys(definitions)
-
-    const visibleEquipmentTypes = perspective && perspective.networkEquipment.planEdit[planType].areAddable || []
-    const visibleEdgeConstructionTypes = perspective && perspective.constructionAreas.planEdit[constructionPlanType].areAddable || []
-    const visibleTypes = [...visibleEquipmentTypes, ...visibleEdgeConstructionTypes]
-
-    const editableEquipmentTypes = visibleTypes.filter(type => {
-      return networkNodeTypes.includes(type)
-    })
-    setEditableEquipmentTypes(editableEquipmentTypes)
-  }, [])
-
-  return Object.keys(equipmentDefinitions).length > 0 && (
+  return visibleEquipmentTypes.length > 0 && (
     <div className="equipment-dragger">
       <div className="info">
         (drag icon onto map)
       </div>
       <div className="nodes">
-        {editableEquipmentTypes.map(type => equipmentDefinitions[type] &&
+        {visibleEquipmentTypes.map(type => equipmentDefinitions[type] &&
           <DraggableNode
             key={type}
             icon={equipmentDefinitions[type].iconUrl}
@@ -48,6 +49,22 @@ export const EquipmentDragger = props => {
           />
         )}
       </div>
+      <style jsx>{`
+        .equipment-dragger {
+          margin: 0 0 10px;
+        }
+        .info {
+          text-align: center;
+          margin: 0 0 4px;
+        }
+        .nodes {
+          display: grid;
+          gap: 5px;
+          grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
+          padding: 5px;
+          border: 2px solid #f3f3f3;
+        }
+      `}</style>
     </div>
   ) || null
 
@@ -58,6 +75,8 @@ const mapStateToProps = (state) => {
     activePlan: state.plan.activePlan,
     perspective: state.configuration.ui.perspective,
     mapLayers: state.mapLayers,
+    features: state.planEditor.features,
+    selectedSubnetId: state.planEditor.selectedSubnetId,
   }
 }
 
