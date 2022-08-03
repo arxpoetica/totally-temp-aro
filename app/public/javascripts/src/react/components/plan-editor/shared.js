@@ -1,3 +1,6 @@
+import WktUtils from '../../../shared-utils/wkt-utils'
+import { Notifier } from '../../common/notifications'
+
 // FIXME: how to use get `state.configuration.system.ARO_CLIENT` in a constant like this
 // build replace plugin?
 const ARO_CLIENT = 'aro'
@@ -133,4 +136,31 @@ export const getIconUrl = (feature, { equipments, constructionAreas, locationAle
  */
 export const getMetersPerPixel = (latitude, zoom) => {
   return 156543.03392 * Math.cos(latitude * Math.PI / 180) / Math.pow(2, zoom)
+}
+
+/**
+ * Guards by checking if the equipment is inside the subnet boundary
+ * Used to check if equipment icon is dropped/moved inside/outside of the
+ * subnet, ejecting early and warning the user
+ * @param {object} latLng
+ * @param {string} selectedSubnetId
+ * @param {object} subnetFeatures
+ * @param {object} drafts
+ * @returns {boolean} Equipment is inside the boundary
+ */
+export const isEquipmentInsideBoundary = (latLng, selectedSubnetId, subnetFeatures, drafts) => {
+  // equipment either has the subnet or belongs to a parent equipment's subnet
+  const draft = drafts[selectedSubnetId] || drafts[subnetFeatures[selectedSubnetId].subnetId]
+  const subnetBoundary = draft.subnetBoundary
+  const paths = WktUtils.getGoogleMapPathsFromWKTMultiPolygon(subnetBoundary.polygon)
+  const polygon = new google.maps.Polygon({ paths })
+  const isInsideSubnet = google.maps.geometry.poly.containsLocation(latLng, polygon)
+  if (!isInsideSubnet) {
+    Notifier.warn([
+      'Equipment must be placed inside of Service Area boundary ',
+      'and FDTs must be placed inside the selected FDH boundary.',
+    ].join(''), { title: 'Action not allowed' })
+    return false
+  }
+  return true
 }

@@ -1,5 +1,6 @@
 import { showNotification } from '@mantine/notifications'
 
+// TODO: move this function into the `Notifier` class as a static method
 export function handleError(error, props = {}) {
 
   console.error(error)
@@ -25,5 +26,20 @@ export function handleError(error, props = {}) {
     autoClose: false,
     ...props,
   })
+
+}
+
+export class Notifier {
+
+  static warn(message, props = {}) {
+    console.warn(message)
+    showNotification({
+      title: `Warning`,
+      message,
+      color: 'yellow',
+      autoClose: false,
+      ...props,
+    })
+  }
 
 }
