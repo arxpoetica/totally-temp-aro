@@ -2,36 +2,12 @@ import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import DraggableNode from './draggable-node.jsx'
 import { constants } from './shared'
+import PlanEditorSelectors from './plan-editor-selectors'
 
 export const EquipmentDragger = props => {
 
-  const { activePlan, perspective, mapLayers, features, selectedSubnetId } = props
-  const [visibleEquipmentTypes, setVisibleEquipmentTypes] = useState([])
-
-
-  let { planType } = activePlan
-  let constructionPlanType = planType
-  if (!(planType in perspective.networkEquipment.planEdit)) planType = 'default'
-  if (!(constructionPlanType in perspective.constructionAreas.planEdit)) constructionPlanType = 'default'
-  const equipmentDefinitions = {
-    ...mapLayers.networkEquipment.equipments,
-    ...mapLayers.constructionAreas.construction_areas,
-  }
-  const addableEquipmentTypes = perspective && perspective.networkEquipment.planEdit[planType].areAddable || []
-  const addableEdgeConstructionTypes = perspective && perspective.constructionAreas.planEdit[constructionPlanType].areAddable || []
-  const addableTypes = [...addableEquipmentTypes, ...addableEdgeConstructionTypes]
-
-  useEffect(() => {
-    if (selectedSubnetId) {
-      const { networkNodeType } = features[selectedSubnetId].feature
-      const visibleEquipmentTypes = addableTypes.filter(type => {
-        return equipmentDefinitions[networkNodeType].allowedChildEquipment.includes(type)
-      })
-      setVisibleEquipmentTypes(visibleEquipmentTypes)
-    } else {
-      setVisibleEquipmentTypes([])
-    }
-  }, [selectedSubnetId])
+  const { equipmentDraggerInfo, visibleEquipmentTypes } = props
+  const { equipmentDefinitions } = equipmentDraggerInfo
 
   return visibleEquipmentTypes.length > 0 && (
     <div className="equipment-dragger">
@@ -72,11 +48,8 @@ export const EquipmentDragger = props => {
 
 const mapStateToProps = (state) => {
   return {
-    activePlan: state.plan.activePlan,
-    perspective: state.configuration.ui.perspective,
-    mapLayers: state.mapLayers,
-    features: state.planEditor.features,
-    selectedSubnetId: state.planEditor.selectedSubnetId,
+    equipmentDraggerInfo: PlanEditorSelectors.getEquipmentDraggerInfo(state),
+    visibleEquipmentTypes: state.planEditor.visibleEquipmentTypes,
   }
 }
 

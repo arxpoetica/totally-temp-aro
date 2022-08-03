@@ -1332,34 +1332,38 @@ function addSubnets({ subnetIds = [], forceReload = false }) {
 }
 
 function setSelectedSubnetId (selectedSubnetId) {
-  return async (dispatch, getState) => {
-
-    if (!selectedSubnetId) {
-      dispatch({
-        type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
-        payload: null,
-      })
-    } else {
-      const { planEditor } = getState()
-      const { drafts } = planEditor
-      // only load a new subnet if you have a subnet selected
+  return (dispatch, getState) => {
+    batch(async() => {
       try {
-        // only load a new subnet if you have a subnet selected
-        if (drafts[selectedSubnetId]) await dispatch(addSubnets({ subnetIds: [selectedSubnetId] }))
-        // otherwise it's just a piece of equipment
-        // so go ahead and pass the `selectedSubnetId` along...
-        dispatch({
-          type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
-          payload: selectedSubnetId,
-        })
+        if (!selectedSubnetId) {
+          dispatch({ type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID, payload: null })
+          dispatch({ type: Actions.PLAN_EDITOR_SET_VISIBLE_EQUIPMENT_TYPES, payload: [] })
+        } else {
+          const { drafts } = getState().planEditor
+          // only load a new subnet if you have a subnet selected
+          if (drafts[selectedSubnetId]) await dispatch(addSubnets({ subnetIds: [selectedSubnetId] }))
+          // otherwise it's just a piece of equipment
+          // so go ahead and pass the `selectedSubnetId` along...
+          dispatch({
+            type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
+            payload: selectedSubnetId,
+          })
+
+          const state = getState()
+          const { features } = state.planEditor
+          const { networkNodeType } = features[selectedSubnetId].feature
+          const { equipmentDefinitions, addableTypes } = PlanEditorSelectors.getEquipmentDraggerInfo(state)
+          const visibleEquipmentTypes = addableTypes.filter(type => {
+            return equipmentDefinitions[networkNodeType].allowedChildEquipment.includes(type)
+          })
+          dispatch({ type: Actions.PLAN_EDITOR_SET_VISIBLE_EQUIPMENT_TYPES, payload: visibleEquipmentTypes })
+        }
       } catch (error) {
         handleError(error)
-        dispatch({
-          type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
-          payload: null,
-        })
+        dispatch({ type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID, payload: null })
+        dispatch({ type: Actions.PLAN_EDITOR_SET_VISIBLE_EQUIPMENT_TYPES, payload: [] })
       }
-    }
+    })
   }
 }
 

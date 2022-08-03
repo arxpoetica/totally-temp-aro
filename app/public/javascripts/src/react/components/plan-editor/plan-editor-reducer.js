@@ -23,7 +23,10 @@ const defaultState = {
   drafts: {},
   subnets: {},
   subnetFeatures: {},
-  selectedSubnetId: null, // need to rename this now that a terminal can be selected, lets do "activeFeature" // unselected this should be null not ''
+  // need to rename this now that any equipment can be selected,
+  // lets do "activeFeature" // unselected this should be null not ''
+  selectedSubnetId: null,
+  visibleEquipmentTypes: [],
   boundaryDebounceBySubnetId: {},
   cursorLocationIds: [],
   cursorEquipmentIds: [],
@@ -267,6 +270,10 @@ function setSelectedSubnetId (state, selectedSubnetId) {
   return { ...state, selectedSubnetId }
 }
 
+function setVisibleEquipmentTypes(state, visibleEquipmentTypes) {
+  return { ...state, visibleEquipmentTypes }
+}
+
 function setBoundaryDebounce (state, subnetId, timeoutId) {
   return {
     ...state, 
@@ -419,6 +426,9 @@ function planEditorReducer (state = defaultState, { type, payload }) {
 
     case Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID:
       return setSelectedSubnetId(state, payload)
+
+    case Actions.PLAN_EDITOR_SET_VISIBLE_EQUIPMENT_TYPES:
+      return setVisibleEquipmentTypes(state, payload)
 
     case Actions.PLAN_EDITOR_SET_BOUNDARY_DEBOUNCE:
       return setBoundaryDebounce(state, payload.subnetId, payload.timeoutId)
