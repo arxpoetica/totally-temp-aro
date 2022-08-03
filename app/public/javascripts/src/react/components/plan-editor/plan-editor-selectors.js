@@ -53,6 +53,7 @@ function getRootOfFeatureUtility (drafts, subnetFeatures, featureId) {
   return subnetId // can return null
 }
 
+// this is the central office or subnetnode
 const getRootSubnetIdForSelected = createSelector(
   [getSelectedSubnetId, getSubnetFeatures, getDrafts],
   (selectedSubnetId, subnetFeatures, drafts) => {
