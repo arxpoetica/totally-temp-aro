@@ -238,10 +238,12 @@ function getLocationPreview(planId, updatedLocationConstraints) {
       // FIXME: however the rest of the tile layer system uses it all over the place,
       // FIXME: including the Node.js location routes and models which also need to
       // FIXME: be converted to GUIDs and to service API endpoints
+      // NOTE: addPlanTargets accepts UUIDs not location IDs so I think all the above FIXMEs are irrelevent
       const locations = new Set()
       for (const item of data) {
         for (const ids of item.ids) {
-          locations.add(ids.id)
+          //locations.add(ids.id)
+          locations.add(ids.uuid)
         }
       }
       dispatch(SelectionActions.addPlanTargets(planId, {
