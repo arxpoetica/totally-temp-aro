@@ -149,7 +149,13 @@ export const getMetersPerPixel = (latitude, zoom) => {
  */
 export const isEquipmentInsideBoundary = (latLng, selectedSubnetId, subnetFeatures, drafts) => {
   // equipment either has the subnet or belongs to a parent equipment's subnet
-  const draft = drafts[selectedSubnetId] || drafts[subnetFeatures[selectedSubnetId].subnetId]
+  const draft = drafts[selectedSubnetId] || (
+    subnetFeatures[selectedSubnetId]
+    && drafts[subnetFeatures[selectedSubnetId].subnetId]
+  )
+  // if there's no draft it's because there's no central office
+  // ...just continue silently and let service handle the error
+  if (!draft) return true
   const subnetBoundary = draft.subnetBoundary
   const paths = WktUtils.getGoogleMapPathsFromWKTMultiPolygon(subnetBoundary.polygon)
   const polygon = new google.maps.Polygon({ paths })
