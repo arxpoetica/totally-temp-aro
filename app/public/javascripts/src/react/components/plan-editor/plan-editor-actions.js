@@ -269,37 +269,31 @@ function unsubscribeFromSocket() {
 }
 
 function createFeature(feature) {
-  //return Promise.resolve()
   return async(dispatch, getState) => {
     try {
-
       const { planEditor, plan } = getState()
       const transactionId = planEditor.transaction && planEditor.transaction.id
       const isRingPlan = plan.activePlan.planType === 'RING'
 
-
       const url = `/service/plan-transaction/${transactionId}/subnet_cmd/update-children`
       const commandsBody = { childId: feature, type: 'add' }
       // we're relying on `selectedSubnetId` to find the selected subnet for context
-      let { selectedSubnetId } = planEditor
-      if (!selectedSubnetId) {
-        // this call just ensures we have the central office
+      let { drafts, subnetFeatures, selectedSubnetId } = planEditor
+      if (selectedSubnetId) {
+        // get the correct `selectedSubnetId` since it exists
+        selectedSubnetId = drafts[selectedSubnetId]
+          ? selectedSubnetId
+          : subnetFeatures[selectedSubnetId].subnetId
+        commandsBody.subnetId = selectedSubnetId
+      } else {
+        // otherwise, this call just ensures we have the central office
         // since we don't know the context since no subnet is selected
         const rootSubnet = Object.values(planEditor.drafts).find(draft => {
           return draft.nodeType === 'central_office' || draft.nodeType === 'subnet_node'
         })
-        if (rootSubnet) {
-          await dispatch(addSubnets({ subnetIds: [rootSubnet.subnetId] }))
-        }
-      } else if (planEditor.subnetFeatures[selectedSubnetId].subnetId) {
-        // otherwise get the correct `selectedSubnetId` since it exists
-        selectedSubnetId = planEditor.subnetFeatures[selectedSubnetId].subnetId
+        if (rootSubnet) await dispatch(addSubnets({ subnetIds: [rootSubnet.subnetId] }))
       }
-      // If it is a ring plan we need to pass in the parentID of the
-      // dummy subnet in order to find the correct ring plan in service
-      if (isRingPlan && selectedSubnetId) {
-        commandsBody.subnetId = selectedSubnetId
-      }
+
       const updateResponse = await AroHttp.post(url, { commands: [commandsBody] })
       const { subnetUpdates, equipmentUpdates } = updateResponse.data
 
@@ -1321,17 +1315,13 @@ function addSubnets({ subnetIds = [], forceReload = false }) {
 
 function setSelectedSubnetId (selectedSubnetId) {
   return (dispatch, getState) => {
-
-    if (!selectedSubnetId) {
-      dispatch({
-        type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
-        payload: null,
-      })
-    } else {
-      batch(async() => {
-        try {
-          const { planEditor } = getState()
-          const { drafts } = planEditor
+    batch(async() => {
+      try {
+        if (!selectedSubnetId) {
+          dispatch({ type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID, payload: null })
+          dispatch({ type: Actions.PLAN_EDITOR_SET_VISIBLE_EQUIPMENT_TYPES, payload: [] })
+        } else {
+          const { drafts } = getState().planEditor
           // only load a new subnet if you have a subnet selected
           if (drafts[selectedSubnetId]) await dispatch(addSubnets({ subnetIds: [selectedSubnetId] }))
           // otherwise it's just a piece of equipment
@@ -1340,16 +1330,22 @@ function setSelectedSubnetId (selectedSubnetId) {
             type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
             payload: selectedSubnetId,
           })
-        } catch (error) {
-          handleError(error)
-          dispatch({
-            type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
-            payload: null,
-          })
-        }
 
-      })
-    }
+          const state = getState()
+          const { features } = state.planEditor
+          const { networkNodeType } = features[selectedSubnetId].feature
+          const { equipmentDefinitions, addableTypes } = PlanEditorSelectors.getEquipmentDraggerInfo(state)
+          const visibleEquipmentTypes = addableTypes.filter(type => {
+            return equipmentDefinitions[networkNodeType].allowedChildEquipment.includes(type)
+          })
+          dispatch({ type: Actions.PLAN_EDITOR_SET_VISIBLE_EQUIPMENT_TYPES, payload: visibleEquipmentTypes })
+        }
+      } catch (error) {
+        handleError(error)
+        dispatch({ type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID, payload: null })
+        dispatch({ type: Actions.PLAN_EDITOR_SET_VISIBLE_EQUIPMENT_TYPES, payload: [] })
+      }
+    })
   }
 }
 
