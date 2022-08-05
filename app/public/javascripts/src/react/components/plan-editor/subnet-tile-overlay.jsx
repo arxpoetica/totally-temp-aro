@@ -30,18 +30,18 @@ class _SubnetTileOverlay extends Component {
   // --- renderer --- //
 
   // this may become it's own static class
-  renderTileCanvas (ownerDocument, points, tileId, state) {
+  renderTileCanvas (ownerDocument, points, tileId, pointsById, badgeLists) {
     var canvas = ownerDocument.createElement('canvas')
     canvas.width = TileUtils.TILE_SIZE + (2 * TileUtils.TILE_MARGIN)
     canvas.height = TileUtils.TILE_SIZE + (2 * TileUtils.TILE_MARGIN)
     var ctx = canvas.getContext('2d')
-    ctx.fillStyle = '#99FF99'
+    //ctx.fillStyle = '#99FF99'
     for (const [id, point] of Object.entries(points)) {
       let px = TileUtils.worldCoordToTilePixel(point, tileId)
       px.x += TileUtils.TILE_MARGIN
       px.y += TileUtils.TILE_MARGIN
       // get icon type
-      let iconType = state.locationsById[id].locationEntityType
+      let iconType = pointsById[id].locationEntityType
       let icon = mapIcons[iconType]
       // TODO: locationEntityType is not consistent across Service
       //  eg: sometimes it's "medium_businesses" 
@@ -58,17 +58,19 @@ class _SubnetTileOverlay extends Component {
       // figure badges
       // for each badge
       // TODO: should be stored in Redux as a dictionary
-      let hasAlertBadge = Object.values(state.alertLocationIds).find(faultNode => faultNode.faultReference.objectId === id)
-      if (hasAlertBadge) {
-        let badgeCoord = {
-          x: imageCoord.x + iconBadges['alert'].offset.x + (icon.image.width * iconBadges['alert'].offsetMult.w),
-          y: imageCoord.y + iconBadges['alert'].offset.y + (icon.image.width * iconBadges['alert'].offsetMult.h)
+      if (badgeLists.alertLocationIds) {
+        let hasAlertBadge = Object.values(badgeLists.alertLocationIds).find(faultNode => faultNode.faultReference.objectId === id)
+        if (hasAlertBadge) {
+          let badgeCoord = {
+            x: imageCoord.x + iconBadges['alert'].offset.x + (icon.image.width * iconBadges['alert'].offsetMult.w),
+            y: imageCoord.y + iconBadges['alert'].offset.y + (icon.image.width * iconBadges['alert'].offsetMult.h)
+          }
+          ctx.drawImage(
+            iconBadges['alert'].image, 
+            badgeCoord.x, 
+            badgeCoord.y,
+          )
         }
-        ctx.drawImage(
-          iconBadges['alert'].image, 
-          badgeCoord.x, 
-          badgeCoord.y,
-        )
       }
     }
 
@@ -83,7 +85,7 @@ class _SubnetTileOverlay extends Component {
       //console.log(points)
       if (Object.keys(points).length) {
         // render tile
-        tile = this.renderTileCanvas(ownerDocument, points, tileId, {alertLocationIds: this.props.alertLocationIds, locationsById: this.props.locationsById})
+        tile = this.renderTileCanvas(ownerDocument, points, tileId, this.props.locationsById, {alertLocationIds: this.props.alertLocationIds})
         tileCache.addTile(tile, tileId)
       }
     }
@@ -123,13 +125,12 @@ class _SubnetTileOverlay extends Component {
       )
     }
 
-    
     // if debug on
-    div.innerHTML = sCoords;
-    div.style.fontSize = "10"
-    div.style.borderStyle = "solid"
-    div.style.borderWidth = "1px"
-    div.style.color = div.style.borderColor = "#AAAAAA"
+    // div.innerHTML = sCoords;
+    // div.style.fontSize = "10"
+    // div.style.borderStyle = "solid"
+    // div.style.borderWidth = "1px"
+    // div.style.color = div.style.borderColor = "#AAAAAA"
     
     if (tile) {
       div.appendChild(tile)
@@ -282,6 +283,7 @@ class _SubnetTileOverlay extends Component {
 
 const mapStateToProps = (state) => {
   const selectedSubnetId = PlanEditorSelectors.getNearestSubnetIdOfSelected(state)
+  //const selectedSubnetId = 'all'
   // TODO: this should probably be a selector 
   //  OR we make it a dictionary in state
   let alertLocationIds = {}
@@ -297,9 +299,11 @@ const mapStateToProps = (state) => {
     alertLocationIds = state.planEditor.subnets[selectedSubnetId].faultTree.rootNode.childNodes
     
     //locationsById = state.planEditor.subnets[selectedSubnetId].subnetLocationsById
-    let rootId = PlanEditorSelectors.getRootSubnetIdForSelected(state)
-    locationsById = state.planEditor.drafts[rootId].locations
+    //let rootId = PlanEditorSelectors.getRootSubnetIdForSelected(state)
+    
+    locationsById = state.planEditor.draftLocations.households
   }
+  //locationsById = state.planEditor.draftLocations.groups
   return {
     mapRef: state.map.googleMaps,
     subnetTileData: state.subnetTileData, 

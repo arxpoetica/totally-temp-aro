@@ -231,35 +231,88 @@ function subscribeToSocket() {
               'medium': 'medium_businesses',
               'large': 'large_businesses',
             }
-            let locations = {}
+            let enumRank = {
+              'household': 0,
+              'small_businesses': 1, 
+              'medium_businesses': 2,
+              'large_businesses': 3,
+              'celltower': 4,
+            }
+            let locations = {
+              households: {},
+              groups: {},
+            }
+            
             for (const location of data.rootLocations) {
               if (!location.ids.length) {
                 //console.log(location)
                 // TODO: thses are dropcoils what do we do with dropcoils?
               } else {
+                // TOS: need a hash for each household 
+                //  and a hash for groups with identical Lat Long 
+                //  this will also have agrigate info like "highest ranking location type" 
+                // This layer will not be interactive
+                //dispatch(SubnetTileActions.setSubnetsData(tileDataBySubnet))
                 
                 //let locationId = location.ids[0].uuid // what is there are more than one?
                 // TODO: system wide change ALL "xx_businesses" to "xx" eg "medium_businesses" to "medium" - a lot in settings 
-                for (let subLocation of location.ids) {
-                  if (enumPatch[subLocation.locationEntityType]) {
-                    subLocation.locationEntityType = enumPatch[subLocation.locationEntityType]
+                
+                // populate the group list
+                let groupId = `${location.point.coordinates[1]},${location.point.coordinates[0]}`
+                // if (locations.groups[groupId]) {
+                //   console.log(' ------- ID ALREADY EXISTS: two locations have the same Lat Long ------- ')
+                //   console.log(locations.groups[groupId])
+                //   console.log(location)
+                // }
+                
+                // TODO: formalize the structure of tile data items
+                //  id: {point: {latitude, longitude}}
+                let group = {
+                  locationEntityType: 'household',
+                  selected: true,
+                  ids: location.ids,
+                  point: {
+                    latitude: location.point.coordinates[1], 
+                    longitude: location.point.coordinates[0],
+                  },
+                }
+                if ('selected' in location) group.selected = location.selected
+
+                if (locations.groups[groupId]) {
+                  // a group already exists at this point (uggh)
+                  //  so we need to agrigate with that
+                  group.locationEntityType = locations.groups[groupId].locationEntityType // will either be household or higher
+                  group.selected = group.selected || locations.groups[groupId].selected
+                  group.ids = locations.groups[groupId].ids.concat(group.ids)
+                }
+                
+
+                // populate the household list
+                for (let household of location.ids) {
+                  if (enumPatch[household.locationEntityType]) {
+                    household.locationEntityType = enumPatch[household.locationEntityType]
                   }
-                  locations[subLocation.uuid] = subLocation
+                  household.selected = location.selected
+                  locations.households[household.uuid] = household
+
+                  // - group locationEntityType (an aggregateType) is the highest ranking locationType in the list - 
+                  if (enumRank[household.locationEntityType] > enumRank[group.locationEntityType]) {
+                    group.locationEntityType = household.locationEntityType
+                  }
                 }
                 //locations[locationId] = location
+                locations.groups[groupId] = group
               }
-              if (location.ids.length > 1) {
-                console.log('------------ HERE ------------')
-                console.log(location)
-              }
+              // if (location.ids.length > 1) {
+              //   console.log('------------ HERE ------------')
+              //   console.log(location)
+              // }
             }
             dispatch({
               type: Actions.PLAN_EDITOR_SET_DRAFT_LOCATIONS,
-              payload: {
-                rootSubnetId: data.rootSubnetId,
-                rootLocations: locations,
-              }
+              payload: locations,
             })
+            dispatch(SubnetTileActions.setSubnetData('all', locations.groups))
             break
           case DRAFT_STATES.ERROR_SUBNET_TREE:
             message = `Type ${data.subnetNodeUpdateType} for SUBNET_DATA socket channel with `
@@ -1760,6 +1813,7 @@ function parseSubnet (subnet) {
   subnet.subnetLocationsById = {}
   subnet.subnetLocations.forEach(location => {
     location.objectIds.forEach(objectId => {
+      // TOS: does this make a list for each household? 
       // if subnet.subnetLocationsById[objectId] doesn't exist something has fallen out of sync
       subnet.subnetLocationsById[objectId] = { ...location, parentEquipmentId: null}
     })
