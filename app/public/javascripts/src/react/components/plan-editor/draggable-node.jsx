@@ -49,6 +49,31 @@ export const DraggableNode = props => {
       <div className="node-wrap">
         <img src={icon} onLoad={onImageLoad} />
       </div>
+      <style jsx>{`
+        .node {
+          position: relative;
+          width: 50px;
+          height: 50px;
+          background-color: #f3f3f3;
+          border: 1px solid transparent;
+          transition: all 0.2s ease-in-out;
+          cursor: pointer;
+        }
+        .node:hover {
+          background-color: #e1e1e1;
+          border-color: #cccccc;
+        }
+        .node-wrap {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          position: absolute;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0;
+        }
+      `}</style>
     </div>
   )
 
