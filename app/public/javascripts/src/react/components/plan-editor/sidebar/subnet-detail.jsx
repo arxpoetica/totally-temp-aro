@@ -83,6 +83,9 @@ const SubnetDetail = props => {
     if (props.subnetFeatures[featureId]) {
       let featureType = props.subnetFeatures[featureId].feature.networkNodeType
       iconURL = props.iconsByType._alert[featureType]
+    } else if (props.locationsById[featureId]) {
+      let featureType = props.locationsById[featureId].locationEntityType // TODO: standardize stuff like this
+      iconURL = props.iconsByType._alert[featureType]
     }
     faultNode.assignedFaultCodes.forEach(fCode => {
       alertElements.push(
@@ -168,6 +171,7 @@ const mapStateToProps = state => {
     locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
     iconsByType: MapLayerSelectors.getIconsByType(state), // TODO: use new icon system
     map: state.map.googleMaps,
+    locationsById: state.planEditor.draftLocations.households,
   }
 }
 
