@@ -234,7 +234,8 @@ function removeSubnetFeatures (state, featureIds) {
     // this checks if the ID is a subnet, not sure if this should happen here or in actions
     // TODO: I feel like there is a better way to check this
     if (
-      state.subnetFeatures[featureId].feature.networkNodeType === 'central_office'
+      state.subnetFeatures[featureId].feature.dataType === "edge_construction_area"
+      || state.subnetFeatures[featureId].feature.networkNodeType === 'central_office'
       || state.subnetFeatures[featureId].feature.networkNodeType === 'fiber_distribution_hub'
     ) {
       // removes from subnets and subnet features
@@ -251,15 +252,6 @@ function removeSubnetFeatures (state, featureIds) {
     }
   })
   return { ...state, subnetFeatures: updatedSubnetFeatures, subnets: updatedSubnets }
-}
-
-function removeSubnets (state, subnets) {
-  const updatedSubnets = { ...state.subnets }
-  for (const subnet of subnets) {
-    delete updatedSubnets[subnet.subnetId.id]
-    // ToDo: remove children from subnetFeatures
-  }
-  return { ...state, subnets: updatedSubnets }
 }
 
 function clearSubnets (state) {
@@ -417,9 +409,6 @@ function planEditorReducer (state = defaultState, { type, payload }) {
 
     case Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE:
       return removeSubnetFeatures(state, [payload])
-
-    case Actions.PLAN_EDITOR_REMOVE_SUBNETS:
-      return removeSubnets(state, payload)
 
     case Actions.PLAN_EDITOR_CLEAR_SUBNETS:
       return clearSubnets(state)
