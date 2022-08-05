@@ -73,6 +73,19 @@ class _SubnetTileOverlay extends Component {
           )
         }
       }
+
+      // TODO: generalize badge drawing
+      if (isUnderlay && ('selected' in pointsById[id]) && !pointsById[id].selected) {
+        let badgeCoord = {
+          x: imageCoord.x + iconBadges['x'].offset.x + (icon.image.width * iconBadges['x'].offsetMult.w),
+          y: imageCoord.y + iconBadges['x'].offset.y + (icon.image.width * iconBadges['x'].offsetMult.h)
+        }
+        ctx.drawImage(
+          iconBadges['x'].image, 
+          badgeCoord.x, 
+          badgeCoord.y,
+        )
+      }
     }
 
     return canvas
