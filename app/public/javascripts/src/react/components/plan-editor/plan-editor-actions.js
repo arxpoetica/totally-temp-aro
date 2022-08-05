@@ -1140,20 +1140,19 @@ function deleteConstructionArea (featureId) {
     let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
 
     await AroHttp.delete(`/service/plan-transaction/${transactionId}/edge-construction-area/${featureId}`)
+
+    const rootDrafts = PlanEditorSelectors.getRootDrafts(state)
     batch(() => {
       dispatch({
-      type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE,
+        type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE,
         payload: featureId
       })
       dispatch({
         type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE,
         payload: featureId,
       })
-      dispatch({
-        type: Actions.PLAN_EDITOR_REMOVE_SUBNETS,
-        payload: [subnet]
-      })
       dispatch(recalculateSubnets(transactionId))
+      dispatch(setSelectedSubnetId(Object.values(rootDrafts)[0].subnetId))
     })
   }
 }
