@@ -30,12 +30,13 @@ class _SubnetTileOverlay extends Component {
   // --- renderer --- //
 
   // this may become it's own static class
-  renderTileCanvas (ownerDocument, points, tileId, pointsById, badgeLists) {
+  renderTileCanvas (ownerDocument, points, tileId, pointsById, badgeLists, isUnderlay) {
     var canvas = ownerDocument.createElement('canvas')
     canvas.width = TileUtils.TILE_SIZE + (2 * TileUtils.TILE_MARGIN)
     canvas.height = TileUtils.TILE_SIZE + (2 * TileUtils.TILE_MARGIN)
     var ctx = canvas.getContext('2d')
     //ctx.fillStyle = '#99FF99'
+    
     for (const [id, point] of Object.entries(points)) {
       let px = TileUtils.worldCoordToTilePixel(point, tileId)
       px.x += TileUtils.TILE_MARGIN
@@ -77,15 +78,16 @@ class _SubnetTileOverlay extends Component {
     return canvas
   }
 
-  getTileCanvas (ownerDocument, tileData, tileCache, tileId) {
+  getTileCanvas (ownerDocument, tileData, tileCache, tileId, isUnderlay) {
     let tile = tileCache.getTile(tileId)
     if (!tile) {
       // not in the cache so render it
       let points = TileDataMutator.getPointsForTile(tileData, tileId)
-      //console.log(points)
       if (Object.keys(points).length) {
         // render tile
-        tile = this.renderTileCanvas(ownerDocument, points, tileId, this.props.locationsById, {alertLocationIds: this.props.alertLocationIds})
+        let locationsById = this.props.locationsById
+        if (isUnderlay) locationsById = this.props.groupsById
+        tile = this.renderTileCanvas(ownerDocument, points, tileId, locationsById, {alertLocationIds: this.props.alertLocationIds}, isUnderlay)
         tileCache.addTile(tile, tileId)
       }
     }
@@ -102,10 +104,11 @@ class _SubnetTileOverlay extends Component {
   //  this.props.subnetTileData and this.props.selectedSubnetId
   //  instead of the values at time of function declarition 
   overlayGetTileCallback = (coord, zoom, ownerDocument) => {
-    let sCoords = String(coord)
+    //let sCoords = String(coord)
     //console.log(`getTile ${sCoords} ${zoom}`)
     //console.log(this.props.selectedSubnetId)
 
+    // ?should we cache the div as well?
     const div = ownerDocument.createElement("div")
     
     div.style.width = `${TileUtils.TILE_SIZE}px`
@@ -113,34 +116,37 @@ class _SubnetTileOverlay extends Component {
     div.style.position = 'relative'
     div.style.overflow = 'visible'
 
-    let tile = null
-    if (this.props.subnetTileData[this.props.selectedSubnetId] && tileCache.subnets[this.props.selectedSubnetId]) {
-      let tileId = TileUtils.coordToTileId(coord, zoom)
-      //console.log(tileId)
-      tile = this.getTileCanvas(
-        ownerDocument, 
-        this.props.subnetTileData[this.props.selectedSubnetId], 
-        tileCache.subnets[this.props.selectedSubnetId], 
-        tileId
-      )
-    }
-
     // if debug on
     // div.innerHTML = sCoords;
     // div.style.fontSize = "10"
     // div.style.borderStyle = "solid"
     // div.style.borderWidth = "1px"
     // div.style.color = div.style.borderColor = "#AAAAAA"
-    
-    if (tile) {
-      div.appendChild(tile)
-      tile.style.position = 'absolute'
-      tile.style.left = `-${TileUtils.TILE_MARGIN}px`
-      tile.style.top = `-${TileUtils.TILE_MARGIN}px`
-      //console.log(tile)
-    }
 
-    //console.log(div)
+    // for the moment we're just going to sneak the 'all' layer underneith
+    //  TODO: make a proper layering system 
+    for (const tileDataKey of ['all', this.props.selectedSubnetId]) {
+      let isUnderlay = (tileDataKey === 'all') // hack will fix later
+      let tile = null
+      if (this.props.subnetTileData[tileDataKey] && tileCache.subnets[tileDataKey]) {
+        let tileId = TileUtils.coordToTileId(coord, zoom)
+        tile = this.getTileCanvas(
+          ownerDocument, 
+          this.props.subnetTileData[tileDataKey], 
+          tileCache.subnets[tileDataKey], 
+          tileId,
+          isUnderlay
+        )
+      }
+      
+      if (tile) {
+        div.appendChild(tile)
+        tile.style.position = 'absolute'
+        tile.style.left = `-${TileUtils.TILE_MARGIN}px`
+        tile.style.top = `-${TileUtils.TILE_MARGIN}px`
+        if (isUnderlay) tile.style.opacity = 0.5
+      }
+    }
     
     return div;
   }
@@ -216,7 +222,6 @@ class _SubnetTileOverlay extends Component {
   }
 
   addListeners () {
-    //console.log(this.props.mapRef)
     //if (!this.props.mapRef) return
     this.removeListeners()
     this.overlayMouseMoveListener = google.maps.event.addListener(this.props.mapRef, 'mousemove', this.onMouseMove)
@@ -259,12 +264,10 @@ class _SubnetTileOverlay extends Component {
   render() { return null }
 
   componentDidMount() { 
-    //console.log(' --- mount --- ') 
     this.refreshTiles() // will init if it can and hasn't yet
   }
 
   componentDidUpdate(/* prevProps, prevState, snapshot */) {
-    //console.log(' --- update --- ') 
     this.refreshTiles() // will init if it can and hasn't yet
     // we could check to make sure that either selectedSubnetId changed 
     //  OR subnetTileData changed on the subnet we are showing
@@ -274,7 +277,6 @@ class _SubnetTileOverlay extends Component {
   componentWillUnmount() {
     this.removeListeners()
     this.removeOverlayLayer()
-    console.log('component unmount')
   }
 
 }
@@ -302,7 +304,9 @@ const mapStateToProps = (state) => {
     //let rootId = PlanEditorSelectors.getRootSubnetIdForSelected(state)
     
     locationsById = state.planEditor.draftLocations.households
+    //locationsById = {...state.planEditor.draftLocations.households, ...state.planEditor.draftLocations.groups} // TODO: this is not the best, this list is huge and redundant
   }
+  let groupsById = state.planEditor.draftLocations.groups
   //locationsById = state.planEditor.draftLocations.groups
   return {
     mapRef: state.map.googleMaps,
@@ -313,7 +317,8 @@ const mapStateToProps = (state) => {
     // tile data, useEffect: on change tell overlayLayer to run getTile on all visible tiles using clearTileCache
     // tileOverlay.clearTileCache();
     alertLocationIds, // TODO: when this changes the action creator needs to clear the cache
-    locationsById, 
+    locationsById,
+    groupsById,
   }
 }
 
