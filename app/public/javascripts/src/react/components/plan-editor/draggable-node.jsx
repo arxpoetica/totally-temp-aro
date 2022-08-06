@@ -3,6 +3,7 @@ import { PropTypes } from 'prop-types'
 import { connect } from 'react-redux'
 import { constants } from './shared'
 import PlanEditorActions from './plan-editor-actions'
+import cx from 'clsx'
 
 export const DraggableNode = props => {
 
@@ -13,6 +14,7 @@ export const DraggableNode = props => {
   	startDragging,
   	stopDragging,
     label,
+    active,
   } = props
 
   const [aspect, setAspect] = useState({ width: 0, height: 0 })
@@ -41,7 +43,7 @@ export const DraggableNode = props => {
 
   return (
     <div
-      className="node"
+      className={cx('node', !active && 'inactive')}
       title={label}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
@@ -58,6 +60,10 @@ export const DraggableNode = props => {
           border: 1px solid transparent;
           transition: all 0.2s ease-in-out;
           cursor: pointer;
+        }
+        .inactive {
+          opacity: 0.25;
+          pointer-events: none;
         }
         .node:hover {
           background-color: #e1e1e1;
