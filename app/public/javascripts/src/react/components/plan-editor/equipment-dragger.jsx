@@ -7,27 +7,28 @@ import PlanEditorSelectors from './plan-editor-selectors'
 export const EquipmentDragger = props => {
 
   const { planType, drafts, selectedSubnetId, equipmentDraggerInfo, visibleEquipmentTypes } = props
-  const { equipmentDefinitions } = equipmentDraggerInfo
+  const { equipmentDefinitions, addableTypes } = equipmentDraggerInfo
 
-  // ugh, special casing...
-  const displayTypes =
+  // ugh, special casing for ring plans vs standard...
+  const activeTypes =
     planType === 'UNDEFINED' && !Object.keys(drafts).length && !selectedSubnetId
     ? ['central_office']
     : visibleEquipmentTypes
 
-  return displayTypes.length > 0 && (
+  return (
     <div className="equipment-dragger">
       <div className="info">
         (drag icon onto map)
       </div>
       <div className="nodes">
-        {displayTypes.map(type => equipmentDefinitions[type] &&
+        {addableTypes.map(type => equipmentDefinitions[type] &&
           <DraggableNode
             key={type}
             icon={equipmentDefinitions[type].iconUrl}
             entityType={constants.DRAG_DROP_NETWORK_EQUIPMENT}
             entityDetails={equipmentDefinitions[type].networkNodeType}
             label={equipmentDefinitions[type].label}
+            active={activeTypes.includes(type)}
           />
         )}
       </div>
@@ -48,7 +49,7 @@ export const EquipmentDragger = props => {
         }
       `}</style>
     </div>
-  ) || null
+  )
 
 }
 
