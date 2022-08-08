@@ -1343,11 +1343,12 @@ function setSelectedSubnetId (selectedSubnetId) {
           })
 
           const state = getState()
-          const { features } = state.planEditor
-          const { networkNodeType } = features[selectedSubnetId].feature
+          const { subnetFeatures } = state.planEditor
+          const { feature } = subnetFeatures[selectedSubnetId]
+          const nodeType = feature.networkNodeType || feature.dataType
           const { equipmentDefinitions, addableTypes } = PlanEditorSelectors.getEquipmentDraggerInfo(state)
           const visibleEquipmentTypes = addableTypes.filter(type => {
-            return equipmentDefinitions[networkNodeType].allowedChildEquipment.includes(type)
+            return equipmentDefinitions[nodeType].allowedChildEquipment.includes(type)
           })
           dispatch({ type: Actions.PLAN_EDITOR_SET_VISIBLE_EQUIPMENT_TYPES, payload: visibleEquipmentTypes })
         }
