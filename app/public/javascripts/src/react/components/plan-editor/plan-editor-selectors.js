@@ -1,5 +1,5 @@
 import { createSelector } from 'reselect'
-import { constants } from './shared'
+import { constants, validLocationConnectionTypes } from './shared'
 const { ALERT_TYPES } = constants
 
 const getAllBoundaryLayers = state => state.mapLayers.boundary
@@ -53,6 +53,7 @@ function getRootOfFeatureUtility (drafts, subnetFeatures, featureId) {
   return subnetId // can return null
 }
 
+// this is the central office or subnetnode
 const getRootSubnetIdForSelected = createSelector(
   [getSelectedSubnetId, getSubnetFeatures, getDrafts],
   (selectedSubnetId, subnetFeatures, drafts) => {
@@ -134,16 +135,42 @@ locationWarnImgByType['3'].src = '/images/map_icons/aro/businesses_large_default
 locationWarnImgByType['4'].src = '/images/map_icons/aro/households_default_alert.png'
 locationWarnImgByType['5'].src = '/images/map_icons/aro/tower_alert.png'
 
-const getSelectedSubnetLocations = createSelector(
+const getLocationsForSelectedSubnet = createSelector(
   [getSelectedSubnetId, getSelectedSubnet, getSubnetFeatures, getSubnets],
   (selectedSubnetId, selectedSubnet, subnetFeatures, subnets) => {
     let selectedSubnetLocations = {}
     if (selectedSubnet) {
+      // the selectedSubnetId is that of a subnet node type (not a location connector type)
+      //  so return the list of all locations in the subnet
       selectedSubnetLocations = selectedSubnet.subnetLocationsById
     } else if (subnetFeatures[selectedSubnetId]
       && subnetFeatures[selectedSubnetId].subnetId
-      && subnetFeatures[selectedSubnetId].feature.dropLinks
+      && validLocationConnectionTypes.includes( subnetFeatures[selectedSubnetId].feature.networkNodeType )
     ) {
+      // the selectedSubnetId is of a location connector type not a true subnet node type 
+      //  so return the list of locations of parent
+      let parentSubnetId = subnetFeatures[selectedSubnetId].subnetId
+      selectedSubnetLocations = subnets[parentSubnetId].subnetLocationsById
+    }
+    
+    return selectedSubnetLocations
+  }
+)
+
+const getLocationsForSelectedFeature = createSelector(
+  [getSelectedSubnetId, getSelectedSubnet, getSubnetFeatures, getSubnets],
+  (selectedSubnetId, selectedSubnet, subnetFeatures, subnets) => {
+    let selectedSubnetLocations = {}
+    if (selectedSubnet) {
+      // the selectedSubnetId is that of a subnet node type (not a location connector type)
+      //  so return the list of all locations in the subnet
+      selectedSubnetLocations = selectedSubnet.subnetLocationsById
+    } else if (subnetFeatures[selectedSubnetId]
+      && subnetFeatures[selectedSubnetId].subnetId
+      && validLocationConnectionTypes.includes( subnetFeatures[selectedSubnetId].feature.networkNodeType )
+    ) {
+      // the selectedSubnetId is of a location connector type not a true subnet node type 
+      //  so return the list of connected locations
       let parentSubnetId = subnetFeatures[selectedSubnetId].subnetId
       subnetFeatures[selectedSubnetId].feature.dropLinks.forEach(dropLink => {
         dropLink.locationLinks.forEach(locationLink => {
@@ -165,7 +192,7 @@ const getCursorLocations = createSelector(
       selectedSubnetLocations = selectedSubnet.subnetLocationsById
     } else if (subnetFeatures[selectedSubnetId]
       && subnetFeatures[selectedSubnetId].subnetId
-      && subnetFeatures[selectedSubnetId].feature.dropLinks
+      && validLocationConnectionTypes.includes( subnetFeatures[selectedSubnetId].feature.networkNodeType )
     ) {
       let parentSubnetId = subnetFeatures[selectedSubnetId].subnetId
       if (subnets[parentSubnetId]) {
@@ -183,31 +210,15 @@ const getCursorLocations = createSelector(
   }
 )
 
-// can have multiple subnets
 const getAlertsForSubnetTree = createSelector(
   [getSubnets, getSubnetFeatures, getNetworkConfig],
   (subnets, subnetFeatures, networkConfig) => {
-
-    // this should theoretically be it's own selector 
-    //  BUT I want to encourage the use of similar functions that get info from the draft
-    let rootSubnets = []
-    Object.values(subnets).forEach(subnet => {
-      if (!subnet.parentSubnetId) rootSubnets.push(subnet)
-    })
-
+    // TODO: replace with drafts (should happen with new Vector Tile system)
     let alerts = {}
-    let subnetList = []
-    rootSubnets.forEach(rootSubnet => {
-      const childrenHubSubnets = rootSubnet.children
-        .filter(id => subnets[id])
-        .map(id => subnets[id])
-
-        subnetList = subnetList.concat( [rootSubnet, ...childrenHubSubnets] )
-    })
-    subnetList.forEach(subnet => {
+    Object.values(subnets).forEach(subnet => {
       alerts = { ...alerts, ...getAlertsFromSubnet(subnet, subnetFeatures, networkConfig) }
     })
-
+    
     return alerts
   }
 )
@@ -361,13 +372,23 @@ const getLocationCounts = createSelector(
       // TODO: not a fan of hardcoding by type
       if (subnet && type === 'fiber_distribution_hub') {
         const locations = Object.values(subnet.subnetLocationsById)
-        locationCountsById[id] = locations
-          .filter(location => !!location.parentEquipmentId)
-          .length
+        const uniqueConnected = new Set()
+        const uniqueTotal = new Set()
+        for (const location of locations) {
+          if(!!location.parentEquipmentId) {
+            location.objectIds.forEach(id => uniqueConnected.add(id))
+          }
+          location.objectIds.forEach(id => uniqueTotal.add(id))
+        }
+        locationCountsById[id] = {
+          connected: uniqueConnected.size,
+          total: uniqueTotal.size,
+        }
       } else if (subnet && type === 'dslam') {
         locationCountsById[id] = Object.keys(subnet.subnetLocationsById).length
-      } else if ((type === 'fiber_distribution_terminal' || type === 'location_connector') && feature.feature.dropLinks) {
-        locationCountsById[id] = feature.feature.dropLinks.length
+      } else if (validLocationConnectionTypes.includes(type)) {
+        locationCountsById[id] = feature.feature.dropLinks
+          .reduce((count, dropLink) => count + dropLink.locationLinks.length, 0)
       } else {
         const locationDistanceMap = subnet && subnet.fiber && subnet.fiber.locationDistanceMap
         locationCountsById[id] = locationDistanceMap
@@ -376,6 +397,32 @@ const getLocationCounts = createSelector(
       }
     }
     return locationCountsById
+  }
+)
+
+const getActivePlan = state => state.plan.activePlan
+const getPerspective = state => state.configuration.ui.perspective
+const getMapLayers = state => state.mapLayers
+
+const getEquipmentDraggerInfo = createSelector(
+  [getActivePlan, getPerspective, getMapLayers],
+  (activePlan, perspective, mapLayers) => {
+    let { planType } = activePlan
+    let constructionPlanType = planType
+    if (!(planType in perspective.networkEquipment.planEdit)) planType = 'default'
+    if (!(constructionPlanType in perspective.constructionAreas.planEdit)) constructionPlanType = 'default'
+    const equipmentDefinitions = {
+      // NOTE: these definitions come from the `ui.settings` table
+      ...mapLayers.networkEquipment.equipments,
+      ...mapLayers.constructionAreas.construction_areas,
+    }
+    const addableEquipmentTypes = perspective
+      && perspective.networkEquipment.planEdit[planType].areAddable || []
+    const addableEdgeConstructionTypes = perspective
+      && perspective.constructionAreas.planEdit[constructionPlanType].areAddable || []
+    const addableTypes = [...addableEquipmentTypes, ...addableEdgeConstructionTypes]
+
+    return { equipmentDefinitions, addableTypes }
   }
 )
 
@@ -388,13 +435,15 @@ const PlanEditorSelectors = Object.freeze({
   locationWarnImgByType,
   getRootDrafts,
   getDraftsLoadedProgress,
-  getSelectedSubnetLocations,
+  getLocationsForSelectedFeature,
+  getLocationsForSelectedSubnet,
   getCursorLocations,
   getLocationCounts,
   getSubnetFeatures,
   getSelectedPlanThumbInformation,
   getRootOfFeatureUtility,
   getRootSubnetIdForSelected,
+  getEquipmentDraggerInfo,
 })
 
 export default PlanEditorSelectors

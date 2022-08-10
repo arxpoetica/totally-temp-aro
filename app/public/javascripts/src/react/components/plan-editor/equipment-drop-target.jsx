@@ -9,6 +9,7 @@ import PlanEditorActions from './plan-editor-actions'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import './equipment-drop-target.css'
 import ViewSettingsActions from '../view-settings/view-settings-actions'
+import { isEquipmentInsideBoundary } from './shared'
 
 export class EquipmentDropTarget extends Component {
   constructor (props) {
@@ -48,6 +49,9 @@ export class EquipmentDropTarget extends Component {
     const offsetX = (grabImageW * 0.5) - grabOffsetX // center
     const offsetY = grabImageH - grabOffsetY // bottom
     const dropLatLng = MapUtils.pixelToLatlng(this.props.googleMaps, event.clientX + offsetX, event.clientY + offsetY)
+
+    const { selectedSubnetId, subnetFeatures, drafts } = this.props
+    if (!isEquipmentInsideBoundary(dropLatLng, selectedSubnetId, subnetFeatures, drafts)) return false
 
     if (entityBeingDropped === constants.DRAG_DROP_NETWORK_EQUIPMENT) {
       // A network equipment item was dropped. Handle it.
@@ -138,7 +142,10 @@ EquipmentDropTarget.propTypes = {
 const mapStateToProps = state => ({
   isDraggingFeatureForDrop: state.planEditor.isDraggingFeatureForDrop,
   googleMaps: state.map.googleMaps,
-  planThumbInformation: state.planEditor.planThumbInformation
+  planThumbInformation: state.planEditor.planThumbInformation,
+  selectedSubnetId: state.planEditor.selectedSubnetId,
+  subnetFeatures: state.planEditor.subnetFeatures,
+  drafts: state.planEditor.drafts,
 })
 
 const mapDispatchToProps = dispatch => ({

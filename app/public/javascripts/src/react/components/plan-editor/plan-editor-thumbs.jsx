@@ -63,6 +63,24 @@ const PlanEditorHeader = props => {
     updatePlanThumbInformation({key: id, planThumbInformation: event.target.value})
   }
 
+  function totalCounts(id) {
+    const isNumber = typeof locationCounts[id] === "number"
+    const connectedLocations = isNumber
+      ? locationCounts[id]
+      : locationCounts[id].connected
+    let countText = `Location connections: ${connectedLocations}`
+    if (!isNumber) {
+      countText += '\n'
+      countText += `Locations in boundary: ${locationCounts[id].total}`
+    }
+
+    return countText
+  }
+
+  function isValidCount(id) {
+    return locationCounts[id] > 0 || locationCounts[id].total > 0
+  }
+
   return (
     <>
       {!!Object.keys(features).length && selectedEditFeatureIds.map(id => {
@@ -87,7 +105,9 @@ const PlanEditorHeader = props => {
               <img src={getIconUrl(feature, props)} alt={label}/>
               <h2>{label}</h2>
             </div>
-            {locationCounts[id] > 0 && <p className="household-connections">Location connections: {locationCounts[id]}</p>}
+            {isValidCount(id) &&
+              <p className="household-connections">{ totalCounts(id) }</p>
+            }
             <div className="subinfo">
             {mapLayers[type].planThumbOptions && mapLayers[type].planThumbOptions.thumbText
               ? <div className="item"> {mapLayers[type].planThumbOptions.thumbText} </div>

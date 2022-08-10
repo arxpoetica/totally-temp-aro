@@ -135,7 +135,13 @@
 }
 .plan-editor-thumb img { margin: 0 12px 0 0; }
 .plan-editor-thumb h2 { margin: 0; }
-.plan-editor-thumb .household-connections { margin: 0; font-size: 16px; font-weight: 700; }
+.plan-editor-thumb .household-connections {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  white-space: pre-wrap;
+  margin-bottom: 4px;
+}
 .plan-editor-thumb .subinfo {
   display: grid;
   grid-auto-flow: column;
@@ -171,45 +177,6 @@
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
-}
-
-/* ========================= >>>>> plan editor actions >>>>> */
-
-.equipment-dragger {
-  margin: 0 0 20px;
-}
-.equipment-dragger .info {
-  text-align: center;
-  margin: 0 0 12px;
-}
-.equipment-dragger .nodes {
-  display: grid;
-  grid-gap: 5px;
-  grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
-  justify-items: center;
-}
-.equipment-dragger .node {
-  position: relative;
-  background-color: #f3f3f3;
-  border: 1px solid transparent;
-  transition: all 0.2s ease-in-out;
-  cursor: pointer;
-  width: 50px;
-  height: 50px;
-}
-.equipment-dragger .node-wrap {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-}
-.equipment-dragger .node:hover {
-  background-color: #e1e1e1;
-  border-color: #cccccc;
 }
 
 /* Plan Editor container */

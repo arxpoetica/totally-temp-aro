@@ -23,7 +23,10 @@ const defaultState = {
   drafts: {},
   subnets: {},
   subnetFeatures: {},
-  selectedSubnetId: null, // need to rename this now that a terminal can be selected, lets do "activeFeature" // unselected this should be null not ''
+  // need to rename this now that any equipment can be selected,
+  // lets do "activeFeature" // unselected this should be null not ''
+  selectedSubnetId: null,
+  visibleEquipmentTypes: [],
   boundaryDebounceBySubnetId: {},
   cursorLocationIds: [],
   cursorEquipmentIds: [],
@@ -37,6 +40,14 @@ function setTransaction (state, transaction) {
   return { ...state,
     isPlanEditorActive: true,
     transaction: transaction
+  }
+}
+
+function setTransactionIdOnly (state, transactionId) {
+  return { ...state,
+    transaction: {
+      id: transactionId
+    }
   }
 }
 
@@ -210,7 +221,8 @@ function removeSubnetFeatures (state, featureIds) {
     // this checks if the ID is a subnet, not sure if this should happen here or in actions
     // TODO: I feel like there is a better way to check this
     if (
-      state.subnetFeatures[featureId].feature.networkNodeType === 'central_office'
+      state.subnetFeatures[featureId].feature.dataType === "edge_construction_area"
+      || state.subnetFeatures[featureId].feature.networkNodeType === 'central_office'
       || state.subnetFeatures[featureId].feature.networkNodeType === 'fiber_distribution_hub'
     ) {
       // removes from subnets and subnet features
@@ -229,21 +241,16 @@ function removeSubnetFeatures (state, featureIds) {
   return { ...state, subnetFeatures: updatedSubnetFeatures, subnets: updatedSubnets }
 }
 
-function removeSubnets (state, subnets) {
-  const updatedSubnets = { ...state.subnets }
-  for (const subnet of subnets) {
-    delete updatedSubnets[subnet.subnetId.id]
-    // ToDo: remove children from subnetFeatures
-  }
-  return { ...state, subnets: updatedSubnets }
-}
-
 function clearSubnets (state) {
   return { ...state, subnets: {}, selectedSubnetId: '', subnetFeatures: {} }
 }
 
 function setSelectedSubnetId (state, selectedSubnetId) {
   return { ...state, selectedSubnetId }
+}
+
+function setVisibleEquipmentTypes(state, visibleEquipmentTypes) {
+  return { ...state, visibleEquipmentTypes }
 }
 
 function setBoundaryDebounce (state, subnetId, timeoutId) {
@@ -329,6 +336,9 @@ function planEditorReducer (state = defaultState, { type, payload }) {
     case Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION:
       return setIsEnteringTransaction(state, payload)
 
+    case Actions.PLAN_EDITOR_SET_TRANSACTION_ID_ONLY:
+      return setTransactionIdOnly(state, payload)
+
     case Actions.PLAN_EDITOR_SET_SELECTED_EDIT_FEATURE_IDS:
       return setSelectedEditFeatureIds(state, payload)
 
@@ -383,14 +393,14 @@ function planEditorReducer (state = defaultState, { type, payload }) {
     case Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE:
       return removeSubnetFeatures(state, [payload])
 
-    case Actions.PLAN_EDITOR_REMOVE_SUBNETS:
-      return removeSubnets(state, payload)
-
     case Actions.PLAN_EDITOR_CLEAR_SUBNETS:
       return clearSubnets(state)
 
     case Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID:
       return setSelectedSubnetId(state, payload)
+
+    case Actions.PLAN_EDITOR_SET_VISIBLE_EQUIPMENT_TYPES:
+      return setVisibleEquipmentTypes(state, payload)
 
     case Actions.PLAN_EDITOR_SET_BOUNDARY_DEBOUNCE:
       return setBoundaryDebounce(state, payload.subnetId, payload.timeoutId)
