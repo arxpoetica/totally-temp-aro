@@ -125,6 +125,8 @@ function GlobalSettings(props) {
     props.setShowGlobalSettings(false)
     props.setIsRrmManager(false)
     props.setGlobalSettingsView(false)
+    props.setIsResourceEditor(true)
+    props.setEditingMode('LIST_RESOURCE_MANAGERS')
     showResourceManagerTable()
     if (props.currentViewProps === views.MY_ACCOUNT) { props.openAccountSettingsModal(false) }
   }

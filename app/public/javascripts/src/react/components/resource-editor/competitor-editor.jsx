@@ -19,10 +19,6 @@ const styles = {
   },
 }
 
-const orderOptions = values => {
-  return values.filter(v => v.isFixed).concat(values.filter(v => !v.isFixed))
-}
-
 const recalcStateMap = {
   CLEAN: "clean",
   REQUIRE_RECALC: "requireRecalc",
@@ -151,13 +147,13 @@ export class CompetitorEditor extends Component {
 
         {
           this.props.recalcState === recalcStateMap.REQUIRE_RECALC &&  <Alert title="Recalc Required" color="yellow">
-            Some changes occurred, you need to recalculate for them to take affect.
+            Some changes occurred, you need to recalculate for them to take effect.
           </Alert>
         }
 
         {
           this.props.recalcState === recalcStateMap.RECALCING && <Alert title="Recalcing..." color="yellow">
-            Recalculation is in progress, it may take some time, once it is complete this message will disappear and changes will take affect.
+            Recalculation is in progress, it may take up to an hour. Once it is complete this message will disappear and changes will take effect.
           </Alert>
         }
 
