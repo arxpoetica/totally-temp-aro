@@ -27,11 +27,25 @@ function ResourceEditor(props) {
   const [cloneManager, setCloneManager] = useState('')
   const [cloneManagerType, setCloneManagerType] = useState('')
   const [openedManager, setOpenedManager] = useState('')
-  const [selectedResourceName, setSelectedResourceName] = useState('')
-  const [filterText, setFilterText] = useState('')
+  const [selectedResourceName, setSelectedResourceName] = useState(props.selectedResourceName)
+  const [filterText, setFilterText] = useState(props.filterText)
   const [isOrderDesc, setIsOrderDesc] = useState(false)
   const [selectedColumn, setSelectedColumn] = useState('')
 
+	const resourceTypeUserPermissionMap = {
+		all: ["admin", "super_user"],
+		price_book: ["admin", "super_user", "public"],
+		tsm_manager: ["admin", "super_user", "public"],
+		competition_manager: ["admin", "super_user"],
+		roic_manager: ["admin", "super_user", "public"],
+		arpu_manager: ["admin", "super_user", "public"],
+		impedance_mapping_manager: ["admin", "super_user", "public"],
+		rate_reach_manager: ["admin", "super_user", "public"],
+		network_architecture_manager: ["admin", "super_user", "public"],
+		fusion_manager: ["admin", "super_user", "public"],
+		planning_constraints_manager: ["admin", "super_user", "public"],
+	}
+	
   const actionsECD = [
     {
       buttonText: 'Edit', // Edit
@@ -334,67 +348,76 @@ function ResourceEditor(props) {
 							</div>
 						</div>
 					</div>
-					<div className="comp_edit_tbl_contain" style={{flex: '1 1 auto', overflowY: 'auto'}}>
-						<table className="table table-sm ei-table-foldout-striped" style={{borderBottom: "1px solid #dee2e6"}}>
-							<thead className="thead-dark">
-								<tr>
-									<th></th>
-									<th
-										className='ei-table-col-head-sortable ng-binding ng-scope'
-										onClick={event => { onSortClick(sortableColumns.NAME) }}
-										style={{'cursor': 'pointer'}}
-									>
-										Name
-										{selectedColumn === sortableColumns.NAME
-											? <div className='ei-table-col-sort-icon ng-scope'>
-													<i className={'fa' + (isOrderDesc ? ' fa-chevron-up' : ' fa-chevron-down')} aria-hidden='true'> </i>
-												</div>
-											: ''
-										}
-									</th>
-									<th
-										className='ei-table-col-head-sortable ng-binding ng-scope'
-										onClick={event => { onSortClick(sortableColumns.RESOURCE_TYPE) }}
-										style={{'cursor': 'pointer'}}
-									>
-										Resource Type
-										{selectedColumn === sortableColumns.RESOURCE_TYPE
-											? <div className='ei-table-col-sort-icon ng-scope'>
-													<i className={'fa' + (isOrderDesc ? ' fa-chevron-up' : ' fa-chevron-down')} aria-hidden='true'> </i>
-												</div>
-											: ''
-										}
-									</th>
-									<th></th>
-								</tr>
-							</thead>
-							<tbody>
-								{renderDataRows()}
-							</tbody>
-						</table>
-					</div>
-					<div style={{flex: '0 0 auto'}}>
-						<div className="float-right">
-							{paginationElement}
-						</div>
-					</div>
+				
 					{
-					props.isMakeNewFilter &&
-						<div style={{flex: '0 0 auto'}}>
-							<div className="form-group row justify-content-end">
-								<div className="col-sm-6">
-									<button
-										onClick={() => handleCanMakeNewFilter(selectedResourceName)}
-										value={selectedResourceName}
-										className="btn btn-light btn-block"
-									>
-										<i className="fa fa-file action-button-icon"></i>
-										New {selectedResourceName}
-									</button>
+						resourceTypeUserPermissionMap[filterText].includes(props.loggedInUser.perspective) && (
+							<div>
+								<div className="comp_edit_tbl_contain" style={{flex: '1 1 auto', overflowY: 'auto'}}>
+									<table className="table table-sm ei-table-foldout-striped" style={{borderBottom: "1px solid #dee2e6"}}>
+										<thead className="thead-dark">
+											<tr>
+												<th></th>
+												<th
+													className='ei-table-col-head-sortable ng-binding ng-scope'
+													onClick={event => { onSortClick(sortableColumns.NAME) }}
+													style={{'cursor': 'pointer'}}
+												>
+													Name
+													{selectedColumn === sortableColumns.NAME
+														? <div className='ei-table-col-sort-icon ng-scope'>
+																<i className={'fa' + (isOrderDesc ? ' fa-chevron-up' : ' fa-chevron-down')} aria-hidden='true'> </i>
+															</div>
+														: ''
+													}
+												</th>
+												<th
+													className='ei-table-col-head-sortable ng-binding ng-scope'
+													onClick={event => { onSortClick(sortableColumns.RESOURCE_TYPE) }}
+													style={{'cursor': 'pointer'}}
+												>
+													Resource Type
+													{selectedColumn === sortableColumns.RESOURCE_TYPE
+														? <div className='ei-table-col-sort-icon ng-scope'>
+																<i className={'fa' + (isOrderDesc ? ' fa-chevron-up' : ' fa-chevron-down')} aria-hidden='true'> </i>
+															</div>
+														: ''
+													}
+												</th>
+												<th></th>
+											</tr>
+										</thead>
+										<tbody>
+											{renderDataRows()}
+										</tbody>
+									</table>
 								</div>
+								<div style={{flex: '0 0 auto'}}>
+									<div className="float-right">
+										{paginationElement}
+									</div>
+								</div>								
+								{
+									props.isMakeNewFilter &&
+										<div style={{flex: '0 0 auto'}}>
+											<div className="form-group row justify-content-end">
+												<div className="col-sm-6">
+													<button
+														onClick={() => handleCanMakeNewFilter(selectedResourceName)}
+														value={selectedResourceName}
+														className="btn btn-light btn-block"
+													>
+														<i className="fa fa-file action-button-icon"></i>
+														New {selectedResourceName}
+													</button>
+												</div>
+											</div>
+										</div>
+								}
 							</div>
-						</div>
+						)
 					}
+					
+
 					<>
 						{
 							cloneManagerType === 'competition_system'
