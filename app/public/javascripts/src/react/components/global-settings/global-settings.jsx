@@ -174,7 +174,7 @@ function GlobalSettings(props) {
             :'xl'
       }
       title={renderBreadCrumb()}
-      overflow="inside"
+      overflow="outside"
       styles={{ modal: { backgroundColor: "#F8F9FA" } }}
     >
       {breadCrumb.length === 1 &&

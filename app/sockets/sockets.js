@@ -20,7 +20,6 @@ class Sockets {
       library: socket.of('/library'),
       broadcast: socket.of('/broadcast'),
       tileInvalidation: socket.of('/tileInvalidation'),
-      competitionUpdates: socket.of('/competition-updates'),
     }
 
     // Set up logic to join/leave rooms
@@ -64,11 +63,6 @@ class Sockets {
   emitToLibrary (libraryId, payload) {
     this.sockets.library.to(`${libraryId}`).emit('message', payload)
     logger.info(`SOCKET EMIT library: ${libraryId}`, `payload: ${this.formatPayloadForLogging(payload)}`)
-  }
-
-  emitToCompetitionResourceManagerUsers (resourceManagerId, payload) {
-    this.sockets.competitionUpdates.to(`${resourceManagerId}`).emit('message', payload)
-    logger.info(`SOCKET EMIT competition updates: ${resourceManagerId}`, `payload: ${this.formatPayloadForLogging(payload)}`)
   }
 
   // Emit a message to EVERYONE connected via websockets. Use sparingly, if used at all.

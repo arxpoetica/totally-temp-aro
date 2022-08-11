@@ -1,12 +1,10 @@
 import React, { Component } from 'react'
-import { Popover, Text, Button, Loader } from '@mantine/core';
+import { Popover, Text, Button, Loader } from '@mantine/core'
 import { connect } from 'react-redux'
-import ResourceActions from './resource-actions'
-import Select from "react-select"
-// import { Alert } from '@mantine/core';
-import AroHttp from '../../common/aro-http'
-import SocketManager from '../../common/socket-manager';
-// import Loader from '../common/Loader.jsx';
+import ResourceActions from '../resource-actions'
+import Select from 'react-select'
+import AroHttp from '../../../common/aro-http'
+import SocketManager from '../../../common/socket-manager'
 
 const styles = {
   multiValue: (base, state) => {
@@ -29,7 +27,7 @@ const recalcStateMap = {
   RECALCULATED: "recalculated"
 }
 
-export class CompetitorEditor extends Component {
+class _CompetitorEditor extends Component {
   constructor (props) {
     super(props)
     this.state = {
@@ -43,34 +41,34 @@ export class CompetitorEditor extends Component {
       hasChanged: false,
       recalcPopOverOpen: false
     }
-    // console.log({SocketManager});
+
+    console.log({ SocketManager })
     
-    SocketManager.joinRoom('competition-updates', this.props.editingManager.id)
-    SocketManager.subscribe('MODIFY', msg => {
-      console.log({msg})
-    })
-    SocketManager.subscribe('REBUILD_STARTED', msg => {
-      console.log('REBUILD_STARTED', {msg})
-    })
-    SocketManager.subscribe('REBUILD_ENDED', msg => {
-      console.log('REBUILD_ENDED', {msg})
-    })
-    SocketManager.subscribe('REBUILD_FAILED', msg => {
-      console.log('REBUILD_FAILED', {msg})
-    })
+    // SocketManager.joinRoom('competition-updates', this.props.editingManager.id)
+    // SocketManager.subscribe('MODIFY', msg => {
+    //   console.log({msg})
+    // })
+    // SocketManager.subscribe('REBUILD_STARTED', msg => {
+    //   console.log('REBUILD_STARTED', {msg})
+    // })
+    // SocketManager.subscribe('REBUILD_ENDED', msg => {
+    //   console.log('REBUILD_ENDED', {msg})
+    // })
+    // SocketManager.subscribe('REBUILD_FAILED', msg => {
+    //   console.log('REBUILD_FAILED', {msg})
+    // })
   }
 
 
-  componentDidMount () {
+  async componentDidMount () {
     this.props.getRegions()
     this.props.setModalTitle(this.props.resourceManagerName)
 
-    AroHttp.get(`/service/v1/competitor-manager/${this.props.editingManager.id}/state`)
-      .then((result) => {
-        if (result.data.modifiedCount > 0){
-          this.props.setRecalcState("requireRecalc")
-        }
-      })
+    const url = `/service/v1/competitor-manager/${this.props.editingManager.id}/state`
+    const res = await AroHttp.get(url)
+    if (res.data.modifiedCount > 0) {
+      this.props.setRecalcState('requireRecalc')
+    }
   }
 
   static getDerivedStateFromProps(nextProps) {
@@ -483,5 +481,4 @@ const mapDispatchToProps = (dispatch) => ({
   executeRecalc: (userId, competitorManagerId) => dispatch(ResourceActions.executeRecalc(userId, competitorManagerId)),
 })
 
-const CompetitorEditorComponent = connect(mapStateToProps, mapDispatchToProps)(CompetitorEditor)
-export default CompetitorEditorComponent
+export const CompetitorEditor = connect(mapStateToProps, mapDispatchToProps)(_CompetitorEditor)

@@ -14,11 +14,6 @@ const socketConfig = Object.freeze({
     exchange: 'tile_invalidation',
     queue: 'tileInvalidation'
   },
-  competitionUpdates: {
-    message: 'COMPETITION_UPDATES',
-    exchange: 'competition-updates',
-    queue: 'competitionUpdates'
-  },
   progress: {
     message: 'PROGRESS_MESSAGE_DATA',
     exchange: 'aro_progress',
@@ -51,7 +46,6 @@ class SocketManager {
     messageQueueManager.addConsumer(this.getPlanEventConsumer())
     messageQueueManager.addConsumer(this.getLibraryEventConsumer())
     messageQueueManager.addConsumer(this.getSubnetConsumer())
-    messageQueueManager.addConsumer(this.getCompetitionUpdatesConsumer())
     messageQueueManager.connectToPublisher()
   }
 
@@ -134,16 +128,6 @@ class SocketManager {
       console.log(msg.content.toString())
       msg.properties.headers.eventType = 'SUBNET_DATA'
       this.sockets.emitToClient(msg.properties.headers.sessionId, msg)
-    })
-  }
-
-  getCompetitionUpdatesConsumer () {
-    return new Consumer(socketConfig.competitionUpdates.queue, socketConfig.competitionUpdates.exchange, msg => {
-      console.log('Received competitionUpdates message from service')
-      console.log(msg.content.toString())
-      console.log(msg.properties.headers, msg.content)
-      msg.properties.headers.eventType = socketConfig.competitionUpdates.message
-      this.sockets.emitToCompetitionResourceManagerUsers(JSON.parse(msg.content.toString()).managerId, msg)
     })
   }
 
