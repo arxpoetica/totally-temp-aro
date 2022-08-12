@@ -80,7 +80,7 @@ module.exports = class NetworkPlan {
 
     const locationIdChunks = breakArrayIntoChunks(location_ids)
     for (const locationIdsChunk of locationIdChunks) {
-      var sql = `
+      const sql = `
         DELETE FROM client.plan_targets
         WHERE location_id in ($1)
         AND plan_id = $2
@@ -91,25 +91,26 @@ module.exports = class NetworkPlan {
   }
 
   static removeAllTargets (plan_id) {
-    var sql = 'DELETE FROM client.plan_targets WHERE plan_id=$1'
+    const sql = 'DELETE FROM client.plan_targets WHERE plan_id=$1'
     return database.query(sql, [plan_id])
   }
 
-  static getTargetsAddresses (locationIds) {
+  static async getTargetsAddresses (locationIds) {
     if (!_.isArray(locationIds) || locationIds.length === 0) return Promise.resolve()
 
-    var sql = `
-      SELECT id, INITCAP(address) as address,ST_X(geom) as lng, ST_Y(geom) as lat
-      FROM locations
-      WHERE id IN ($1)
-    `
-    return database.query(sql, [locationIds])
-    .then(result => {
-      // Convert array to a keyed object, then return it.
-      var idToLocation = {}
+    // returning keyed object instead of array of results
+    const idToLocation = {}
+    const locationIdChunks = breakArrayIntoChunks(locationIds)
+    for (const locationIdsChunk of locationIdChunks) {
+      const sql = `
+        SELECT id, INITCAP(address) as address,ST_X(geom) as lng, ST_Y(geom) as lat
+        FROM locations
+        WHERE id IN ($1)
+      `
+      const result = await database.query(sql, [locationIdsChunk])
       result.forEach(location => idToLocation[location.id] = location)
-      return idToLocation
-    })
+    }
+    return idToLocation
   }
 
   static getServiceAreaAddresses (serviceAreaIds) {
