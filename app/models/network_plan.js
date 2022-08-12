@@ -17,6 +17,18 @@ var request = pify(require('request'), { multiArgs: true })
 const { createLogger, LOGGER_GROUPS } = require('../helpers/logger')
 const logger = createLogger(LOGGER_GROUPS.MODELS)
 
+// NOTE: this extra functionality is when count limits are large
+// hence smaller limited sync calls instead of one massive
+const CHUNK_LIMIT = 10000
+function breakArrayIntoChunks(array, limit = CHUNK_LIMIT) {
+  const arrayOfChunks = []
+  for (let index = 0; index < array.length; index += limit) {
+      const chunk = array.slice(index, index + limit)
+      arrayOfChunks.push(chunk)
+  }
+  return arrayOfChunks
+}
+
 module.exports = class NetworkPlan {
 
   static _addSources (plan_id, network_node_ids) {
@@ -44,30 +56,38 @@ module.exports = class NetworkPlan {
       })
   }
 
-  static addTargets (plan_id, location_ids) {
+  static async addTargets (plan_id, location_ids) {
     if (!_.isArray(location_ids) || location_ids.length === 0) return Promise.resolve()
 
-    var sql = `
-      INSERT INTO client.plan_targets(location_id, plan_id)
-      (
-        SELECT id, $2
-        FROM locations
-        WHERE id IN ($1)
-        AND id NOT IN (SELECT location_id FROM client.plan_targets WHERE plan_id=$2)  -- We don't want duplicate targets
-      )
-    `
-    return database.query(sql, [location_ids, plan_id])
+    const locationIdChunks = breakArrayIntoChunks(location_ids)
+    for (const locationIdsChunk of locationIdChunks) {
+      var sql = `
+        INSERT INTO client.plan_targets(location_id, plan_id)
+        (
+          SELECT id, $2
+          FROM locations
+          WHERE id IN ($1)
+          AND id NOT IN (SELECT location_id FROM client.plan_targets WHERE plan_id=$2)  -- We don't want duplicate targets
+        )
+      `
+      await database.query(sql, [locationIdsChunk, plan_id])
+    }
+    return Promise.resolve()
   }
 
-  static removeTargets (plan_id, location_ids) {
+  static async removeTargets (plan_id, location_ids) {
     if (!_.isArray(location_ids) || location_ids.length === 0) return Promise.resolve()
 
-    var sql = `
-      DELETE FROM client.plan_targets
-      WHERE location_id in ($1)
-      AND plan_id = $2
-    `
-    return database.query(sql, [location_ids, plan_id])
+    const locationIdChunks = breakArrayIntoChunks(location_ids)
+    for (const locationIdsChunk of locationIdChunks) {
+      var sql = `
+        DELETE FROM client.plan_targets
+        WHERE location_id in ($1)
+        AND plan_id = $2
+      `
+      await database.query(sql, [locationIdsChunk, plan_id])
+    }
+    return Promise.resolve()
   }
 
   static removeAllTargets (plan_id) {
