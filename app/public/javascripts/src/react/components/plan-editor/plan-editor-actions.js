@@ -270,7 +270,7 @@ function subscribeToSocket() {
                 let group = {
                   locationEntityType: 'household',
                   selected: true,
-                  ids: location.ids,
+                  ids: location.ids.map(household => household.uuid),
                   point: {
                     latitude: location.point.coordinates[1], 
                     longitude: location.point.coordinates[0],
