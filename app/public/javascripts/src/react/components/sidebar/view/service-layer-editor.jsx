@@ -286,6 +286,7 @@ export const ServiceLayerEditor = (props) => {
             entityType={constants.DRAG_IS_BOUNDARY}
             entityDetails={constants.MAP_OBJECT_CREATE_SERVICE_AREA}
             label="Drag and Drop"
+            active={true}
           />
         </div>
       </div>

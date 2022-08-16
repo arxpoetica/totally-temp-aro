@@ -66,6 +66,7 @@ function getRootOfFeatureUtility (drafts, subnetFeatures, featureId) {
   return subnetId // can return null
 }
 
+// this is the central office or subnetnode
 const getRootSubnetIdForSelected = createSelector(
   [getSelectedSubnetId, getSubnetFeatures, getDrafts],
   (selectedSubnetId, subnetFeatures, drafts) => {
@@ -412,6 +413,32 @@ const getLocationCounts = createSelector(
   }
 )
 
+const getActivePlan = state => state.plan.activePlan
+const getPerspective = state => state.configuration.ui.perspective
+const getMapLayers = state => state.mapLayers
+
+const getEquipmentDraggerInfo = createSelector(
+  [getActivePlan, getPerspective, getMapLayers],
+  (activePlan, perspective, mapLayers) => {
+    let { planType } = activePlan
+    let constructionPlanType = planType
+    if (!(planType in perspective.networkEquipment.planEdit)) planType = 'default'
+    if (!(constructionPlanType in perspective.constructionAreas.planEdit)) constructionPlanType = 'default'
+    const equipmentDefinitions = {
+      // NOTE: these definitions come from the `ui.settings` table
+      ...mapLayers.networkEquipment.equipments,
+      ...mapLayers.constructionAreas.construction_areas,
+    }
+    const addableEquipmentTypes = perspective
+      && perspective.networkEquipment.planEdit[planType].areAddable || []
+    const addableEdgeConstructionTypes = perspective
+      && perspective.constructionAreas.planEdit[constructionPlanType].areAddable || []
+    const addableTypes = [...addableEquipmentTypes, ...addableEdgeConstructionTypes]
+
+    return { equipmentDefinitions, addableTypes }
+  }
+)
+
 const PlanEditorSelectors = Object.freeze({
   getSelectedSubnet,
   getBoundaryLayersList,
@@ -430,6 +457,7 @@ const PlanEditorSelectors = Object.freeze({
   getRootOfFeatureUtility,
   getRootSubnetIdForSelected,
   getNearestSubnetIdOfSelected,
+  getEquipmentDraggerInfo,
 })
 
 export default PlanEditorSelectors

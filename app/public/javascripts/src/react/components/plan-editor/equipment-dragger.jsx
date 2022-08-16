@@ -1,85 +1,65 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
-import { PropTypes } from 'prop-types'
 import DraggableNode from './draggable-node.jsx'
 import { constants } from './shared'
-
-// TODO: centralize these somewhere...should probably not be hardcoded
-const networkNodeTypes = [
-  'dslam',
-  'central_office',
-  'fiber_distribution_hub',
-  'fiber_distribution_terminal',
-  'cell_5g',
-  'splice_point',
-  'bulk_distribution_terminal',
-  'loop_extender',
-  'network_anchor',
-  'multiple_dwelling_unit',
-  'network_connector',
-  'location_connector',
-]
-
-const edgeConstruction = [
-  "edge_construction_area"
-]
+import PlanEditorSelectors from './plan-editor-selectors'
 
 export const EquipmentDragger = props => {
 
-  const { visibleEquipmentTypes, equipmentDefinitions, visibleEdgeConstructionTypes } = props
+  const { planType, drafts, selectedSubnetId, equipmentDraggerInfo, visibleEquipmentTypes } = props
+  const { equipmentDefinitions, addableTypes } = equipmentDraggerInfo
 
-  const [editableEquipmentTypes, setEditableEquipmentTypes] = useState([])
+  // ugh, special casing for ring plans vs standard...
+  const activeTypes =
+    planType === 'UNDEFINED' && !Object.keys(drafts).length && !selectedSubnetId
+    ? ['central_office']
+    : visibleEquipmentTypes
 
-  useEffect(() => {
-    const editableEquipmentTypes = [...visibleEquipmentTypes, ...visibleEdgeConstructionTypes].filter(type => {
-      return networkNodeTypes.includes(type) || edgeConstruction.includes(type)
-    })
-    setEditableEquipmentTypes(editableEquipmentTypes)
-  }, [])
-
-  return equipmentDefinitions && (
+  return (
     <div className="equipment-dragger">
-
       <div className="info">
         (drag icon onto map)
       </div>
-
       <div className="nodes">
-        {editableEquipmentTypes.map(type =>
-          (equipmentDefinitions[type] && <DraggableNode
+        {addableTypes.map(type => equipmentDefinitions[type] &&
+          <DraggableNode
             key={type}
             icon={equipmentDefinitions[type].iconUrl}
             entityType={constants.DRAG_DROP_NETWORK_EQUIPMENT}
             entityDetails={equipmentDefinitions[type].networkNodeType}
             label={equipmentDefinitions[type].label}
-          />)
+            active={activeTypes.includes(type)}
+          />
         )}
       </div>
-
+      <style jsx>{`
+        .equipment-dragger {
+          margin: 0 0 10px;
+        }
+        .info {
+          text-align: center;
+          margin: 0 0 4px;
+        }
+        .nodes {
+          display: grid;
+          gap: 5px;
+          grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
+          padding: 5px;
+          border: 2px solid #f3f3f3;
+        }
+      `}</style>
     </div>
-  ) || null
+  )
 
-}
-
-EquipmentDragger.propTypes = {
-  visibleEquipmentTypes: PropTypes.arrayOf(PropTypes.string),
-  equipmentDefinitions: PropTypes.object,
 }
 
 const mapStateToProps = (state) => {
-  let planType = state.plan.activePlan.planType
-  let constructionPlanType = state.plan.activePlan.planType
-  if (!(planType in state.configuration.ui.perspective.networkEquipment.planEdit)) planType = 'default'
-  if (!(constructionPlanType in state.configuration.ui.perspective.constructionAreas.planEdit)) constructionPlanType = 'default'
-  const equipmentDefinitions = {
-    ...state.mapLayers.networkEquipment.equipments,
-    ...state.mapLayers.constructionAreas.construction_areas
-  }
-
   return {
-    visibleEquipmentTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.networkEquipment.planEdit[planType].areAddable) || [],
-    visibleEdgeConstructionTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.constructionAreas.planEdit[constructionPlanType].areAddable) || [],
-    equipmentDefinitions,
+    planType: state.plan.activePlan.planType,
+    drafts: state.planEditor.drafts,
+    selectedSubnetId: state.planEditor.selectedSubnetId,
+    equipmentDraggerInfo: PlanEditorSelectors.getEquipmentDraggerInfo(state),
+    visibleEquipmentTypes: state.planEditor.visibleEquipmentTypes,
   }
 }
 

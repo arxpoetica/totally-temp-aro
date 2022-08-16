@@ -1,10 +1,8 @@
-import { List, Map } from 'immutable'
+import { List } from 'immutable'
 import { createSelector } from 'reselect'
-import { formValueSelector } from 'redux-form'
 import { toast } from 'react-toastify'
 import StateViewMode from './state-view-mode'
 import MapLayerHelper from './map-layer-helper'
-import Constants from '../components/common/constants'
 import Actions from '../react/common/actions'
 import GlobalSettingsActions from '../react/components/global-settings/globalsettings-action'
 import UiActions from '../react/components/configuration/ui/ui-actions'
@@ -16,18 +14,14 @@ import MapLayerActions from '../react/components/map-layers/map-layer-actions'
 import MapReportsActions from '../react/components/map-reports/map-reports-actions'
 import SelectionActions from '../react/components/selection/selection-actions'
 import PlanStates from '../react/components/plan/plan-states'
-import SelectionModes from '../react/components/selection/selection-modes'
 import SocketManager from '../react/common/socket-manager'
 import RingEditActions from '../react/components/ring-edit/ring-edit-actions'
 import NetworkAnalysisActions from '../react/components/optimization/network-analysis/network-analysis-actions'
-import NotificationInterface from '../react/components/notification/notification-interface'
-import AroNetworkConstraints from '../shared-utils/aro-network-constraints'
 import PuppeteerMessages from '../components/common/puppeteer-messages'
 import NetworkOptimizationActions from '../react/components/optimization/network-optimization/network-optimization-actions'
 import ViewSettingsActions from '../react/components/view-settings/view-settings-actions'
 import ToolBarActions from '../react/components/header/tool-bar-actions'
 import RoicReportsActions from '../react/components/sidebar/analysis/roic-reports/roic-reports-actions'
-import { hsvToRgb } from '../react/common/view-utils'
 import StateViewModeActions from '../react/components/state-view-mode/state-view-mode-actions'
 import PlanEditorActions from '../react/components/plan-editor/plan-editor-actions'
 import RxState from '../react/common/rxState'
@@ -54,88 +48,9 @@ class State {
     var Rx = require('rxjs')
 
     var service = {}
-    service.INVALID_PLAN_ID = -1
-    service.MAX_EXPORTABLE_AREA = 11000000000 // 25000000
 
     service.rxState = new RxState() // For RxJs in react components
     service.StateViewMode = StateViewMode
-
-    service.sidebarWidth = window.GLOBAL_SIDEBAR_INITIAL_WIDTH || 25
-
-    service.OPTIMIZATION_TYPES = {
-      UNCONSTRAINED: { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
-      MAX_IRR: { id: 'MAX_IRR', algorithm: 'IRR', label: 'Maximum IRR' },
-      BUDGET: { id: 'BUDGET', algorithm: 'IRR', label: 'Budget' },
-      IRR_TARGET: { id: 'IRR_TARGET', algorithm: 'IRR', label: 'Plan IRR Floor' },
-      IRR_THRESH: { id: 'IRR_THRESH', algorithm: 'IRR', label: 'Segment IRR Floor' },
-      TABC: { id: 'TABC', algorithm: 'CUSTOM', label: 'ABCD analysis' }, // Verizon-specific
-      COVERAGE: { id: 'COVERAGE', algorithm: 'COVERAGE', label: 'Coverage Target' }
-    }
-
-    service.cashFlowStrategyTypes = {
-      COMPUTED_ROIC: { id: 'COMPUTED_ROIC', label: 'Computed ROIC' },
-      ESTIMATED_ROIC: { id: 'ESTIMATED_ROIC', label: 'Estimated ROIC' },
-      EXTERNAL: { id: 'EXTERNAL', label: 'External' }
-    }
-
-    service.pruningStrategyTypes = {
-      INTER_WIRECENTER: { id: 'INTER_WIRECENTER', label: 'Inter Service Area' },
-      INTRA_WIRECENTER: { id: 'INTRA_WIRECENTER', label: 'Intra Service Area' }
-    }
-
-    service.terminalValueStrategyTypes = {
-      NONE: { id: 'NONE', label: 'None' },
-      FIXED_MULTIPLIER: { id: 'FIXED_MULTIPLIER', label: 'End Year Multiplier' },
-      PERPUTUAL_GROWTH: { id: 'PERPUTUAL_GROWTH', label: 'Perpetual Growth' }
-    }
-
-    service.penetrationAnalysisStrategies = [
-      { id: 'SCURVE', label: 'Curve Based' },
-      { id: 'FLOW_SHARE', label: 'Flow Share' }
-    ]
-
-    service.connectionCostStrategies = [
-      { id: 'NEW_CONNECTION', label: 'New Connection' },
-      { id: 'REUSE_CONNECTION', label: 'Reuse Connection' }
-    ]
-
-    service.viewFiberOptions = [
-      {
-        id: 1,
-        name: 'Uniform width'
-      },
-      {
-        id: 2,
-        name: 'Fiber Strand Count',
-        field: 'fiber_strands',
-        multiplier: 2.1,
-        pixelWidth: {
-          min: 2,
-          max: 12,
-          divisor: 1 / 3
-        },
-        opacity: {
-          min: 0.66,
-          max: 1
-        }
-      },
-      {
-        id: 3,
-        name: 'Atomic Unit Demand',
-        field: 'atomic_units',
-        multiplier: 1,
-        pixelWidth: {
-          min: 2,
-          max: 12,
-          divisor: 1 / 3,
-          atomicDivisor: 50
-        },
-        opacity: {
-          min: 0.66,
-          max: 1
-        }
-      }
-    ]
 
     // Promises for app initialization (configuration loaded, map ready, etc.)
     service.mapReadyPromise = new Promise((resolve, reject) => {
@@ -163,17 +78,6 @@ class State {
     }
 
     service.setMapReadyPromise()
-
-    // toolbar actions
-    service.toolbarActions = Object.freeze({
-      SINGLE_SELECT: 1,
-      POLYGON_SELECT: 2,
-      POLYGON_EXPORT: 3
-    })
-    service.selectedToolBarAction = null
-    service.resetToolBarAction = () => {
-      service.selectedToolBarAction = null
-    }
 
     service.showEquipmentLabels = false
     service.equipmentLayerTypeVisibility = {
@@ -203,17 +107,6 @@ class State {
     })
     service.activeViewModePanel = service.viewModePanels.LOCATION_INFO
 
-    // The selected panel when in the edit plan mode
-    service.EditPlanPanels = Object.freeze({
-      EDIT_PLAN: 'EDIT_PLAN',
-      EDIT_RINGS: 'EDIT_RINGS'
-    })
-    service.activeEditPlanPanel = service.EditPlanPanels.EDIT_PLAN
-    
-    service.EditRingsPanels = Object.freeze({
-      EDIT_RINGS: 'EDIT_RINGS',
-      OUTPUT: 'OUTPUT'
-    })
 
     service.routingModes = {
       DIRECT_ROUTING: { id: 'DIRECT_ROUTING', label: 'Direct Routing' },
@@ -240,20 +133,6 @@ class State {
         }
       ]
     }
-
-    // ruler actions
-    service.allRulerActions = Object.freeze({
-      STRAIGHT_LINE: { id: 'STRAIGHT_LINE', label: 'Straight Line' },
-      ROAD_SEGMENT: { id: 'ROAD_SEGMENT', label: 'Road Segment' },
-      COPPER: { id: 'COPPER', label: 'Copper' }
-    })
-
-    service.rulerActions = [
-      service.allRulerActions.STRAIGHT_LINE,
-      service.allRulerActions.ROAD_SEGMENT
-    ]
-
-    service.currentRulerAction = service.allRulerActions.STRAIGHT_LINE
 
     service.isRulerEnabled = false
     service.isReportMode = false
@@ -286,27 +165,15 @@ class State {
     service.requestMapLayerRefresh = new Rx.BehaviorSubject({})
     service.requestCreateMapOverlay = new Rx.BehaviorSubject(null)
     service.requestDestroyMapOverlay = new Rx.BehaviorSubject(null)
-    service.showNetworkAnalysisOutput = false
     service.requestSetMapCenter = new Rx.BehaviorSubject({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
     service.requestSetMapZoom = new Rx.BehaviorSubject(service.defaultPlanCoordinates.zoom)
     service.showDetailedLocationInfo = new Rx.BehaviorSubject()
-    service.showDetailedEquipmentInfo = new Rx.BehaviorSubject()
-    service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
-    service.showProjectSettingsModal = false
-    service.selectedDataTypeId = 1
-    service.viewSettingsChanged = new Rx.BehaviorSubject()
-    service.measuredDistance = new Rx.BehaviorSubject()
-    service.dragStartEvent = new Rx.BehaviorSubject()
-    service.dragEndEvent = new Rx.BehaviorSubject()
     service.showPlanResourceEditorModal = false
-    service.editingPlanResourceKey = null
-    service.isLoadingPlan = false
 
     // Raise an event requesting locations within a polygon to be selected. Coordinates are relative to the visible map.
     service.requestPolygonSelect = new Rx.BehaviorSubject({})
 
     service.areTilesRendering = false
-    service.noteIdTilesRendering = null
     service.areTilesRenderingDebounceId = null
     service._setAreTilesRendering = newValue => {
       service.areTilesRendering = newValue
@@ -554,93 +421,6 @@ class State {
       service.showPlanResourceEditorModal = true
     }
 
-    // not quite sure where to put the defaults
-    service.resourceItems = {}
-    // Load the plan resource selections from the server
-    service.loadPlanResourceSelectionFromServer = () => {
-      if (!service.plan) {
-        return Promise.resolve()
-      }
-      var currentPlan = service.plan
-      return Promise.all([
-        $http.get('/service/odata/resourcetypeentity'), // The types of resource managers
-        $http.get('/service/v2/resource-manager'),
-        $http.get(`/service/v1/plan/${currentPlan.id}/configuration`)
-      ])
-        .then((results) => {
-          var resourceManagerTypes = results[0].data
-          var allResourceManagers = results[1].data
-          var selectedResourceManagers = results[2].data.resourceConfigItems
-
-          var resourceManOrder = [
-            'price_book',
-            'arpu_manager',
-            'roic_manager',
-            'rate_reach_manager',
-            'impedance_mapping_manager',
-            'tsm_manager',
-            'competition_manager',
-            'fusion_manager',
-            'network_architecture_manager',
-            'planning_constraints_manager'
-          ]
-
-          // First set up the resource items so that we display all types in the UI
-          var newResourceItems = {}
-          resourceManagerTypes.forEach((resourceManager) => {
-            if (!resourceManOrder.includes(resourceManager.name)) resourceManOrder.push(resourceManager.name)
-
-            newResourceItems[resourceManager.name] = {
-              id: resourceManager.id,
-              description: resourceManager.description,
-              allManagers: [],
-              selectedManager: null,
-              order: resourceManOrder.indexOf(resourceManager.name)
-            }
-          })
-
-          // Then add all the managers in the system to the appropriate type
-          allResourceManagers.forEach((resourceManager) => {
-            // Once the backend supports the permission filtering on the odata API
-            // or durinng the react migration  managerType - resourceType maping can 
-            // be removed as managerType is used in many old Angular code
-            resourceManager['managerType'] = resourceManager['resourceType']
-            delete resourceManager['resourceType']
-            if (!resourceManager.deleted) {
-              newResourceItems[resourceManager.managerType].allManagers.push(resourceManager)
-            }
-            newResourceItems[resourceManager.managerType].allManagers.sort((a, b) => (a.name > b.name) ? 1 : -1)
-          })
-          
-          // Then select the appropriate manager for each type
-          selectedResourceManagers.forEach((selectedResourceManager) => {
-            var allManagers = newResourceItems[selectedResourceManager.aroResourceType].allManagers
-            var matchedManagers = allManagers.filter((item) => item.id === selectedResourceManager.resourceManagerId)
-            if (matchedManagers.length === 1) {
-              newResourceItems[selectedResourceManager.aroResourceType].selectedManager = matchedManagers[0]
-            }
-          })
-          service.resourceItems = newResourceItems
-          service.pristineResourceItems = angular.copy(service.resourceItems)
-          $timeout() // Trigger a digest cycle so that components can update
-          return Promise.resolve()
-        })
-        .catch((err) => console.error(err))
-    }
-
-    service.getDefaultProjectForUser = (userId) => {
-      return $http.get(`/service/auth/users/${userId}/configuration`)
-        .then((result) => Promise.resolve(result.data.projectTemplateId))
-        .catch((err) => console.error(err))
-    }
-
-    // Get the default project template id for a given user
-    service.getDefaultProjectTemplate = (userId) => {
-      return $http.get(`/service/auth/users/${service.loggedInUser.id}/configuration`)
-        .then((result) => Promise.resolve(result.data.projectTemplateId))
-        .catch((err) => console.error(err))
-    }
-
     service.createNewPlan = (isEphemeral, planName, parentPlan, planType) => {
       if (isEphemeral && parentPlan) {
         return Promise.reject('ERROR: Ephemeral plans cannot have a parent plan')
@@ -858,7 +638,7 @@ class State {
           //    i know it's not the best, I'll be back.
           planInputs = { ...defaultPlanInputs, ...planInputs }
           return Promise.all([
-            service.loadPlanResourceSelectionFromServer() // ,
+            // service.loadPlanResourceSelectionFromServer() // ,
             // service.loadNetworkConfigurationFromServer()
           ])
         })
@@ -887,108 +667,10 @@ class State {
       return Promise.all(promises)
     }
 
-    service.locationInputSelected = (locationKey) => {
-      return service.locationLayers.filter((locationType) => {
-        return locationType.checked && locationType.categoryKey === locationKey
-      }).length > 0
-    }
-
-    service.networkNodeTypesEntity = {}
-    service.networkNodeTypes = {}
-    // Load NetworkNodeTypesEntity
-    service.loadNetworkNodeTypesEntity = () => {
-      return new Promise((resolve, reject) => {
-        $http.get('/service/odata/NetworkNodeTypesEntity')
-          .then((response) => {
-            if (response.status >= 200 && response.status <= 299) {
-              service.networkNodeTypes = response.data
-              response.data.forEach((entityType) => {
-                service.networkNodeTypesEntity[entityType.name] = entityType.description
-              })
-              resolve()
-            } else {
-              reject(response)
-            }
-          })
-      })
-    }
-    service.loadNetworkNodeTypesEntity()
-
     service.progressMessagePollingInterval = null
     service.progressMessage = ''
     service.progressPercent = 0
     service.isCanceling = false // True when we have requested the server to cancel a request
-
-    service.getOptimizationProgress = (newPlan) => {
-      if (!service.plan.planState) {
-        service.plan.planState = PlanStates.START_STATE
-        service.setActivePlanState(PlanStates.START_STATE)
-      }
-      if (service.plan) {
-        // Unsubscribe from progress message handler (if any)
-        if (service.unsubscribeProgressHandler) {
-          service.unsubscribeProgressHandler()
-        }
-        service.unsubscribeProgressHandler = SocketManager.subscribe('PROGRESS_MESSAGE_DATA', msg => {
-          if (msg.data.processType === 'optimization') {
-            const state = msg.data.optimizationState
-            newPlan.planState = state
-            service.plan.planState = state
-
-            if (state === PlanStates.CANCELED || state === PlanStates.FAILED) {
-              tileDataService.markHtmlCacheDirty()
-              service.requestMapLayerRefresh.next(null)
-              delete service.plan.optimizationId
-              service.loadPlanInputs(newPlan.id)
-              service.setActivePlanState(state)
-              service.stopProgressMessagePolling()
-            }
-
-            service.progressPercent = msg.data.progress * 100
-            $timeout() // Trigger a digest cycle so that components can update
-          }
-        })
-      }
-    }
-
-    // ToDo: move to redux
-    service.cancelOptimization = () => {
-      service.isCanceling = true
-      $http.delete(`/service/optimization/processes/${service.plan.optimizationId}`)
-        .then((response) => {
-          // Optimization process was cancelled. Get the plan status from the server
-          return $http.get(`/service/v1/plan/${service.plan.id}`)
-        })
-        .then((response) => {
-          service.isCanceling = false
-          service.plan.planState = response.data.planState // Note that this should match with Constants.PLAN_STATE
-          delete service.plan.optimizationId
-          tileDataService.markHtmlCacheDirty()
-          service.requestMapLayerRefresh.next(null)
-        })
-        .catch((err) => {
-          console.error(err)
-          service.isCanceling = false
-        })
-    }
-
-    service.startProgressMessagePolling = (startDate) => {
-      service.progressMessagePollingInterval = setInterval(() => {
-        var diff = (Date.now() - new Date(startDate).getTime()) / 1000
-        var minutes = Math.floor(diff / 60)
-        var seconds = Math.ceil(diff % 60)
-        service.progressMessage = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds} Runtime`
-        $timeout()
-      }, 1000)
-    }
-
-    service.stopProgressMessagePolling = () => {
-      if (service.progressMessagePollingInterval) {
-        clearInterval(service.progressMessagePollingInterval)
-        service.progressMessagePollingInterval = null
-        service.progressMessage = ''
-      }
-    }
 
     service.getDefaultPlanInputs = () => {
       return angular.copy(service.configuration.optimizationOptions)
@@ -1452,35 +1134,6 @@ class State {
     }
 
     service.planEditorChanged = new Rx.BehaviorSubject(false)
-    service.serviceLayers = []
-    // ToDo: Do not select service layers by name
-    // we need a change in service GET /v1/library-entry needs to send id, identifier is not the same thing
-    service.nameToServiceLayers = {}
-    service.loadServiceLayers = () => {
-      $http.get('/service/odata/ServiceLayer?$select=id,name,description')
-        .then((response) => {
-          if (response.status >= 200 && response.status <= 299) {
-            service.serviceLayers = response.data
-            service.serviceLayers.forEach((layer) => {
-              service.nameToServiceLayers[layer.name] = layer
-            })
-          }
-        })
-    }
-
-    service.loadServiceLayers()
-
-    service.getValidEquipmentFeaturesList = (equipmentFeaturesList) => {
-      var validEquipments = []
-      equipmentFeaturesList.filter((equipment) => {
-        if (tileDataService.modifiedFeatures.hasOwnProperty(equipment.object_id)) {
-          if (!tileDataService.modifiedFeatures[equipment.object_id].deleted) validEquipments.push(equipment)
-        } else {
-          validEquipments.push(equipment)
-        }
-      })
-      return validEquipments
-    }
 
     service.listOfAppVersions = []
     service.getReleaseVersions = () => {
@@ -1505,10 +1158,6 @@ class State {
         service.setShowGlobalSettings()
         service.setCurrentViewToReleaseNotes('Release Notes')
       }
-    }
-
-    service.toggleSiteBoundary = () => {
-      service.updateShowSiteBoundary(!service.showSiteBoundary)
     }
 
     // Define a tile box at zoom level 22 that covers the entire world
