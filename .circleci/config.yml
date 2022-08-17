@@ -73,7 +73,6 @@ workflows:
                 - master
                 - dev
                 - uat
-                - react/map-tools-migrations
       - deploy:
           context: aro_qa_builds
           requires:
