@@ -22,6 +22,7 @@ try {
 
 configuration.base_url = process.env.APP_BASE_URL || 'http://localhost:8000'
 configuration.aro_service_url = process.env.ARO_SERVICE_URL || configuration.aro_service_url
+configuration.oauth_server_host = process.env.OAUTH_SERVER_HOST || configuration.oauth_server_host
 configuration.rabbitmq = {
   server: process.env.RABBITMQ_SERVER || 'rabbitmq',
   username: process.env.RABBITMQ_USERNAME || 'guest',
