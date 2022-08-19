@@ -1850,6 +1850,13 @@ function parseSubnet (subnet) {
   subnet.coEquipments = subnet.coEquipments.map(feature => feature.objectId)
   subnet.subnetNode = subnet.subnetNode.objectId
 
+  // alert lists need to be dictionaries not arrays 
+  let childNodeById = {}
+  subnet.faultTree.rootNode.childNodes.forEach(childNode => {
+    childNodeById[childNode.faultReference.objectId] = childNode
+  })
+  subnet.faultTree.rootNode.childNodes = childNodeById
+
   return { subnet, subnetFeatures }
 }
 

@@ -7,6 +7,7 @@ import PlanEditorActions from './plan-editor-actions'
 import TileUtils from '../common/tile-overlay/tile-overlay-utils'
 import TileDataMutator from '../common/tile-overlay/tile-data-mutator'
 import tileIcons from '../common/tile-overlay/tile-icons'
+import SubnetTileSelectors from './subnet-tile-selectors'
 // global: tileCache.subnets
 
 let mapIcons = tileIcons.mapIcons
@@ -30,7 +31,7 @@ class _SubnetTileOverlay extends Component {
   // --- renderer --- //
 
   // this may become it's own static class
-  renderTileCanvas (ownerDocument, points, tileId, pointsById, badgeLists, isUnderlay) {
+  renderTileCanvas (ownerDocument, points, tileId, pointMetaById, badgeLists) {
     var canvas = ownerDocument.createElement('canvas')
     canvas.width = TileUtils.TILE_SIZE + (2 * TileUtils.TILE_MARGIN)
     canvas.height = TileUtils.TILE_SIZE + (2 * TileUtils.TILE_MARGIN)
@@ -42,7 +43,7 @@ class _SubnetTileOverlay extends Component {
       px.x += TileUtils.TILE_MARGIN
       px.y += TileUtils.TILE_MARGIN
       // get icon type
-      let iconType = pointsById[id].locationEntityType
+      let iconType = pointMetaById[id].locationEntityType
       let icon = mapIcons[iconType]
       // TODO: locationEntityType is not consistent across Service
       //  eg: sometimes it's "medium_businesses" 
@@ -58,49 +59,43 @@ class _SubnetTileOverlay extends Component {
       )
       // figure badges
       // for each badge
-      // TODO: should be stored in Redux as a dictionary
-      if (badgeLists.alertLocationIds) {
-        let hasAlertBadge = Object.values(badgeLists.alertLocationIds).find(faultNode => faultNode.faultReference.objectId === id)
-        if (hasAlertBadge) {
+      for (const [badgeId, badge] of Object.entries(iconBadges)) {
+        // badgeLists is a collection of id collectiions with the schema 
+        //  badgeLists: {
+        //    $badgeId: {
+        //      $pointId: bool
+        //    }
+        //  }
+        //  if the badgeLists isn't present
+        //    or if the pointId isn't in the list 
+        //    or if the value of badgeLists[badgeId][id] is false
+        //    the badge will not be drawn for this point, all three are valid means and are usful in different scenarios 
+        
+        if (badgeLists[badgeId] && badgeLists[badgeId][id]) {
           let badgeCoord = {
-            x: imageCoord.x + iconBadges['alert'].offset.x + (icon.image.width * iconBadges['alert'].offsetMult.w),
-            y: imageCoord.y + iconBadges['alert'].offset.y + (icon.image.width * iconBadges['alert'].offsetMult.h)
+            x: imageCoord.x + badge.offset.x + (icon.image.width * badge.offsetMult.w),
+            y: imageCoord.y + badge.offset.y + (icon.image.width * badge.offsetMult.h)
           }
           ctx.drawImage(
-            iconBadges['alert'].image, 
+            badge.image, 
             badgeCoord.x, 
             badgeCoord.y,
           )
         }
-      }
-
-      // TODO: generalize badge drawing
-      if (isUnderlay && ('selected' in pointsById[id]) && !pointsById[id].selected) {
-        let badgeCoord = {
-          x: imageCoord.x + iconBadges['x'].offset.x + (icon.image.width * iconBadges['x'].offsetMult.w),
-          y: imageCoord.y + iconBadges['x'].offset.y + (icon.image.width * iconBadges['x'].offsetMult.h)
-        }
-        ctx.drawImage(
-          iconBadges['x'].image, 
-          badgeCoord.x, 
-          badgeCoord.y,
-        )
       }
     }
 
     return canvas
   }
 
-  getTileCanvas (ownerDocument, tileData, tileCache, tileId, isUnderlay) {
+  getTileCanvas (ownerDocument, tileData, tileCache, tileId, pointMetaById, badgeLists) { // TODO: should all these be sent or pulled from "this."? Figure it out when we abstract this Component for use with view mode
     let tile = tileCache.getTile(tileId)
     if (!tile) {
       // not in the cache so render it
       let points = TileDataMutator.getPointsForTile(tileData, tileId)
       if (Object.keys(points).length) {
         // render tile
-        let locationsById = this.props.locationsById
-        if (isUnderlay) locationsById = this.props.groupsById
-        tile = this.renderTileCanvas(ownerDocument, points, tileId, locationsById, {alertLocationIds: this.props.alertLocationIds}, isUnderlay)
+        tile = this.renderTileCanvas(ownerDocument, points, tileId, pointMetaById, badgeLists)
         tileCache.addTile(tile, tileId)
       }
     }
@@ -117,10 +112,6 @@ class _SubnetTileOverlay extends Component {
   //  this.props.subnetTileData and this.props.selectedSubnetId
   //  instead of the values at time of function declarition 
   overlayGetTileCallback = (coord, zoom, ownerDocument) => {
-    //let sCoords = String(coord)
-    //console.log(`getTile ${sCoords} ${zoom}`)
-    //console.log(this.props.selectedSubnetId)
-
     // ?should we cache the div as well?
     const div = ownerDocument.createElement("div")
     
@@ -143,12 +134,23 @@ class _SubnetTileOverlay extends Component {
       let tile = null
       if (this.props.subnetTileData[tileDataKey] && tileCache.subnets[tileDataKey]) {
         let tileId = TileUtils.coordToTileId(coord, zoom)
+        
+        let badgeLists = {}
+        let pointMetaById = this.props.locationsById 
+        if (isUnderlay) {
+          pointMetaById = this.props.groupsById
+          badgeLists['x'] = this.props.unselectedLocationGroups
+        } else {
+          badgeLists['alert'] = this.props.alertLocationIds
+        }
+
         tile = this.getTileCanvas(
           ownerDocument, 
           this.props.subnetTileData[tileDataKey], 
           tileCache.subnets[tileDataKey], 
           tileId,
-          isUnderlay
+          pointMetaById,
+          badgeLists
         )
       }
       
@@ -213,7 +215,6 @@ class _SubnetTileOverlay extends Component {
       // ts = performance.now() - ts
       // console.log(ts)
       // console.log(points)
-      //const ids = locations.map(location => location.object_id)
       this.props.setCursorLocationIds(Object.keys(points))
     }, 20)
   }
@@ -235,7 +236,6 @@ class _SubnetTileOverlay extends Component {
   }
 
   addListeners () {
-    //if (!this.props.mapRef) return
     this.removeListeners()
     this.overlayMouseMoveListener = google.maps.event.addListener(this.props.mapRef, 'mousemove', this.onMouseMove)
     this.overlayMouseOutListener = google.maps.event.addListener(this.props.mapRef, 'mouseout', this.onMouseOut)
@@ -254,7 +254,6 @@ class _SubnetTileOverlay extends Component {
   }
 
   removeListeners () {
-    //if (!this.props.mapRef) return
     google.maps.event.removeListener(this.overlayMouseMoveListener)
     google.maps.event.removeListener(this.overlayMouseOutListener)
     google.maps.event.removeListener(this.overlayRightClickListener)
@@ -285,6 +284,9 @@ class _SubnetTileOverlay extends Component {
     // we could check to make sure that either selectedSubnetId changed 
     //  OR subnetTileData changed on the subnet we are showing
     //  BUT that would probably take longer than simply querying cached tiles 
+
+    // - make derived data (or selector?) - //
+
   }
 
   componentWillUnmount() {
@@ -298,7 +300,6 @@ class _SubnetTileOverlay extends Component {
 
 const mapStateToProps = (state) => {
   const selectedSubnetId = PlanEditorSelectors.getNearestSubnetIdOfSelected(state)
-  //const selectedSubnetId = 'all'
   // TODO: this should probably be a selector 
   //  OR we make it a dictionary in state
   let alertLocationIds = {}
@@ -308,30 +309,18 @@ const mapStateToProps = (state) => {
     && state.planEditor.subnets[selectedSubnetId]
     && state.planEditor.subnets[selectedSubnetId].faultTree
   ) {
-    // state.planEditor.subnets[selectedSubnetId].faultTree.rootNode.childNodes.forEach(faultNode => {
-    //   alertLocationIds[faultNode.faultReference.objectId] = faultNode
-    // })
     alertLocationIds = state.planEditor.subnets[selectedSubnetId].faultTree.rootNode.childNodes
-    
-    //locationsById = state.planEditor.subnets[selectedSubnetId].subnetLocationsById
-    //let rootId = PlanEditorSelectors.getRootSubnetIdForSelected(state)
-    
     locationsById = state.planEditor.draftLocations.households
-    //locationsById = {...state.planEditor.draftLocations.households, ...state.planEditor.draftLocations.groups} // TODO: this is not the best, this list is huge and redundant
   }
   let groupsById = state.planEditor.draftLocations.groups
-  //locationsById = state.planEditor.draftLocations.groups
   return {
     mapRef: state.map.googleMaps,
     subnetTileData: state.subnetTileData, 
-    //selectedSubnetId: state.planEditor.selectedSubnetId,
     selectedSubnetId,
-    //rootSubnetId: PlanEditorSelectors.getRootSubnetIdForSelected(state),
-    // tile data, useEffect: on change tell overlayLayer to run getTile on all visible tiles using clearTileCache
-    // tileOverlay.clearTileCache();
-    alertLocationIds, // TODO: when this changes the action creator needs to clear the cache
+    alertLocationIds, // when this changes the action creator needs to clear the cache, this happens because the cache is cleared when the subnet data is updated (parent to this object)
     locationsById,
     groupsById,
+    unselectedLocationGroups: SubnetTileSelectors.getUnselectedLocationGroups(state),
   }
 }
 

@@ -43,14 +43,14 @@ const SubnetDetail = props => {
     return (!props.selectedSubnetId 
       || !props.subnets
       || !props.subnets[props.selectedSubnetId] // meaning we will not show this detail if the selected node is a Terminal or Location
-      || !props.subnets[props.selectedSubnetId].faultTree.rootNode.childNodes.length
+      || !Object.keys(props.subnets[props.selectedSubnetId].faultTree.rootNode.childNodes).length
     )
   }
 
   function makeFaultRows (faultTree) {
     let elements = []
     // planEditor.subnets["6a98a2e6-6785-41cd-8700-a2c9109f1ceb"].faultTree.rootNode.childNodes[0].childNodes
-    faultTree.rootNode.childNodes.forEach(faultNode => {
+    Object.values(faultTree.rootNode.childNodes).forEach(faultNode => {
       elements.push(makeFaultRow(faultNode))
     })
 
