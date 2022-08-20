@@ -1,15 +1,20 @@
 import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
+import { ClientSocketManager } from '../../common/client-sockets'
+import { SOCKET_EVENTS } from '../../../../../../socket-namespaces'
+import { Notifier } from '../../common/notifications'
 import { momentStartDate, momentEndDate } from '../../common/view-utils.js'
 import moment from 'moment'
 
-function broadcastMessage (message) {
-  return (dispatch, getState) => {
-    const state = getState()
-    const loggedInUserID = state.user.loggedInUser.id
-    message.loggedInUserID = loggedInUserID
-    AroHttp.post('/socket/broadcast', message)
-      .catch((err) => console.error(err))
+function broadcastMessage (payload) {
+  return async(dispatch, getState) => {
+    try {
+      const state = getState()
+      payload.loggedInUserID = state.user.loggedInUser.id
+      ClientSocketManager.sockets.broadcast.emit(SOCKET_EVENTS.ADMIN_BROADCAST, payload)
+    } catch (error) {
+      Notifier.error(error)
+    }
   }
 }
 

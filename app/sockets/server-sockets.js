@@ -1,7 +1,8 @@
 /**
- * Socket Manager
+ * Server Socket Manager
  * 
- * Note about namespaces / channels:
+ * NOTE ABOUT NAMESPACES / CHANNELS:
+ * 
  * This is an ascending order of the number of users that the message
  * will potentially go to. Always try to stay low on the number of
  * messages (so "client" is far better than "broadcast"):
@@ -17,19 +18,10 @@
  */
 
 const { config: { rabbitmq } } = require('../helpers')
-const { createLogger, LOGGER_GROUPS } = require('../helpers/logger')
-const logger = createLogger(LOGGER_GROUPS.SOCKET, 'yellow')
 const MessageQueueManager = require('./message-queue-manager')
-const Consumer = require('./consumer')
-
-const CHANNEL_NAMES = [
-  'client',
-  'plan',
-  'user',
-  'library',
-  'broadcast',
-  'tileInvalidation',
-]
+const { socketLogger, Consumer } = require('./server-socket-utils')
+const { setSubscribers } = require('./server-subscribers')
+const { CHANNEL_NAMES } = require('../socket-namespaces')
 
 async function createServerSocketManager(server) {
 
@@ -39,42 +31,30 @@ async function createServerSocketManager(server) {
   // NOTE: channels are called namespaces in the docs
   // SEE: https://socket.io/docs/v2/namespaces/
   const channels = {}
-  for (const channelName of CHANNEL_NAMES) {
-
+  for (const channelName of Object.values(CHANNEL_NAMES)) {
     channels[channelName] = io.of(`/${channelName}`)
-
     socketLogger(`Setting up room join/leave for socket namespace ${channelName}`)
     channels[channelName].on('connection', socket => {
       socketLogger(`Client with id ${socket.client.id} connected to socket with namespace ${channelName}`)
-
-      socket.on('SOCKET_JOIN_ROOM', roomId => {
-        socketLogger(`Client with id ${socket.client.id} joined room ${roomId} on socket with namespace ${channelName}`)
-        socket.join(`${roomId}`)
-      })
-
-      socket.on('SOCKET_LEAVE_ROOM', roomId => {
-        socketLogger(`Client with id ${socket.client.id} left room ${roomId} on socket with namespace ${channelName}`)
-        socket.leave(`${roomId}`)
-      })
-
+      setSubscribers(channelName, socket, channels[channelName])
     })
   }
 
   const emitToClient = (clientId, payload) => {
-    channels.client.to(`${clientId}`).emit('message', payload)
+    channels.client.to(clientId).emit('message', payload)
     // TODO: too much noise and not very useful. turn back on?
     // socketLogger(`SOCKET EMIT client: ${clientId}`, payload)
   }
   const emitToUser = (userId, payload) => {
-    channels.user.to(`${userId}`).emit('message', payload)
+    channels.user.to(userId).emit('message', payload)
     socketLogger(`SOCKET EMIT user: ${userId}`, payload)
   }
   const emitToPlan = (planId, payload) => {
-    channels.plan.to(`${planId}`).emit('message', payload)
+    channels.plan.to(planId).emit('message', payload)
     socketLogger(`SOCKET EMIT plan: ${planId}`, payload)
   }
   const emitToLibrary = (libraryId, payload) => {
-    channels.library.to(`${libraryId}`).emit('message', payload)
+    channels.library.to(libraryId).emit('message', payload)
     socketLogger(`SOCKET EMIT library: ${libraryId}`, payload)
   }
   const emitToBroadcast = (payload) => {
@@ -82,7 +62,7 @@ async function createServerSocketManager(server) {
     socketLogger(`SOCKET EMIT broadcast to all`, payload)
   }
   const emitToLoggedInUser = (loggedInUserID, payload) => {
-    channels.broadcast.to(`${loggedInUserID}`).emit('message', payload)
+    channels.broadcast.to(loggedInUserID).emit('message', payload)
     socketLogger(`SOCKET EMIT broadcast to logged in users: ${loggedInUserID}`, payload)
   }
 
@@ -163,33 +143,14 @@ async function createServerSocketManager(server) {
     mapVectorTileUuidToClientId: (vtUuid, clientId) => {
       vectorTileRequestToRoom[vtUuid] = clientId
     },
-    broadcastMessage: message => {
-      // sending to loggedInUser in namespace 'broadcast'
-      emitToLoggedInUser(message.loggedInUserID, {
-        type: 'NOTIFICATION_SHOW',
-        payload: message,
-      })
-    },
+    emitToClient,
+    emitToUser,
+    emitToPlan,
+    emitToLibrary,
+    emitToBroadcast,
+    emitToLoggedInUser,
   }
 
-}
-
-function socketLogger(message, payload) {
-  // return
-  if (payload) {
-    const toLog = JSON.stringify(payload, (key, value) => {
-      if (key === 'content') {
-        return {
-          type: value.type,
-          data: `Length: ${value.data.length}`
-        }
-      }
-      return value
-    }, 2)
-    logger.info(message, `payload: ${toLog}`)
-  } else {
-    logger.info(message)
-  }
 }
 
 module.exports.initServerSockets = async(server) => {

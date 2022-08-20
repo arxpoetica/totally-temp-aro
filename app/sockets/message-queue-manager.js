@@ -1,7 +1,7 @@
 const amqp = require('amqplib')
 const { createLogger, LOGGER_GROUPS } = require('../helpers/logger')
 const logger = createLogger(LOGGER_GROUPS.RABBIT_MQ)
-const Consumer = require('./consumer')
+const { Consumer } = require('./server-socket-utils')
 const RETRY_CONNECTION_IN_MSEC = 10000
 
 class MessageQueueManager {

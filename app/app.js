@@ -97,8 +97,6 @@ async function kickoff() {
   require('./routes/routes_settings').configure(api, middleware)
   require('./routes/routes_reports').configure(api, middleware)
   require('./routes/routes_ui_assets').configure(api, middleware)
-  // TODO: don't use ServerSocketManager in route endpoints...remove...
-  require('./routes/routes_socket').configure(api, middleware, ServerSocketManager)
   require('./routes/routes_ui_settings').configure(api, middleware)
 
   require('./routes/routes_errors').configure(api, middleware)

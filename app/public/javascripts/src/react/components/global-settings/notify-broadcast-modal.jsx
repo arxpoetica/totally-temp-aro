@@ -5,6 +5,8 @@ import UiActions from '../configuration/ui/ui-actions'
 import GlobalsettingsActions from '../global-settings/globalsettings-action'
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap'
 import Constants from '../../common/constants'
+import { ClientSocketManager } from '../../common/client-sockets'
+import { SOCKET_EVENTS } from '../../../../../../socket-namespaces'
 import { dequal } from 'dequal'
 
 export const NotifyBroadcastModal = (props) => {
@@ -16,19 +18,22 @@ export const NotifyBroadcastModal = (props) => {
 
   const { isBroadcastModalOpen, broadcastChecked } = state
 
-  const { notifyBroadcast, loadConfigurationFromServer, broadcastData, validateBroadcast, isReportMode } = props
+  const { nb, loadConfigurationFromServer, broadcastData, validateBroadcast, isReportMode, notifyBroadcast } = props
 
   useEffect(() => {
     // Enable modal when broadcast is active.
-    if (notifyBroadcast && notifyBroadcast.isEnableBroadcastModal
+    if (nb && nb.isEnableBroadcastModal
       && checkBroadcastExpiry(Constants.BROADCAST_LOCAL_STORAGE) && !isReportMode) {
       setState((state) => ({ ...state, isBroadcastModalOpen: true }))
     }
-  }, [notifyBroadcast])
+  }, [nb])
 
   useEffect(() => {
     // intialize the setInterval and check ui.settings for every 4 hours
-    setInterval(() => loadConfigurationFromServer(), Constants.BROADCAST_INTERVAL_TIME)
+    const timer = setInterval(() => loadConfigurationFromServer(), Constants.BROADCAST_INTERVAL_TIME)
+    return () => {
+      clearInterval(timer)
+    }
   }, [])
 
   // https://reactjs.org/docs/hooks-faq.html#how-to-get-the-previous-props-or-state
@@ -49,13 +54,20 @@ export const NotifyBroadcastModal = (props) => {
       if (!checkBroadcastExpiry(Constants.BROADCAST_LOCAL_STORAGE)) {
         setState((state) => ({ ...state, broadcastChecked: false }))
         localStorage.removeItem(Constants.BROADCAST_LOCAL_STORAGE)
-        validateBroadcast(broadcastData)
-      } else {
-        validateBroadcast(broadcastData)
       }
+      validateBroadcast(broadcastData)
     } else {
       setState((state) => ({ ...state, broadcastChecked: false }))
       broadcastData && validateBroadcast(broadcastData)
+    }
+    let unsubscriber
+    if (broadcastData) {
+      unsubscriber = ClientSocketManager.subscribe(SOCKET_EVENTS.ADMIN_BROADCAST, ({ payload }) => {
+        notifyBroadcast(payload)
+      })
+    }
+    return () => {
+      if (unsubscriber) unsubscriber()
     }
   }, [broadcastData])
 
@@ -106,10 +118,10 @@ export const NotifyBroadcastModal = (props) => {
       <ModalHeader toggle={toggleBroadcastModal}>BROADCAST</ModalHeader>
       <ModalBody>
         <span className="font-weight-bold">
-          {notifyBroadcast.subject}:
+          {nb.subject}:
         </span>
         <div style={{ marginTop: '15px' }}>
-          {notifyBroadcast.message}
+          {nb.message}
         </div>
       </ModalBody>
       <ModalFooter>
@@ -131,7 +143,7 @@ export const NotifyBroadcastModal = (props) => {
 }
 
 const mapStateToProps = (state) => ({
-  notifyBroadcast: state.globalSettings.notifyBroadcast,
+  nb: state.globalSettings.notifyBroadcast, // FIXME: this shouldn't have the same name as the action
   broadcastData: state.configuration.ui.items.broadcast,
   isReportMode: state.mapReports.isReportMode,
 })
@@ -139,6 +151,7 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = (dispatch) => ({
   loadConfigurationFromServer: () => dispatch(UiActions.loadConfigurationFromServer()),
   validateBroadcast: (message) => dispatch(GlobalsettingsActions.validateBroadcast(message)),
+  notifyBroadcast: (message) => dispatch(GlobalsettingsActions.notifyBroadcast(message)),
 })
 
 export default wrapComponentWithProvider(reduxStore, NotifyBroadcastModal, mapStateToProps, mapDispatchToProps)
