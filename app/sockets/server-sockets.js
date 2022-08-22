@@ -21,7 +21,7 @@ const { config: { rabbitmq } } = require('../helpers')
 const MessageQueueManager = require('./message-queue-manager')
 const { socketLogger, Consumer } = require('./server-socket-utils')
 const { setSubscribers } = require('./server-subscribers')
-const { CHANNEL_NAMES } = require('../socket-namespaces')
+const { CHANNEL_NAMES, SOCKET_EVENTS } = require('../socket-namespaces')
 
 async function createServerSocketManager(server) {
 
@@ -134,6 +134,15 @@ async function createServerSocketManager(server) {
     socketLogger('Received subnet message from service', msg.content.toString())
     msg.properties.headers.eventType = 'SUBNET_DATA'
     emitToClient(msg.properties.headers.sessionId, msg)
+  }))
+
+  messageQueueManager.addConsumer(new Consumer('competitionUpdatesEvent', 'competition-updates', msg => {
+    console.log({ msg: msg.content.toString() })
+    socketLogger('Received subnet message from service', msg.content.toString())
+    emitToBroadcast({
+      type: SOCKET_EVENTS.COMPETITION_UPDATES,
+      payload: msg.content.toString(),
+    })
   }))
 
   messageQueueManager.connectToPublisher()

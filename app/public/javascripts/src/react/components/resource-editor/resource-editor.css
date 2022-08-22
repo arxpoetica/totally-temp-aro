@@ -1,49 +1,6 @@
 /* ---- Competition Manager Start ----*/
 
-#tblCompetitorModel td {
-  line-height: 33px; /* To vertically align text */
-}
-
-.comp_edit_flex_section {
-  display: flex;
-  margin-bottom: 20px;
-}
-
-.comp_edit_filter_row_left {
-  flex-grow: 1;
-  padding-right: 10px;
-} 
-
-.comp_edit_filter_row_right {
-  width: 20%;
-} 
-
-#comp_edit_region_select_list {
-  padding-top: 2px;
-}
-
-.comp_edit_percent_item {
-  width: 6em;
-}
-
-.comp_edit_input_set {
-  white-space: nowrap;
-  text-align: right;
-}
-
-.comp_edit_input_set input {
-  display: inline-block;
-}
-
-.nowrap_label {
-  white-space: nowrap;
-}
-
-.comp_edit_center_label {
-  text-align: center;
-}
-
-.comp_edit_tbl_contain{
+.comp_edit_tbl_contain {
   max-height: 500px; 
   min-height: 125px;
   overflow-y: auto;

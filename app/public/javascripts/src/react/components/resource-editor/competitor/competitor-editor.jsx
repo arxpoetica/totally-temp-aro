@@ -1,10 +1,12 @@
 import React, { Component } from 'react'
-import { Popover, Text, Button, Loader } from '@mantine/core'
 import { connect } from 'react-redux'
+import { CompetitorButtons } from './competitor-buttons.jsx'
 import ResourceActions from '../resource-actions'
 import Select from 'react-select'
 import AroHttp from '../../../common/aro-http'
 import { ClientSocketManager } from '../../../common/client-sockets'
+import { RECALC_STATES } from './competitor-shared'
+import cx from 'clsx'
 
 const styles = {
   multiValue: (base, state) => {
@@ -20,12 +22,6 @@ const styles = {
   },
 }
 
-const recalcStateMap = {
-  CLEAN: "clean",
-  REQUIRE_RECALC: "requireRecalc",
-  RECALCING: "recalcing",
-  RECALCULATED: "recalculated"
-}
 
 class _CompetitorEditor extends Component {
   constructor (props) {
@@ -39,11 +35,11 @@ class _CompetitorEditor extends Component {
       openTab: 0,
       strengthsById: '',
       hasChanged: false,
-      recalcPopOverOpen: false
     }
 
     console.log({ ClientSocketManager })
-    
+
+
     // ClientSocketManager.joinRoom('competition-updates', this.props.editingManager.id)
     // ClientSocketManager.subscribe('MODIFY', msg => {
     //   console.log({msg})
@@ -63,12 +59,10 @@ class _CompetitorEditor extends Component {
   async componentDidMount () {
     this.props.getRegions()
     this.props.setModalTitle(this.props.resourceManagerName)
-
-    const url = `/service/v1/competitor-manager/${this.props.editingManager.id}/state`
-    const res = await AroHttp.get(url)
-    if (res.data.modifiedCount > 0) {
-      this.props.setRecalcState('requireRecalc')
-    }
+    const { id } = this.props.editingManager
+    const url = `/service/v2/resource-manager/${id}/competition_manager`
+    const { data } = await AroHttp.get(url)
+    this.props.setRecalcState(data.state)
   }
 
   static getDerivedStateFromProps(nextProps) {
@@ -88,282 +82,254 @@ class _CompetitorEditor extends Component {
 
     return (
       <div>
-        <strong>Regions</strong>
-        <div className="comp_edit_flex_section">
-          <div className="comp_edit_filter_row_left" id="comp_edit_region_select_list">
-            <Select
-              isMulti
-              styles={styles}
-              closeMenuOnSelect={true}
-              value={this.state.selectedRegions}
-              options={regionsList}
-              hideSelectedOptions={true}
-              backspaceRemovesValue={false}
-              isSearchable={true}
-              isClearable={this.state.isClearable}
-              isDisabled={this.state.isDisabled}
-              placeholder="Select data sources..."
-              onChange={(event) => this.handleRegionsChange(event)}
-            />
-            <div style={{marginTop: '4px'}}>
+        <div className={cx(this.props.recalcState === RECALC_STATES.RECALCULATING && 'recalculating')}>
+          <strong>Regions</strong>
+          <div className="comp_edit_flex_section">
+            <div className="comp_edit_filter_row_left" id="comp_edit_region_select_list">
+              <Select
+                isMulti
+                styles={styles}
+                closeMenuOnSelect={true}
+                value={this.state.selectedRegions}
+                options={regionsList}
+                hideSelectedOptions={true}
+                backspaceRemovesValue={false}
+                isSearchable={true}
+                isClearable={this.state.isClearable}
+                isDisabled={this.state.isDisabled}
+                placeholder="Select data sources..."
+                onChange={(event) => this.handleRegionsChange(event)}
+              />
+              <div style={{marginTop: '4px'}}>
+                {this.state.regionSelectEnabled &&
+                  <button className="btn btn-primary nowrap_label" onClick={(event) => this.handleSelectAllRegions(event)}>
+                    <i className="fa fa-check action-button-icon"></i> Select All
+                  </button>
+                }
+              </div>
+            </div>
+
+            <div className="comp_edit_filter_row_right" id="comp_edit_region_btn">
+              {!this.state.regionSelectEnabled &&
+                <button className="btn btn-light nowrap_label" onClick={(event) => this.reselectRegion(event)}>
+                  <i className="fa fa-undo action-button-icon"></i> Reselect
+                </button>
+              }
               {this.state.regionSelectEnabled &&
-                <button className="btn btn-primary nowrap_label" onClick={(event) => this.handleSelectAllRegions(event)}>
-                  <i className="fa fa-check action-button-icon"></i> Select All
+                <button
+                  className="btn btn-primary nowrap_label"
+                  onClick={(event) => this.onRegionCommit(event)}
+                  disabled={this.state.selectedRegions.length < 1}
+                >
+                  <i className="fa fa-save action-button-icon"></i> Select
                 </button>
               }
             </div>
           </div>
 
-          <div className="comp_edit_filter_row_right" id="comp_edit_region_btn">
-            {!this.state.regionSelectEnabled &&
-              <button className="btn btn-light nowrap_label" onClick={(event) => this.reselectRegion(event)}>
-                <i className="fa fa-undo action-button-icon"></i> Reselect
-              </button>
-            }
-            {this.state.regionSelectEnabled &&
-              <button
-                className="btn btn-primary nowrap_label"
-                onClick={(event) => this.onRegionCommit(event)}
-                disabled={this.state.selectedRegions.length < 1}
-              >
-                <i className="fa fa-save action-button-icon"></i> Select
-              </button>
-            }
-          </div>
-        </div>
-
-        {!this.state.regionSelectEnabled &&
-          <div>
-            <strong>Coverage Threshold</strong>
-            <div className="comp_edit_flex_section">
-              <div className="comp_edit_filter_row_left">
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  value={this.state.prominenceThreshold}
-                  onChange={(event) => this.handleRangeChange(event)}
-                  style={{marginTop: '10px', width:'100%'}}/>
-              </div>
-              <div className="comp_edit_filter_row_right">
-                <div className="comp_edit_percent_item">
-                  <div className="input-group input-group-sm">
-                    <input id="coverageTargetValue"
-                      type="number" step="0.1"
-                      value={this.state.prominenceThreshold}
-                      onChange={(event) => this.handleRangeChange(event)}
-                      className="form-control text-right"
-                      />
-                    <div className="input-group-addon">%</div>
+          {!this.state.regionSelectEnabled &&
+            <div>
+              <strong>Coverage Threshold</strong>
+              <div className="comp_edit_flex_section">
+                <div className="comp_edit_filter_row_left">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    value={this.state.prominenceThreshold}
+                    onChange={(event) => this.handleRangeChange(event)}
+                    style={{marginTop: '10px', width:'100%'}}/>
+                </div>
+                <div className="comp_edit_filter_row_right">
+                  <div className="comp_edit_percent_item">
+                    <div className="input-group input-group-sm">
+                      <input id="coverageTargetValue"
+                        type="number" step="0.1"
+                        value={this.state.prominenceThreshold}
+                        onChange={(event) => this.handleRangeChange(event)}
+                        className="form-control text-right"
+                        />
+                      <div className="input-group-addon">%</div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        }
+          }
 
-        {/* {
-          this.props.recalcState === recalcStateMap.REQUIRE_RECALC &&  <Alert title="Recalc Required" color="yellow">
-            Some changes occurred, you need to recalculate for them to take effect.
-          </Alert>
-        } */}
+          {!this.state.regionSelectEnabled &&
+            <div>
+              <ul className="nav nav-tabs">
+                <li className="nav-item">
+                  <a className={`nav-link ${this.state.openTab === 0 ? 'active' : ''}`}
+                    onClick={(event) => this.handleOpenTab(0)} href="#"
+                  >Above Threshold</a>
+                </li>
+                <li className="nav-item">
+                <a className={`nav-link ${this.state.openTab === 1 ? 'active' : ''}`}
+                    onClick={(event) => this.handleOpenTab(1)} href="#"
+                  >Below Threshold</a>
+                </li>
+              </ul>
 
-        {/* {
-          this.props.recalcState === recalcStateMap.RECALCING && <Alert title="Recalcing..." color="yellow">
-            Recalculation is in progress, it may take up to an hour. Once it is complete this message will disappear and changes will take effect.
-          </Alert>
-        } */}
-
-        {!this.state.regionSelectEnabled &&
-          <div>
-            <ul className="nav nav-tabs">
-              <li className="nav-item">
-                <a className={`nav-link ${this.state.openTab === 0 ? 'active' : ''}`}
-                  onClick={(event) => this.handleOpenTab(0)} href="#"
-                >Above Threshold</a>
-              </li>
-              <li className="nav-item">
-              <a className={`nav-link ${this.state.openTab === 1 ? 'active' : ''}`}
-                  onClick={(event) => this.handleOpenTab(1)} href="#"
-                >Below Threshold</a>
-              </li>
-            </ul>
-
-            {this.state.openTab === 0 &&
-              <div>
-                <div className="comp_edit_tbl_contain">
-                  <table id="tblCompetitorModel" className="table table-sm table-striped">
-                    <thead className="thead-dark">
-                      <tr>
-                        <th>Carrier</th>
-                        <th>Coverage</th>
-                        {
-                          this.props.loadStrength.strengthCols
-                          && this.props.loadStrength.strengthCols.map((providerType, providerKey) =>
-                            <th key={providerKey} className="comp_edit_center_label">{providerType}</th>
-                          )
-                        }
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {
-                       this.props.carriersByPct.filter((carrierValue) =>
-                       carrierValue.cbPercent >= this.state.prominenceThreshold)
-                       .map((carrierValue, carrierKey) =>
-                        <tr key={carrierKey}>
-                          <td>{carrierValue.alias}</td>
-                          <td>{this.truncateNum(carrierValue.cbPercent, 1)}%</td>
+              {this.state.openTab === 0 &&
+                <div>
+                  <div className="comp_edit_tbl_contain">
+                    <table id="tblCompetitorModel" className="table table-sm table-striped">
+                      <thead className="thead-dark">
+                        <tr>
+                          <th>Carrier</th>
+                          <th>Coverage</th>
                           {
                             this.props.loadStrength.strengthCols
                             && this.props.loadStrength.strengthCols.map((providerType, providerKey) =>
-                              <td key={providerKey}>
-                                {!!this.state.strengthsById[carrierValue.carrierId][providerType] &&
-                                  <div className="comp_edit_input_set" >
-                                    <input
-                                      type="text"
-                                      className="form-control comp_edit_percent_item"
-                                      value={this.state.strengthsById[carrierValue.carrierId][providerType].strength}
-                                      onChange={(event) => this.handleStrengthChange(
-                                        event, this.state.strengthsById, carrierValue.carrierId, providerType
-                                      )}
-                                    />
-                                  </div>
-                                }
-                              </td>
+                              <th key={providerKey} className="comp_edit_center_label">{providerType}</th>
                             )
                           }
                         </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            }
-
-            {this.state.openTab === 1 &&
-              <div>
-                <div className="comp_edit_tbl_contain">
-                  <table id="tblCompetitorModel" className="table table-sm table-striped">
-                    <thead className="thead-dark">
-                      <tr>
-                        <th>Carrier</th>
-                        <th>Coverage</th>
+                      </thead>
+                      <tbody>
                         {
-                          this.props.loadStrength.strengthCols
-                          && this.props.loadStrength.strengthCols.map((providerType, providerKey) =>
-                            <th key={providerKey} className="comp_edit_center_label">{providerType}</th>
-                          )
-                        }
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {
-                       this.props.carriersByPct.filter((carrierValue) =>
-                       carrierValue.cbPercent < this.state.prominenceThreshold)
-                       .map((carrierValue, carrierKey) =>
-                        <tr key={carrierKey}>
-                          <td>{carrierValue.alias}</td>
-                          <td>{this.truncateNum(carrierValue.cbPercent, 1)}%</td>
-                          {
-                            this.props.loadStrength.strengthCols
-                            && this.props.loadStrength.strengthCols.map((providerType, providerKey) =>
-                              <td key={providerKey}>
-                                {!!this.state.strengthsById[carrierValue.carrierId][providerType] &&
-                                  <div className="comp_edit_input_set" >
-                                    <input
-                                      type="text"
-                                      className="form-control comp_edit_percent_item"
-                                      value={this.state.strengthsById[carrierValue.carrierId][providerType].strength}
-                                      onChange={(event) => this.handleStrengthChange(
-                                        event, this.state.strengthsById, carrierValue.carrierId, providerType
-                                      )}
-                                    />
-                                  </div>
-                                }
-                              </td>
-                            )
-                          }
-                        </tr>
+                        this.props.carriersByPct.filter((carrierValue) =>
+                        carrierValue.cbPercent >= this.state.prominenceThreshold)
+                        .map((carrierValue, carrierKey) =>
+                          <tr key={carrierKey}>
+                            <td>{carrierValue.alias}</td>
+                            <td>{this.truncateNum(carrierValue.cbPercent, 1)}%</td>
+                            {
+                              this.props.loadStrength.strengthCols
+                              && this.props.loadStrength.strengthCols.map((providerType, providerKey) =>
+                                <td key={providerKey}>
+                                  {!!this.state.strengthsById[carrierValue.carrierId][providerType] &&
+                                    <div className="comp_edit_input_set" >
+                                      <input
+                                        type="text"
+                                        className="form-control comp_edit_percent_item"
+                                        value={this.state.strengthsById[carrierValue.carrierId][providerType].strength}
+                                        onChange={(event) => this.handleStrengthChange(
+                                          event, this.state.strengthsById, carrierValue.carrierId, providerType
+                                        )}
+                                      />
+                                    </div>
+                                  }
+                                </td>
+                              )
+                            }
+                          </tr>
                         )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            }
-          </div>
-        }
-        <div style={{flex: '0 0 auto'}}>
-          <div style={{textAlign: 'right', paddingTop: '15px'}}>
-            <button className="btn btn-light mr-2" onClick={() => this.exitEditingMode()}>
-              <i className="fa fa-undo action-button-icon"></i> Discard changes
-            </button>
-            {
-              this.props.recalcState === recalcStateMap.REQUIRE_RECALC ? (
-                <Popover
-                  opened={this.state.recalcPopOverOpen}
-                  onClose={() => this.setState({ recalcPopOverOpen: false })}
-                  target={
-                    <Button
-                      leftIcon={<i className="fa fa-undo action-button-icon"></i>}
-                      style={{ marginTop: '2px', marginRight: '7px'}}
-                      onClick={() => {
-                        this.props.executeRecalc(
-                          this.props.loggedInUser.id,
-                          this.props.editingManager.id
-                        )
-                      }}
-                    >
-                      Recalc
-                    </Button>
-                  }
-                  width={260}
-                  position="top"
-                  placement="center"
-                  withCloseButton
-                >
-                  <div>
-                    <Text size="sm">
-                      Recalculation is required in order to apply the changes you made. It
-                      may take a few minutes...
-                    </Text>
+                      </tbody>
+                    </table>
                   </div>
-                </Popover>
-              ) : this.props.recalcState === recalcStateMap.RECALCING ? (
-                <Button
-                  variant="outline"
-                  radius={0}
-                  leftIcon={<Loader/>}
-                  style={{ marginBotom: '-8px', marginRight: '8px', height: '34px'}}
-                  size={'md'}
-                  loading={this.props.recalcState === recalcStateMap.RECALCING}
-                >
-                  Recalculating...
-                </Button>
-              ) : null
-            }
-            <button
-              className="btn btn-primary"
-              onClick={() => {
-                console.log("save btn");
-                if (
-                  this.props.recalcState === recalcStateMap.REQUIRE_RECALC &&
-                  !this.state.recalcPopOverOpen
-                ) {
-                  console.log('in if state', this.props.recalcState, this.state.recalcPopOverOpen);
-                  this.setState({ recalcPopOverOpen: true });
-                  return
-                }
-                this.setState({ recalcPopOverOpen: true })
-                this.state.hasChanged && this.saveConfigurationToServer()
-              }}
-              // disabled={ this.state.regionSelectEnabled }
-            >
-              <i className="fa fa-save action-button-icon"></i> Save
-            </button>
-          </div>
+                </div>
+              }
+
+              {this.state.openTab === 1 &&
+                <div>
+                  <div className="comp_edit_tbl_contain">
+                    <table id="tblCompetitorModel" className="table table-sm table-striped">
+                      <thead className="thead-dark">
+                        <tr>
+                          <th>Carrier</th>
+                          <th>Coverage</th>
+                          {
+                            this.props.loadStrength.strengthCols
+                            && this.props.loadStrength.strengthCols.map((providerType, providerKey) =>
+                              <th key={providerKey} className="comp_edit_center_label">{providerType}</th>
+                            )
+                          }
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {
+                        this.props.carriersByPct.filter((carrierValue) =>
+                        carrierValue.cbPercent < this.state.prominenceThreshold)
+                        .map((carrierValue, carrierKey) =>
+                          <tr key={carrierKey}>
+                            <td>{carrierValue.alias}</td>
+                            <td>{this.truncateNum(carrierValue.cbPercent, 1)}%</td>
+                            {
+                              this.props.loadStrength.strengthCols
+                              && this.props.loadStrength.strengthCols.map((providerType, providerKey) =>
+                                <td key={providerKey}>
+                                  {!!this.state.strengthsById[carrierValue.carrierId][providerType] &&
+                                    <div className="comp_edit_input_set" >
+                                      <input
+                                        type="text"
+                                        className="form-control comp_edit_percent_item"
+                                        value={this.state.strengthsById[carrierValue.carrierId][providerType].strength}
+                                        onChange={(event) => this.handleStrengthChange(
+                                          event, this.state.strengthsById, carrierValue.carrierId, providerType
+                                        )}
+                                      />
+                                    </div>
+                                  }
+                                </td>
+                              )
+                            }
+                          </tr>
+                          )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              }
+            </div>
+          }
         </div>
-    </div>
+
+        <CompetitorButtons
+          recalcState={this.props.recalcState}
+          exitEditingMode={this.exitEditingMode.bind(this)}
+          executeRecalc={this.props.executeRecalc}
+          loggedInUserId={this.props.loggedInUser.id}
+          editingManagerId={this.props.editingManager.id}
+          hasChanged={this.state.hasChanged}
+          saveConfigurationToServer={this.saveConfigurationToServer.bind(this)}
+          regionSelectEnabled={this.state.regionSelectEnabled}
+        />
+
+        {/* TODO: move classes / styles into here: */}
+        <style jsx>{`
+          .recalculating {
+            pointer-events: none;
+            opacity: 0.25;
+          }
+          .comp_edit_flex_section {
+            display: flex;
+            margin-bottom: 20px;
+          }
+          .comp_edit_filter_row_left {
+            flex-grow: 1;
+            padding-right: 10px;
+          }
+          .comp_edit_filter_row_right {
+            width: 20%;
+          }
+          #tblCompetitorModel td {
+            line-height: 33px;
+          }
+          #comp_edit_region_select_list {
+            padding-top: 2px;
+          }
+          .comp_edit_percent_item {
+            width: 6em;
+          }
+          .comp_edit_input_set {
+            white-space: nowrap;
+            text-align: right;
+          }
+          .comp_edit_input_set input {
+            display: inline-block;
+          }
+          .nowrap_label {
+            white-space: nowrap;
+          }
+          .comp_edit_center_label {
+            text-align: center;
+          }
+        `}</style>
+      </div>
     )
   }
 
@@ -372,7 +338,6 @@ class _CompetitorEditor extends Component {
   }
 
   saveConfigurationToServer(){
-    console.log('saveConfigurationToServer');
     this.props.saveCompManConfig(this.props.editingManager.id,
       this.props.loadStrength.pristineStrengthsById, this.state.strengthsById
     )

@@ -9,4 +9,5 @@ module.exports.CHANNEL_NAMES = Object.freeze({
 
 module.exports.SOCKET_EVENTS = Object.freeze({
   ADMIN_BROADCAST: 'ADMIN_BROADCAST',
+  COMPETITION_UPDATES: 'COMPETITION_UPDATES',
 })

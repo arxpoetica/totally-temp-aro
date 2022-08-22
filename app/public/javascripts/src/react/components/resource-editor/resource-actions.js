@@ -6,6 +6,8 @@ import { batch } from 'react-redux'
 //  BUT resource managers are listed in two places, DRY this up!
 import PlanActions from '../plan/plan-actions'
 import GlobalSettingsActions from '../global-settings/globalsettings-action'
+import { Notifier } from '../../common/notifications'
+import { RECALC_STATES } from './competitor/competitor-shared'
 
 function getResourceTypes () {
   return dispatch => {
@@ -978,38 +980,32 @@ function  getDefaultStrength (carrierId) {
 }
 
 function saveCompManConfig(competitorManagerId, pristineStrengthsById, strengthsById){
-
-  return dispatch => {
-
-    const changedModels = []
-    for (const carrierId in strengthsById){
-      for (const providerTypeId in strengthsById[carrierId]){
-        const strengthJSON = JSON.stringify(strengthsById[carrierId][providerTypeId] )
-        if (strengthJSON !== JSON.stringify(pristineStrengthsById[carrierId][providerTypeId])) {
-          changedModels.push(JSON.parse(strengthJSON))
+  return async(dispatch) => {
+    try {
+      const changedModels = []
+      for (const carrierId in strengthsById) {
+        for (const providerTypeId in strengthsById[carrierId]){
+          const strengthJSON = JSON.stringify(strengthsById[carrierId][providerTypeId] )
+          if (strengthJSON !== JSON.stringify(pristineStrengthsById[carrierId][providerTypeId])) {
+            changedModels.push(JSON.parse(strengthJSON))
+          }
         }
       }
-    }
 
-    if (changedModels.length > 0) {
-      AroHttp.put(`/service/v1/competitor-manager/${competitorManagerId}/strengths`, changedModels)
-        .then((result) => {
-          if (!this.doRecalc){
-            AroHttp.get(`/service/v1/competitor-manager/${competitorManagerId}/state`)
-            .then((result) => {
-              if (result.data.modifiedCount > 0){
-                // this.doRecalc = true
-                dispatch(setRecalcState("requireRecalc"))
-              }
-              // dispatch(setIsResourceEditor(true))
-            })
-          }else{
-            // dispatch(setIsResourceEditor(true))
+      if (changedModels.length > 0) {
+        await AroHttp.put(`/service/v1/competitor-manager/${competitorManagerId}/strengths`, changedModels)
+        if (!this.doRecalc){
+          const url = `/service/v2/resource-manager/${competitorManagerId}/competition_manager`
+          const { data } = await AroHttp.get(url)
+          if (data.state === RECALC_STATES.DIRTY) {
+            dispatch(setRecalcState(RECALC_STATES.DIRTY))
           }
-        })
-        .catch((err) => console.error(err))
-    } else {
-      console.log('Competitor Editor: No models were changed. Nothing to save.')
+        }
+      } else {
+        console.log('Competitor Editor: No models were changed. Nothing to save.')
+      }
+    } catch (error) {
+      Notifier.error(error)
     }
   }
 }
@@ -1017,12 +1013,12 @@ function saveCompManConfig(competitorManagerId, pristineStrengthsById, strengths
 // Recalcing
 function executeRecalc(userId, competitorManagerId){
   return dispatch => {
-    dispatch(setRecalcState('recalcing'))
+    dispatch(setRecalcState(RECALC_STATES.RECALCULATING))
     // call the api
     setTimeout(() => {
       AroHttp.post(`/service/v1/competitor-manager/${competitorManagerId}/refresh/?user_id=${userId}`)
-      .then((result) =>{
-        dispatch(setRecalcState('clean')) // or set to Recalculated
+      .then((result) => {
+        dispatch(setRecalcState(RECALC_STATES.VALID))
       })
       .catch((err)=> console.error(err))
     }, 5000)

@@ -1,4 +1,5 @@
 import Actions from '../../common/actions'
+import { RECALC_STATES } from './competitor/competitor-shared'
 
 const initialOffset = 0
 const initialcurrentPage = 0
@@ -33,7 +34,7 @@ const defaultState = {
   selectedResourceKey: '',
   roicManager: {},
   roicManagerConfiguration: {},
-  recalcState: "clean"
+  recalcState: RECALC_STATES.VALID,
 }
 
 function setResourceTypes (state, resourceTypes) {

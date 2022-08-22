@@ -2,13 +2,6 @@ const { socketLogger } = require('./server-socket-utils')
 const { CHANNEL_NAMES, SOCKET_EVENTS } = require('../socket-namespaces')
 const kleur = require('kleur')
 
-function blamo(lead = 'LOGGING') {
-  console.log(kleur.bgBlack().white('                            '))
-  console.log(kleur.bgBlack().white(`          ${lead}:          `))
-  console.log(kleur.bgBlack().white('                            '))
-  console.log()
-}
-
 module.exports.setSubscribers = (channelName, socket, channel) => {
 
   socket.on('SOCKET_JOIN_ROOM', roomId => {
@@ -21,7 +14,6 @@ module.exports.setSubscribers = (channelName, socket, channel) => {
   })
 
   if (channelName === CHANNEL_NAMES.BROADCAST) {
-    blamo()
 
     socket.on(SOCKET_EVENTS.ADMIN_BROADCAST, payload => {
       const { loggedInUserID } = payload
