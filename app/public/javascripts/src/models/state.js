@@ -1064,7 +1064,13 @@ class State {
             {w: 1.0, h: 0.0},
           )
           tileIcons.setBadge(
-            'x',
+            'inactive',
+            '/images/map_icons/badges/badge_inactive.png',
+            {x: -9, y:-4},
+            {w: 1.0, h: 0.0},
+          )
+          tileIcons.setBadge(
+            'xOut',
             '/images/map_icons/badges/badge_x.png',
             {x: -2, y:-10},
             {w: 0.0, h: 1.0},

@@ -139,7 +139,7 @@ class _SubnetTileOverlay extends Component {
         let pointMetaById = this.props.locationsById 
         if (isUnderlay) {
           pointMetaById = this.props.groupsById
-          badgeLists['x'] = this.props.unselectedLocationGroups
+          badgeLists['inactive'] = this.props.unselectedLocationGroups
         } else {
           badgeLists['alert'] = this.props.alertLocationIds
         }
