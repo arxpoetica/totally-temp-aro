@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Popover, Text, Button, Loader } from '@mantine/core'
+import { IconArrowBack, IconCalculator, IconDeviceFloppy } from '@tabler/icons'
 import { RECALC_STATES } from './competitor-shared'
 
 export const CompetitorButtons = props => {
@@ -23,7 +24,7 @@ export const CompetitorButtons = props => {
   return <div className="buttons">
     <Button
       onClick={exitEditingMode}
-      leftIcon={<i className="fa fa-undo action-button-icon"></i>}
+      leftIcon={<IconArrowBack size={20} stroke={2}/>}
       variant="subtle"
       color="red"
       disabled={recalculating}
@@ -36,7 +37,7 @@ export const CompetitorButtons = props => {
         onClose={() => setPopoverOpen(false)}
         target={
           <Button
-            leftIcon={<i className="fa fa-undo action-button-icon"></i>}
+            leftIcon={<IconCalculator size={20} stroke={2}/>}
             color="yellow"
             onClick={() => executeRecalc(loggedInUserId, editingManagerId)}
           >
@@ -66,7 +67,7 @@ export const CompetitorButtons = props => {
       </Button>
     }
     <Button
-      leftIcon={<i className="fa fa-save action-button-icon"></i>}
+      leftIcon={<IconDeviceFloppy size={20} stroke={2}/>}
       onClick={() => {
         if (requiresRecalc && !popoverOpen) {
           return setPopoverOpen(true)
