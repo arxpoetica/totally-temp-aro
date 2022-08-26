@@ -178,14 +178,15 @@ const PlanNavigation = props => {
         }
       })
       
-      if (isSelected) {
+      const nodeType = props.drafts[featureId] && props.drafts[featureId].nodeType
+      const isRoot = !node.draft.parentSubnetId
+      if (isSelected && (faultSum || isRoot)) { // IF selected do a fold out IF there is faults to show OR equipment to show (only root)
         childRows.unshift(
           <div className="info" key={`selected_${featureId}`}>
             <SubnetDetail></SubnetDetail>
           </div>
         )
       }
-      const nodeType = props.drafts[featureId] && props.drafts[featureId].nodeType
       
       let featureRow = (
         <>
