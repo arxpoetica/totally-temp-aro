@@ -68,7 +68,7 @@ let reducer = combineReducers({
   plan,
   projectTemplate,
   planEditor,
-  subnetTileData, // this could maybe be in planEditor but combineReducers doesn't support adding a child, an only pair siblings
+  subnetTileData,
   selection,
   tool,
   user,

@@ -21,7 +21,7 @@ TileDataMutator.getNewTileData = () => {return {}} // just here for expansibilit
 TileDataMutator.addPoint = (tileData, tileCache, pointId, worldCoord) => {
   //get tile id from worldCoord
   let allTileIds = TileUtils.getAllTileIdsForWorldCoord(worldCoord)
-  let tileId = allTileIds[0]
+  let tileId = allTileIds[0] // index 0 is the tile at max zoom or leaf level zoom
   //add pointId to list
   if (!tileData[tileId.x]) tileData[tileId.x] = {}
   if (!tileData[tileId.x][tileId.y]) tileData[tileId.x][tileId.y] = {}
@@ -34,7 +34,7 @@ TileDataMutator.addPoint = (tileData, tileCache, pointId, worldCoord) => {
 TileDataMutator.deletePoint = (tileData, tileCache, pointId, worldCoord) => {
   //get tile id from worldCoord
   let allTileIds = TileUtils.getAllTileIdsForWorldCoord(worldCoord)
-  let tileId = allTileIds[0]
+  let tileId = allTileIds[0] // index 0 is the tile at max zoom or leaf level zoom
   //remove pointId from list
   if (
     tileData[tileId.x]
@@ -97,10 +97,9 @@ TileDataMutator.getPointsForLeafTileRect = (tileData, nwTileId, seTileId) => {
   
   for (let x=minX; x<=maxX; x++) {
     for (let y=minY; y<=maxY; y++) {
-      if (tileData[x] && tileData[x][y]) points = { ...points, ...tileData[x][y] }
-      // if (tileData[x] && tileData[x][y]) {
-      //   points.push(tileData[x][y])
-      // }
+      if (tileData[x] && tileData[x][y]) {
+        points = { ...points, ...tileData[x][y] }
+      }
     }
   }
   

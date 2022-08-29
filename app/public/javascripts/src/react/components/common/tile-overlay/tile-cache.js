@@ -22,7 +22,7 @@ For the moment culling is handled here locally with TileCache itself manipulatin
 */
 
 export class TileCache {
-  constructor (itemLimit = 1024) {
+  constructor (itemLimit = 1024) { // 1024 is just a default, set it to what is appropriate for your system 
     this.itemLimit = itemLimit
     this.clear()
   }

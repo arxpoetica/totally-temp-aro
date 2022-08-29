@@ -1057,6 +1057,7 @@ class State {
 
           // TODO: this doesn't really belong here
           //  when new tile system is complete move this to an init function
+          // these define the badge icons, name, source, offset, and point for offset reference defined as percent of height and width of parent icon
           tileIcons.setBadge(
             'alert',
             '/images/map_icons/badges/badge_alert.png',
