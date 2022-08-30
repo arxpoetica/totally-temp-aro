@@ -4,7 +4,6 @@ import { CompetitorButtons } from './competitor-buttons.jsx'
 import ResourceActions from '../resource-actions'
 import Select from 'react-select'
 import AroHttp from '../../../common/aro-http'
-import { ClientSocketManager } from '../../../common/client-sockets'
 import { RECALC_STATES } from './competitor-shared'
 import cx from 'clsx'
 
@@ -36,25 +35,7 @@ class _CompetitorEditor extends Component {
       strengthsById: '',
       hasChanged: false,
     }
-
-    console.log({ ClientSocketManager })
-
-
-    // ClientSocketManager.joinRoom('competition-updates', this.props.editingManager.id)
-    // ClientSocketManager.subscribe('MODIFY', msg => {
-    //   console.log({msg})
-    // })
-    // ClientSocketManager.subscribe('REBUILD_STARTED', msg => {
-    //   console.log('REBUILD_STARTED', {msg})
-    // })
-    // ClientSocketManager.subscribe('REBUILD_ENDED', msg => {
-    //   console.log('REBUILD_ENDED', {msg})
-    // })
-    // ClientSocketManager.subscribe('REBUILD_FAILED', msg => {
-    //   console.log('REBUILD_FAILED', {msg})
-    // })
   }
-
 
   async componentDidMount () {
     this.props.getRegions()

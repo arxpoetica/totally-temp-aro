@@ -1,4 +1,6 @@
-import { showNotification } from '@mantine/notifications'
+import React from 'react'
+import { showNotification, updateNotification, hideNotification } from '@mantine/notifications'
+import { IconCheck } from '@tabler/icons'
 
 export class Notifier {
 
@@ -19,24 +21,48 @@ export class Notifier {
       message = 'Unknown error from service. Please contact support to resolve.'
     }
 
+    const id = Date.now().toString()
     showNotification({
+      id,
       title: `${error.status} Error`,
       message,
       color: 'red',
       autoClose: false,
       ...props,
     })
+    return id
   }
 
   static warning(message, props = {}) {
     console.warn(message)
+    const id = Date.now().toString()
     showNotification({
+      id,
       title: `Warning`,
       message,
       color: 'yellow',
       autoClose: false,
       ...props,
     })
+    return id
+  }
+
+  static done(id, props = {}) {
+    if (id) {
+      updateNotification({
+        id,
+        title: 'Done!',
+        message: 'The task has finished.',
+        color: 'green',
+        icon: <IconCheck size={16}/>,
+        autoClose: false,
+        ...props,
+      })
+    }
+  }
+
+  static close(id) {
+    if (id) hideNotification(id)
   }
 
 }

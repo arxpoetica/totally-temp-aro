@@ -997,9 +997,7 @@ function saveCompManConfig(competitorManagerId, pristineStrengthsById, strengths
         if (!this.doRecalc){
           const url = `/service/v2/resource-manager/${competitorManagerId}/competition_manager`
           const { data } = await AroHttp.get(url)
-          if (data.state === RECALC_STATES.DIRTY) {
-            dispatch(setRecalcState(RECALC_STATES.DIRTY))
-          }
+          dispatch(setRecalcState(data.state))
         }
       } else {
         console.log('Competitor Editor: No models were changed. Nothing to save.')
@@ -1011,17 +1009,15 @@ function saveCompManConfig(competitorManagerId, pristineStrengthsById, strengths
 }
 
 // Recalcing
-function executeRecalc(userId, competitorManagerId){
-  return dispatch => {
-    dispatch(setRecalcState(RECALC_STATES.RECALCULATING))
-    // call the api
-    setTimeout(() => {
-      AroHttp.post(`/service/v1/competitor-manager/${competitorManagerId}/refresh/?user_id=${userId}`)
-      .then((result) => {
-        dispatch(setRecalcState(RECALC_STATES.VALID))
-      })
-      .catch((err)=> console.error(err))
-    }, 5000)
+function executeRecalc(userId, competitorManagerId) {
+  return async(dispatch) => {
+    try {
+      dispatch(setRecalcState(RECALC_STATES.RECALCULATING))
+      const url = `/service/v1/competitor-manager/${competitorManagerId}/refresh/?user_id=${userId}`
+      await AroHttp.post(url)
+    } catch (error) {
+      Notifier.error(error)
+    }
   }
 }
 
@@ -1345,10 +1341,40 @@ function convertMetersToLengthUnits (input) {
   }
 }
 
-function setRecalcState(recalc) {
+function setRecalcState(nextRecalcState) {
+  return (dispatch, getState) => {
+    const { recalcState: prevRecalcState, recalcNotificationId } = getState().resourceEditor
+    dispatch({
+      type: Actions.RESOURCE_EDITOR_SET_RECALC_STATE,
+      payload: nextRecalcState,
+    })
+    if (nextRecalcState !== prevRecalcState && nextRecalcState === RECALC_STATES.RECALCULATING) {
+      const id = Notifier.warning([
+        'The competition manager is being updated.',
+        'You should not run any plans until this operation is complete.',
+        'Please contact your system admin with any questions.',
+      ].join(' '), {
+        title: 'Updating Competition Manager',
+        loading: true,
+      })
+      dispatch(setRecalcNotificationId(id))
+    } else if (recalcNotificationId && nextRecalcState !== RECALC_STATES.RECALCULATING) {
+      setRecalcNotificationId(null)
+      Notifier.done(recalcNotificationId, {
+        title: 'Updated Competition Manager',
+        message: [
+          'The competition manager has finished updating.',
+          'It is now safe to continue running plans.',
+        ].join(' '),
+      })
+    }
+  }
+}
+
+function setRecalcNotificationId(recalcNotificationId) {
   return {
-    type: Actions.RESOURCE_EDITOR_SET_RECALC_STATE,
-    payload: recalc,
+    type: Actions.RESOURCE_EDITOR_SET_RECALC_NOTIFICATION_ID,
+    payload: recalcNotificationId,
   }
 }
 
@@ -1391,5 +1417,6 @@ export default {
   convertlengthUnitsToMeters,
   setEditingMode,
   setRecalcState,
-  executeRecalc
+  setRecalcNotificationId,
+  executeRecalc,
 }

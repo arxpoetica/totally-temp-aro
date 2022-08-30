@@ -35,6 +35,7 @@ const defaultState = {
   roicManager: {},
   roicManagerConfiguration: {},
   recalcState: RECALC_STATES.VALID,
+  recalcNotificationId: null,
 }
 
 function setResourceTypes (state, resourceTypes) {
@@ -281,6 +282,10 @@ function setRecalcState(state, recalc) {
   }
 }
 
+function setRecalcNotificationId(state, recalcNotificationId) {
+  return { ...state, recalcNotificationId }
+}
+
 function resourceReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.RESOURCE_EDITOR_SET_RESOURCE_TYPES:
@@ -384,6 +389,8 @@ function resourceReducer (state = defaultState, action) {
     case Actions.RESOURCE_EDITOR_SET_RECALC_STATE:
       return setRecalcState(state, action.payload)
 
+    case Actions.RESOURCE_EDITOR_SET_RECALC_NOTIFICATION_ID:
+      return setRecalcNotificationId(state, action.payload)
 
   default:
     return state

@@ -58,7 +58,7 @@ async function createServerSocketManager(server) {
     socketLogger(`SOCKET EMIT library: ${libraryId}`, payload)
   }
   const emitToBroadcast = (payload) => {
-    channels.broadcast.to('broadcast').emit('message', payload)
+    channels.broadcast.emit('message', payload)
     socketLogger(`SOCKET EMIT broadcast to all`, payload)
   }
   const emitToLoggedInUser = (loggedInUserID, payload) => {
@@ -136,12 +136,11 @@ async function createServerSocketManager(server) {
     emitToClient(msg.properties.headers.sessionId, msg)
   }))
 
-  messageQueueManager.addConsumer(new Consumer('competitionUpdatesEvent', 'competition-updates', msg => {
-    console.log({ msg: msg.content.toString() })
+  messageQueueManager.addConsumer(new Consumer('competitionUpdatesEvent', 'competition_updates', msg => {
     socketLogger('Received subnet message from service', msg.content.toString())
     emitToBroadcast({
       type: SOCKET_EVENTS.COMPETITION_UPDATES,
-      payload: msg.content.toString(),
+      payload: msg.content,
     })
   }))
 

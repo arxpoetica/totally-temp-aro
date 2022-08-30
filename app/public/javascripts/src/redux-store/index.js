@@ -85,7 +85,11 @@ let reducer = combineReducers({
   stateViewMode,
 })
 
+// Custom middleware
+import { createSocketMiddleware } from './middleware'
+const socketSubscribers = createSocketMiddleware()
+
 // Add support for Redux devtools extension. Yes, even in production.
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
-var store = createStore(reducer, composeEnhancers(applyMiddleware(thunk, logger)))
+var store = createStore(reducer, composeEnhancers(applyMiddleware(thunk, socketSubscribers, logger)))
 export default store
