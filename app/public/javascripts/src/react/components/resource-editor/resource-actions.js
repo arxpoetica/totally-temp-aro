@@ -978,7 +978,6 @@ function  getDefaultStrength (carrierId) {
 }
 
 function saveCompManConfig(competitorManagerId, pristineStrengthsById, strengthsById){
-  console.log('saveCompManConfig');
 
   return dispatch => {
 

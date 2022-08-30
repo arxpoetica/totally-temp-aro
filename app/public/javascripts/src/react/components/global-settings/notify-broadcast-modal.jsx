@@ -4,7 +4,7 @@ import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import UiActions from '../configuration/ui/ui-actions'
 import GlobalsettingsActions from '../global-settings/globalsettings-action'
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap'
-import Constants from '../../common/constants.js'
+import Constants from '../../common/constants'
 import { dequal } from 'dequal'
 
 export const NotifyBroadcastModal = (props) => {

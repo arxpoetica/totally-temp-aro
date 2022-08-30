@@ -14,7 +14,7 @@ import MapLayerActions from '../react/components/map-layers/map-layer-actions'
 import MapReportsActions from '../react/components/map-reports/map-reports-actions'
 import SelectionActions from '../react/components/selection/selection-actions'
 import PlanStates from '../react/components/plan/plan-states'
-import { SocketManager } from '../react/common/socket-manager'
+import { ClientSocketManager } from '../react/common/client-sockets'
 import RingEditActions from '../react/components/ring-edit/ring-edit-actions'
 import NetworkAnalysisActions from '../react/components/optimization/network-analysis/network-analysis-actions'
 import PuppeteerMessages from '../components/common/puppeteer-messages'
@@ -810,9 +810,9 @@ class State {
       service.loadAuthRolesRedux()
       service.setLoggedInUserRedux(user)
       service.loadSystemActorsRedux()
-      SocketManager.joinRoom('user', user.id)
+      ClientSocketManager.joinRoom('user', user.id)
       // Join room for this broadcast
-      SocketManager.joinRoom('broadcast', user.id)
+      ClientSocketManager.joinRoom('broadcast', user.id)
 
       service.equipmentLayerTypeVisibility.existing = service.configuration.networkEquipment.visibility.defaultShowExistingEquipment
       service.equipmentLayerTypeVisibility.planned = service.configuration.networkEquipment.visibility.defaultShowPlannedEquipment
@@ -1215,10 +1215,10 @@ class State {
       service.loadPlanRedux(service.plan.id)
     }
 
-    service.unsubscribePlanEvent = SocketManager.subscribe('COMMIT_TRANSACTION', service.handlePlanModifiedEvent.bind(service))
-    service.unsubscribeLibraryEvent1 = SocketManager.subscribe('USER_TRANSACTION', service.handleLibraryModifiedEvent.bind(service))
-    service.unsubscribeLibraryEvent1 = SocketManager.subscribe('ETL_ADD', service.handleLibraryModifiedEvent.bind(service))
-    service.unsubscribePlanRefresh = SocketManager.subscribe('PLAN_REFRESH', service.handlePlanRefreshRequest.bind(service))
+    service.unsubscribePlanEvent = ClientSocketManager.subscribe('COMMIT_TRANSACTION', service.handlePlanModifiedEvent.bind(service))
+    service.unsubscribeLibraryEvent1 = ClientSocketManager.subscribe('USER_TRANSACTION', service.handleLibraryModifiedEvent.bind(service))
+    service.unsubscribeLibraryEvent1 = ClientSocketManager.subscribe('ETL_ADD', service.handleLibraryModifiedEvent.bind(service))
+    service.unsubscribePlanRefresh = ClientSocketManager.subscribe('PLAN_REFRESH', service.handlePlanRefreshRequest.bind(service))
 
     // NOTE: this is willReceiveProps in Angular vernacular
     service.mergeToTarget = (nextReduxState, actions) => {

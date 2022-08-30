@@ -8,7 +8,7 @@ import MenuItemAction from '../context-menu/menu-item-action'
 import ContextMenuActions from '../context-menu/actions'
 import ResourceActions from '../resource-editor/resource-actions'
 import SubnetTileActions from './subnet-tile-actions'
-import { SocketManager } from '../../common/socket-manager'
+import { ClientSocketManager } from '../../common/client-sockets'
 import { batch } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import PlanEditorSelectors from './plan-editor-selectors'
@@ -40,7 +40,7 @@ function resumeOrCreateTransaction() {
 
       const planId = plan.activePlan.id
       const userId = user.loggedInUser.id
-      const sessionId = await SocketManager.getSessionId()
+      const sessionId = await ClientSocketManager.getSessionId()
       const draftExists = draftsState === DRAFT_STATES.END_INITIALIZATION
       const { data: transactionData }
         = await TransactionManager.resumeOrCreateTransaction(planId, userId, sessionId, draftExists)
@@ -163,7 +163,7 @@ function subscribeToSocket() {
 
       // TODO: move this into a controller
 
-      const unsubscriber = SocketManager.subscribe('SUBNET_DATA', rawData => {
+      const unsubscriber = ClientSocketManager.subscribe('SUBNET_DATA', rawData => {
         const data = JSON.parse(utf8decoder.decode(rawData.content))
         let message
         const { userId, updateSession, planTransactionId, rootSubnetId } = data

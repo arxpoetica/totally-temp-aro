@@ -6,7 +6,7 @@ import wrapComponentWithProvider from '../../../common/provider-wrapped-componen
 import RfpStatusTypes from './constants'
 import uuidv4 from 'uuid/v4'
 import Constants from '../../../common/constants'
-import { SocketManager } from '../../../../react/common/socket-manager'
+import { ClientSocketManager } from '../../../../react/common/client-sockets'
 import ProgressButton from '../../common/progress-button.jsx'
 const selector = formValueSelector(Constants.RFP_OPTIONS_FORM)
 
@@ -21,7 +21,7 @@ export class RfpButton extends ProgressButton {
       FINISHED: RfpStatusTypes.FINISHED
     }
 
-    this.unsubscriber = SocketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {
+    this.unsubscriber = ClientSocketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {
       if (progressData.data.processType === 'rfp') {
         this.props.setOptimizationProgress(progressData.data)
       }

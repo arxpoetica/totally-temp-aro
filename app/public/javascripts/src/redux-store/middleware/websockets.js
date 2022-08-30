@@ -1,9 +1,9 @@
-import { SocketManager } from '../../react/common/socket-manager'
+import { ClientSocketManager } from '../../react/common/client-sockets'
 import GlobalsettingsActions from '../../react/components/global-settings/globalsettings-action'
 
 const createSocketMiddleware = () => {
   return storeAPI => {
-    SocketManager.subscribe('NOTIFICATION_SHOW', (command) => {
+    ClientSocketManager.subscribe('NOTIFICATION_SHOW', (command) => {
       const { dispatch } = storeAPI
       // Dispatch an action to notify the broadcast message
       dispatch(GlobalsettingsActions.notifyBroadcast(command.payload))

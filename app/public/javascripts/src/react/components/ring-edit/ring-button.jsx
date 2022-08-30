@@ -4,7 +4,7 @@ import reduxStore from '../../../redux-store'
 import RingActions from './ring-edit-actions.js'
 import PlanActions from '../plan/plan-actions'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
-import { SocketManager } from '../../../react/common/socket-manager'
+import { ClientSocketManager } from '../../../react/common/client-sockets'
 // import AroHttp from '../../common/aro-http'
 import RingStatusTypes from './constants'
 import ProgressButton from '../common/progress-button.jsx'
@@ -22,7 +22,7 @@ export class RingButton extends ProgressButton {
       FINISHED: RingStatusTypes.COMPLETED
     }
 
-    this.unsubscriber = SocketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {
+    this.unsubscriber = ClientSocketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {
       if (progressData.data.processType === 'ring') {
         this.props.setActivePlanState(progressData.data.optimizationState)
         this.props.setAnalysisProgress(progressData.data.progress)

@@ -4,7 +4,7 @@ import CoverageActions from '../coverage/coverage-actions'
 import SelectionActions from '../selection/selection-actions'
 import RfpActions from '../optimization/rfp/rfp-actions'
 import RfpStatusTypes from '../optimization/rfp/constants'
-import { SocketManager } from '../../../react/common/socket-manager'
+import { ClientSocketManager } from '../../common/client-sockets'
 import PlanEditorActions from '../plan-editor/plan-editor-actions'
 import RingEditActions from '../ring-edit/ring-edit-actions'
 import NetworkOptimizationActions from '../optimization/network-optimization/network-optimization-actions'
@@ -72,8 +72,8 @@ function manageLibrarySubscriptions (currentSelectedLibraryItems, newSelectedLib
   const newSelectedLibraryIds = new Set(newSelectedLibraryItems.map(libraryItem => libraryItem.identifier))
   const subscriptionsToAdd = [...newSelectedLibraryIds].filter(item => !currentSelectedLibraryIds.has(item))
   const subscriptionsToDelete = [...currentSelectedLibraryIds].filter(item => !newSelectedLibraryIds.has(item))
-  subscriptionsToDelete.forEach(libraryId => SocketManager.leaveRoom('library', libraryId))
-  subscriptionsToAdd.forEach(libraryId => SocketManager.joinRoom('library', libraryId))
+  subscriptionsToDelete.forEach(libraryId => ClientSocketManager.leaveRoom('library', libraryId))
+  subscriptionsToAdd.forEach(libraryId => ClientSocketManager.joinRoom('library', libraryId))
 }
 
 function loadPlanDataSelectionFromServer (planId) {
@@ -163,7 +163,7 @@ function loadPlanDataSelectionFromServer (planId) {
 function setActivePlan (plan) {
   return (dispatch, getState) => {
     getState().plan.activePlan && getState().plan.activePlan.id &&
-      SocketManager.leaveRoom('plan', getState().plan.activePlan.id) // leave previous plan
+      ClientSocketManager.leaveRoom('plan', getState().plan.activePlan.id) // leave previous plan
     batch(() => {
       dispatch(subnetTileActions.clearSubnetDataAndCache())
       dispatch({
@@ -181,7 +181,7 @@ function setActivePlan (plan) {
     // clear any old plan edit data 
     dispatch(PlanEditorActions.clearTransaction(false))
     // Join room for this plan
-    SocketManager.joinRoom('plan', plan.id)
+    ClientSocketManager.joinRoom('plan', plan.id)
     // Get current plan data items
     dispatch(loadPlanDataSelectionFromServer(plan.id))
     // Update details on the coverage report

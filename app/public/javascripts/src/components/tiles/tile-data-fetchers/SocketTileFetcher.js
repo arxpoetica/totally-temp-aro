@@ -4,13 +4,13 @@ import { VectorTile } from 'vector-tile'
 import Protobuf from 'pbf'
 import AroHttp from '../../../react/common/aro-http'
 import uuidv4 from 'uuid/v4'
-import { SocketManager } from '../../../react/common/socket-manager'
+import { ClientSocketManager } from '../../../react/common/client-sockets'
 
 class SocketTileFetcher {
 
   constructor () {
     this.tileReceivers = {}
-    this.unsubscriber = SocketManager.subscribe('VECTOR_TILE_DATA', message => this._receiveSocketData(message))
+    this.unsubscriber = ClientSocketManager.subscribe('VECTOR_TILE_DATA', message => this._receiveSocketData(message))
   }
 
   // Returns a promise that will eventually provide map data for all the layer definitions in the specified tile
@@ -27,7 +27,7 @@ class SocketTileFetcher {
       return ldCopy
     })
     const mapDataPromise = new Promise((resolve, reject) => {
-      SocketManager.getSessionId()
+      ClientSocketManager.getSessionId()
         .then(sessionId => {
           const requestBody = {
             websocketSessionId: sessionId,

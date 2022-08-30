@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import ResourceActions from '../resource-actions'
 import Select from 'react-select'
 import AroHttp from '../../../common/aro-http'
-import { SocketManager } from '../../../common/socket-manager'
+import { ClientSocketManager } from '../../../common/client-sockets'
 
 const styles = {
   multiValue: (base, state) => {
@@ -42,19 +42,19 @@ class _CompetitorEditor extends Component {
       recalcPopOverOpen: false
     }
 
-    console.log({ SocketManager })
+    console.log({ ClientSocketManager })
     
-    // SocketManager.joinRoom('competition-updates', this.props.editingManager.id)
-    // SocketManager.subscribe('MODIFY', msg => {
+    // ClientSocketManager.joinRoom('competition-updates', this.props.editingManager.id)
+    // ClientSocketManager.subscribe('MODIFY', msg => {
     //   console.log({msg})
     // })
-    // SocketManager.subscribe('REBUILD_STARTED', msg => {
+    // ClientSocketManager.subscribe('REBUILD_STARTED', msg => {
     //   console.log('REBUILD_STARTED', {msg})
     // })
-    // SocketManager.subscribe('REBUILD_ENDED', msg => {
+    // ClientSocketManager.subscribe('REBUILD_ENDED', msg => {
     //   console.log('REBUILD_ENDED', {msg})
     // })
-    // SocketManager.subscribe('REBUILD_FAILED', msg => {
+    // ClientSocketManager.subscribe('REBUILD_FAILED', msg => {
     //   console.log('REBUILD_FAILED', {msg})
     // })
   }
