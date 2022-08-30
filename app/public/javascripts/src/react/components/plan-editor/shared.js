@@ -162,7 +162,7 @@ export const isEquipmentInsideBoundary = (latLng, selectedSubnetId, subnetFeatur
   const polygon = new google.maps.Polygon({ paths })
   const isInsideSubnet = google.maps.geometry.poly.containsLocation(latLng, polygon)
   if (!isInsideSubnet) {
-    Notifier.warn([
+    Notifier.warning([
       'Equipment must be placed inside of Service Area boundary ',
       'and FDTs must be placed inside the selected FDH boundary.',
     ].join(''), { title: 'Action not allowed' })

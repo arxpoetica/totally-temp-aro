@@ -1,6 +1,6 @@
 /* globals swal */
 import AroHttp from '../../common/aro-http'
-import { handleError } from '../../common/notifications'
+import { Notifier } from '../../common/notifications'
 
 export default class TransactionManager {
   // Workflow:
@@ -40,7 +40,7 @@ export default class TransactionManager {
 
     } catch (error) {
         // For transaction resume errors, handle it and rethrow the exception
-        handleError(error)
+        Notifier.error(error)
         return error
     }
   }
@@ -70,11 +70,11 @@ export default class TransactionManager {
             .then(res => AroHttp.post(`/service/plan-transactions?session_id=${sessionId}`, { planId: currentPlanId }))
             .then(res => resolve(res))
             .catch(error => {
-              handleError(error)
+              Notifier.error(error)
               reject(error)
             })
         } else {
-          handleError(error)
+          Notifier.error(error)
           reject(new Error('Unable to delete older transactions. Please try again later.'))
         }
       })
@@ -129,7 +129,7 @@ export default class TransactionManager {
           AroHttp.delete(`/service/plan-transactions/transaction/${transactionId}`)
             .then(() => resolve(true))
             .catch(error => {
-              handleError(error)
+              Notifier.error(error)
               reject(error)
             })
         } else {

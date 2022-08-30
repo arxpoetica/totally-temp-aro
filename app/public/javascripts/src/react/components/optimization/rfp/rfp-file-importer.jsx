@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import RfpActions from './rfp-actions'
 import RfpPointImporterUtils from './rfp-file-importer-utils'
-import { handleError } from '../../../common/notifications'
+import { Notifier } from '../../../common/notifications'
 
 const connector = connect(
   state => ({}),
@@ -19,7 +19,7 @@ export const RfpFileImporter = connector(({ addTargets, displayOnly }) => {
       const targets = await RfpPointImporterUtils.loadPointsFromFile(file)
       addTargets(targets)
     } catch (error) {
-      handleError(error)
+      Notifier.error(error)
     }
   }
 

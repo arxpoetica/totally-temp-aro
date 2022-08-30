@@ -15,7 +15,7 @@ import PlanEditorSelectors from './plan-editor-selectors'
 import { constants, validSubnetTypes, validLocationConnectionTypes } from './shared'
 import { displayModes } from '../sidebar/constants'
 const { DRAFT_STATES, BLOCKER, INCLUSION } = constants
-import { handleError } from '../../common/notifications'
+import { Notifier } from '../../common/notifications'
 
 
 function resumeOrCreateTransaction() {
@@ -56,7 +56,7 @@ function resumeOrCreateTransaction() {
         })
       })
     } catch (error) {
-      handleError(error)
+      Notifier.error(error)
       dispatch({
         type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
         payload: false,
@@ -116,7 +116,7 @@ function commitTransaction (transactionId) {
       dispatch({ type: Actions.PLAN_SET_ACTIVE_PLAN, payload: { plan: data } })
 
     } catch (error) {
-      handleError(error)
+      Notifier.error(error)
       dispatch(clearTransaction())
     }
   }
@@ -134,7 +134,7 @@ function discardTransaction (transactionId) {
         dispatch(setIsCommittingTransaction(false))
       }
     } catch (error) {
-      handleError(error)
+      Notifier.error(error)
       dispatch(clearTransaction())
     }
   }
@@ -151,7 +151,7 @@ function getActiveTransaction() {
         })
       }
     } catch (error) {
-      handleError(error)
+      Notifier.error(error)
     }
   }
 }
@@ -318,13 +318,13 @@ function subscribeToSocket() {
             message = `Type ${data.subnetNodeUpdateType} for SUBNET_DATA socket channel with `
             message += `user id ${userId}, transaction id ${planTransactionId}, `
             message += `session id ${updateSession}, and root subnet id ${rootSubnetId}.`
-            handleError(new Error(message))
+            Notifier.error(new Error(message))
             break
           default:
             message = `Unhandled type ${data.subnetNodeUpdateType} for SUBNET_DATA socket channel with `
             message += `user id ${userId}, transaction id ${planTransactionId}, `
             message += `session id ${updateSession}, and root subnet id ${rootSubnetId}.`
-            handleError(new Error(message))
+            Notifier.error(new Error(message))
         }
 
         if (DRAFT_STATES[data.subnetNodeUpdateType]) {
@@ -341,7 +341,7 @@ function subscribeToSocket() {
       })
       // console.log('...subscribed to subnet socket channel...')
     } catch (error) {
-      handleError(error)
+      Notifier.error(error)
     }
   }
 }
@@ -353,7 +353,7 @@ function unsubscribeFromSocket() {
       unsubscriber()
       // console.log('...unsubscribed from subnet socket channel...')
     } catch (error) {
-      handleError(error)
+      Notifier.error(error)
     }
     dispatch({ type: Actions.PLAN_EDITOR_CLEAR_SOCKET_UNSUBSCRIBER })
   }
@@ -479,7 +479,7 @@ function createFeature(feature) {
         }
       })
     } catch (error) {
-      handleError(error)
+      Notifier.error(error)
     }
   }
 }
@@ -513,7 +513,7 @@ function updateFeatureProperties(feature) {
       })
       return Promise.resolve()
     } catch (error) {
-      handleError(error)
+      Notifier.error(error)
     }
   }
 }
@@ -564,7 +564,7 @@ function createConstructionArea(constructionArea) {
         })
       })
     } catch (error) {
-      handleError(error)
+      Notifier.error(error)
     }
   }
 }
@@ -771,7 +771,7 @@ function _updateSubnetFeatures (subnetFeatures) {
         dispatch(recalculateSubnets(transactionId, subnetIds))
         
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -906,7 +906,7 @@ function mergeTerminals (terminals) {
 
         dispatch(recalculateSubnets(transactionId))
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -1040,7 +1040,7 @@ function updatePlanThumbInformation (payload) {
           })
         })
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -1095,7 +1095,7 @@ function moveFeature (featureId, coordinates) {
           dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT, payload: draftClone })
         }
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -1218,7 +1218,7 @@ function deleteFeatures (featureIds) {
         dispatch(recalculateSubnets(transactionId))
       })
     } catch (error) {
-      handleError(error)
+      Notifier.error(error)
     }
   }
 }
@@ -1286,7 +1286,7 @@ function readFeatures (featureIds) {
               })
             }
           })
-          .catch(error => handleError(error))
+          .catch(error => Notifier.error(error))
       )
     })
     return Promise.all(promises)
@@ -1400,7 +1400,7 @@ function addSubnets({ subnetIds = [], forceReload = false }) {
       return subnetIds
 
     } catch (error) {
-      handleError(error)
+      Notifier.error(error)
       dispatch(setIsCalculatingSubnets(false))
       return Promise.reject()
     }
@@ -1436,7 +1436,7 @@ function setSelectedSubnetId (selectedSubnetId) {
           dispatch({ type: Actions.PLAN_EDITOR_SET_VISIBLE_EQUIPMENT_TYPES, payload: visibleEquipmentTypes })
         }
       } catch (error) {
-        handleError(error)
+        Notifier.error(error)
         dispatch({ type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID, payload: null })
         dispatch({ type: Actions.PLAN_EDITOR_SET_VISIBLE_EQUIPMENT_TYPES, payload: [] })
       }
@@ -1496,7 +1496,7 @@ function recalculateBoundary (subnetId) {
         }
       })
       .catch(error => {
-        handleError(error)
+        Notifier.error(error)
         dispatch(setIsCalculatingBoundary(false))
       })
   }
@@ -1571,7 +1571,7 @@ function recalculateSubnets(transactionId, subnetIds = []) {
       })
 
     } catch (error) {
-      handleError(error)
+      Notifier.error(error)
       dispatch(setIsCalculatingSubnets(false))
       dispatch(setIsRecalculating(false))
     }
@@ -1609,7 +1609,7 @@ function getFiberAnnotations (subnetId) {
             payload: { [subnetId]: res.data }
           })
         })
-        .catch((error) => handleError(error))
+        .catch((error) => Notifier.error(error))
     }
   }
 }
@@ -1628,7 +1628,7 @@ function setFiberAnnotations (fiberAnnotations, subnetId) {
             payload: fiberAnnotations,
           })
         })
-        .catch((error) => handleError(error))
+        .catch((error) => Notifier.error(error))
     }
   }
 }
@@ -1728,7 +1728,7 @@ function parseRecalcEvents (recalcData) {
           const faultTreeCount = await AroHttp.get(updateFaultTreeUrl)
           clonedDrafts[subnetId].faultTreeSummary = faultTreeCount.data.faultTree.faultTreeSummary
         } catch (e) {
-          handleError(e)
+          Notifier.error(e)
         }
       }
     })

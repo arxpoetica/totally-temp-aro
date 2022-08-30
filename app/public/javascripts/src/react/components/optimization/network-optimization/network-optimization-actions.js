@@ -3,7 +3,7 @@ import Actions from '../../../common/actions'
 import AroHttp from '../../../common/aro-http'
 import PlanActions from '../../plan/plan-actions'
 import SelectionActions from '../../selection/selection-actions'
-import { handleError } from '../../../common/notifications'
+import { Notifier } from '../../../common/notifications'
 
 function runOptimization(inputs, userId) { // shouldn't be getting userId from caller
   return (dispatch, getState) => {
@@ -24,7 +24,7 @@ function runOptimization(inputs, userId) { // shouldn't be getting userId from c
           dispatch(SelectionActions.loadPlanTargetSelectionsFromServer(response.data.planId))
         })
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -45,7 +45,7 @@ function cancelOptimization(planId, optimizationId) {
         return dispatch({ type: Actions.NETWORK_OPTIMIZATION_CLEAR_OPTIMIZATION_ID })
       })
       .catch(error => {
-        handleError(error)
+        Notifier.error(error)
         dispatch({
           type: Actions.NETWORK_OPTIMIZATION_SET_IS_CANCELING,
           payload: false,
@@ -65,7 +65,7 @@ function loadOptimizationInputs(planId) {
       .then((response) => {
         dispatch(this.setOptimizationInputs(response.data))
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -159,7 +159,7 @@ function copyEphemeralPlan(plan) {
       const result = await AroHttp.post(url + query, {})
       dispatch(PlanActions.setActivePlan(result.data))
     } catch (error) {
-      handleError(error)
+      Notifier.error(error)
     }
   }
 }
@@ -171,7 +171,7 @@ function modifyOptimization(plan)  {
       const result = await AroHttp.get(`/service/v1/plan/${plan.id}/optimization-state`)
       dispatch(PlanActions.setActivePlanState(result.data))
     } catch (error) {
-      handleError(error)
+      Notifier.error(error)
     }
   }
 }
@@ -258,7 +258,7 @@ function getLocationPreview(planId, updatedLocationConstraints) {
       })
 
     } catch (error) {
-      handleError(error)
+      Notifier.error(error)
       dispatch({
         type: Actions.NETWORK_OPTIMIZATION_SET_IS_PREVIEW_LOADING,
         payload: false,
@@ -293,7 +293,7 @@ function getEnumOptions(propertyName) {
         })
       }
     } catch (error) {
-      handleError(error)
+      Notifier.error(error)
     }
   }
 }

@@ -12,7 +12,7 @@ import UserActions from '../user/user-actions'
 import ToolBarActions from '../header/tool-bar-actions.js'
 import AroHttp from '../../common/aro-http'
 import fetch from 'cross-fetch'
-import { handleError } from '../../common/notifications'
+import { Notifier } from '../../common/notifications'
 import subnetTileActions from '../plan-editor/subnet-tile-actions'
 import RoicReportsActions from '../sidebar/analysis/roic-reports/roic-reports-actions'
 
@@ -62,7 +62,7 @@ function loadPlan (planId) {
   return dispatch => {
     AroHttp.get(`/service/v1/plan/${planId}`)
       .then(result => dispatch(setActivePlan(result.data)))
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -155,7 +155,7 @@ function loadPlanDataSelectionFromServer (planId) {
           }
         })
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -251,7 +251,7 @@ function deleteLibraryEntry (dataSource) {
         // wait for success before updating local state, keep in sync
         dispatch(setAllLibraryItems(dataType, updatedLib))
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -267,7 +267,7 @@ function clearAllSelectedSA (plan, dataItems, selectedServiceAreas) {
           dispatch(SelectionActions.removePlanTargets(plan.id, { serviceAreas: new Set(invalidServiceAreas) }))
         }
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -350,7 +350,7 @@ function loadPlanResourceSelectionFromServer (plan) {
         })
         return Promise.resolve()
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -458,7 +458,7 @@ function loadProjectConfig (userId, authPermissions) {
         const selectedProjectId = result.data.projectTemplateId
         dispatch(setSelectedProjectId(selectedProjectId))
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -469,7 +469,7 @@ function createNewProject (projectName, parentProject, userId, authPermissions) 
         dispatch(loadProjectConfig(userId, authPermissions))
         dispatch(setProjectMode('HOME'))
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -481,7 +481,7 @@ function deleteProjectConfig (project,userId, authPermissions) {
         dispatch(loadProjectConfig(userId, authPermissions))
         dispatch(setProjectMode('HOME'))
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -510,7 +510,7 @@ function planSettingsToProject (selectedProjectId, dataItems, resourceItems) {
       .then(() => {
         dispatch(setProjectMode('HOME'))
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -569,7 +569,7 @@ function updateDataSourceEditableStatus (isDataSourceEditable, dataSourceKey, lo
             payload: isDataSourceEditable
           })
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
     }
   }
 }
@@ -631,7 +631,7 @@ function loadLibraryEntryById (libraryId) {
           }
         })
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -659,7 +659,7 @@ function deletePlan (plan) {
             })
             .then((ephemeralPlan) => dispatch(setActivePlan(ephemeralPlan.data)))
             .catch(error => {
-              handleError(error)
+              Notifier.error(error)
               reject(error)
             })
         } else {
@@ -709,7 +709,7 @@ function exportPlan (userId, planId, filename) {
     saveAs(new Blob([rawResult]), filename)
   })
   .catch(error => {
-    handleError(error)
+    Notifier.error(error)
   })
 }
 
@@ -732,7 +732,7 @@ function importPlan (userId, file) {
       })
     })
     .catch(error => {
-      handleError(error)
+      Notifier.error(error)
       dispatch({
         type: Actions.PLAN_SET_UPLOAD_NAME,
         payload: null,
