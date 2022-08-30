@@ -26,6 +26,7 @@ import StateViewModeActions from '../react/components/state-view-mode/state-view
 import PlanEditorActions from '../react/components/plan-editor/plan-editor-actions'
 import RxState from '../react/common/rxState'
 import tileIcons from '../react/components/common/tile-overlay/tile-icons'
+import { SOCKET_EVENTS } from '../../../../socket-namespaces'
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllLocationLayers = reduxState => reduxState.mapLayers.location
@@ -1215,10 +1216,10 @@ class State {
       service.loadPlanRedux(service.plan.id)
     }
 
-    service.unsubscribePlanEvent = ClientSocketManager.subscribe('COMMIT_TRANSACTION', service.handlePlanModifiedEvent.bind(service))
-    service.unsubscribeLibraryEvent1 = ClientSocketManager.subscribe('USER_TRANSACTION', service.handleLibraryModifiedEvent.bind(service))
-    service.unsubscribeLibraryEvent1 = ClientSocketManager.subscribe('ETL_ADD', service.handleLibraryModifiedEvent.bind(service))
-    service.unsubscribePlanRefresh = ClientSocketManager.subscribe('PLAN_REFRESH', service.handlePlanRefreshRequest.bind(service))
+    service.unsubscribePlanEvent = ClientSocketManager.subscribe(SOCKET_EVENTS.COMMIT_TRANSACTION, service.handlePlanModifiedEvent.bind(service))
+    service.unsubscribeLibraryEvent1 = ClientSocketManager.subscribe(SOCKET_EVENTS.USER_TRANSACTION, service.handleLibraryModifiedEvent.bind(service))
+    service.unsubscribeLibraryEvent1 = ClientSocketManager.subscribe(SOCKET_EVENTS.ETL_ADD, service.handleLibraryModifiedEvent.bind(service))
+    service.unsubscribePlanRefresh = ClientSocketManager.subscribe(SOCKET_EVENTS.PLAN_REFRESH, service.handlePlanRefreshRequest.bind(service))
 
     // NOTE: this is willReceiveProps in Angular vernacular
     service.mergeToTarget = (nextReduxState, actions) => {

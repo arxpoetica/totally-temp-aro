@@ -83,7 +83,7 @@ async function createServerSocketManager(server) {
       // TODO: too much noise...turning off for now...
       // socketLogger(`Vector Tile Socket: Routing message with UUID ${uuid} to /${clientId}`)
       delete vectorTileRequestToRoom[uuid]
-      msg.properties.headers.eventType = 'VECTOR_TILE_DATA'
+      msg.properties.headers.eventType = SOCKET_EVENTS.VECTOR_TILE_DATA
       emitToClient(clientId, msg)
     }
   }))
@@ -105,7 +105,7 @@ async function createServerSocketManager(server) {
     } else {
       socketLogger(`Optimization Progress Socket: Routing message with UUID ${processId} to plan/${processId}`)
       socketLogger(`SOCKET EMIT plan:${processId}`, JSON.stringify(msg))
-      msg.properties.headers.eventType = 'PROGRESS_MESSAGE_DATA'
+      msg.properties.headers.eventType = SOCKET_EVENTS.PROGRESS_MESSAGE_DATA
       // UI dependent on optimizationState at so many places TODO: need to remove optimizationstate
       msg.data = JSON.parse(msg.content.toString()) // Shove it in here for now. Its in too many places in the front end.
       msg.data.progress = (msg.data.jobsCompleted + 1) / (msg.data.totalJobs + 1)
@@ -132,7 +132,7 @@ async function createServerSocketManager(server) {
 
   messageQueueManager.addConsumer(new Consumer('subnetEvent', 'subnet', msg => {
     socketLogger('Received subnet message from service', msg.content.toString())
-    msg.properties.headers.eventType = 'SUBNET_DATA'
+    msg.properties.headers.eventType = SOCKET_EVENTS.SUBNET_DATA
     emitToClient(msg.properties.headers.sessionId, msg)
   }))
 

@@ -16,6 +16,7 @@ import { constants, validSubnetTypes, validLocationConnectionTypes } from './sha
 import { displayModes } from '../sidebar/constants'
 const { DRAFT_STATES, BLOCKER, INCLUSION } = constants
 import { Notifier } from '../../common/notifications'
+import { SOCKET_EVENTS } from '../../../../../../socket-namespaces'
 
 
 function resumeOrCreateTransaction() {
@@ -163,7 +164,7 @@ function subscribeToSocket() {
 
       // TODO: move this into a controller
 
-      const unsubscriber = ClientSocketManager.subscribe('SUBNET_DATA', rawData => {
+      const unsubscriber = ClientSocketManager.subscribe(SOCKET_EVENTS.SUBNET_DATA, rawData => {
         const data = JSON.parse(utf8decoder.decode(rawData.content))
         let message
         const { userId, updateSession, planTransactionId, rootSubnetId } = data
