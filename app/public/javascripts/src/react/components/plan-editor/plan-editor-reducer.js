@@ -21,6 +21,10 @@ const defaultState = {
   draftsState: null,
   draftProgressTuple: [0, 1], // -> [count loaded, total count to load]
   drafts: {},
+  draftLocations: {
+    households: {},
+    groups: {},
+  },
   subnets: {},
   subnetFeatures: {},
   // need to rename this now that any equipment can be selected,
@@ -189,7 +193,7 @@ function mergeDraftProps(state, draftProps) {
   })
   return { ...state, drafts: { ...state.drafts, ...mergedDrafts } }
 }
-
+/*
 function setDraftLocations(state, subnetId, locations) {
   return {
     ...state, 
@@ -201,6 +205,13 @@ function setDraftLocations(state, subnetId, locations) {
       }
     }
   } 
+}
+*/
+function setDraftLocations(state, draftLocations) {
+  return {
+    ...state, 
+    draftLocations
+  }
 }
 
 function updateSubnetBoundary (state, subnetId, geometry) {
@@ -372,7 +383,7 @@ function planEditorReducer (state = defaultState, { type, payload }) {
     }
 
     case Actions.PLAN_EDITOR_SET_DRAFT_LOCATIONS: {
-      return setDraftLocations(state, payload.rootSubnetId, payload.rootLocations)
+      return setDraftLocations(state, payload)
     }
 
     case Actions.PLAN_EDITOR_CLEAR_DRAFTS:

@@ -26,7 +26,7 @@ const SubnetDetail = props => {
 
     // no location alert found, better search elsewhere
     let equipment
-
+    // TODO: we shouldn't need to search, we should use a dictionary 
     // search among draft equipment first
     let allEquipment = []
     const drafts = Object.values(props.rootDrafts)
@@ -43,14 +43,14 @@ const SubnetDetail = props => {
     return (!props.selectedSubnetId 
       || !props.subnets
       || !props.subnets[props.selectedSubnetId] // meaning we will not show this detail if the selected node is a Terminal or Location
-      || !props.subnets[props.selectedSubnetId].faultTree.rootNode.childNodes.length
+      || !Object.keys(props.subnets[props.selectedSubnetId].faultTree.rootNode.childNodes).length
     )
   }
 
   function makeFaultRows (faultTree) {
     let elements = []
     // planEditor.subnets["6a98a2e6-6785-41cd-8700-a2c9109f1ceb"].faultTree.rootNode.childNodes[0].childNodes
-    faultTree.rootNode.childNodes.forEach(faultNode => {
+    Object.values(faultTree.rootNode.childNodes).forEach(faultNode => {
       elements.push(makeFaultRow(faultNode))
     })
 
@@ -82,6 +82,9 @@ const SubnetDetail = props => {
     let iconURL = props.iconsByType._alert['household']
     if (props.subnetFeatures[featureId]) {
       let featureType = props.subnetFeatures[featureId].feature.networkNodeType
+      iconURL = props.iconsByType._alert[featureType]
+    } else if (props.locationsById[featureId]) {
+      let featureType = props.locationsById[featureId].locationEntityType // TODO: standardize stuff like this
       iconURL = props.iconsByType._alert[featureType]
     }
     faultNode.assignedFaultCodes.forEach(fCode => {
@@ -166,8 +169,9 @@ const mapStateToProps = state => {
     subnetFeatures: state.planEditor.subnetFeatures,
     rootDrafts: PlanEditorSelectors.getRootDrafts(state),
     locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
-    iconsByType: MapLayerSelectors.getIconsByType(state),
+    iconsByType: MapLayerSelectors.getIconsByType(state), // TODO: use new icon system
     map: state.map.googleMaps,
+    locationsById: state.planEditor.draftLocations.households,
   }
 }
 

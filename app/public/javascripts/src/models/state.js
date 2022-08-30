@@ -25,6 +25,7 @@ import RoicReportsActions from '../react/components/sidebar/analysis/roic-report
 import StateViewModeActions from '../react/components/state-view-mode/state-view-mode-actions'
 import PlanEditorActions from '../react/components/plan-editor/plan-editor-actions'
 import RxState from '../react/common/rxState'
+import tileIcons from '../react/components/common/tile-overlay/tile-icons'
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllLocationLayers = reduxState => reduxState.mapLayers.location
@@ -272,7 +273,7 @@ class State {
       // plan edit rightclick action from tile.js
       if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_PLAN) {
         //console.log(options)
-        service.showContextMenuForLocations (options.locations, options.event)
+        service.showContextMenuForLocations (options.locations, options.event) // hitch to new VTS 
       }
     })
 
@@ -339,10 +340,11 @@ class State {
         }
       })
 
-      $ngRedux.dispatch({
-        type: Actions.LAYERS_SET_LOCATION,
-        payload: locationTypesForRedux
-      })
+      // $ngRedux.dispatch({
+      //   type: Actions.LAYERS_SET_LOCATION,
+      //   payload: locationTypesForRedux
+      // })
+      service.setLocationTypes(locationTypesForRedux)
     }
 
     service.setLayerVisibility = (layer, isVisible) => {
@@ -586,6 +588,12 @@ class State {
           service.setRecreateTilesAndCache(false)
         })
         .catch((err) => console.error(err))
+    }
+
+    service.disconnectVectorTileClassic = () => {
+      tileDataService.clearDataCache()
+      tileDataService.clearHtmlCache()
+      service.requestDestroyMapOverlay.next(null)
     }
 
     service.onActivePlanChanged = () => {
@@ -1047,6 +1055,27 @@ class State {
         .then(result => {
           var config = result.data
 
+          // TODO: this doesn't really belong here
+          //  when new tile system is complete move this to an init function
+          // these define the badge icons, name, source, offset, and point for offset reference defined as percent of height and width of parent icon
+          tileIcons.setBadge(
+            'alert',
+            '/images/map_icons/badges/badge_alert.png',
+            {x: -9, y:-4},
+            {w: 1.0, h: 0.0},
+          )
+          tileIcons.setBadge(
+            'inactive',
+            '/images/map_icons/badges/badge_inactive.png',
+            {x: -9, y:-4},
+            {w: 1.0, h: 0.0},
+          )
+          // tileIcons.setBadge(
+          //   'xOut',
+          //   '/images/map_icons/badges/badge_x.png',
+          //   {x: -2, y:-10},
+          //   {w: 0.0, h: 1.0},
+          // )
           // filter out conduits that are not to be shown
           // this code may belong in cache.js instead
           var conduits = config.appConfiguration.networkEquipment.conduits || {}
@@ -1217,7 +1246,17 @@ class State {
       if (nextReduxState.rSelectedDisplayMode &&
           service.rSelectedDisplayMode !== service.selectedDisplayMode.getValue()) 
       {
-        // console.log(service.rSelectedDisplayMode)
+        // NOTE: this should technically be in a listener for service.selectedDisplayMode
+        //  but I'm looking to compleetely replace Vector Tile in the very near future - so hopefully you never see this comment ... erm ...
+        if (service.displayModes.EDIT_PLAN === service.rSelectedDisplayMode) {
+          // If entering Edit Mode turn VT off
+          service.disconnectVectorTileClassic()
+        } else if (service.displayModes.EDIT_PLAN === service.selectedDisplayMode.getValue()) {
+          // If exiting Edit Mode turn VT back on
+          service.recreateTilesAndCache()
+        }
+        
+        // update rSelectedDisplayMode
         service.selectedDisplayMode.next(service.rSelectedDisplayMode)
       }
       // if (nextReduxState.rActiveViewModePanel && 
@@ -1293,6 +1332,7 @@ class State {
       setConstructionAreaLayers: constructionAreaLayers => dispatch(MapLayerActions.setConstructionAreaLayers(constructionAreaLayers)),
       setCopperLayers: copperLayers => dispatch(MapLayerActions.setCopperLayers(copperLayers)),
       updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible)),
+      setLocationTypes: locationTypes => dispatch(MapLayerActions.setLocationTypes(locationTypes)),
       setLocationFilters: locationFilters => dispatch(MapLayerActions.setLocationFilters(locationFilters)),
       setLocationFilterChecked: locationFilters => dispatch(MapLayerActions.setLocationFilterChecked(filterType, ruleKey, isChecked)),
       onFeatureSelectedRedux: features => dispatch(RingEditActions.onFeatureSelected(features)),

@@ -2,6 +2,7 @@ import { List } from 'immutable'
 import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
 import { hsvToRgb } from '../../common/view-utils'
+import tileIcons from '../common/tile-overlay/tile-icons'
 
 // Sets the visibility for a specified layer
 // ToDo: LOCATIONS refactor callers of this to send layer Key instead of whole layer
@@ -108,6 +109,18 @@ function setCableConduitVisibility (cableKey, conduitKey, newVisibility) {
   }
 }
 
+function setLocationTypes (locationTypes) {
+  // set up map icons
+  locationTypes.forEach(locType => {
+    tileIcons.setIcon(locType.key, locType.iconUrl, {x:8, y:8})
+  })
+
+  return {
+    type: Actions.LAYERS_SET_LOCATION,
+    payload: locationTypes,
+  }
+}
+
 function setLocationFilters (locationFilters) {
   return {
     type: Actions.LAYERS_SET_LOCATION_FILTERS,
@@ -127,6 +140,12 @@ function setLocationFilterChecked (filterType, ruleKey, isChecked) {
 }
 
 function setNetworkEquipmentLayers (networkEquipmentLayers) {
+  // set map icons 
+  Object.values(networkEquipmentLayers.equipments).forEach(equipment => {
+    // TODO: get offets
+    tileIcons.setIcon(equipment.key, equipment.iconUrl, {x:8, y:8})
+  })
+
   return {
     type: Actions.LAYERS_SET_NETWORK_EQUIPMENT,
     payload: networkEquipmentLayers
@@ -328,6 +347,7 @@ export default {
   setNetworkEquipmentLayerVisibility,
   setNetworkEquipmentSubtypeVisibility,
   setCableConduitVisibility,
+  setLocationTypes,
   setLocationFilters,
   setLocationFilterChecked,
   setNetworkEquipmentLayers,

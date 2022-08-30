@@ -56,14 +56,39 @@ class TileComponentController {
     this.utils = Utils
     this.rxState = rxState
 
+    // Subscribe to events for creating and destroying the map overlay layer
+    this.createMapOverlaySubscription = state.requestCreateMapOverlay.skip(1).subscribe(() => this.createMapOverlay())
+    this.destroyMapOverlaySubscription = state.requestDestroyMapOverlay.skip(1).subscribe(() => this.destroyMapOverlay())
+
+    tileDataService.addEntityImageForLayer('SELECTED_LOCATION', state.selectedLocationIcon)
+
+    this.DELTA = Object.freeze({
+      IGNORE: 0,
+      DELETE: 1,
+      UPDATE: 2
+    })
+
+    $document.ready(() => {
+      // We should have a map variable at this point
+      this.mapRef = window[this.mapGlobalObjectName]
+      this.createMapOverlay()
+      this.unsubscribeRedux = this.$ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
+    })
+  }
+
+
+
+  rootSubscribeAll () {
+    let state = this.state
+    let rxState = this.rxState
     // Subscribe to changes in the mapLayers subject
-    state.mapLayers
+    this.unsubMapLayers = state.mapLayers
       .debounceTime(100)
       .pairwise() // This will give us the previous value in addition to the current value
       .subscribe((pairs) => this.handleMapEvents(pairs[0], pairs[1], null))
 
     // Subscribe to changes in the plan (for setting center and zoom)
-    state.planChanged.subscribe(() => {
+    this.unsubPlanChanged = state.planChanged.subscribe(() => {
       // Set default coordinates in case we dont have a valid plan
       var coordinates = state.defaultPlanCoordinates
       if (state.plan) {
@@ -75,89 +100,72 @@ class TileComponentController {
       }
     })
 
-    // Subscribe to events for creating and destroying the map overlay layer
-    this.createMapOverlaySubscription = state.requestCreateMapOverlay.skip(1).subscribe(() => this.createMapOverlay())
-    this.destroyMapOverlaySubscription = state.requestDestroyMapOverlay.skip(1).subscribe(() => this.destroyMapOverlay())
-
     // Subscribe to changes in the map tile options
-    rxState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
+    this.unsubMapTileOptions = rxState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
       this.mapTileOptions = JSON.parse(JSON.stringify(mapTileOptions))
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapTileOptions(mapTileOptions)
       }
     }) 
 
-    // Redraw map tiles when requestd
-    state.requestMapLayerRefresh.subscribe((tilesToRefresh) => {
-      this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
-      this.refreshMapTiles(tilesToRefresh)
-    })
-
-    rxState.requestMapLayerRefresh.getMessage().subscribe((tilesToRefresh) => {
+    this.unsubRXMapLayerRefresh = rxState.requestMapLayerRefresh.getMessage().subscribe((tilesToRefresh) => {
       this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
       this.refreshMapTiles(tilesToRefresh)
     });
 
+    // Redraw map tiles when requestd
+    this.unsubMapLayerRefresh = state.requestMapLayerRefresh.subscribe((tilesToRefresh) => {
+      this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
+      this.refreshMapTiles(tilesToRefresh)
+    })
+
     // If selected layer category map changes or gets loaded, set that in the tile data road
-    state.layerCategories.subscribe((layerCategories) => {
+    this.unsubCategories = state.layerCategories.subscribe((layerCategories) => {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setLayerCategories(layerCategories)
       }
     })
 
     // If Display Mode change, set that in the tile data
-    state.selectedDisplayMode.subscribe((selectedDisplayMode) => {
+    this.unsubDisplayMode = state.selectedDisplayMode.subscribe((selectedDisplayMode) => {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedDisplayMode(selectedDisplayMode)
       }
     })
 
-    // Set the map zoom level
-    state.requestSetMapZoom.subscribe((zoom) => {
-      if (this.mapRef) {
-        this.mapRef.setZoom(zoom)
-      }
-    })
-
-    // Set the map zoom level
-    rxState.requestSetMapZoom.getMessage().subscribe((zoom) => {
-      if (this.mapRef) {
-        this.mapRef.setZoom(zoom)
-      }
-    })
-
     // To change the center of the map to given LatLng
-    state.requestSetMapCenter.subscribe((mapCenter) => {
-      if (this.mapRef) {
-        this.mapRef.panTo({ lat: mapCenter.latitude, lng: mapCenter.longitude })
-      }
-    })
-
-    // To change the center of the map to given LatLng
-    rxState.requestSetMapCenter.getMessage().subscribe((mapCenter) => {
+    this.unsubSetMapCenter = state.requestSetMapCenter.subscribe((mapCenter) => {
       if (this.mapRef) {
         this.mapRef.panTo({ lat: mapCenter.latitude, lng: mapCenter.longitude })
       }
     })
     
+    // Set the map zoom level
+    this.unsubRXSetMapZoom = rxState.requestSetMapZoom.getMessage().subscribe((zoom) => {
+      if (this.mapRef) {
+        this.mapRef.setZoom(zoom)
+      }
+    })
+
+    // Set the map zoom level
+    this.unsubSetMapZoom = state.requestSetMapZoom.subscribe((zoom) => {
+      if (this.mapRef) {
+        this.mapRef.setZoom(zoom)
+      }
+    })
+    
     //Due to unable to subscribe requestSetMapCenter as of now used Custom Event Listener
     // https://www.sitepoint.com/javascript-custom-events/
-    window.addEventListener('mapChanged', (mapCenter) => { 
+    
+    this.onMapChanged = (mapCenter) => { 
       if (this.mapRef) {
         this.mapRef.panTo({ lat: mapCenter.detail.latitude, lng: mapCenter.detail.longitude })
         this.mapRef.setZoom(mapCenter.detail.zoom)
       }
-    });
+    }
+    window.addEventListener('mapChanged', this.onMapChanged)
 
-    tileDataService.addEntityImageForLayer('SELECTED_LOCATION', state.selectedLocationIcon)
-
-    this.DELTA = Object.freeze({
-      IGNORE: 0,
-      DELETE: 1,
-      UPDATE: 2
-    })
-
-    this.state.requestPolygonSelect.subscribe((args) => {
+    this.unsubPolygonSelect = this.state.requestPolygonSelect.subscribe((args) => {
       if (!this.mapRef || !args.coords) {
         return
       }
@@ -263,19 +271,31 @@ class TileComponentController {
         })
         .catch((err) => console.error(err))
     })
-
-    $document.ready(() => {
-      // We should have a map variable at this point
-      this.mapRef = window[this.mapGlobalObjectName]
-      this.createMapOverlay()
-      this.unsubscribeRedux = this.$ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
-      
-    })
   }
+
+  rootUnsubscribeAll () {
+    //this.unsubscribeRedux()
+    this.unsubPolygonSelect.unsubscribe()
+    window.removeEventListener('mapChanged', this.onMapChanged)
+    //this.unsubRXSetMapCenter.unsubscribe()
+    this.unsubSetMapCenter.unsubscribe()
+    this.unsubRXSetMapZoom.unsubscribe()
+    this.unsubSetMapZoom.unsubscribe()
+    this.unsubDisplayMode.unsubscribe()
+    this.unsubCategories.unsubscribe()
+    this.unsubRXMapLayerRefresh.unsubscribe()
+    this.unsubMapLayerRefresh.unsubscribe()
+    this.unsubMapTileOptions.unsubscribe()
+    this.unsubPlanChanged.unsubscribe()
+    this.unsubMapLayers.unsubscribe()
+  }
+
 
   // Creates the map overlay that will be used to display vector tile information
   // ToDo: stateMapLayers doesn't seem to get updated in MapTileRenderer when it changes in Redux
   createMapOverlay () {
+    this.rootSubscribeAll()
+
     if (this.mapRef.overlayMapTypes.length > 0) {
       console.error('ERROR: Creating a map overlay, but we already have overlays defined')
       console.error(this.mapRef.overlayMapTypes)
@@ -518,7 +538,7 @@ class TileComponentController {
         // We'll be compleetly replacing this system - until then send info through state.js
         const { locations } = await this.getFeaturesUnderLatLng(event.latLng)
         const ids = locations.map(location => location.object_id)
-        this.setCursorLocationIds(ids)
+        this.setCursorLocationIds(ids) // hitch to new VTS 
       }, 100)
     })
     this.overlayMouseoutListener = this.mapRef.addListener('mouseout', () => {
@@ -631,6 +651,11 @@ class TileComponentController {
           console.error(err)
         })
     }
+    // init render tiles
+    let mapLayers = this.state.mapLayers.getValue()
+    if (Object.keys(mapLayers).length) {
+      this.handleMapEvents(null, this.state.mapLayers.getValue(), null)
+    }
   }
 
   // Removes the existing map overlay
@@ -672,6 +697,9 @@ class TileComponentController {
     }
     
     this.mapRef.overlayMapTypes.clear()
+    this.OVERLAY_MAP_INDEX = null
+
+    this.rootUnsubscribeAll()
   }
 
   // Refresh map tiles
@@ -691,7 +719,6 @@ class TileComponentController {
       })
       return
     }
-
     // // First get a list of tiles that are visible on the screen.
     var visibleTiles = []
     var zoom = this.mapRef.getZoom()
@@ -788,6 +815,7 @@ class TileComponentController {
   $onDestroy () {
     this.createMapOverlaySubscription()
     this.destroyMapOverlaySubscription()
+    this.destroyMapOverlay()
     this.unsubscribeRedux()
   }
 
@@ -826,6 +854,7 @@ class TileComponentController {
   }
 
   mergeToTarget (nextState, actions) {
+    if (null === this.OVERLAY_MAP_INDEX) return
     // store the previous values before Object.assign
     const currentSelectionModeId = this.activeSelectionModeId
     const oldPlanTargets = this.selection && this.selection.planTargets
