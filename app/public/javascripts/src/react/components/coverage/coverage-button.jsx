@@ -5,7 +5,7 @@ import reduxStore from '../../../redux-store'
 import CoverageActions from '../coverage/coverage-actions'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import CoverageStatusTypes from './constants'
-import socketManager from '../../../react/common/socket-manager'
+import { SocketManager } from '../../../react/common/socket-manager'
 import ProgressButton from '../common/progress-button.jsx'
 
 export class CoverageButton extends ProgressButton {
@@ -19,7 +19,7 @@ export class CoverageButton extends ProgressButton {
       FINISHED: CoverageStatusTypes.FINISHED
     }
 
-    this.unsubscriber = socketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {
+    this.unsubscriber = SocketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {
       if (progressData.data.processType === 'coverage') {
         this.props.setCoverageProgress(progressData.data)
       }

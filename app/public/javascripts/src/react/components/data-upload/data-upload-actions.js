@@ -1,6 +1,6 @@
 import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
-import SocketManager from '../../common/socket-manager'
+import { SocketManager } from '../../common/socket-manager'
 import NotificationInterface from '../notification/notification-interface'
 import NotificationTypes from '../notification/notification-types'
 import PlanActions from '../plan/plan-actions'

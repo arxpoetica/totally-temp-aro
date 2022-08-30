@@ -10,7 +10,7 @@ const SocketNamespaces = Object.freeze([
   'subnet',
 ])
 
-class SocketManager {
+class _SocketManager {
   constructor () {
     this.router = {}
 
@@ -115,7 +115,5 @@ class SocketManager {
   }
 }
 
-let socketManager = new SocketManager()
-
 // NOTE: we are exporting the instance and not the class
-export default socketManager
+export const SocketManager = new _SocketManager()

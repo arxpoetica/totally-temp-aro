@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import ResourceActions from '../resource-actions'
 import Select from 'react-select'
 import AroHttp from '../../../common/aro-http'
-import SocketManager from '../../../common/socket-manager'
+import { SocketManager } from '../../../common/socket-manager'
 
 const styles = {
   multiValue: (base, state) => {
