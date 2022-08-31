@@ -100,6 +100,8 @@ export class AroSearch extends Component {
   }
 
   onSearchResult(selectedLocation) {
+    // #179702878
+    // is this still used? do we ever show a list of locations to be searched?
     this.props.setSelectedLocations([selectedLocation.id])
     AroHttp.get(`/service/odata/LocationObjectEntity?$select=id,geom&$filter=id eq ${selectedLocation.id}&$top=1`)
       .then(result => {

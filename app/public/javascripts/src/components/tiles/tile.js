@@ -200,7 +200,7 @@ class TileComponentController {
           })
 
           // Get the locations from this tile that are in the polygon
-          pointInPolyPromises.push(FeatureSelector.getPointsInPolygon(tileDataService, { width: Constants.TILE_SIZE, height: Constants.TILE_SIZE },
+          pointInPolyPromises.push(FeatureSelector.getPointsInPolygon(this.tileDataService, { width: Constants.TILE_SIZE, height: Constants.TILE_SIZE },
             this.state.mapLayers.getValue(),
             zoom, tileCoords.x, tileCoords.y, convertedPixelCoords,
             this.state.selectedBoundaryType.id))
@@ -208,13 +208,16 @@ class TileComponentController {
       }
       Promise.all(pointInPolyPromises)
         .then((results) => {
+          console.log(results)
           var selectedLocations = new Set()
           var selectedServiceAreas = new Set()
           var selectedRoadSegments = new Set()
           results.forEach((result) => {
             result.forEach((selectedObj) => {
-              if (selectedObj.location_id) {
-                selectedLocations.add(selectedObj.location_id)
+              if (selectedObj.location_id) { // OR selectedObj._data_type === "location" 
+                //selectedLocations.add(selectedObj.location_id) // selectedObj.object_id
+                // #179702878 group select fix
+                selectedLocations.add(selectedObj)
               } else if (selectedObj._data_type == 'service_layer' && selectedObj.id) {
                 selectedServiceAreas.add(selectedObj.id)
               } else if (selectedObj.gid) {
@@ -242,13 +245,14 @@ class TileComponentController {
           }
 
           if (canSelectLoc) {
-            selectedLocations.forEach((id) => selectedLocationsIds.push({ location_id: id }))
+            //selectedLocations.forEach((id) => selectedLocationsIds.push({ location_id: id })) // instead of { location_id: id } should be id (object_id)
+            selectedLocationsIds = selectedLocations
           }
 
           if (canSelectSA) {
             selectedServiceAreas.forEach((id) => selectedServiceAreaIds.push({ id: id }))
           }
-
+          // #179702878 is this still used?
           state.hackRaiseEvent(selectedLocationsIds)
 
           // Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
@@ -374,7 +378,7 @@ class TileComponentController {
                 menuItemFeatureId = feature.objectId = feature.object_id
               } else if (feature.hasOwnProperty('objectId')) {
                 menuItemFeatureId = feature.objectId
-              } else if (feature.hasOwnProperty('location_id')) {
+              } else if (feature.hasOwnProperty('location_id')) { // object ID - also we need a better way to detect if the item IS a location
                 menuItemFeatureId = feature.location_id
               } else if (feature._data_type === 'census_block') {
                 menuItemFeatureId = `census_block_${feature.id}`

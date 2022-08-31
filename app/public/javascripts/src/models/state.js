@@ -265,7 +265,9 @@ class State {
       if (service.rSelectedDisplayMode === service.displayModes.EDIT_RINGS) {
         service.onFeatureSelectedRedux(options)
       } else if (options.locations) {
-        service.setSelectedLocations(options.locations.map(location => location.location_id))
+        // #179702878 group select fix
+        //service.setSelectedLocations(options.locations.map(location => location.location_id))
+        service.setSelectedLocations(options.locations)
       }
     })
 

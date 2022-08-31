@@ -2,9 +2,12 @@ import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
 
 // Fetch the getLocationInfo
-function getLocationInfo (planId, id) {
+function getLocationInfo (planId, location) {
   return dispatch => {
-    AroHttp.get(`/locations/${planId}/${id}/show`)
+    // #179702878
+    // TODO: swap this for an API endpoint? 
+    //  at minimum swap location_id for object_id
+    AroHttp.get(`/locations/${planId}/${location.location_id}/show`)
       .then(result => {
         if (result.data) {
           dispatch({ type: Actions.LOCATION_INFO_SET_DETAILS, payload: result.data })
