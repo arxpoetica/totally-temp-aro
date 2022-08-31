@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Popover, Text, Button, Loader } from '@mantine/core'
+import { Popover, CloseButton, Button, Loader } from '@mantine/core'
 import { IconArrowBack, IconCalculator, IconDeviceFloppy } from '@tabler/icons'
 import { RECALC_STATES } from './competitor-shared'
 
@@ -33,28 +33,34 @@ export const CompetitorButtons = props => {
     </Button>
     {requiresRecalc &&
       <Popover
-        opened={popoverOpen}
-        onClose={() => setPopoverOpen(false)}
-        target={
-          <Button
-            leftIcon={<IconCalculator size={20} stroke={2}/>}
-            color="yellow"
-            onClick={() => executeRecalc(loggedInUserId, editingManagerId)}
-          >
-            Recalc
-          </Button>
-        }
         width={260}
         position="top"
         placement="center"
-        withCloseButton
+        opened={popoverOpen}
+        closeOnClickOutside={false}
       >
-        <div>
-          <Text size="sm">
-            Recalculation is required in order to apply the changes you made. It
-            may take a few minutes...
-          </Text>
-        </div>
+        <Popover.Target>
+          <Button
+            leftIcon={<IconCalculator size={20} stroke={2}/>}
+            color="yellow"
+            onClick={() => {
+              executeRecalc(loggedInUserId, editingManagerId)
+              setPopoverOpen(false)
+            }}
+          >
+            Recalc
+          </Button>
+        </Popover.Target>
+        <Popover.Dropdown>
+          <div className="popover-dropdown">
+            Recalculation is required in order to apply the
+            changes you made. It may take a few minutes...
+            <CloseButton
+              aria-label="Close message"
+              onClick={() => setPopoverOpen(false)}
+            />
+          </div>
+        </Popover.Dropdown>
       </Popover>
     }
     {recalculating &&
@@ -69,13 +75,10 @@ export const CompetitorButtons = props => {
     <Button
       leftIcon={<IconDeviceFloppy size={20} stroke={2}/>}
       onClick={() => {
-        if (requiresRecalc && !popoverOpen) {
-          return setPopoverOpen(true)
-        }
         setPopoverOpen(true)
-        if (hasChanged) saveConfigurationToServer()
+        saveConfigurationToServer()
       }}
-      disabled={regionSelectEnabled || recalculating}
+      disabled={regionSelectEnabled || recalculating || !hasChanged}
     >
       Save
     </Button>
@@ -85,6 +88,10 @@ export const CompetitorButtons = props => {
         justify-content: flex-end;
         gap: 8px;
         margin: 15px 0 0;
+      }
+      .popover-dropdown {
+        display: flex;
+        align-items: center;
       }
     `}</style>
   </div>

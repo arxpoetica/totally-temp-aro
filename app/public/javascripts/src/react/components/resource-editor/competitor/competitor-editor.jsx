@@ -312,7 +312,7 @@ class _CompetitorEditor extends Component {
 
   handleStrengthChange(e, strengthObj, carrierId, providerType){
     strengthObj[carrierId][providerType].strength = e.target.value
-    this.setState({ strengthsById: strengthObj, hasChanged : true })
+    this.setState({ strengthsById: strengthObj, hasChanged: true })
   }
 
   truncateNum (num, digits) {
