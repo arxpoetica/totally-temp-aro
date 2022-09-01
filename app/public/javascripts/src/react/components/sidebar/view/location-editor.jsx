@@ -680,7 +680,7 @@ export const LocationEditor = (props) => {
                             className="radiofill"
                             value={1}
                             name='workflowStateId'
-                            disabled={true}
+                            disabled={!userCanChangeWorkflowState && 'disabled'}
                             checked={objectIdToProperties[selectedMapObject.objectId].workflowStateId === 1}
                             onChange={(event) => {
                               onChangeLocProp(event)
