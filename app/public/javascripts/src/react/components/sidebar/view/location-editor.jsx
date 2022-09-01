@@ -128,6 +128,7 @@ export const LocationEditor = (props) => {
     setPlanEditorFeatures,
     selectedDisplayMode,
     setDeletedMapObjects,
+    mapRef
   } = props
 
   useEffect(() => {
@@ -141,6 +142,7 @@ export const LocationEditor = (props) => {
       const newSelection = cloneSelection()
       newSelection.editable.location = {}
       setMapSelection(newSelection)
+      mapRef.setOptions({ draggableCursor: null })
     }
   }, [])
 
@@ -973,6 +975,7 @@ const mapStateToProps = (state) => ({
   locationLayers: getLocationLayersList(state),
   ARO_CLIENT: state.toolbar.appConfiguration.ARO_CLIENT,
   loggedInUser: state.user.loggedInUser,
+  mapRef: state.map.googleMaps,
 })
 
 const mapDispatchToProps = (dispatch) => ({
