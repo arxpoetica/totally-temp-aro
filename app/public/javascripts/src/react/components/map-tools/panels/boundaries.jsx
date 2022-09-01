@@ -209,10 +209,10 @@ const BoundariesPanel = (props) => {
     setMapSelection(newSelection)
   }
 
-  const updateSelectedCategory = (selectedType, categoryId) => {
+  const updateSelectedCategory = (uiLayerId, categoryId) => {
     boundaryLayers.forEach((layer) => {
-      if (layer.type === selectedType && parseInt(categoryId) > 0) {
-        layer.selectedCategory = layer.categories[1]
+      if (layer.uiLayerId === uiLayerId && parseInt(categoryId) > 0) {
+        layer.selectedCategory = layer.categories[categoryId]
       } else {
         layer.selectedCategory = null
       }
@@ -265,7 +265,7 @@ const BoundariesPanel = (props) => {
                           className='form-control dropdown'
                           value={layer.selectedCategory ? layer.selectedCategory.id : 0}
                           onChange={(event) => {
-                            updateSelectedCategory(layer.type, event.target.value),
+                            updateSelectedCategory(layer.uiLayerId, event.target.value)
                             onSelectCategory(layer.selectedCategory)
                           }}
                         >
