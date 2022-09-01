@@ -9,11 +9,19 @@ export const EquipmentDragger = props => {
   const { planType, drafts, selectedSubnetId, equipmentDraggerInfo, visibleEquipmentTypes } = props
   const { equipmentDefinitions, addableTypes } = equipmentDraggerInfo
 
-  // ugh, special casing for ring plans vs standard...
-  const activeTypes =
-    planType === 'UNDEFINED' && !Object.keys(drafts).length && !selectedSubnetId
-    ? ['central_office']
-    : visibleEquipmentTypes
+  // ugh, special casing for various scenarios...this could arguably be done better...
+  let activeTypes
+  const draftsLength = Object.keys(drafts).length
+  if (!draftsLength && !selectedSubnetId) {
+    activeTypes = planType === 'UNDEFINED'
+      // 1. if ring plan and no drafts or selected subnet id
+      ? ['central_office']
+      // 2. if greenfield and no pre-existing central office
+      : ['central_office', 'fiber_distribution_hub']
+  } else {
+    // 3. otherwise no special casing, use default from selector
+    activeTypes = visibleEquipmentTypes
+  }
 
   return (
     <div className="equipment-dragger">
