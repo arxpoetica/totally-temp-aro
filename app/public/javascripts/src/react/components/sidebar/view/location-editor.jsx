@@ -266,8 +266,10 @@ export const LocationEditor = (props) => {
 
   const onChangeLocProp = (event) => {
     const objectIdToPropertiesObj = objectIdToProperties
-    const { target: { value, name } } = event
-
+    let { target: { value, name } } = event
+    if (name === 'workflowStateId') {
+      value = Number(value)
+    }
     objectIdToPropertiesObj[selectedMapObject.objectId][name] = value
     setState((state) => ({ ...state, objectIdToProperties: objectIdToPropertiesObj }))
   }
@@ -333,9 +335,9 @@ export const LocationEditor = (props) => {
   const formatLocationForService = (objectId) => {
     const mapObject = objectIdToMapObject[objectId]
     const objectProperties = objectIdToProperties[objectId]
-    const workflowStateKey = Object.keys(WorkflowState).filter(
+    const workflowStateKey = Object.keys(WorkflowState).find(
       key => WorkflowState[key].id === objectProperties.workflowStateId
-    )[0]
+    )
     const workflowStateName = WorkflowState[workflowStateKey].name
 
     const featureObj = {
@@ -677,9 +679,13 @@ export const LocationEditor = (props) => {
                             type="radio"
                             className="radiofill"
                             value={1}
+                            name='workflowStateId'
                             disabled={true}
                             checked={objectIdToProperties[selectedMapObject.objectId].workflowStateId === 1}
-                            onChange={() => markSelectedLocationPropertiesDirty()}
+                            onChange={(event) => {
+                              onChangeLocProp(event)
+                              markSelectedLocationPropertiesDirty()
+                            }}
                           />
                           <span><img src={getWorkflowStateIcon()} className="created" /></span>
                           Created
@@ -689,14 +695,13 @@ export const LocationEditor = (props) => {
                             type="radio"
                             className="radiofill"
                             value={2}
-                            disabled={
-                              (
-                                !userCanChangeWorkflowState ||
-                                (objectIdToProperties[selectedMapObject.objectId].workflowStateId === WorkflowState.CREATED.id)
-                              ) ? 'disabled' : null
-                            }
+                            name='workflowStateId'
+                            disabled={!userCanChangeWorkflowState && 'disabled'}
                             checked={objectIdToProperties[selectedMapObject.objectId].workflowStateId === 2}
-                            onChange={() => markSelectedLocationPropertiesDirty()}
+                            onChange={(event) => {
+                              onChangeLocProp(event)
+                              markSelectedLocationPropertiesDirty()
+                            }}
                           />
                           <span>
                             <img
@@ -712,14 +717,13 @@ export const LocationEditor = (props) => {
                             type="radio"
                             className="radiofill"
                             value={4}
-                            disabled={
-                              (
-                                !userCanChangeWorkflowState ||
-                                (objectIdToProperties[selectedMapObject.objectId].workflowStateId === WorkflowState.CREATED.id)
-                              ) ? 'disabled' : null
-                            }
+                            name='workflowStateId'
+                            disabled={!userCanChangeWorkflowState && 'disabled'}
                             checked={objectIdToProperties[selectedMapObject.objectId].workflowStateId === 4}
-                            onChange={() => markSelectedLocationPropertiesDirty()}
+                            onChange={(event) => {
+                              onChangeLocProp(event)
+                              markSelectedLocationPropertiesDirty()
+                            }}
                           />
                           <span>
                             <img
