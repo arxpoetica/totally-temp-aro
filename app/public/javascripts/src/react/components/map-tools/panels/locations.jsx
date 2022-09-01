@@ -10,6 +10,7 @@ import { CardHeader } from '../card-header.jsx'
 import { MapToolCard } from '../map-tool-card.jsx'
 import { CardBody } from '../card-body.jsx'
 import MapTool from '../map-tool.jsx'
+import { klona } from 'klona'
 import { dequal } from 'dequal'
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
@@ -17,7 +18,7 @@ const getAllLocationLayers = (state) => state.mapLayers.location
 const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
 const getAllLocationFilters = (state) => state.mapLayers.locationFilters || {}
 const getOrderedLocationFilters = createSelector([getAllLocationFilters], (locationFilters) => {
-  const orderedLocationFilters = JSON.parse(JSON.stringify(locationFilters))
+  const orderedLocationFilters = klona(locationFilters)
   Object.keys(orderedLocationFilters).forEach((filterType) => {
     const orderedRules = Object.keys(orderedLocationFilters[filterType].rules)
       .map((ruleKey) => ({
@@ -298,7 +299,7 @@ export const LocationsPanel = (props) => {
             let tileDefinitions = []
 
             locationType.tileDefinitions.forEach((rawTileDefinition) => {
-              let tileDefinition = JSON.parse(JSON.stringify(rawTileDefinition))
+              let tileDefinition = klona(rawTileDefinition)
               objectKeyReplace(tileDefinition, '${tilePointTransform}', pointTransform)
               objectKeyReplace(tileDefinition, '${libraryId}', selectedLocationLibrary.identifier)
               tileDefinitions.push(tileDefinition)
@@ -407,43 +408,34 @@ export const LocationsPanel = (props) => {
               <div className="row title">Location Filters</div>
             )}
 
-            {Object.keys(orderedLocationFilters).length > 0 &&
-              Object.keys(orderedLocationFilters).map((filterKey, index) => {
-                const { filterName, filter } = orderedLocationFilters[filterKey]
+            {Object.keys(orderedLocationFilters).length > 0 && 
+              Object.keys(orderedLocationFilters).map(filterName => {
+                const { rules } = orderedLocationFilters[filterName]
                 return (
-                  <div key={index}>
+                  <div key={filterName}>
                     <ul className="customer-type">
-                      {/* <!-- Loop through all filter types --> */}
-                      {filter &&
-                        filter.rules &&
-                        filter.rules.map((rule, index) => {
-                          return (
-                            <li key={index}>
-                              <div className="ctype-icon">
-                                <img className="image" src={rule.onPass.iconUrl} alt="location-icon" />
-                              </div>
-                              <div className="ctype-name">{rule.description}</div>
-                              <div className="ctype-checkbox">
-                                <input
-                                  type="checkbox"
-                                  className="checkboxfill"
-                                  checked={rule.isChecked}
-                                  onClick={() =>
-                                    setLocationFilterChecked(
-                                      filterName,
-                                      rule.ruleKey,
-                                      !rule.isChecked
-                                    )
-                                  }
-                                />
-                              </div>
-                            </li>
-                          )
-                        })}
+                      {/* loop through all filter types */}
+                      {Array.isArray(rules) && rules.map((rule, index) =>
+                        <li key={index}>
+                          <div className="ctype-icon">
+                            <img className="image" src={rule.onPass.iconUrl} alt="location-icon" />
+                          </div>
+                          <div className="ctype-name">{rule.description}</div>
+                          <div className="ctype-checkbox">
+                            <input
+                              type="checkbox"
+                              className="checkboxfill"
+                              checked={rule.isChecked || false}
+                              onChange={() => setLocationFilterChecked(filterName, rule.ruleKey, !rule.isChecked)}
+                            />
+                          </div>
+                        </li>
+                      )}
                     </ul>
                   </div>
                 )
-              })}
+              })
+            }
 
             {areAnyLocationLayersVisible() && (
               <div className="row title">Location Types</div>
