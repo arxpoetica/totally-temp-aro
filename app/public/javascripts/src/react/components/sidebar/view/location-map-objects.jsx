@@ -10,18 +10,9 @@ import MenuItemAction from '../../context-menu/menu-item-action'
 import { usePrevious } from '../../../common/view-utils.js'
 import { dequal } from 'dequal'
 import { constants } from '../../plan-editor/shared'
+import WktUtils from '../../../../shared-utils/wkt-utils'
 
 // ----- rightclick menu ----- //
-const getXYFromEvent = (event) => {
-  let mouseEvent = null
-  Object.keys(event).forEach((eventKey) => {
-    if (event.hasOwnProperty(eventKey) && (event[eventKey] instanceof MouseEvent)) { mouseEvent = event[eventKey] }
-  })
-  if (!mouseEvent) { return }
-  const x = mouseEvent.clientX
-  const y = mouseEvent.clientY
-  return { x, y }
-}
 
 const highlightMapObject = (mapObject) => {
   if (isMarker(mapObject)) {
@@ -133,7 +124,7 @@ const LocationMapObjects = (props) => {
       // 'event' contains a MouseEvent which we use to get X,Y coordinates. The key of the MouseEvent object
       // changes with google maps implementations. So iterate over the keys to find the right object.
       if (featureType === 'location') { selectMapObject(mapObject) }
-      const eventXY = getXYFromEvent(event)
+      const eventXY = WktUtils.getXYFromEvent(event)
       if (!eventXY) { return }
       updateContextMenu(event.latLng, eventXY.x, eventXY.y, mapObject)
     })

@@ -17,6 +17,7 @@ import PlanEditorActions from '../../react/components/plan-editor/plan-editor-ac
 import PlanEditorSelectors from '../../react/components/plan-editor/plan-editor-selectors'
 import { dequal } from 'dequal'
 import MapLayerActions from '../../react/components/map-layers/map-layer-actions'
+import WktUtils from '../../shared-utils/wkt-utils'
 
 class TileComponentController {
   // MapLayer objects contain the following information
@@ -411,7 +412,7 @@ class TileComponentController {
                   boundsByNetworkNodeObjectId[result.data.objectId].displayName = `Boundary: ${clliCode}`
                 })
 
-                var eventXY = this.getXYFromEvent(event)
+                var eventXY = WktUtils.getXYFromEvent(event)
                 this.contextMenuService.populateMenu(menuItems)
                 this.contextMenuService.moveMenu(eventXY.x, eventXY.y)
                 this.contextMenuService.menuOn()
@@ -420,19 +421,6 @@ class TileComponentController {
           }
         })
     })
-
-    // ToDo: this function should probably be a global utility
-    this.getXYFromEvent = function (event) {
-      var mouseEvent = null
-      Object.keys(event).forEach((eventKey) => {
-        if (event.hasOwnProperty(eventKey) && (event[eventKey] instanceof MouseEvent)) {
-          mouseEvent = event[eventKey]
-        }
-      })
-      var x = mouseEvent.clientX
-      var y = mouseEvent.clientY
-      return { 'x': x, 'y': y }
-    }
 
     this.overlayDragstartListener = this.mapRef.addListener('dragstart', (event) => {
       if (this.contextMenuService.isMenuVisible.getValue()) {

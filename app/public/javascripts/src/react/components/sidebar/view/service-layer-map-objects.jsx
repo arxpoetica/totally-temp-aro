@@ -16,6 +16,7 @@ import { MultiSelectVertices } from '../../common/maps/multiselect-vertices.js'
 import { InvalidBoundaryHandling } from '../../common/maps/invalid-boundary-handling.js'
 import ContextMenuActions from '../../context-menu/actions'
 import uuidStore from '../../../../shared-utils/uuid-store'
+import WktUtils from '../../../../shared-utils/wkt-utils.js'
 
 const polygonOptions = Object.freeze({
   strokeColor: '#FF1493',
@@ -163,36 +164,10 @@ export const ServiceLayerMapObjects = (props) => {
   const isMarker = (mapObject) => mapObject && mapObject.icon
 
   // ----- rightclick menu ----- //
-  const getXYFromEvent = (event) => {
-    let mouseEvent = null
-    Object.keys(event).forEach((eventKey) => {
-      if (
-        event.hasOwnProperty(eventKey) && (event[eventKey] instanceof MouseEvent)
-      ) {
-        mouseEvent = event[eventKey]
-      }
-    })
-
-    if (!mouseEvent) return
-
-    const x = mouseEvent.clientX
-    const y = mouseEvent.clientY
-    return { x, y }
-  }
-
-  // Return true if the given path is a closed path
-  const isClosedPath = (path) => {
-    const firstPoint = path.getAt(0)
-    const lastPoint = path.getAt(path.length - 1)
-    const deltaLat = Math.abs(firstPoint.lat() - lastPoint.lat())
-    const deltaLng = Math.abs(firstPoint.lng() - lastPoint.lng())
-    const TOLERANCE = 0.0001
-    return (deltaLat < TOLERANCE) && (deltaLng < TOLERANCE)
-  }
 
   const rightClickServicArea = (event) => {
     if (featureType === 'serviceArea') {
-      const eventXY = getXYFromEvent(event)
+      const eventXY = WktUtils.getXYFromEvent(event)
       if (!eventXY) { return }
       updateContextMenu(event.latLng, eventXY.x, eventXY.y, null)
     }
@@ -324,7 +299,7 @@ export const ServiceLayerMapObjects = (props) => {
         500
       )
       mapObject.getPaths().forEach(function (path, index) {
-        const isClosed = isClosedPath(path)
+        const isClosed = WktUtils.isClosedPath(path)
         google.maps.event.addListener(path, 'insert_at', function () { debouncedModifyObject(mapObject); })
         google.maps.event.addListener(path, 'remove_at', function () { debouncedModifyObject(mapObject); })
         google.maps.event.addListener(path, 'set_at', function () {
@@ -365,7 +340,7 @@ export const ServiceLayerMapObjects = (props) => {
       if (!event || event.vertex) { return }
       // 'event' contains a MouseEvent which we use to get X,Y coordinates. The key of the MouseEvent object
       // changes with google maps implementations. So iterate over the keys to find the right object.
-      const eventXY = getXYFromEvent(event)
+      const eventXY = WktUtils.getXYFromEvent(event)
       if (!eventXY) { return }
       updateContextMenu(event.latLng, eventXY.x, eventXY.y, mapObject)
     })
