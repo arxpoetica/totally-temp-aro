@@ -19,7 +19,7 @@ class WktUtils {
   static pathToCoordinates (path) {
     var pathPoints = []
     path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
-    if (JSON.stringify(pathPoints[0]) !== JSON.stringify(pathPoints[pathPoints.length-1])) {
+    if (!WktUtils.isClosedArrayPath(pathPoints)) {
       pathPoints.push(pathPoints[0]) // Close the polygon
     }
     return pathPoints
@@ -52,13 +52,8 @@ class WktUtils {
     if (geometry.type !== 'MultiPolygon') {
       throw new Error(`getGoogleMapPathsFromWKTMultiPolygon() expects geometry of type MultiPolygon, received ${geometry.type}`)
     }
-    var polygonPath = []
-    geometry.coordinates[0][0].forEach((polygonVertex) => {
-      polygonPath.push({
-        lat: polygonVertex[1],
-        lng: polygonVertex[0]
-      })
-    })
+    // should we do this for all coords, not just [0][0]?
+    var polygonPath = WktUtils.getGoogleMapPathsFromWKTCoords(geometry.coordinates[0][0])
     return polygonPath
   }
 
@@ -67,13 +62,29 @@ class WktUtils {
     if (geometry.type !== 'Polygon') {
       throw new Error(`getGoogleMapPathsFromWKTPolygon() expects geometry of type Polygon, received ${geometry.type}`)
     }
+    // should we do this for all coords, not just [0]?
+    var polygonPath = WktUtils.getGoogleMapPathsFromWKTCoords(geometry.coordinates[0])
+    return polygonPath
+  }
+
+  // Converts a WKT Polygon Geometry object into a Google Maps Path object
+  static getGoogleMapPathsFromWKTCoords (coords) {
     var polygonPath = []
-    geometry.coordinates[0].forEach((polygonVertex) => {
+    // check for "closed path" / duplicate points
+    let isClosed = WktUtils.isClosedArrayPath(coords)
+    // we don't want to mutate the property sent
+    coords.forEach((polygonVertex) => {
       polygonPath.push({
         lat: polygonVertex[1],
         lng: polygonVertex[0]
       })
     })
+    if (isClosed) {
+      // prune the duplicate
+      console.log(coords)
+      polygonPath.pop()
+      console.log(polygonPath)
+    }
     return polygonPath
   }
 
@@ -117,6 +128,15 @@ class WktUtils {
     const TOLERANCE = 0.0001
     return (deltaLat < TOLERANCE) && (deltaLng < TOLERANCE)
   }
+  // same thing but for array representation
+  static isClosedArrayPath (path) {
+    const firstPoint = path[0]
+    const lastPoint = path[path.length - 1]
+    const deltaLat = Math.abs(firstPoint[1] - lastPoint[1])
+    const deltaLng = Math.abs(firstPoint[0] - lastPoint[0])
+    const TOLERANCE = 0.0001
+    return (deltaLat < TOLERANCE) && (deltaLng < TOLERANCE)
+  }
 
   // Returns the x, y coordinates in pixels from a map object rightclick event
   static getXYFromEvent (event) {
@@ -126,6 +146,7 @@ class WktUtils {
         mouseEvent = event[eventKey]
       }
     })
+    if (!mouseEvent) return
     return {
       x: mouseEvent.clientX,
       y: mouseEvent.clientY
