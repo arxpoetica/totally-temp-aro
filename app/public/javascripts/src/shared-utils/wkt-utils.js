@@ -1,6 +1,6 @@
 /* global google MouseEvent */
 
-const COORD_TOLERANCE = 0.000001
+export const COORD_TOLERANCE = 0.000001
 class WktUtils {
   // Converts a Google Maps LatLng object into a WKT Point Geometry object
   static getWKTPointFromGoogleMapLatLng (latLng) {
