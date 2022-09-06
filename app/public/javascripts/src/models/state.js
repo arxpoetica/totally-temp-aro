@@ -398,7 +398,6 @@ class State {
         service.onFeatureSelectedRedux(hitFeatures)
       } else if (hitFeatures.locations) {
         service.setSelectedLocations(hitFeatures.locations.map(location => location.location_id))
-        // service.setActiveViewModePanel(service.viewModePanels.LOCATION_INFO)
       }
     })
 
