@@ -1,4 +1,6 @@
 /* global google MouseEvent */
+
+const COORD_TOLERANCE = 0.000001
 class WktUtils {
   // Converts a Google Maps LatLng object into a WKT Point Geometry object
   static getWKTPointFromGoogleMapLatLng (latLng) {
@@ -81,9 +83,7 @@ class WktUtils {
     })
     if (isClosed) {
       // prune the duplicate
-      console.log(coords)
       polygonPath.pop()
-      console.log(polygonPath)
     }
     return polygonPath
   }
@@ -125,8 +125,7 @@ class WktUtils {
     const lastPoint = path.getAt(path.length - 1)
     const deltaLat = Math.abs(firstPoint.lat() - lastPoint.lat())
     const deltaLng = Math.abs(firstPoint.lng() - lastPoint.lng())
-    const TOLERANCE = 0.0001
-    return (deltaLat < TOLERANCE) && (deltaLng < TOLERANCE)
+    return (deltaLat < COORD_TOLERANCE) && (deltaLng < COORD_TOLERANCE)
   }
   // same thing but for array representation
   static isClosedArrayPath (path) {
@@ -134,8 +133,7 @@ class WktUtils {
     const lastPoint = path[path.length - 1]
     const deltaLat = Math.abs(firstPoint[1] - lastPoint[1])
     const deltaLng = Math.abs(firstPoint[0] - lastPoint[0])
-    const TOLERANCE = 0.0001
-    return (deltaLat < TOLERANCE) && (deltaLng < TOLERANCE)
+    return (deltaLat < COORD_TOLERANCE) && (deltaLng < COORD_TOLERANCE)
   }
 
   // Returns the x, y coordinates in pixels from a map object rightclick event
