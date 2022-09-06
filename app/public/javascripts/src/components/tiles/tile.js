@@ -524,14 +524,17 @@ class TileComponentController {
             hitFeatures.roadSegments = [...hitFeatures.roadSegments]
             hitFeatures.fiberFeatures = [...hitFeatures.fiberFeatures]
 
+            // NOTE: not running anything with boundaries because only
+            // focused on selection/deselection of point-based features.
+            // For a historical explanantion: anything beyond is fairly complicated...
             const featureNamesAndFeatureIdNames = [
-              ['analysisAreas', 'id'],
-              ['censusFeatures', 'id'],
+              // ['analysisAreas', 'id'],
+              // ['censusFeatures', 'id'],
               ['equipmentFeatures', 'object_id'],
               ['fiberFeatures', 'link_id'],
               ['locations', 'location_id'], //TODO: change to object_id
               ['roadSegments', 'object_id'],
-              ['serviceAreas', 'object_id'],
+              // ['serviceAreas', 'object_id'],
             ]
             for (const [featureName, idName] of featureNamesAndFeatureIdNames) {
               // performing a set difference
@@ -541,6 +544,20 @@ class TileComponentController {
                 const found = prevFeatures.find(prevItem => prevItem[idName] === feature[idName])
                 return !found
               })
+            }
+            // this is so gross, and really exemplifies why we need
+            // a single source of truth for a selection model, but...
+            // ...if you're selecting anything with a border, it can conflict
+            // with single-point-based selections, so need to prioritize those...
+            if (
+              hitFeatures.equipmentFeatures.length
+              || hitFeatures.fiberFeatures.length
+              || hitFeatures.locations.length
+              || hitFeatures.roadSegments.length
+            ) {
+              hitFeatures.analysisAreas = []
+              hitFeatures.censusFeatures = []
+              hitFeatures.serviceAreas = []
             }
 
             // annoying post-prep reset
