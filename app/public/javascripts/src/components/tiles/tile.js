@@ -15,9 +15,9 @@ import MenuItem from '../common/context-menu/menu-item'
 import ToolBarActions from '../../react/components/header/tool-bar-actions'
 import PlanEditorActions from '../../react/components/plan-editor/plan-editor-actions'
 import PlanEditorSelectors from '../../react/components/plan-editor/plan-editor-selectors'
-import { dequal } from 'dequal'
 import MapLayerActions from '../../react/components/map-layers/map-layer-actions'
 import WktUtils from '../../shared-utils/wkt-utils'
+import { dequal } from 'dequal'
 
 class TileComponentController {
   // MapLayer objects contain the following information
@@ -431,7 +431,7 @@ class TileComponentController {
 
     this.overlayClickListener = this.mapRef.addListener('click', async(event) => {
       const displayMode = this.state.selectedDisplayMode.getValue()
-      const { ANALYSIS, EDIT_PLAN, EDIT_RINGS } = this.state.displayModes
+      const { ANALYSIS, EDIT_PLAN } = this.state.displayModes
       const { rPlanState } = this
       const { STARTED, COMPLETED } = rConstants.PLAN_STATE
 
@@ -453,6 +453,11 @@ class TileComponentController {
         return
       }
 
+      // TODO: This block is 100% cruft and can be entirely deleted
+      // because `mapFeaturesKeyClickedEvent` and `mapFeaturesClickedEvent`
+      // are never subscribed to, hence...nothing happens here...
+      // which also begs the question...how do we migrate
+      // `getFeaturesUnderLatLng` (...which is used elsewhere...)
       try {
         // ToDo: depricate getFilteredFeaturesUnderLatLng switch to this
         const hitFeatures = await this.getFeaturesUnderLatLng(event.latLng)
@@ -501,6 +506,67 @@ class TileComponentController {
           } else {
             hitFeatures.roadSegments = new Set([...hitRoadSegments])
           }
+
+          // BIG FAT TODO: THIS _SET DIFFERENCE_ REALLY DOESN'T GO HERE.
+          // THERE'S A MASSIVE (MASSIVE) CHAIN OF FEATURE SELECTIONS THAT COULD
+          // BE SIMPLIFIED INTO A MUCH MORE DISCREET (SINGLE) SELECTION FUNCTION.
+          // RIGHT NOW THERE'S 5 OR MORE FUNCTIONS PASSING ALONG THE DATA, BEFORE AND AFTER THIS
+          // potential TODO: maybe we can fix it as part of vector tile 2.0
+          const prevHitFeatures = this.state.mapFeaturesSelectedEvent.getValue()
+          if (Object.keys(prevHitFeatures).length) {
+            // unfortunately, because of data inconsistency,
+            // this requires special casing. TODO: simplify the data
+            // structures for this kind of thing!
+
+            // annoying prep (this is reset below)
+            prevHitFeatures.roadSegments = [...prevHitFeatures.roadSegments]
+            prevHitFeatures.fiberFeatures = [...prevHitFeatures.fiberFeatures]
+            hitFeatures.roadSegments = [...hitFeatures.roadSegments]
+            hitFeatures.fiberFeatures = [...hitFeatures.fiberFeatures]
+
+            // NOTE: not running anything with boundaries because only
+            // focused on selection/deselection of point-based features.
+            // For a historical explanantion: anything beyond is fairly complicated...
+            const featureNamesAndFeatureIdNames = [
+              // ['analysisAreas', 'id'],
+              // ['censusFeatures', 'id'],
+              ['equipmentFeatures', 'object_id'],
+              ['fiberFeatures', 'link_id'],
+              ['locations', 'location_id'], //TODO: change to object_id
+              ['roadSegments', 'object_id'],
+              // ['serviceAreas', 'object_id'],
+            ]
+            for (const [featureName, idName] of featureNamesAndFeatureIdNames) {
+              // performing a set difference
+              // https://www.wikiwand.com/en/Difference_(set_theory)#/Relative_complement
+              const prevFeatures = prevHitFeatures[featureName]
+              hitFeatures[featureName] = hitFeatures[featureName].filter(feature => {
+                const found = prevFeatures.find(prevItem => prevItem[idName] === feature[idName])
+                return !found
+              })
+            }
+            // this is so gross, and really exemplifies why we need
+            // a single source of truth for a selection model, but...
+            // ...if you're selecting anything with a border, it can conflict
+            // with single-point-based selections, so need to prioritize those...
+            if (
+              hitFeatures.equipmentFeatures.length
+              || hitFeatures.fiberFeatures.length
+              || hitFeatures.locations.length
+              || hitFeatures.roadSegments.length
+            ) {
+              hitFeatures.analysisAreas = []
+              hitFeatures.censusFeatures = []
+              hitFeatures.serviceAreas = []
+            }
+
+            // annoying post-prep reset
+            prevHitFeatures.roadSegments = new Set([...prevHitFeatures.roadSegments])
+            prevHitFeatures.fiberFeatures = new Set([...prevHitFeatures.fiberFeatures])
+            hitFeatures.roadSegments = new Set([...hitFeatures.roadSegments])
+            hitFeatures.fiberFeatures = new Set([...hitFeatures.fiberFeatures])
+          }
+
           // Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
           // ToDo: now that we have types these categories should to be dynamic
           this.state.mapFeaturesSelectedEvent.next(hitFeatures)
