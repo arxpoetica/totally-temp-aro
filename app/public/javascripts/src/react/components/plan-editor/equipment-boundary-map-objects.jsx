@@ -66,7 +66,10 @@ const EquipmentBoundaryMapObjects = props => {
       google,
       contextMenuClick,
     )
-    invalidBoundaryHandling.stashMapObject(mapObject.subnetId, mapObject)
+
+    if (!invalidBoundaryHandling.stashedMapObjects[mapObject.subnetId]) {
+      invalidBoundaryHandling.stashMapObject(mapObject.subnetId, mapObject)
+    }
     clearMapObjectOverlay = multiSelectVertices.clearMapObjectOverlay.bind(multiSelectVertices)
   }
 
@@ -79,15 +82,11 @@ const EquipmentBoundaryMapObjects = props => {
 
   function modifyBoundaryShape(mapObject) {
     const [isValidPolygon, validMapObject] = invalidBoundaryHandling.isValidPolygon(
-      mapObject.objectId,
+      mapObject.subnetId,
       mapObject,
     )
       
     if (isValidPolygon) {
-      invalidBoundaryHandling.stashMapObject(
-        validMapObject.objectId,
-        validMapObject
-      )
       const geometry = WktUtils.getWKTMultiPolygonFromGoogleMapPaths(validMapObject.getPaths())
       boundaryChange(validMapObject.subnetId, geometry)
     } else {
