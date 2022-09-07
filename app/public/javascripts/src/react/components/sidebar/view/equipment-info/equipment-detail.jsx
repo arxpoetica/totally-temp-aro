@@ -82,7 +82,7 @@ export const equipmentDetail = (props) => {
 
       if (!allowViewModeClickAction || roadSegments && roadSegments.size > 0) return
 
-      if (equipmentFeatures && equipmentFeatures.length > 0) {
+      if (equipmentFeatures) {
         // filter deleted equipment features
         const equipmentList = getValidEquipmentFeaturesList(equipmentFeatures)
 
@@ -90,47 +90,59 @@ export const equipmentDetail = (props) => {
           const equipment = equipmentList[0]
           updateSelectedState(equipment)
           displayEquipment(plan.id, equipment.object_id)
-          .then((equipmentInfo) => { checkForBounds(equipmentInfo) })
+            .then(equipmentInfo => {
+              if (equipmentInfo) checkForBounds(equipmentInfo)
+            })
+        } else {
+          displayEquipment(plan.id)
+          updateSelectedState(null)
         }
       }
       
-      if (fiberFeatures && fiberFeatures.size > 0) {
-        AroHttp.get(`/service/plan/subnets/annotations?plan_id=${plan.id}`)
-          .then(({ data: annotationsBySubnet }) => {
+      if (fiberFeatures) {
 
-            const fibers = JSON.parse(JSON.stringify([...fiberFeatures]))
-              // dedupe fibers (see https://stackoverflow.com/a/56757215/209803)
-              .filter((fiber, index, array) => {
-                const compareIndex = array.findIndex(compareFiber => {
-                  return JSON.stringify(compareFiber) === JSON.stringify(fiber)
-                })
-                return index === compareIndex
-              })
+        if (fiberFeatures.size > 0) {
 
-            if (fibers.length > 0) {
-              const newFiberMeta = fibers.map(fiber => {
-                const subnet = annotationsBySubnet.find(({ subnetId }) => {
-                  return fiber.subnet_id === subnetId
-                })
-                let annotation
-                if (subnet) {
-                  // for now, only returning for matches that have
-                  // both to/from ids in both array groups
-                  annotation = subnet.annotations.find(annotation => {
-                    return annotation.toNode === fiber.to_node
-                      && annotation.fromNode === fiber.from_node
+          AroHttp.get(`/service/plan/subnets/annotations?plan_id=${plan.id}`)
+            .then(({ data: annotationsBySubnet }) => {
+
+              const fibers = JSON.parse(JSON.stringify([...fiberFeatures]))
+                // dedupe fibers (see https://stackoverflow.com/a/56757215/209803)
+                .filter((fiber, index, array) => {
+                  const compareIndex = array.findIndex(compareFiber => {
+                    return JSON.stringify(compareFiber) === JSON.stringify(fiber)
                   })
-                }
-                fiber.annotations = annotation && Object.values(annotation.annotations) || []
-                return fiber
-              })
-              setFiberMeta(newFiberMeta)
-              updateFiberFeatures(fiberFeatures)
-              activeViewModePanelAction(viewModePanels.EQUIPMENT_INFO)
-            }
+                  return index === compareIndex
+                })
 
-          })
-          .catch(error => console.log(error))
+              if (fibers.length > 0) {
+                const newFiberMeta = fibers.map(fiber => {
+                  const subnet = annotationsBySubnet.find(({ subnetId }) => {
+                    return fiber.subnet_id === subnetId
+                  })
+                  let annotation
+                  if (subnet) {
+                    // for now, only returning for matches that have
+                    // both to/from ids in both array groups
+                    annotation = subnet.annotations.find(annotation => {
+                      return annotation.toNode === fiber.to_node
+                        && annotation.fromNode === fiber.from_node
+                    })
+                  }
+                  fiber.annotations = annotation && Object.values(annotation.annotations) || []
+                  return fiber
+                })
+                setFiberMeta(newFiberMeta)
+                updateFiberFeatures(fiberFeatures)
+                activeViewModePanelAction(viewModePanels.EQUIPMENT_INFO)
+              }
+            })
+            .catch(error => console.log(error))
+        } else {
+          setFiberMeta([])
+          updateFiberFeatures()
+        }
+
       }
     }
   }, [selectedMapFeatures])
@@ -149,7 +161,7 @@ export const equipmentDetail = (props) => {
 
   const updateFiberFeatures = (fiberFeatures) => {
     const newSelection = cloneSelection()
-    newSelection.details.fiberSegments = fiberFeatures
+    newSelection.details.fiberSegments = fiberFeatures ? fiberFeatures : {}
     setMapSelection(newSelection)
   }
 
@@ -159,42 +171,50 @@ export const equipmentDetail = (props) => {
     newSelection.details.fiberSegments = new Set()
     if (selectedFeature) {
       newSelection.editable.equipment[selectedFeature.object_id || selectedFeature.objectId] = selectedFeature
+    } else {
+      newSelection.editable.equipment = {}
     }
     setMapSelection(newSelection)
   }
 
-  const displayEquipment = (planId, objectId) => {
-    setState((state) => ({ ...state, coverageOutput: null, showCoverageOutput: false }))
-    return AroHttp.get(`/service/plan-feature/${planId}/equipment/${objectId}?userId=${loggedInUser.id}`)
-      .then((result) => {
-        const equipmentInfo = result.data
-        if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')) {
-          if (networkEquipment.equipments.hasOwnProperty(equipmentInfo.networkNodeType)) {
-            setState((state) => ({ ...state,
-              headerIcon: networkEquipment.equipments[equipmentInfo.networkNodeType].iconUrl,
-              networkNodeLabel: networkEquipment.equipments[equipmentInfo.networkNodeType].label
-            }))
-          } else {
-            // no icon
-            setState((state) => ({ ...state,
-              headerIcon: '', networkNodeLabel: equipmentInfo.networkNodeType
-            }))
-          }
+  const displayEquipment = async(planId, objectId) => {
+    try {
+      setState((state) => ({ ...state, coverageOutput: null, showCoverageOutput: false }))
+
+      let equipmentInfo
+      if (objectId) {
+        const result = await AroHttp.get(`/service/plan-feature/${planId}/equipment/${objectId}`)
+        equipmentInfo = result.data
+      }
+
+      if (equipmentInfo && equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')) {
+        if (networkEquipment.equipments.hasOwnProperty(equipmentInfo.networkNodeType)) {
           setState((state) => ({ ...state,
-            equipmentData: equipmentInfo,
-            selectedEquipmentGeog: equipmentInfo.geometry.coordinates,
-            equipmentFeature: AroFeatureFactory.createObject(equipmentInfo).networkNodeEquipment,
-            networkNodeType: equipmentInfo.networkNodeType,
-            currentEquipmentDetailView: EquipmentDetailView.Detail,
+            headerIcon: networkEquipment.equipments[equipmentInfo.networkNodeType].iconUrl,
+            networkNodeLabel: networkEquipment.equipments[equipmentInfo.networkNodeType].label
           }))
-          activeViewModePanelAction(viewModePanels.EQUIPMENT_INFO)
         } else {
-          clearSelection()
+          // no icon
+          setState((state) => ({ ...state,
+            headerIcon: '', networkNodeLabel: equipmentInfo.networkNodeType
+          }))
         }
-        return equipmentInfo
-      }).catch((err) => {
-        console.error(err)
-      })
+        setState((state) => ({ ...state,
+          equipmentData: equipmentInfo,
+          selectedEquipmentGeog: equipmentInfo.geometry.coordinates,
+          equipmentFeature: AroFeatureFactory.createObject(equipmentInfo).networkNodeEquipment,
+          networkNodeType: equipmentInfo.networkNodeType,
+          currentEquipmentDetailView: EquipmentDetailView.Detail,
+        }))
+        activeViewModePanelAction(viewModePanels.EQUIPMENT_INFO)
+      } else {
+        clearSelection()
+      }
+      return equipmentInfo
+
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   const viewSelectedEquipment = (selectedEquipment, isZoom) => {
