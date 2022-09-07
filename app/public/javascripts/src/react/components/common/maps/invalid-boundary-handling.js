@@ -8,9 +8,12 @@ export class InvalidBoundaryHandling {
   }
 
   stashMapObject(id, mapObject) {
+    console.log(this.stashedMapObjects)
     this.stashedMapObjects[id] = WktUtils.getWKTPolygonFromGoogleMapPath(
       mapObject.getPath()
     )
+    console.log(this.stashedMapObjects)
+    console.log('hitting in the stash')
   }
 
   isValidPolygon (id, newMapObject) {
@@ -28,13 +31,15 @@ export class InvalidBoundaryHandling {
     
     if (selfIntersectingPoints.length && newMapObject.getPath) {
       newMapObject.setMap(null)
-      if (newMapObject.feature) {
-        newMapObject.feature.geometry =  this.stashedMapObjects[id]
-      }
+      console.log("Hitting in the failed")
+      newMapObject.setPath(WktUtils.getGoogleMapPathsFromWKTPolygon(this.stashedMapObjects[id]))
       Utilities.displayErrorMessage({
         title: 'Invalid Polygon',
         text: 'Polygon shape is invalid, please try again. Ensure that the polygon is not self-intersecting.'
       })
+    } else {
+      console.log("Hitting in the validation")
+      this.stashMapObject(id, newMapObject)
     }
 
     return [selfIntersectingPoints.length === 0, newMapObject]
