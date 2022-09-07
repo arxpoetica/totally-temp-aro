@@ -383,21 +383,21 @@ class State {
     service.mapFeaturesKeyClickedEvent = new Rx.BehaviorSubject({})
     service.mapFeaturesClickedEvent = new Rx.BehaviorSubject({})
 
-    service.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
+    service.mapFeaturesSelectedEvent.skip(1).subscribe(hitFeatures => {
       // ToDo: selection mechanism needs to be cerntalised 
       // set all mapFeatures in redux
       if (service.selectedDisplayMode.getValue() == service.displayModes.VIEW
         || service.selectedDisplayMode.getValue() == service.displayModes.ANALYSIS) {
-        service.setMapFeatures(options)
+        service.setMapFeatures(hitFeatures)
         // For tracking when map clicked by the user.
         service.setIsMapClicked(true)
       }
 
       // ToDo: this check may need to move into REACT
       if (service.rSelectedDisplayMode === service.displayModes.EDIT_RINGS) {
-        service.onFeatureSelectedRedux(options)
-      } else if (options.locations) {
-        service.setSelectedLocations(options.locations.map(location => location.location_id))
+        service.onFeatureSelectedRedux(hitFeatures)
+      } else if (hitFeatures.locations) {
+        service.setSelectedLocations(hitFeatures.locations.map(location => location.location_id))
         // service.setActiveViewModePanel(service.viewModePanels.LOCATION_INFO)
       }
     })
