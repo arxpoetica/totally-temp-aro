@@ -13,7 +13,7 @@ export const EquipmentDragger = props => {
   let activeTypes
   const draftsLength = Object.keys(drafts).length
   if (!draftsLength && !selectedSubnetId) {
-    activeTypes = planType === 'UNDEFINED'
+    activeTypes = planType === 'RING'
       // 1. if ring plan and no drafts or selected subnet id
       ? ['central_office']
       // 2. if greenfield and no pre-existing central office
