@@ -38,9 +38,9 @@ const EquipmentBoundaryMapObjects = props => {
   }, [selectedSubnetId])
 
 
-  function createMapObject(subnetId) {
+  function createMapObject(subnetId, geometry) {
     if (!subnets[subnetId]) return
-    const geometry = subnets[subnetId].subnetBoundary.polygon
+    const newGeom = geometry || subnets[subnetId].subnetBoundary.polygon
     let isEditable = !subnets[subnetId].subnetBoundary.locked
     isEditable = isEditable && subnetId === selectedSubnetId
     
@@ -49,7 +49,7 @@ const EquipmentBoundaryMapObjects = props => {
     mapObject = new google.maps.Polygon({
       subnetId, // Not used by Google Maps
       dataType: subnets[subnetId].dataType,
-      paths: WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry),
+      paths: WktUtils.getGoogleMapPathsFromWKTMultiPolygon(newGeom),
       clickable: false,
       draggable: false,
       editable: isEditable,
@@ -66,7 +66,10 @@ const EquipmentBoundaryMapObjects = props => {
       google,
       contextMenuClick,
     )
-    invalidBoundaryHandling.stashMapObject(mapObject.subnetId, mapObject)
+
+    if (!invalidBoundaryHandling.stashedMapObjects[mapObject.subnetId]) {
+      invalidBoundaryHandling.stashMapObject(mapObject.subnetId, mapObject)
+    }
     clearMapObjectOverlay = multiSelectVertices.clearMapObjectOverlay.bind(multiSelectVertices)
   }
 
@@ -79,19 +82,14 @@ const EquipmentBoundaryMapObjects = props => {
 
   function modifyBoundaryShape(mapObject) {
     const [isValidPolygon, validMapObject] = invalidBoundaryHandling.isValidPolygon(
-      mapObject.objectId,
+      mapObject.subnetId,
       mapObject,
     )
-      
+    const geometry = WktUtils.getWKTMultiPolygonFromGoogleMapPaths(validMapObject.getPaths())
     if (isValidPolygon) {
-      invalidBoundaryHandling.stashMapObject(
-        validMapObject.objectId,
-        validMapObject
-      )
-      const geometry = WktUtils.getWKTMultiPolygonFromGoogleMapPaths(validMapObject.getPaths())
       boundaryChange(validMapObject.subnetId, geometry)
     } else {
-      createMapObject(validMapObject.subnetId)
+      createMapObject(validMapObject.subnetId, geometry)
     }
   }
 

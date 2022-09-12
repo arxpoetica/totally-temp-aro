@@ -260,7 +260,10 @@ export const ServiceLayerMapObjects = (props) => {
         google,
         openDeleteMenu
       )
-      invalidBoundaryHandling.stashMapObject(mapObject.objectId, mapObject)
+
+      if (!invalidBoundaryHandling.stashedMapObjects[mapObject.objectId]) {
+        invalidBoundaryHandling.stashMapObject(mapObject.objectId, mapObject)
+      }
 
       // Set up listeners on the map object
       mapObject.addListener('click', (event) => {
@@ -484,10 +487,6 @@ export const ServiceLayerMapObjects = (props) => {
     )
 
     if (isValidPolygon) {
-      invalidBoundaryHandling.stashMapObject(
-        validMapObject.objectId,
-        validMapObject
-      )
       onModifyObject(validMapObject)
     } else {
       createMapObject(validMapObject.feature, null, true, null, true)
