@@ -17,7 +17,6 @@ import { InvalidBoundaryHandling } from '../../common/maps/invalid-boundary-hand
 import ContextMenuActions from '../../context-menu/actions'
 import uuidStore from '../../../../shared-utils/uuid-store'
 import WktUtils from '../../../../shared-utils/wkt-utils.js'
-import { invalid } from 'moment'
 
 const polygonOptions = Object.freeze({
   strokeColor: '#FF1493',
@@ -261,7 +260,8 @@ export const ServiceLayerMapObjects = (props) => {
         google,
         openDeleteMenu
       )
-      if (invalidBoundaryHandling.stashedMapObjects[mapObject.objectId]) {
+
+      if (!invalidBoundaryHandling.stashedMapObjects[mapObject.objectId]) {
         invalidBoundaryHandling.stashMapObject(mapObject.objectId, mapObject)
       }
 
