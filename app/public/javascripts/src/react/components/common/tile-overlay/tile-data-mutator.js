@@ -95,14 +95,58 @@ TileDataMutator.getPointsForLeafTileRect = (tileData, nwTileId, seTileId) => {
     return points
   }
   
+  // let a = Date.now()
+  // for (let x=minX; x<=maxX; x++) {
+  //   for (let y=minY; y<=maxY; y++) {
+  //     if (tileData[x] && tileData[x][y]) {
+  //       points = { ...points, ...tileData[x][y] }
+  //     }
+  //   }
+  // }
+  //let b = Date.now()
+  // let pointsB = {}
+  // for (let x=minX; x<=maxX; x++) {
+  //   for (let y=minY; y<=maxY; y++) {
+  //     if (tileData[x] && tileData[x][y]) {
+  //       Object.keys(tileData[x][y]).forEach(key => {
+  //         // spread operator is approximately 2000 times slower!
+  //         //  YES two thousand times slower!
+  //         //pointsB[key] = tileData[x][y][key]
+  //         points[key] = tileData[x][y][key]
+  //       })
+  //     }
+  //   }
+  // }
+  // let c = Date.now()
+  // let pointsC = []
+  // for (let x=minX; x<=maxX; x++) {
+  //   for (let y=minY; y<=maxY; y++) {
+  //     if (tileData[x] && tileData[x][y]) {
+  //       pointsC.push(tileData[x][y])
+  //     }
+  //   }
+  // }
+  // let pointsD = {}
+  // let d = Date.now()
   for (let x=minX; x<=maxX; x++) {
     for (let y=minY; y<=maxY; y++) {
       if (tileData[x] && tileData[x][y]) {
-        points = { ...points, ...tileData[x][y] }
+        for (let key in tileData[x][y]){
+          // spread operator is approximately 2000 times slower!
+          //  YES two thousand times slower!
+          points[key] = tileData[x][y][key]
+        }
       }
     }
   }
-  
+  //let e = Date.now()
+  // let spreadT = b-a
+  //let keysT = c-b
+  // let arrayT = d-c
+  //let forInT = e-d
+  //let pointsLen = Object.values(points).length
+  // console.log({spreadT, keysT, arrayT, pointsLen, minX, maxX, minY, maxY})
+  //console.log({keysT, forInT, pointsLen, minX, maxX, minY, maxY})
   return points
 }
 
