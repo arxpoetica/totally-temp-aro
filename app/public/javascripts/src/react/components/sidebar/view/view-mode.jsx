@@ -51,7 +51,7 @@ const ViewMode = (props) => {
 
     if (checkSelectedDisplayMode(displayModes.VIEW) && checkIsShowViewModePanels(viewModePanels.LOCATION_INFO)) {
       const newSelection = cloneSelection()
-      if (locationId) { newSelection.editable.location = { [locationId]: locationId } }
+      newSelection.editable.location = locationId ? { [locationId]: locationId } : {}
       setMapSelection(newSelection)
     }
   }

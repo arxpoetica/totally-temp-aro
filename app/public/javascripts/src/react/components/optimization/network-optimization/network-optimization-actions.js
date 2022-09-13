@@ -12,8 +12,14 @@ function runOptimization(inputs, userId) { // shouldn't be getting userId from c
       type: Actions.NETWORK_OPTIMIZATION_SET_IS_CANCELING,
       payload: false,
     })
-
+    let state = getState()
     const type = inputs.analysis_type === 'NETWORK_ANALYSIS' ? 'analyze' : 'optimize'
+    // --- HERE - if we have a list of locations remove the filter? (seems hacky)
+    // conditionally: if we have a list of locations loaded in the plan
+    if (state.selection.planTargets.locations.size) {
+      console.log('removing filter constraints')
+      inputs.locationConstraints.objectFilter.propertyConstraints = []
+    }
     AroHttp.post(`/service/v1/${type}/masterplan?userId=${userId}`, inputs)
       .then((response) => {
         batch(() => {

@@ -84,8 +84,8 @@ const PlanTransactionTools = props => {
           </div>
 
           <div className="column">
-            <Menu
-              control={
+            <Menu>
+              <Menu.Target>
                 <Button
                   fullWidth
                   rightIcon={<DropdownCaret/>}
@@ -93,28 +93,23 @@ const PlanTransactionTools = props => {
                 >
                   Recalculate / Commit
                 </Button>
-              }
-              size="xl"
-              styles={{ root: { display: 'block' } }}
-            >
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Item
+                  onClick={() => recalculate({ ...props, hasAnnotations })}
+                  color={hasAnnotations ? 'red' : undefined}
+                  disabled={isLoading}
+                >
+                  Recalulate Hubs &amp; Terminals
+                </Menu.Item>
 
-              <Menu.Item
-                onClick={() => recalculate({ ...props, hasAnnotations })}
-                variant="outline"
-                color={hasAnnotations ? 'red' : undefined}
-                disabled={isLoading}
-              >
-                Recalulate Hubs &amp; Terminals
-              </Menu.Item>
-
-              <Menu.Item
-                onClick={() => checkAndCommitTransaction({ ...props, hasAnnotations })}
-                variant="outline"
-                disabled={isLoading}
-              >
-                Commit Changes &amp; Exit
-              </Menu.Item>
-
+                <Menu.Item
+                  onClick={() => checkAndCommitTransaction({ ...props, hasAnnotations })}
+                  disabled={isLoading}
+                >
+                  Commit Changes &amp; Exit
+                </Menu.Item>
+              </Menu.Dropdown>
             </Menu>
           </div>
         </div>

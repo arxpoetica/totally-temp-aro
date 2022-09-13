@@ -49,7 +49,7 @@ services:
             - main
 
     zookeeper:
-        image: zookeeper
+        image: zookeeper:3.7.1
         ports:
             - "2181:2181"
         networks:

@@ -1,5 +1,5 @@
 import React from "react";
-import { Switch, RadioGroup, Radio, Select, NumberInput } from "@mantine/core"
+import { Switch, Radio, Select, NumberInput } from "@mantine/core"
 
 const coverageTypes = Object.freeze({
   SUBSIDIZED: 'Use Location layer',
@@ -107,7 +107,7 @@ function ROICSubsidy(props) {
         />
       </div>
       <div className="subsidy-body">
-        <RadioGroup
+        <Radio.Group
           name="pruningCoverageTypes"
           label="Calculation Setting"
           description="Choose How the subsidy is calculated per location."
@@ -127,7 +127,7 @@ function ROICSubsidy(props) {
               label={calcButtonLabel(coverageType)}
             />
           )}
-        </RadioGroup>
+        </Radio.Group>
         <div className="input-wrapper">
           <div className="calc-type-value-wrapper">
             <Select
