@@ -453,23 +453,6 @@ class TileComponentController {
         return
       }
 
-      // TODO: This block is 100% cruft and can be entirely deleted
-      // because `mapFeaturesKeyClickedEvent` and `mapFeaturesClickedEvent`
-      // are never subscribed to, hence...nothing happens here...
-      // which also begs the question...how do we migrate
-      // `getFeaturesUnderLatLng` (...which is used elsewhere...)
-      try {
-        // ToDo: depricate getFilteredFeaturesUnderLatLng switch to this
-        const hitFeatures = await this.getFeaturesUnderLatLng(event.latLng)
-        if (isShiftPressed) {
-          this.state.mapFeaturesKeyClickedEvent.next(hitFeatures)
-        } else {
-          this.state.mapFeaturesClickedEvent.next(hitFeatures)
-        }
-      } catch (error) {
-        console.error(error)
-      }
-
       try {
         const hitFeatures = await this.getFilteredFeaturesUnderLatLng(event.latLng)
         const hittableSegmentsIds = Object
