@@ -243,6 +243,7 @@ class State {
     ]
     
     // feature clicked on map
+    // #179702878 is this still used?
     service.hackRaiseEvent = (features) => {
       $rootScope.$broadcast('map_layer_clicked_feature', features, {})
     }
@@ -263,7 +264,9 @@ class State {
       if (service.rSelectedDisplayMode === service.displayModes.EDIT_RINGS) {
         service.onFeatureSelectedRedux(hitFeatures)
       } else if (hitFeatures.locations) {
-        service.setSelectedLocations(hitFeatures.locations.map(location => location.location_id))
+        // #179702878 group select fix
+        //service.setSelectedLocations(hitFeatures.locations.map(location => location.location_id))
+        service.setSelectedLocations(hitFeatures.locations)
       }
     })
 

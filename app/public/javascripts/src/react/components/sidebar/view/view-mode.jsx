@@ -29,6 +29,8 @@ const ViewMode = (props) => {
     selectedTargetSelectionMode,
   } = props
 
+  // #179702878
+  // make sure the new selectedLocations schema meshes with where it's being sent
   const prevSelectedLocations = usePrevious(selectedLocations)
   useEffect(() => {
     if (

@@ -1,5 +1,6 @@
 /* global app config $ encodeURIComponent _ tinycolor swal location Chart angular */
 // Selected location controller
+// #179702878 is this component still in use?
 app.controller('selected_location_controller', ($rootScope, $scope, $http, $filter, map_tools, state) => {
   $scope.location = {}
   $scope.show_households = config.ui.map_tools.locations.view.indexOf('residential') >= 0
