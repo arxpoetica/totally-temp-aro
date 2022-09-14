@@ -253,8 +253,6 @@ class TileComponentController {
           if (canSelectSA) {
             selectedServiceAreas.forEach((id) => selectedServiceAreaIds.push({ id: id }))
           }
-          // #179702878 is this still used?
-          state.hackRaiseEvent(selectedLocationsIds)
 
           // Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
           state.mapFeaturesSelectedEvent.next({
@@ -473,10 +471,6 @@ class TileComponentController {
         }
 
         if (hitFeatures) {
-          if (hitFeatures.locations.length > 0) {
-            this.state.hackRaiseEvent(hitFeatures.locations)
-          }
-
           if (isShiftPressed && hasRoadSegments) {
             const mapFeatures = this.state.mapFeaturesSelectedEvent.getValue()
             const priorRoadSegments = [...mapFeatures.roadSegments || []]

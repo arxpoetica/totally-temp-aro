@@ -242,12 +242,7 @@ class State {
         checked: false
       }
     ]
-    
-    // feature clicked on map
-    // #179702878 is this still used?
-    service.hackRaiseEvent = (features) => {
-      $rootScope.$broadcast('map_layer_clicked_feature', features, {})
-    }
+
     service.mapFeaturesSelectedEvent = new Rx.BehaviorSubject({})
     service.mapFeaturesRightClickedEvent = new Rx.BehaviorSubject({})
 
