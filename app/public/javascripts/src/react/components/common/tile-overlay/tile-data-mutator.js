@@ -98,7 +98,11 @@ TileDataMutator.getPointsForLeafTileRect = (tileData, nwTileId, seTileId) => {
   for (let x=minX; x<=maxX; x++) {
     for (let y=minY; y<=maxY; y++) {
       if (tileData[x] && tileData[x][y]) {
-        points = { ...points, ...tileData[x][y] }
+        for (let key in tileData[x][y]){
+          // spread operator is approximately 2000 times slower!
+          //  YES two thousand times slower!
+          points[key] = tileData[x][y][key]
+        }
       }
     }
   }
