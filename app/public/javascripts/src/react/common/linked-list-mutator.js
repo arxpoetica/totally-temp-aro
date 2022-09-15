@@ -99,7 +99,7 @@ LinkedListMutator.getCount = (linkedList) => {
 
 LinkedListMutator.remove = (linkedList, id) => {
   if (linkedList[id]) {
-    linkedList = LinkedListMutator.removeLinkage(linkedList, id)
+    linkedList = removeLinkage(linkedList, id)
     delete linkedList[id]
     linkedList._count --
   }
