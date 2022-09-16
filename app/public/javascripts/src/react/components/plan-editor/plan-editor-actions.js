@@ -71,7 +71,7 @@ function clearTransaction (doOpenView = true) {
     // unsubscriber somewhere, and I can't isolate it. So clearing it twice.
     // Once up front here, and then again later when it no longer is necessary.
     // The fix should only call `unsubscriber` once.
-    const { planEditor: { socketUnsubscriber: unsubscriber } } = getState()
+    const { plan, planEditor: { socketUnsubscriber: unsubscriber } } = getState()
     unsubscriber()
 
     dispatch({ type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION })
@@ -84,9 +84,12 @@ function clearTransaction (doOpenView = true) {
       dispatch({ type: Actions.PLAN_EDITOR_CLEAR_SUBNETS })
       dispatch({ type: Actions.PLAN_EDITOR_CLEAR_FEATURES })
       if (doOpenView) {
+        const displayMode = plan.activePlan.planType === "RING"
+          ? displayModes.EDIT_RINGS
+          : displayModes.ANALYSIS
         dispatch({
           type: Actions.TOOL_BAR_SET_SELECTED_DISPLAY_MODE,
-          payload: displayModes.ANALYSIS,
+          payload: displayMode,
         })
       }
     })
@@ -104,10 +107,6 @@ function commitTransaction (transactionId) {
 
       await dispatch(recalculateSubnets(transactionId))
       dispatch(setIsCommittingTransaction(true))
-      dispatch({
-        type: Actions.TOOL_BAR_SET_SELECTED_DISPLAY_MODE,
-        payload: displayModes.ANALYSIS,
-      })
       await AroHttp.put(`/service/plan-transactions/${transactionId}`)
       dispatch(clearTransaction())
 
@@ -479,7 +478,7 @@ function createConstructionArea(constructionArea) {
 function deleteBoundaryVertex (mapObject, vertex) {
   return dispatch => {
     // checks it is a valid vertex and that there are at least 3 other vertices left
-    if (vertex && mapObject.getPath().getLength() > 3) {
+    if (mapObject.getPath().getLength() > 3) {
       mapObject.getPath().removeAt(vertex)
     }
   }

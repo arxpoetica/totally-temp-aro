@@ -169,7 +169,7 @@ const NetworkEquipmentPanel = (props) => {
       opacity: networkEquipment.drawingOptions.opacity || 0.5,
       drawingOptions,
       selectable: true,
-      zIndex: existingOrPlannedzIndex,
+      zIndex: networkEquipment.zIndex + (existingOrPlannedzIndex || 0),
       highlightStyle: networkEquipment.highlightStyle,
       subtypes,
     }

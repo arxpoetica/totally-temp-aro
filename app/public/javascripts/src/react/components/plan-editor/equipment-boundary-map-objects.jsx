@@ -38,9 +38,9 @@ const EquipmentBoundaryMapObjects = props => {
   }, [selectedSubnetId])
 
 
-  function createMapObject(subnetId) {
+  function createMapObject(subnetId, geometry) {
     if (!subnets[subnetId]) return
-    const geometry = subnets[subnetId].subnetBoundary.polygon
+    const newGeom = geometry || subnets[subnetId].subnetBoundary.polygon
     let isEditable = !subnets[subnetId].subnetBoundary.locked
     isEditable = isEditable && subnetId === selectedSubnetId
     
@@ -49,7 +49,7 @@ const EquipmentBoundaryMapObjects = props => {
     mapObject = new google.maps.Polygon({
       subnetId, // Not used by Google Maps
       dataType: subnets[subnetId].dataType,
-      paths: WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry),
+      paths: WktUtils.getGoogleMapPathsFromWKTMultiPolygon(newGeom),
       clickable: false,
       draggable: false,
       editable: isEditable,
@@ -66,7 +66,10 @@ const EquipmentBoundaryMapObjects = props => {
       google,
       contextMenuClick,
     )
-    invalidBoundaryHandling.stashMapObject(mapObject.subnetId, mapObject)
+
+    if (!invalidBoundaryHandling.stashedMapObjects[mapObject.subnetId]) {
+      invalidBoundaryHandling.stashMapObject(mapObject.subnetId, mapObject)
+    }
     clearMapObjectOverlay = multiSelectVertices.clearMapObjectOverlay.bind(multiSelectVertices)
   }
 
@@ -79,19 +82,14 @@ const EquipmentBoundaryMapObjects = props => {
 
   function modifyBoundaryShape(mapObject) {
     const [isValidPolygon, validMapObject] = invalidBoundaryHandling.isValidPolygon(
-      mapObject.objectId,
+      mapObject.subnetId,
       mapObject,
     )
-      
+    const geometry = WktUtils.getWKTMultiPolygonFromGoogleMapPaths(validMapObject.getPaths())
     if (isValidPolygon) {
-      invalidBoundaryHandling.stashMapObject(
-        validMapObject.objectId,
-        validMapObject
-      )
-      const geometry = WktUtils.getWKTMultiPolygonFromGoogleMapPaths(validMapObject.getPaths())
       boundaryChange(validMapObject.subnetId, geometry)
     } else {
-      createMapObject(validMapObject.subnetId)
+      createMapObject(validMapObject.subnetId, geometry)
     }
   }
 
@@ -99,28 +97,7 @@ const EquipmentBoundaryMapObjects = props => {
     mapObject.getPaths().forEach((path, index) => {
       google.maps.event.addListener(path, 'insert_at', () => modifyBoundaryShape(mapObject))
       google.maps.event.addListener(path, 'remove_at', () => modifyBoundaryShape(mapObject))
-      // TODO: avoid redundant first = last polygons
-      //  clear these when parsing from service 
-      //  and if needed, replace them when unparsing to send back to service
-      google.maps.event.addListener(path, 'set_at', () => {
-        if (!WktUtils.isClosedPath(path)) {
-          // IMPORTANT to check if it is already a closed path,
-          // otherwise we will get into an infinite loop when trying to keep it closed
-          if (index === 0) {
-            // The first point has been moved, move the last point of
-            // the polygon to keep it a valid, closed polygon
-            path.setAt(0, path.getAt(path.length - 1))
-            modifyBoundaryShape(mapObject)
-          } else if (index === path.length - 1) {
-            // The last point has been moved, move the first point of
-            // the polygon to keep it a valid, closed polygon
-            path.setAt(path.length - 1, path.getAt(0))
-            modifyBoundaryShape(mapObject)
-          }
-        } else {
-          modifyBoundaryShape(mapObject)
-        }
-      })
+      google.maps.event.addListener(path, 'set_at', () => modifyBoundaryShape(mapObject))
     })
 
     mapObject.addListener('contextmenu', event => contextMenuClick(event))

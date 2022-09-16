@@ -73,7 +73,6 @@ workflows:
                 - master
                 - dev
                 - uat
-                - 183015314-master-hotfix-location-display-fix
       - deploy:
           context: aro_qa_builds
           requires:
