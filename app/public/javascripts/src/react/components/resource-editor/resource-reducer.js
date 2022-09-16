@@ -1,4 +1,5 @@
 import Actions from '../../common/actions'
+import { RECALC_STATES } from './competitor/competitor-shared'
 
 const initialOffset = 0
 const initialcurrentPage = 0
@@ -32,7 +33,9 @@ const defaultState = {
   searchText: '',
   selectedResourceKey: '',
   roicManager: {},
-  roicManagerConfiguration: {}
+  roicManagerConfiguration: {},
+  recalcState: RECALC_STATES.VALID,
+  recalcNotificationId: null,
 }
 
 function setResourceTypes (state, resourceTypes) {
@@ -273,6 +276,16 @@ function setIsRrmManager (state, isRrmManager) {
   }
 }
 
+function setRecalcState(state, recalc) {
+  return { ...state,
+    recalcState: recalc
+  }
+}
+
+function setRecalcNotificationId(state, recalcNotificationId) {
+  return { ...state, recalcNotificationId }
+}
+
 function resourceReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.RESOURCE_EDITOR_SET_RESOURCE_TYPES:
@@ -372,6 +385,12 @@ function resourceReducer (state = defaultState, action) {
 
     case Actions.RESOURCE_EDITOR_IS_RRM_MANAGER:
       return setIsRrmManager(state, action.payload)
+
+    case Actions.RESOURCE_EDITOR_SET_RECALC_STATE:
+      return setRecalcState(state, action.payload)
+
+    case Actions.RESOURCE_EDITOR_SET_RECALC_NOTIFICATION_ID:
+      return setRecalcNotificationId(state, action.payload)
 
   default:
     return state

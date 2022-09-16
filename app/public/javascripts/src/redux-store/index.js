@@ -3,9 +3,6 @@ import { createLogger } from 'redux-logger'
 import { reducer as form } from 'redux-form'
 import thunk from 'redux-thunk'
 
-// Custom middleware
-import createSocketMiddleware from './middleware/websockets'
-
 // Reducers
 import ui from '../react/components/configuration/ui/ui-reducer'
 import system from '../react/components/configuration/configuration-reducer'
@@ -54,7 +51,6 @@ const logger = createLogger({
     return true
   },
 })
-const socketMiddleware = createSocketMiddleware()
 
 let reducer = combineReducers({
   configuration: combineReducers({ report, ui, system }),
@@ -89,7 +85,11 @@ let reducer = combineReducers({
   stateViewMode,
 })
 
+// Custom middleware
+import { createSocketMiddleware } from './middleware'
+const socketSubscribers = createSocketMiddleware()
+
 // Add support for Redux devtools extension. Yes, even in production.
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
-var store = createStore(reducer, composeEnhancers(applyMiddleware(thunk, socketMiddleware, logger)))
+var store = createStore(reducer, composeEnhancers(applyMiddleware(thunk, socketSubscribers, logger)))
 export default store

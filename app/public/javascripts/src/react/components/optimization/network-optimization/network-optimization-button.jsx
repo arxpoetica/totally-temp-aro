@@ -5,11 +5,12 @@ import ToolBarActions from '../../header/tool-bar-actions'
 import RingActions from '../../ring-edit/ring-edit-actions'
 import PlanActions from '../../plan/plan-actions'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
-import socketManager from '../../../../react/common/socket-manager'
+import { ClientSocketManager } from '../../../../react/common/client-sockets'
 // import AroHttp from '../../common/aro-http'
 // import RingStatusTypes from './constants'
 import ProgressButton from '../../common/progress-button.jsx'
 import Constants from '../../../common/constants'
+import { SOCKET_EVENTS } from '../../../../../../../socket-namespaces'
 const selector = formValueSelector(Constants.RING_OPTIONS_BASIC_FORM)
 
 export class NetworkOptimizationButton extends ProgressButton {
@@ -27,7 +28,7 @@ export class NetworkOptimizationButton extends ProgressButton {
       FINISHED: Constants.PLAN_STATE.COMPLETED,
     }
 
-    this.unsubscriber = socketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {
+    this.unsubscriber = ClientSocketManager.subscribe(SOCKET_EVENTS.PROGRESS_MESSAGE_DATA, (progressData) => {
       if (progressData.data.processType === 'optimization') {
         this.props.setActivePlanState(progressData.data.optimizationState)
         this.props.setAnalysisProgress(progressData.data.progress)

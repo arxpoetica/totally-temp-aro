@@ -8,10 +8,9 @@ var fs = require('fs')
 var multer = require('multer')
 var os = require('os')
 var upload = multer({ dest: os.tmpdir() })
-const socketManager = require('../sockets/socketManager').socketManager
 const userIdInjector = require('./user-id-injector')
 
-exports.configure = (api, middleware) => {
+exports.configure = (api, middleware, ServerSocketManager) => {
   var jsonSuccess = middleware.jsonSuccess
 
   // Set up all our pass-through routes (e.g. urls starting with /service are routed to aro-service).
@@ -58,7 +57,8 @@ exports.configure = (api, middleware) => {
       if (!websocketSessionId) {
         return Promise.reject(new Error('You must specify a websocketSessionId body parameter for socket routing to work'))
       }
-      socketManager().mapVectorTileUuidToClientId(requestUuid, websocketSessionId)
+      // ...i have questions about firing sockets from an endpoint...
+      ServerSocketManager.mapVectorTileUuidToClientId(requestUuid, websocketSessionId)
 
       // For the request to service, we have to pass only the layerDefinitions
       return bodyContent.layerDefinitions

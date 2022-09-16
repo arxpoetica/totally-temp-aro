@@ -8,7 +8,7 @@ import ReactPaginate from 'react-paginate'
 import PriceBookCreator from './pricebook-creator.jsx'
 import PriceBookEditor from './pricebook-editor.jsx'
 import RateReachManager from './rate-reach-creater.jsx'
-import CompetitorEditor from './competitor-editor.jsx'
+import { CompetitorEditor } from './competitor/competitor-editor.jsx'
 import PermissionsTable from '../acl/resource-permissions/permissions-table.jsx'
 import FusionEditor from '../resource-manager/fusion-editor.jsx'
 import NetworkArchitectureEditor from '../resource-manager/network-architecture-editor.jsx'
@@ -27,11 +27,25 @@ function ResourceEditor(props) {
   const [cloneManager, setCloneManager] = useState('')
   const [cloneManagerType, setCloneManagerType] = useState('')
   const [openedManager, setOpenedManager] = useState('')
-  const [selectedResourceName, setSelectedResourceName] = useState('')
-  const [filterText, setFilterText] = useState('')
+  const [selectedResourceName, setSelectedResourceName] = useState(props.selectedResourceName)
+  const [filterText, setFilterText] = useState(props.filterText)
   const [isOrderDesc, setIsOrderDesc] = useState(false)
   const [selectedColumn, setSelectedColumn] = useState('')
 
+	const resourceTypeUserPermissionMap = {
+		all: ['admin', 'super_user'],
+		price_book: ['admin', 'super_user', 'public', 'default'],
+		tsm_manager: ['admin', 'super_user', 'public', 'default'],
+		competition_manager: ['admin', 'super_user'],
+		roic_manager: ['admin', 'super_user', 'public', 'default'],
+		arpu_manager: ['admin', 'super_user', 'public', 'default'],
+		impedance_mapping_manager: ['admin', 'super_user', 'public', 'default'],
+		rate_reach_manager: ['admin', 'super_user', 'public', 'default'],
+		network_architecture_manager: ['admin', 'super_user', 'public', 'default'],
+		fusion_manager: ['admin', 'super_user', 'public', 'default'],
+		planning_constraints_manager: ['admin', 'super_user', 'public', 'default'],
+	}
+	
   const actionsECD = [
     {
       buttonText: 'Edit', // Edit
@@ -115,7 +129,7 @@ function ResourceEditor(props) {
 
 	const handleOnDiscard = () => {
 		props.setIsResourceEditor(true)
-    props.setEditingMode('LIST_RESOURCE_MANAGERS')
+		props.setEditingMode('LIST_RESOURCE_MANAGERS')
 	}
 
 	const onSortClick = (colName) => {
@@ -334,67 +348,59 @@ function ResourceEditor(props) {
 							</div>
 						</div>
 					</div>
-					<div className="comp_edit_tbl_contain" style={{flex: '1 1 auto', overflowY: 'auto'}}>
-						<table className="table table-sm ei-table-foldout-striped" style={{borderBottom: "1px solid #dee2e6"}}>
-							<thead className="thead-dark">
-								<tr>
-									<th></th>
-									<th
-										className='ei-table-col-head-sortable ng-binding ng-scope'
-										onClick={event => { onSortClick(sortableColumns.NAME) }}
-										style={{'cursor': 'pointer'}}
-									>
-										Name
-										{selectedColumn === sortableColumns.NAME
-											? <div className='ei-table-col-sort-icon ng-scope'>
-													<i className={'fa' + (isOrderDesc ? ' fa-chevron-up' : ' fa-chevron-down')} aria-hidden='true'> </i>
-												</div>
-											: ''
-										}
-									</th>
-									<th
-										className='ei-table-col-head-sortable ng-binding ng-scope'
-										onClick={event => { onSortClick(sortableColumns.RESOURCE_TYPE) }}
-										style={{'cursor': 'pointer'}}
-									>
-										Resource Type
-										{selectedColumn === sortableColumns.RESOURCE_TYPE
-											? <div className='ei-table-col-sort-icon ng-scope'>
-													<i className={'fa' + (isOrderDesc ? ' fa-chevron-up' : ' fa-chevron-down')} aria-hidden='true'> </i>
-												</div>
-											: ''
-										}
-									</th>
-									<th></th>
-								</tr>
-							</thead>
-							<tbody>
-								{renderDataRows()}
-							</tbody>
-						</table>
-					</div>
-					<div style={{flex: '0 0 auto'}}>
-						<div className="float-right">
-							{paginationElement}
-						</div>
-					</div>
+				
 					{
-					props.isMakeNewFilter &&
-						<div style={{flex: '0 0 auto'}}>
-							<div className="form-group row justify-content-end">
-								<div className="col-sm-6">
-									<button
-										onClick={() => handleCanMakeNewFilter(selectedResourceName)}
-										value={selectedResourceName}
-										className="btn btn-light btn-block"
-									>
-										<i className="fa fa-file action-button-icon"></i>
-										New {selectedResourceName}
-									</button>
+						resourceTypeUserPermissionMap[filterText].includes(props.loggedInUser.perspective) && (
+							<div>
+								<div className="comp_edit_tbl_contain" style={{flex: '1 1 auto', overflowY: 'auto'}}>
+									<table className="table table-sm ei-table-foldout-striped" style={{borderBottom: "1px solid #dee2e6"}}>
+										<thead className="thead-dark">
+											<tr>
+												<th></th>
+												<th
+													className='ei-table-col-head-sortable ng-binding ng-scope'
+													onClick={event => { onSortClick(sortableColumns.NAME) }}
+													style={{'cursor': 'pointer'}}
+												>
+													Name
+													{selectedColumn === sortableColumns.NAME
+														? <div className='ei-table-col-sort-icon ng-scope'>
+																<i className={'fa' + (isOrderDesc ? ' fa-chevron-up' : ' fa-chevron-down')} aria-hidden='true'> </i>
+															</div>
+														: ''
+													}
+												</th>
+												<th
+													className='ei-table-col-head-sortable ng-binding ng-scope'
+													onClick={event => { onSortClick(sortableColumns.RESOURCE_TYPE) }}
+													style={{'cursor': 'pointer'}}
+												>
+													Resource Type
+													{selectedColumn === sortableColumns.RESOURCE_TYPE
+														? <div className='ei-table-col-sort-icon ng-scope'>
+																<i className={'fa' + (isOrderDesc ? ' fa-chevron-up' : ' fa-chevron-down')} aria-hidden='true'> </i>
+															</div>
+														: ''
+													}
+												</th>
+												<th></th>
+											</tr>
+										</thead>
+										<tbody>
+											{renderDataRows()}
+										</tbody>
+									</table>
 								</div>
+								<div style={{flex: '0 0 auto'}}>
+									<div className="float-right">
+										{paginationElement}
+									</div>
+								</div>								
 							</div>
-						</div>
+						)
 					}
+					
+
 					<>
 						{
 							cloneManagerType === 'competition_system'

@@ -10,7 +10,7 @@ import PlanTargetListComponent from '../../selection/plan-target-list.jsx'
 import NetworkOptimizationInputForm from './network-optimization-input-form.jsx'
 import NetworkOptimizationButton from './network-optimization-button.jsx'
 import NetworkOptimizationSelectors from './network-optimization-selectors'
-import { handleError } from '../../../common/notifications'
+import { Notifier } from '../../../common/notifications'
 import Constants from '../../../common/constants'
 import DropdownList from 'react-widgets/lib/DropdownList'
 import { useModals } from '@mantine/modals'
@@ -36,7 +36,7 @@ export function NetworkOptimizationInput(props) {
           // save transaction
           props.commitTransaction(props.transactionId)
             .then(() => onRunOptimization())
-            .catch(error => handleError(error))
+            .catch(error => Notifier.error(error))
         }
       })
     } else {

@@ -125,6 +125,8 @@ function GlobalSettings(props) {
     props.setShowGlobalSettings(false)
     props.setIsRrmManager(false)
     props.setGlobalSettingsView(false)
+    props.setIsResourceEditor(true)
+    props.setEditingMode('LIST_RESOURCE_MANAGERS')
     showResourceManagerTable()
     if (props.currentViewProps === views.MY_ACCOUNT) { props.openAccountSettingsModal(false) }
   }
@@ -172,7 +174,7 @@ function GlobalSettings(props) {
             :'xl'
       }
       title={renderBreadCrumb()}
-      overflow="inside"
+      overflow="outside"
       styles={{ modal: { backgroundColor: "#F8F9FA" } }}
     >
       {breadCrumb.length === 1 &&

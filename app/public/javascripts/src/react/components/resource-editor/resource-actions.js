@@ -6,6 +6,8 @@ import { batch } from 'react-redux'
 //  BUT resource managers are listed in two places, DRY this up!
 import PlanActions from '../plan/plan-actions'
 import GlobalSettingsActions from '../global-settings/globalsettings-action'
+import { Notifier } from '../../common/notifications'
+import { RECALC_STATES } from './competitor/competitor-shared'
 
 function getResourceTypes () {
   return dispatch => {
@@ -907,15 +909,12 @@ function loadCompManMeta (competitorManagerId) {
   }
 }
 
-function loadCompManForStates (competitorManagerId, selectedRegions, loggedInUser) {
+function loadCompManForStates(competitorManagerId, regionsString, loggedInUser) {
+  return async(dispatch) => {
+    try {
+      if ('undefined' === typeof competitorManagerId || !regionsString) return
 
-  return dispatch => {
-
-    if ('undefined' === typeof competitorManagerId || selectedRegions.length < 1) return
-    const regionsString = selectedRegions.map(ele => ele.value).join(",")
-
-    AroHttp.get(`/service/v1/competitor-profiles?states=${regionsString}`)
-    .then((carrierResult) => {
+      const carrierResult = await AroHttp.get(`/service/v1/competitor-profiles?states=${regionsString}`)
       const newCarriersById = {}
       const newStrengthsById = {}
 
@@ -923,49 +922,47 @@ function loadCompManForStates (competitorManagerId, selectedRegions, loggedInUse
         newCarriersById[ele.carrierId] = ele
         newStrengthsById[ele.carrierId] = getDefaultStrength(ele.carrierId)
       })
-      
       this.carriersById = newCarriersById
-
       carrierResult.data.sort((a,b) => {return b.cbPercent - a.cbPercent})
 
       dispatch({
         type: Actions.RESOURCE_EDITOR_CARRIERS_BY_PCT,
-        payload: carrierResult.data
+        payload: carrierResult.data,
       })
 
-      AroHttp.get(`/service/v1/competitor-manager/${competitorManagerId}/strengths?states=${regionsString}&user_id=${loggedInUser.id}`)
-      .then((strengthsResult) => {
+      const query = `?states=${regionsString}&user_id=${loggedInUser.id}`
+      const url = `/service/v1/competitor-manager/${competitorManagerId}/strengths${query}`
+      const strengthsResult = await AroHttp.get(url)
 
-        // ToDo: strength types should be dynamic, either get this list from the server OR have the server initilize strengths 
-        const newStrengthColsDict = {wholesale: "wholesale", tower: "tower", retail: "retail"}
+      // ToDo: strength types should be dynamic, either get this list from
+      // the server OR have the server initilize strengths 
+      const newStrengthColsDict = { wholesale: 'wholesale', tower: 'tower', retail: 'retail' }
+      const newStrengthCols = ['wholesale', 'tower', 'retail']
 
-        const newStrengthCols = ["wholesale", "tower", "retail"]
-
-        strengthsResult.data.forEach(ele => {
-
-          if (!newStrengthColsDict.hasOwnProperty(ele.providerTypeId)){
-            newStrengthColsDict[ele.providerTypeId] = ele.providerTypeId
-            newStrengthCols.push(ele.providerTypeId)
-          }
-          if (!newStrengthsById.hasOwnProperty(ele.carrierId)){
-            newStrengthsById[ele.carrierId] = {}
-          }
-          newStrengthsById[ele.carrierId][ele.providerTypeId] = ele
-        })
-        const pristineStrengthsById = newStrengthsById
-        const strengthsById = JSON.parse(JSON.stringify(pristineStrengthsById))
-
-        dispatch({
-          type: Actions.RESOURCE_EDITOR_STRENGTH_COLS,
-          payload: {
-            pristineStrengthsById: pristineStrengthsById,
-            strengthsById: strengthsById,
-            strengthCols: newStrengthCols
-          }
-        })
+      strengthsResult.data.forEach(ele => {
+        if (!newStrengthColsDict.hasOwnProperty(ele.providerTypeId)){
+          newStrengthColsDict[ele.providerTypeId] = ele.providerTypeId
+          newStrengthCols.push(ele.providerTypeId)
+        }
+        if (!newStrengthsById.hasOwnProperty(ele.carrierId)){
+          newStrengthsById[ele.carrierId] = {}
+        }
+        newStrengthsById[ele.carrierId][ele.providerTypeId] = ele
       })
-    })
-    .catch(err => console.error(err))
+      const pristineStrengthsById = newStrengthsById
+      const strengthsById = JSON.parse(JSON.stringify(pristineStrengthsById))
+
+      dispatch({
+        type: Actions.RESOURCE_EDITOR_STRENGTH_COLS,
+        payload: {
+          pristineStrengthsById: pristineStrengthsById,
+          strengthsById: strengthsById,
+          strengthCols: newStrengthCols,
+        }
+      })
+    } catch (error) {
+      Notifier.error(error)
+    }
   }
 }
 
@@ -978,37 +975,43 @@ function  getDefaultStrength (carrierId) {
 }
 
 function saveCompManConfig(competitorManagerId, pristineStrengthsById, strengthsById){
-
-  return dispatch => {
-
-    const changedModels = []
-    for (const carrierId in strengthsById){
-      for (const providerTypeId in strengthsById[carrierId]){
-        const strengthJSON = JSON.stringify(strengthsById[carrierId][providerTypeId] )
-        if (strengthJSON !== JSON.stringify(pristineStrengthsById[carrierId][providerTypeId])) {
-          changedModels.push(JSON.parse(strengthJSON))
+  return async(dispatch) => {
+    try {
+      const changedModels = []
+      for (const carrierId in strengthsById) {
+        for (const providerTypeId in strengthsById[carrierId]){
+          const strengthJSON = JSON.stringify(strengthsById[carrierId][providerTypeId] )
+          if (strengthJSON !== JSON.stringify(pristineStrengthsById[carrierId][providerTypeId])) {
+            changedModels.push(JSON.parse(strengthJSON))
+          }
         }
       }
-    }
 
-    if (changedModels.length > 0) {
-      AroHttp.put(`/service/v1/competitor-manager/${competitorManagerId}/strengths`, changedModels)
-        .then((result) => {
-          if (!this.doRecalc){
-            AroHttp.get(`/service/v1/competitor-manager/${competitorManagerId}/state`)
-            .then((result) => {
-              if (result.data.modifiedCount > 0){
-                //this.doRecalc = true
-              }
-              dispatch(setIsResourceEditor(true))
-            })
-          }else{
-            dispatch(setIsResourceEditor(true))
-          }
-        })
-        .catch((err) => console.error(err))
-    } else {
-      console.log('Competitor Editor: No models were changed. Nothing to save.')
+      if (changedModels.length > 0) {
+        await AroHttp.put(`/service/v1/competitor-manager/${competitorManagerId}/strengths`, changedModels)
+        if (!this.doRecalc){
+          const url = `/service/v2/resource-manager/${competitorManagerId}/competition_manager`
+          const { data } = await AroHttp.get(url)
+          dispatch(setRecalcState(data.state))
+        }
+      } else {
+        console.log('Competitor Editor: No models were changed. Nothing to save.')
+      }
+    } catch (error) {
+      Notifier.error(error)
+    }
+  }
+}
+
+// Recalcing
+function executeRecalc(userId, competitorManagerId) {
+  return async(dispatch) => {
+    try {
+      dispatch(setRecalcState(RECALC_STATES.RECALCULATING))
+      const url = `/service/v1/competitor-manager/${competitorManagerId}/refresh/?user_id=${userId}`
+      await AroHttp.post(url)
+    } catch (error) {
+      Notifier.error(error)
     }
   }
 }
@@ -1333,6 +1336,43 @@ function convertMetersToLengthUnits (input) {
   }
 }
 
+function setRecalcState(nextRecalcState) {
+  return (dispatch, getState) => {
+    const { recalcState: prevRecalcState, recalcNotificationId } = getState().resourceEditor
+    dispatch({
+      type: Actions.RESOURCE_EDITOR_SET_RECALC_STATE,
+      payload: nextRecalcState,
+    })
+    if (nextRecalcState !== prevRecalcState && nextRecalcState === RECALC_STATES.RECALCULATING) {
+      const id = Notifier.warning([
+        'The competition manager is being updated.',
+        'You should not run any plans until this operation is complete.',
+        'Please contact your system admin with any questions.',
+      ].join(' '), {
+        title: 'Updating Competition Manager',
+        loading: true,
+      })
+      dispatch(setRecalcNotificationId(id))
+    } else if (recalcNotificationId && nextRecalcState !== RECALC_STATES.RECALCULATING) {
+      setRecalcNotificationId(null)
+      Notifier.done(recalcNotificationId, {
+        title: 'Updated Competition Manager',
+        message: [
+          'The competition manager has finished updating.',
+          'It is now safe to continue running plans.',
+        ].join(' '),
+      })
+    }
+  }
+}
+
+function setRecalcNotificationId(recalcNotificationId) {
+  return {
+    type: Actions.RESOURCE_EDITOR_SET_RECALC_NOTIFICATION_ID,
+    payload: recalcNotificationId,
+  }
+}
+
 export default {
   getResourceTypes,
   getResourceManagers,
@@ -1371,4 +1411,7 @@ export default {
   convertMetersToLengthUnits,
   convertlengthUnitsToMeters,
   setEditingMode,
+  setRecalcState,
+  setRecalcNotificationId,
+  executeRecalc,
 }

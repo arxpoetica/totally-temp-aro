@@ -1,11 +1,12 @@
 import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
-import SocketManager from '../../common/socket-manager'
+import { ClientSocketManager } from '../../common/client-sockets'
 import NotificationInterface from '../notification/notification-interface'
 import NotificationTypes from '../notification/notification-types'
 import PlanActions from '../plan/plan-actions'
 import ToolBarActions from '../header/tool-bar-actions'
 import GlobalSettingsActions from '../global-settings/globalsettings-action'
+import { SOCKET_EVENTS } from '../../../../../../socket-namespaces'
 
 function loadMetaData () {
 
@@ -246,14 +247,14 @@ function fileUpload (dispatch, uploadDetails, libraryId, loggedInUser, libraryIt
   var uInt8ArrayToJSON = (uIntArr) => {
     return JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(uIntArr)))
   }
-  SocketManager.joinRoom('library', libraryId)
-  var unsubscribeETLStart = SocketManager.subscribe('ETL_START', msg => {
+  ClientSocketManager.joinRoom('library', libraryId)
+  var unsubscribeETLStart = ClientSocketManager.subscribe(SOCKET_EVENTS.ETL_START, msg => {
     if (msg.properties.headers.libraryId === libraryId) {
       // var content = uInt8ArrayToJSON(msg.content)
       NotificationInterface.updateNotification(dispatch, noteId, `${processNote} 0.00% | 0 errors`)
     }
   })
-  var unsubscribeETLUpdate = SocketManager.subscribe('ETL_UPDATE', msg => {
+  var unsubscribeETLUpdate = ClientSocketManager.subscribe(SOCKET_EVENTS.ETL_UPDATE, msg => {
     if (msg.properties.headers.libraryId === libraryId) {
       var content = uInt8ArrayToJSON(msg.content)
       const pct = ((content.validCount / content.totalCount) * 100).toFixed(2)
@@ -263,7 +264,7 @@ function fileUpload (dispatch, uploadDetails, libraryId, loggedInUser, libraryIt
   })
 
 
-  var unsubscribeETLClose = SocketManager.subscribe('ETL_CLOSE', msg => {
+  var unsubscribeETLClose = ClientSocketManager.subscribe(SOCKET_EVENTS.ETL_CLOSE, msg => {
       if (msg.properties.headers.libraryId === libraryId) {
         const content = uInt8ArrayToJSON(msg.content)
         const pct = content.validCount && content.totalCount ? ((content.validCount / content.totalCount) * 100).toFixed(2) : 0
@@ -278,7 +279,7 @@ function fileUpload (dispatch, uploadDetails, libraryId, loggedInUser, libraryIt
       }
     })
 
-  var unsubscribeETLError = SocketManager.subscribe('ETL_ERROR', msg => {
+  var unsubscribeETLError = ClientSocketManager.subscribe(SOCKET_EVENTS.ETL_ERROR, msg => {
     if (msg.properties.headers.libraryId === libraryId) {
       const content = uInt8ArrayToJSON(msg.content)
       NotificationInterface.updateNotification(

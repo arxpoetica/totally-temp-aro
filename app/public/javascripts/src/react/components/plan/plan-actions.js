@@ -4,7 +4,7 @@ import CoverageActions from '../coverage/coverage-actions'
 import SelectionActions from '../selection/selection-actions'
 import RfpActions from '../optimization/rfp/rfp-actions'
 import RfpStatusTypes from '../optimization/rfp/constants'
-import SocketManager from '../../../react/common/socket-manager'
+import { ClientSocketManager } from '../../common/client-sockets'
 import PlanEditorActions from '../plan-editor/plan-editor-actions'
 import RingEditActions from '../ring-edit/ring-edit-actions'
 import NetworkOptimizationActions from '../optimization/network-optimization/network-optimization-actions'
@@ -12,7 +12,7 @@ import UserActions from '../user/user-actions'
 import ToolBarActions from '../header/tool-bar-actions.js'
 import AroHttp from '../../common/aro-http'
 import fetch from 'cross-fetch'
-import { handleError } from '../../common/notifications'
+import { Notifier } from '../../common/notifications'
 import subnetTileActions from '../plan-editor/subnet-tile-actions'
 import RoicReportsActions from '../sidebar/analysis/roic-reports/roic-reports-actions'
 
@@ -62,7 +62,7 @@ function loadPlan (planId) {
   return dispatch => {
     AroHttp.get(`/service/v1/plan/${planId}`)
       .then(result => dispatch(setActivePlan(result.data)))
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -72,8 +72,8 @@ function manageLibrarySubscriptions (currentSelectedLibraryItems, newSelectedLib
   const newSelectedLibraryIds = new Set(newSelectedLibraryItems.map(libraryItem => libraryItem.identifier))
   const subscriptionsToAdd = [...newSelectedLibraryIds].filter(item => !currentSelectedLibraryIds.has(item))
   const subscriptionsToDelete = [...currentSelectedLibraryIds].filter(item => !newSelectedLibraryIds.has(item))
-  subscriptionsToDelete.forEach(libraryId => SocketManager.leaveRoom('library', libraryId))
-  subscriptionsToAdd.forEach(libraryId => SocketManager.joinRoom('library', libraryId))
+  subscriptionsToDelete.forEach(libraryId => ClientSocketManager.leaveRoom('library', libraryId))
+  subscriptionsToAdd.forEach(libraryId => ClientSocketManager.joinRoom('library', libraryId))
 }
 
 function loadPlanDataSelectionFromServer (planId) {
@@ -155,7 +155,7 @@ function loadPlanDataSelectionFromServer (planId) {
           }
         })
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -163,7 +163,7 @@ function loadPlanDataSelectionFromServer (planId) {
 function setActivePlan (plan) {
   return (dispatch, getState) => {
     getState().plan.activePlan && getState().plan.activePlan.id &&
-      SocketManager.leaveRoom('plan', getState().plan.activePlan.id) // leave previous plan
+      ClientSocketManager.leaveRoom('plan', getState().plan.activePlan.id) // leave previous plan
     batch(() => {
       dispatch(subnetTileActions.clearSubnetDataAndCache())
       dispatch({
@@ -181,7 +181,7 @@ function setActivePlan (plan) {
     // clear any old plan edit data 
     dispatch(PlanEditorActions.clearTransaction(false))
     // Join room for this plan
-    SocketManager.joinRoom('plan', plan.id)
+    ClientSocketManager.joinRoom('plan', plan.id)
     // Get current plan data items
     dispatch(loadPlanDataSelectionFromServer(plan.id))
     // Update details on the coverage report
@@ -251,7 +251,7 @@ function deleteLibraryEntry (dataSource) {
         // wait for success before updating local state, keep in sync
         dispatch(setAllLibraryItems(dataType, updatedLib))
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -267,7 +267,7 @@ function clearAllSelectedSA (plan, dataItems, selectedServiceAreas) {
           dispatch(SelectionActions.removePlanTargets(plan.id, { serviceAreas: new Set(invalidServiceAreas) }))
         }
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -350,7 +350,7 @@ function loadPlanResourceSelectionFromServer (plan) {
         })
         return Promise.resolve()
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -458,7 +458,7 @@ function loadProjectConfig (userId, authPermissions) {
         const selectedProjectId = result.data.projectTemplateId
         dispatch(setSelectedProjectId(selectedProjectId))
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -469,7 +469,7 @@ function createNewProject (projectName, parentProject, userId, authPermissions) 
         dispatch(loadProjectConfig(userId, authPermissions))
         dispatch(setProjectMode('HOME'))
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -481,7 +481,7 @@ function deleteProjectConfig (project,userId, authPermissions) {
         dispatch(loadProjectConfig(userId, authPermissions))
         dispatch(setProjectMode('HOME'))
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -510,7 +510,7 @@ function planSettingsToProject (selectedProjectId, dataItems, resourceItems) {
       .then(() => {
         dispatch(setProjectMode('HOME'))
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -569,7 +569,7 @@ function updateDataSourceEditableStatus (isDataSourceEditable, dataSourceKey, lo
             payload: isDataSourceEditable
           })
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
     }
   }
 }
@@ -631,7 +631,7 @@ function loadLibraryEntryById (libraryId) {
           }
         })
       })
-      .catch(error => handleError(error))
+      .catch(error => Notifier.error(error))
   }
 }
 
@@ -659,7 +659,7 @@ function deletePlan (plan) {
             })
             .then((ephemeralPlan) => dispatch(setActivePlan(ephemeralPlan.data)))
             .catch(error => {
-              handleError(error)
+              Notifier.error(error)
               reject(error)
             })
         } else {
@@ -709,7 +709,7 @@ function exportPlan (userId, planId, filename) {
     saveAs(new Blob([rawResult]), filename)
   })
   .catch(error => {
-    handleError(error)
+    Notifier.error(error)
   })
 }
 
@@ -732,7 +732,7 @@ function importPlan (userId, file) {
       })
     })
     .catch(error => {
-      handleError(error)
+      Notifier.error(error)
       dispatch({
         type: Actions.PLAN_SET_UPLOAD_NAME,
         payload: null,
