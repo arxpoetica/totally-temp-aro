@@ -353,9 +353,4 @@ module.exports = class NetworkPlan {
     }
   }
 
-  // FIXME: legacy code, transfer to service
-  static _callService (req) {
-    return models.AROService.request(req)
-  }
-
 }
