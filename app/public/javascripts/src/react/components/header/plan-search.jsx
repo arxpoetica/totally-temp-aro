@@ -593,7 +593,7 @@ export class PlanSearch extends Component {
           planOptions.params = {}
           this.setState({ planOptions })
           // TODO: this doesn't belong here - we need to reload this once an upload is completed 
-          AroHttp.get('/optimization/processes').then((running) => {
+          AroHttp.get('/service/optimization/processes').then(running => {
             this.totalData = []
             this.totalData = response.data.sort((a, b) => (a[this.state.sortByField] < b[this.state.sortByField]) ? 1 : -1)
             this.totalData.forEach((plan) => {

@@ -84,7 +84,6 @@ async function kickoff() {
   require('./routes/routes_county_subdivision').configure(api, middleware)
   require('./routes/routes_census_block').configure(api, middleware)
   require('./routes/routes_location').configure(api, middleware)
-  require('./routes/routes_network').configure(api, middleware)
   require('./routes/routes_etl_template').configure(api, middleware)
   // TODO: don't use ServerSocketManager in route endpoints...remove...
   require('./routes/routes_service').configure(api, middleware, ServerSocketManager)
