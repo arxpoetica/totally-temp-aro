@@ -162,10 +162,18 @@ export class RoicReports extends Component {
     }
   }
 
+  componentDidMount() {
+    if (Object.entries(this.props.roicResults.roicAnalysis.components).length > 0) {
+      this.digestData();
+    }
+  }
+
   componentDidUpdate (prevProps) {
-    if (JSON.stringify(this.props.roicResults) !== JSON.stringify(prevProps.roicResults)) {
-      if (Object.entries(this.props.roicResults.roicAnalysis.components).length > 0)
-        this.digestData()
+    if (
+      JSON.stringify(this.props.roicResults) !== JSON.stringify(prevProps.roicResults)
+      && Object.entries(this.props.roicResults.roicAnalysis.components).length > 0
+    ) {
+      this.digestData()
     }
   }
 
@@ -189,7 +197,7 @@ export class RoicReports extends Component {
       const component = this.props.roicResults.roicAnalysis.components[componentKey]
       Object.keys(component).forEach(curveKey => {
         const curve = component[curveKey]
-        const calcType = this.calcTypes.filter(item => item.id === curve.calcType)[0]
+        const calcType = this.calcTypes.find(item => item.id === curve.calcType)
         const multiplier = calcType ? calcType.multiplier : 1.0
         curve.values = curve.values.map(item => item * multiplier)
       })
