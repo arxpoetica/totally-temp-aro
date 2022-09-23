@@ -150,29 +150,6 @@ module.exports = class Location {
         `, [location_id])
         add('towers', towers_values)
 
-        /*
-        var sql = `
-          SELECT address,zipcode,city, ST_AsGeojson(geog)::json AS geog,cb.tabblock_id, cb.name,
-            (SELECT min(ST_Distance(ef_closest_fibers.geom::geography, locations.geog))
-              FROM (
-                SELECT geom
-                FROM client.existing_fiber
-                ORDER BY existing_fiber.geom <#> locations.geom ASC
-                LIMIT 10
-              ) as ef_closest_fibers
-            ) AS distance_to_client_fiber
-          FROM locations 
-          JOIN aro.census_blocks cb ON ST_Contains(cb.geom,locations.geom)
-          WHERE locations.id=$1
-        `*/
-        // new ?
-        /*
-        var sql = `
-          select e.* from aro_core.global_library gl
-          join aro.edge e
-          on gl.data_source_id =e.data_source_id
-          where gl.meta_data_id ={library_id}
-        `*/
         const locationInfo = await database.findOne(`
           SELECT address,zipcode,city, ST_AsGeojson(geog)::json AS geog,cb.tabblock_id, cb.name
           FROM locations 

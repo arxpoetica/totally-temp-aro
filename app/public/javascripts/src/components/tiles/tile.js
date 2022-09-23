@@ -209,15 +209,12 @@ class TileComponentController {
       }
       Promise.all(pointInPolyPromises)
         .then((results) => {
-          console.log(results)
           var selectedLocations = new Set()
           var selectedServiceAreas = new Set()
           var selectedRoadSegments = new Set()
           results.forEach((result) => {
             result.forEach((selectedObj) => {
               if (selectedObj.location_id) { // OR selectedObj._data_type === "location" 
-                //selectedLocations.add(selectedObj.location_id) // selectedObj.object_id
-                // #179702878 group select fix
                 selectedLocations.add(selectedObj)
               } else if (selectedObj._data_type == 'service_layer' && selectedObj.id) {
                 selectedServiceAreas.add(selectedObj.id)
