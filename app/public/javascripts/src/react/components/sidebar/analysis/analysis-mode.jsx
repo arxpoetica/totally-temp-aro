@@ -18,6 +18,8 @@ import ExpertMode from './expert-mode/expert-mode.jsx'
 import ExpertModeButton from './expert-mode/expert-mode-button.jsx'
 import CoverageReportDownloader from './coverage/coverage-report-downloader.jsx'
 import AnalysisErrors from './analysis-errors.jsx'
+import { targetSelectionModes } from '../constants'
+
 export class AnalysisMode extends Component {
   constructor (props) {
     super(props)
@@ -42,6 +44,11 @@ export class AnalysisMode extends Component {
       if (analysisType.id === this.props.networkAnalysisType) initAnalysisType = analysisType
     })
     this.setState({ localAnalysisType: initAnalysisType })
+  }
+
+  componentWillUnmount() {
+    // TODO: is there more to do here? like removing listeners and polygons?
+    this.props.mapRef.setOptions({ draggableCursor: null })
   }
 
   render () {
@@ -188,6 +195,7 @@ const mapStateToProps = (state) => ({
   networkAnalysisType: state.optimization.networkOptimization.optimizationInputs.analysis_type,
   currentPlanState: state.plan.activePlan.planState,
   planStateCons: state.roicReports.planStateCons,
+  mapRef: state.map.googleMaps,
 })
 
 const mapDispatchToProps = (dispatch) => ({
