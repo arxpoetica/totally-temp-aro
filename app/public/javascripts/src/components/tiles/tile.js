@@ -497,10 +497,10 @@ class TileComponentController {
             // structures for this kind of thing!
 
             // annoying prep (this is reset below)
-            prevHitFeatures.roadSegments = [...prevHitFeatures.roadSegments]
-            prevHitFeatures.fiberFeatures = [...prevHitFeatures.fiberFeatures]
-            hitFeatures.roadSegments = [...hitFeatures.roadSegments]
-            hitFeatures.fiberFeatures = [...hitFeatures.fiberFeatures]
+            prevHitFeatures.roadSegments = [...(prevHitFeatures.roadSegments || [])]
+            prevHitFeatures.fiberFeatures = [...(prevHitFeatures.fiberFeatures || [])]
+            hitFeatures.roadSegments = [...(hitFeatures.roadSegments || [])]
+            hitFeatures.fiberFeatures = [...(hitFeatures.fiberFeatures || [])]
 
             // NOTE: not running anything with boundaries because only
             // focused on selection/deselection of point-based features.
@@ -519,7 +519,9 @@ class TileComponentController {
               // https://www.wikiwand.com/en/Difference_(set_theory)#/Relative_complement
               const prevFeatures = prevHitFeatures[featureName]
               hitFeatures[featureName] = hitFeatures[featureName].filter(feature => {
-                const found = prevFeatures.find(prevItem => prevItem[idName] === feature[idName])
+                // FIXME: OH MY HECK GROSS: `prevFeatures.locations` is SOMETIMES an array
+                // and SOMETIMES a Set...WHHHHHUUUUUHHH???? Hence `[...prevFeatures]
+                const found = [...prevFeatures].find(prevItem => prevItem[idName] === feature[idName])
                 return !found
               })
             }
