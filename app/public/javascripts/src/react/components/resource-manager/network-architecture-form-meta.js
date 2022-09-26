@@ -908,9 +908,9 @@ const NetworkArchitectureFormMeta = Object.freeze({
             },
             'capacityType': {
               '_meta': {
-                'displayType': 'dropdownList',
+                'displayOnly': true,
+                'displayType': 'text',
                 'displayName': '',
-                'options': FiberCapacityTypes
               }
             },
             'strategy': {
@@ -1713,9 +1713,9 @@ const NetworkArchitectureFormMeta = Object.freeze({
             },
             'capacityType': {
               '_meta': {
-                'displayType': 'dropdownList',
+                'displayOnly': true,
+                'displayType': 'text',
                 'displayName': '',
-                'options': FiberCapacityTypes
               }
             },
             'strategy': {
