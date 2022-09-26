@@ -15,7 +15,7 @@ import NetworkAnalysisOutput from '../../optimization/network-analysis/network-a
 import ReportsDownloadModal from '../../optimization/reports/reports-download-modal.jsx'
 import NetWorkBuildOutput from './network-build/network-build-output.jsx'
 import ExpertMode from './expert-mode/expert-mode.jsx'
-import ExpertModeButton from './expert-mode/expert-mode-button.jsx'
+import { ExpertModeButton } from './expert-mode/expert-mode-button.jsx'
 import CoverageReportDownloader from './coverage/coverage-report-downloader.jsx'
 import AnalysisErrors from './analysis-errors.jsx'
 import { targetSelectionModes } from '../constants'
@@ -84,10 +84,9 @@ export class AnalysisMode extends Component {
                 }
               </div>
 
-              {/* Will Render based on Switch case */}
-              <div>
-                {this.renderNetworkAnalysisTypes(networkAnalysisType)}
-              </div>
+              {networkAnalysisType === 'COVERAGE_ANALYSIS' && <CoverageButton />}
+              {networkAnalysisType === 'RFP' && <RfpButton />}
+              {networkAnalysisType === 'EXPERT_MODE' && <ExpertModeButton />}
 
               <div>
                 {(networkAnalysisType === 'NETWORK_PLAN' || networkAnalysisType === 'NETWORK_ANALYSIS') &&
@@ -155,19 +154,6 @@ export class AnalysisMode extends Component {
         </Card>
       </div>
     )
-  }
-
-  renderNetworkAnalysisTypes (networkAnalysisType) {
-    switch (networkAnalysisType) {
-      case 'COVERAGE_ANALYSIS':
-        return <CoverageButton />
-      case 'RFP':
-        return <RfpButton />
-      case 'EXPERT_MODE':
-        return <ExpertModeButton />
-      default:
-        return ''
-    }
   }
 
   onAnalysisTypeChange (event) {

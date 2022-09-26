@@ -143,4 +143,9 @@ module.exports = class NetworkPlan {
     }
   }
 
+  // FIXME: legacy code, transfer to service
+  static getIdsFromSql(sql) {
+    return database.findValues(sql, null, 'id')
+  }
+
 }

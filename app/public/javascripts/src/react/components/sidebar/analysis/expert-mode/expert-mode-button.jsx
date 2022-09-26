@@ -1,116 +1,99 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { connect } from 'react-redux'
-import NetworkOptimizationActions from '../../../optimization/network-optimization/network-optimization-actions'
+import { Button } from '@mantine/core'
+import { IconDeviceFloppy } from '@tabler/icons'
 import format from '../../../../../models/string-template'
 import AroHttp from '../../../../common/aro-http'
 import SelectionModes from '../../../selection/selection-modes'
 import SelectionActions from '../../../selection/selection-actions'
+import { Notifier } from '../../../../common/notifications'
 
-export class expertButton extends Component {
+function expertButton(props) {
 
-  render () {
-
-    const { networkAnalysisType, selectedExpertMode, expertModeTypes } = this.props
-
-    return (
-      <div>
-        {networkAnalysisType === 'EXPERT_MODE' && selectedExpertMode === expertModeTypes['OPTIMIZATION_SETTINGS'].id &&
-          <button className="btn btn-block btn-primary" onClick={() => this.saveExpertMode()}>
-            <i className="fa fa-save"></i>
-            &nbsp;Save
-          </button>
-        }
-
-        {networkAnalysisType === 'EXPERT_MODE' && selectedExpertMode !== expertModeTypes['OPTIMIZATION_SETTINGS'].id &&
-          <button
-            type='button'
-            className={`btn btn-block ${!expertModeTypes[selectedExpertMode].isQueryValid ? 'btn-default' : 'btn-primary'}`}
-            disabled={!expertModeTypes[selectedExpertMode].isQueryValid}
-            onClick={() => this.executeManualPlanTargetsQuery()}
-          >
-            <i className="fa fa-save" />
-            &nbsp;Execute
-          </button>
-        }
-
-        <div style={{width: '100%', paddingBottom: '20px'}} />
-      </div>
-    )
-  }
-
-  saveExpertMode () {
-    this.props.setOptimizationInputs(JSON.parse(this.props.expertMode.OPTIMIZATION_SETTINGS))
-  }
+  const {
+    activePlan,
+    expertMode,
+    selectedExpertMode,
+    expertModeTypes,
+    reduxPlanTargets,
+    expertModeScopeContext,
+  } = props
 
   // expert mode refactor
-  executeManualPlanTargetsQuery () {
-    const query = this.formatExpertModeQuery(
-      this.props.expertMode[this.props.selectedExpertMode], this.props.expertModeScopeContext
-    )
+  async function executeManualPlanTargetsQuery() {
+    try {
 
-    AroHttp.post('/locations/getLocationIds', { query })
-      .then((result) => {
+      let data = []
+      const isTargets = selectedExpertMode === expertModeTypes.MANUAL_PLAN_TARGET_ENTRY.id
+      const planTargetsToAdd = { locations: new Set(), serviceAreas: new Set() }
+      const planTargetsToRemove = { locations: new Set(), serviceAreas: new Set() }
+      const expertQuery = format(expertMode[selectedExpertMode], expertModeScopeContext)
 
-        const { plan, selectedExpertMode, expertModeTypes, reduxPlanTargets } = this.props
+      if (isTargets) {
+        await AroHttp.post(`/service/plan/selected_locations/cmd`, {
+          cmdType: 'EXPERT_SET',
+          expertQuery,
+          planId: activePlan.id,
+        })
+        data = (await AroHttp.get(`/service/plan/${activePlan.id}/selected_locations`)).data
+        props.setSelectionTypeById(SelectionModes.SELECTED_LOCATIONS)
+      } else {
+        // FIXME: legacy API call, transfer to service
+        data = (await AroHttp.post('/network_plan/getIdsFromSql', { query: expertQuery })).data
+        props.setSelectionTypeById(SelectionModes.SELECTED_AREAS)
+      }
 
-        if (selectedExpertMode === expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id) {
-          this.props.setSelectionTypeById(SelectionModes.SELECTED_LOCATIONS)
+      const targetsType = isTargets ? 'locations' : 'serviceAreas'
+      for (const id of data) {
+        if (reduxPlanTargets[targetsType].has(id)) {
+          planTargetsToRemove[targetsType].add(id)
         } else {
-          this.props.setSelectionTypeById(SelectionModes.SELECTED_AREAS)
+          planTargetsToAdd[targetsType].add(id)
         }
+      }
 
-        const addPlanTargets = { locations: new Set(), serviceAreas: new Set() }
-        const removePlanTargets = { locations: new Set(), serviceAreas: new Set() }
-        if (selectedExpertMode === expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id) {
-          result.data.forEach((location) => {
-            if (reduxPlanTargets.locations.has(+location)) {
-              removePlanTargets.locations.add(+location)
-            } else {
-              addPlanTargets.locations.add(+location)
-            }
-          })
-        } else {
-          result.data.forEach((serviceAreaId) => {
-            if (reduxPlanTargets.serviceAreas.has(+serviceAreaId)) {
-              removePlanTargets.serviceAreas.add(+serviceAreaId)
-            } else {
-              addPlanTargets.serviceAreas.add(+serviceAreaId)
-            }
-          })
-        }
+      if (planTargetsToAdd.locations.size > 0 || planTargetsToAdd.serviceAreas.size > 0) {
+        props.addPlanTargets(activePlan.id, planTargetsToAdd)
+      }
+      if (planTargetsToRemove.locations.size > 0 || planTargetsToRemove.serviceAreas.size > 0) {
+        props.removePlanTargets(activePlan.id, planTargetsToRemove)
+      }
 
-        if (addPlanTargets.locations.size > 0 || addPlanTargets.serviceAreas.size > 0) {
-          this.props.addPlanTargets(plan.id, addPlanTargets)
-        }
-        if (removePlanTargets.locations.size > 0 || removePlanTargets.serviceAreas.size > 0) {
-          this.props.removePlanTargets(plan.id, removePlanTargets)
-        }
-      })
-      .catch(err => console.log(err))
+    } catch (error) {
+      Notifier.error(error)
+    }
   }
 
-  formatExpertModeQuery (string, replaceWithobject) {
-    const query = format(string, replaceWithobject)
-    return query
-  }
+  return (
+    <div className="expert-button">
+      <Button
+        leftIcon={<IconDeviceFloppy size={20} stroke={2}/>}
+        onClick={() => executeManualPlanTargetsQuery()}
+        disabled={!expertModeTypes[selectedExpertMode].isQueryValid}
+        fullWidth
+      >
+        Execute
+      </Button>
+      <style jsx>{`
+        .expert-button { margin: 0 0 10px; }
+      `}</style>
+    </div>
+  )
 }
 
 const mapStateToProps = (state) => ({
-  networkAnalysisType: state.optimization.networkOptimization.optimizationInputs.analysis_type,
   expertMode: state.expertMode.expertMode,
   selectedExpertMode: state.expertMode.selectedExpertMode,
   expertModeTypes: state.expertMode.expertModeTypes,
   expertModeScopeContext: state.expertMode.expertModeScopeContext,
   reduxPlanTargets: state.selection.planTargets,
-  plan: state.plan.activePlan,
+  activePlan: state.plan.activePlan,
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  setOptimizationInputs: (inputs) => dispatch(NetworkOptimizationActions.setOptimizationInputs(inputs)),
   setSelectionTypeById: (selectionTypeId) => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
   addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
   removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
 })
 
-const expertButtonComponent = connect(mapStateToProps, mapDispatchToProps)(expertButton)
-export default expertButtonComponent
+export const ExpertModeButton = connect(mapStateToProps, mapDispatchToProps)(expertButton)

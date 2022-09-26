@@ -24,23 +24,4 @@ exports.configure = (api, middleware) => {
     .catch(next)
   });
 
-  // FIXME: legacy code, transfer to service
-  api.post('/locations/getLocationIds', (request, response, next)=> {
-    let query = request.body.query
-    var hasExcludeTerm = false
-    var excludeTerms = ['delete','drop','update','alter','insert','call','commit','create']
-    excludeTerms.forEach((term) => {
-      if(query.toLowerCase().indexOf(term) > -1) hasExcludeTerm = true
-    })
-
-    if(!hasExcludeTerm && query.toLowerCase().indexOf("select") > -1 ) {
-      models.Location.getLocationIds(query)
-      .then(jsonSuccess(response, next))
-      .catch(next)
-    } else {
-      response.status(400).json({
-        error: 'Query Not Supported'
-      })
-    }
-  });
 }

@@ -304,8 +304,4 @@ module.exports = class Location {
     })
   }
 
-  // FIXME: legacy code, transfer to service
-  static getLocationIds(sql) {
-    return database.findValues(sql,null,'id')
-  }
 }
