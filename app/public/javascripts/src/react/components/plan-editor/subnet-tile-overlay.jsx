@@ -10,6 +10,11 @@ import tileIcons from '../common/tile-overlay/tile-icons'
 import SubnetTileSelectors from './subnet-tile-selectors'
 // global: tileCache.subnets
 
+// TODO: convert tileCache to an import instead of a global
+// TODO: ABS: abstract this to general use with modular data set and on/off control
+
+
+
 let mapIcons = tileIcons.mapIcons
 let iconBadges = tileIcons.iconBadges
 // --- helpers --- //
@@ -315,7 +320,7 @@ const mapStateToProps = (state) => {
   let groupsById = state.planEditor.draftLocations.groups
   return {
     mapRef: state.map.googleMaps,
-    subnetTileData: state.subnetTileData, 
+    subnetTileData: state.subnetTileData, // ABS: this prop set by parent (half of this needs to become the parent? what about the other very task specfic props?)
     selectedSubnetId,
     alertLocationIds, // when this changes the action creator needs to clear the cache, this happens because the cache is cleared when the subnet data is updated (parent to this object)
     locationsById,
