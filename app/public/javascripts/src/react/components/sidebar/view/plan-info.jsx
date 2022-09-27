@@ -19,16 +19,9 @@ export const PlanInfo = (props) => {
     saPlanTags: [],
   })
 
-  // Save the permission bits for resource read, write and admin
-  const accessTypes = Object.freeze({
-    RESOURCE_READ: { displayName: 'Read', permissionBits: null, actors: [] },
-    RESOURCE_WRITE: { displayName: 'Write', permissionBits: null, actors: [] },
-    RESOURCE_ADMIN: { displayName: 'Owner', permissionBits: null, actors: [] }
-  })
-
   const { isEditMode, currentUserCanEdit, addGeneralTags, addSATags, generalPlanTags, saPlanTags } = state
   const { plan, systemActors, listOfServiceAreaTags, currentPlanServiceAreaTags, listOfTags, currentPlanTags,
-    dataItems, getTagColour, loggedInUser, authRoles, editActivePlan, loadPlan, setCurrentPlanTags,
+    dataItems, getTagColour, loggedInUser, authRoles, authPermissions, editActivePlan, loadPlan, setCurrentPlanTags,
     setCurrentPlanServiceAreaTags, deletePlan, loadListOfSAPlanTags } = props
 
   useEffect(() => {
@@ -95,22 +88,14 @@ export const PlanInfo = (props) => {
 
   const updateEditableStatus = () => {
     setState((state) => ({ ...state, currentUserCanEdit: false }))
-    AroHttp.get('/service/auth/permissions')
-      .then((result) => {
-        result.data.forEach((authPermissionEntity) => {
-          if (accessTypes.hasOwnProperty(authPermissionEntity.name)) {
-            accessTypes[authPermissionEntity.name].permissionBits = authPermissionEntity.id
-          }
-        })
-        // Get the actors that have access for this resource
-        return Promise.all([
-          AroHttp.get(`/service/auth/acl/PLAN/${plan.id}`),
-          AroHttp.get(`/service/auth/acl/SYSTEM/${loggedInUser.id}`)
-        ])
-      })
+    Promise.all([
+        AroHttp.get(`/service/auth/acl/PLAN/${plan.id}`),
+        AroHttp.get(`/service/auth/acl/SYSTEM/${loggedInUser.id}`)
+      ])
       .then((results) => {
         const planPermissions = results[0].data
         const systemPermissions = results[1].data
+        console.log({planPermissions, systemPermissions})
         // First, check if the user or usergroups have write permissions
         let currentUserCanWrite = false
         let currentUserIsAdmin = false
@@ -120,19 +105,21 @@ export const PlanInfo = (props) => {
           if ((loggedInUser.id === access.systemActorId) ||
               (loggedInUser.groupIds.indexOf(access.systemActorId) >= 0)) {
             const permission = access.rolePermissions
-            currentUserCanWrite = ((permission & accessTypes.RESOURCE_WRITE.permissionBits) !== 0)
-            currentUserIsAdmin = ((permission & accessTypes.RESOURCE_ADMIN.permissionBits) !== 0)
+            currentUserCanWrite = ((permission & authPermissions.RESOURCE_WRITE.permissionBits) !== 0)
+            currentUserIsAdmin = ((permission & authPermissions.RESOURCE_ADMIN.permissionBits) !== 0)
             isUserCanEdit = isUserCanEdit || currentUserCanEdit || currentUserCanWrite || currentUserIsAdmin
           }
         })
 
         // Next, check the global namespace to see if this user or groups have "SuperUser" permissions
+        const allButResourceWorkflow = authRoles.SUPER_USER.permissions - authPermissions.RESOURCE_WORKFLOW.permissionBits
         systemPermissions.resourcePermissions.forEach((access) => {
           // We are checking if the logged in user or any of the users groups have permission to write.
           if ((loggedInUser.id === access.systemActorId) ||
               (loggedInUser.groupIds.indexOf(access.systemActorId) >= 0)) {
             const currentUserIsGod = (access.rolePermissions === authRoles.SUPER_USER.permissions)
-            isUserCanEdit = isUserCanEdit || currentUserIsGod
+            const currentUserIsAllButResourceWorkflow = (access.rolePermissions === allButResourceWorkflow)
+            isUserCanEdit = isUserCanEdit || currentUserIsGod || currentUserIsAllButResourceWorkflow
           }
         })
 
@@ -335,6 +322,7 @@ const mapStateToProps = (state) => ({
   dataItems: state.plan.dataItems,
   loggedInUser: state.user.loggedInUser,
   authRoles: state.user.authRoles,
+  authPermissions: state.user.authPermissions,
 })
 
 const mapDispatchToProps = (dispatch) => ({
