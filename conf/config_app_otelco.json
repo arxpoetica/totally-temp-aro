@@ -19,7 +19,7 @@
 		"meters_to_length_units": "0.000621371"
   },
   "ui": {
-    "title": "ARO",
+    "title": "Arrow",
     "layout": "default",
     "defaultSearch":"Seattle, WA, USA",
     "map_tools": {

@@ -6,7 +6,7 @@
   "spend_by_city": false,
   "currency_symbol": "$",
   "ui": {
-    "title": "ARO",
+    "title": "Arrow",
     "layout": "default",
     "map_tools": {
       "locations": {

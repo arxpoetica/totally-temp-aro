@@ -16,7 +16,7 @@
 		"meters_to_length_units": "1"
   },
   "ui": {
-    "title": "ARO",
+    "title": "Arrow",
     "layout": "default",
     "defaultSearch":"Milan, Italy",
     "map_tools": {
