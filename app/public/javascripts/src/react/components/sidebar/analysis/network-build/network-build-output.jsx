@@ -33,6 +33,7 @@ export class NetWorkBuildOutput extends Component {
             planId={planId}
             rOptimizationState={planState}
             reportSize={reportSize}
+            key="output"
           />
         </div>
 

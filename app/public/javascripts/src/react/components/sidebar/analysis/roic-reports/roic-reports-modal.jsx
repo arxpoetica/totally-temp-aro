@@ -25,6 +25,7 @@ export class RoicReportsModal extends Component {
             planId={planId}
             rOptimizationState={planState}
             reportSize="large"
+            key="modal"
           />
         </ModalBody>
         <ModalFooter>
