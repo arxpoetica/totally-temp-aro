@@ -8,11 +8,9 @@ import TileUtils from '../common/tile-overlay/tile-overlay-utils'
 import TileDataMutator from '../common/tile-overlay/tile-data-mutator'
 import tileIcons from '../common/tile-overlay/tile-icons'
 import SubnetTileSelectors from './subnet-tile-selectors'
-// global: tileCache.subnets
+import { tileCaches } from '../common/tile-overlay/tile-cache'
 
-// TODO: convert tileCache to an import instead of a global
 // TODO: ABS: abstract this to general use with modular data set and on/off control
-
 
 
 let mapIcons = tileIcons.mapIcons
@@ -137,7 +135,7 @@ class _SubnetTileOverlay extends Component {
     for (const tileDataKey of ['all', this.props.selectedSubnetId]) {
       let isUnderlay = (tileDataKey === 'all') // hack will fix later
       let tile = null
-      if (this.props.subnetTileData[tileDataKey] && tileCache.subnets[tileDataKey]) {
+      if (this.props.subnetTileData[tileDataKey] && tileCaches.subnets[tileDataKey]) {
         let tileId = TileUtils.coordToTileId(coord, zoom)
         
         let badgeLists = {}
@@ -152,7 +150,7 @@ class _SubnetTileOverlay extends Component {
         tile = this.getTileCanvas(
           ownerDocument, 
           this.props.subnetTileData[tileDataKey], 
-          tileCache.subnets[tileDataKey], 
+          tileCaches.subnets[tileDataKey], 
           tileId,
           pointMetaById,
           badgeLists

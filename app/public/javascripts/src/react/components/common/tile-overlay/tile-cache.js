@@ -107,3 +107,8 @@ export class TileCache {
   }
 
 }
+
+export let tileCaches = {
+  subnets: {},
+  unbounded: {},
+}

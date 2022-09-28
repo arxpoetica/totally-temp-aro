@@ -7,6 +7,11 @@
 //  also once these are loaded on init (through '/configuration')
 //  they never change
 
+var iconSets = {
+  mapIcons: {},
+  iconBadges: {},
+}
+
 function setIcon (key, src, offset) {
   let image = new Image()
   iconSets.mapIcons[key] = {
