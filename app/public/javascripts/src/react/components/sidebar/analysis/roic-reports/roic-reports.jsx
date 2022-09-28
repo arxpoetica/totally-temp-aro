@@ -199,7 +199,10 @@ export class RoicReports extends Component {
         const curve = component[curveKey]
         const calcType = this.calcTypes.find(item => item.id === curve.calcType)
         const multiplier = calcType ? calcType.multiplier : 1.0
-        curve.values = curve.values.map(item => item * multiplier)
+        if (!curve.scaled) {
+          curve.values = curve.values.map(item => item * multiplier)
+          curve.scaled = true
+        }
       })
     })
   }
