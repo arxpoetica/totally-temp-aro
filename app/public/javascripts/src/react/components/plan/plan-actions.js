@@ -696,7 +696,8 @@ function editActivePlan (plan) {
   }
 }
 
-// NOT an action, this needs to move elsewhere #182441351
+// TODO: see https://www.pivotaltracker.com/n/projects/2468285/stories/182441351
+// NOT an action, this needs to move elsewhere
 function exportPlan (userId, planId, filename) {
   let payload = {
     "inlcudeLinkedResources": true,
@@ -713,7 +714,8 @@ function exportPlan (userId, planId, filename) {
   })
 }
 
-// only sort of an action, this needs to move elsewhere #182441351
+// TODO: see https://www.pivotaltracker.com/n/projects/2468285/stories/182441351
+// only sort of an action, this needs to move elsewhere
 function importPlan (userId, file) {
   return (dispatch) => {
     if (!file) return Promise.resolve()
@@ -770,6 +772,8 @@ export default {
   editActivePlan,
   setActivePlanErrors,
 
-  exportPlan, // TODO: move this #182441351
-  importPlan, // TODO: move this #182441351
+  // TODO: move this. see https://www.pivotaltracker.com/n/projects/2468285/stories/182441351
+  exportPlan,
+  // TODO: move this. see https://www.pivotaltracker.com/n/projects/2468285/stories/182441351
+  importPlan,
 }

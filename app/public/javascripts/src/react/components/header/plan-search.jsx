@@ -1,11 +1,12 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import CreatableSelect from 'react-select/creatable'
+import { Button } from '@mantine/core'
+import { IconUpload } from '@tabler/icons'
 import { components } from 'react-select'
 import AroHttp from '../../common/aro-http'
 import ToolBarActions from './tool-bar-actions'
 import PlanSearchFilter from './plan-search-filter.jsx'
-import { toUTCDate } from '../../common/view-utils.js'
 import PlanActions from '../plan/plan-actions.js'
 import { getPlanCreatorName, getTagCategories } from '../sidebar/view/plan-info-common.js'
 import { uniqBy, arrayComparer } from '../../common/view-utils.js'
@@ -97,7 +98,8 @@ export class PlanSearch extends Component {
         pageCount: 0,
         marginPagesDisplayed: 2,
       },
-      file: null, // temp #182441351
+      // TODO: see https://www.pivotaltracker.com/n/projects/2468285/stories/182441351
+      file: null,
     }
 
     this.optionSetTextArray = [
@@ -130,7 +132,7 @@ export class PlanSearch extends Component {
     const { searchText, plans, idToServiceAreaCode, creatorsSearchList,
       optionSetText, isDropDownOption, sortByField, allPlans, pageableData } = this.state
 
-    // TODO: temp #182441351
+    // TODO: see https://www.pivotaltracker.com/n/projects/2468285/stories/182441351
     if (this.props.uploadName !== null) {
       return (
         <div>
@@ -220,21 +222,16 @@ export class PlanSearch extends Component {
               <input name="file" type="file" onChange={event => this.onFileSelect(event)} className="form-control"/>
             </div>
           </div>
-          <div className="form-group row"
-            style={{ 'marginTop': '-0.8rem' }}
-          >
-            <label className="col-sm-4 col-form-label"> </label>
-            <div className="col-sm-8">
-              <button className="btn btn-primary" 
-                style={{ margin: '2px' }}
-                disabled={!this.state.file}
-                onClick={() => this.onUpload()}>
-                <span className="fa fa-upload text-white"></span> Upload
-              </button>
-            </div>
-          </div>
+          {/* TODO: NOTE: temporarily hiding */}
+          {/* see https://www.pivotaltracker.com/n/projects/2468285/stories/183252612 */}
+          {/* <Button
+            leftIcon={<IconUpload size={20} stroke={2}/>}
+            onClick={() => this.onUpload()}
+            disabled={!this.state.file}
+            children="Upload"
+          /> */}
         </div>
-        
+
         <div className="input-group">
           <CreatableSelect
             isMulti
@@ -369,11 +366,13 @@ export class PlanSearch extends Component {
                       </a>
                     }
 
-                    <a className="btn btn-primary" 
+                    {/* TODO: NOTE: temporarily hiding */}
+                    {/* see https://www.pivotaltracker.com/n/projects/2468285/stories/183252612 */}
+                    {/* <a className="btn btn-primary" 
                       style={{ margin: '2px' }}
                       onClick={() => this.onPlanExportClicked(plan)}>
                       <span className="fa fa-download text-white"></span>
-                    </a>
+                    </a> */}
 
                   </td>
                 </tr>
@@ -757,19 +756,19 @@ export class PlanSearch extends Component {
     return this.props.deletePlan(plan)
   }
 
-  // temp #182441351
+  // TODO: see https://www.pivotaltracker.com/n/projects/2468285/stories/182441351
   onPlanExportClicked(plan) {
     let filename = plan.name.replace(' ', '_') + '.zip'
     this.props.exportPlan(this.props.loggedInUser.id, plan.id, filename)
   }
-  // temp #182441351
+  // TODO: see https://www.pivotaltracker.com/n/projects/2468285/stories/182441351
   onFileSelect (event) {
     event.preventDefault()
     let file = event.target.files[0]
     this.setState({ file: file })
     
   }
-  // temp #182441351
+  // TODO: see https://www.pivotaltracker.com/n/projects/2468285/stories/182441351
   onUpload () {
     if (this.state.file) {
       this.props.importPlan(this.props.loggedInUser.id, this.state.file)
@@ -797,9 +796,10 @@ const mapDispatchToProps = (dispatch) => ({
   ),
   loadPlan: (planId) => dispatch(ToolBarActions.loadPlan(planId)),
   deletePlan: (plan) => dispatch(PlanActions.deletePlan(plan)),
-
-  importPlan: (userId, file) => dispatch(PlanActions.importPlan(userId, file)), // TODO: temporary #182441351
-  exportPlan: (userId, planId, filename) => PlanActions.exportPlan(userId, planId, filename), // NOT an action, TODO: temporary #182441351
+  // TODO: see https://www.pivotaltracker.com/n/projects/2468285/stories/182441351
+  importPlan: (userId, file) => dispatch(PlanActions.importPlan(userId, file)),
+  // TODO: see https://www.pivotaltracker.com/n/projects/2468285/stories/182441351
+  exportPlan: (userId, planId, filename) => PlanActions.exportPlan(userId, planId, filename),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlanSearch)
