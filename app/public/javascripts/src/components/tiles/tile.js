@@ -214,7 +214,7 @@ class TileComponentController {
           var selectedRoadSegments = new Set()
           results.forEach((result) => {
             result.forEach((selectedObj) => {
-              if (selectedObj.location_id) { // OR selectedObj._data_type === "location" 
+              if (selectedObj._data_type === 'location') {
                 selectedLocations.add(selectedObj)
               } else if (selectedObj._data_type == 'service_layer' && selectedObj.id) {
                 selectedServiceAreas.add(selectedObj.id)
@@ -243,7 +243,6 @@ class TileComponentController {
           }
 
           if (canSelectLoc) {
-            //selectedLocations.forEach((id) => selectedLocationsIds.push({ location_id: id })) // instead of { location_id: id } should be id (object_id)
             selectedLocationsIds = selectedLocations
           }
 
@@ -374,7 +373,7 @@ class TileComponentController {
                 menuItemFeatureId = feature.objectId = feature.object_id
               } else if (feature.hasOwnProperty('objectId')) {
                 menuItemFeatureId = feature.objectId
-              } else if (feature.hasOwnProperty('location_id')) { // object ID - also we need a better way to detect if the item IS a location
+              } else if (feature._data_type === 'location') {
                 menuItemFeatureId = feature.location_id
               } else if (feature._data_type === 'census_block') {
                 menuItemFeatureId = `census_block_${feature.id}`
@@ -510,7 +509,7 @@ class TileComponentController {
               // ['censusFeatures', 'id'],
               ['equipmentFeatures', 'object_id'],
               ['fiberFeatures', 'link_id'],
-              ['locations', 'location_id'], //TODO: change to object_id
+              ['locations', 'object_id'],
               ['roadSegments', 'object_id'],
               // ['serviceAreas', 'object_id'],
             ]
@@ -607,7 +606,7 @@ class TileComponentController {
           results.forEach((result) => {
             // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
             // ToDo: filter out deleted etc
-            if (result.location_id) {
+            if (result._data_type === 'location') {
               locations = locations.concat(result)
             } else if (result.code && result._data_type === 'analysis_area') {
               analysisAreas.push(result)
