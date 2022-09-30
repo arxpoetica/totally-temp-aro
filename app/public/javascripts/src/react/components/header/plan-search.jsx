@@ -1,8 +1,10 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import CreatableSelect from 'react-select/creatable'
-import { Button } from '@mantine/core'
-import { IconUpload } from '@tabler/icons'
+// TODO: NOTE: temporarily hiding
+// see https://www.pivotaltracker.com/n/projects/2468285/stories/183252612
+// import { Grid, FileInput, Button } from '@mantine/core'
+// import { IconUpload } from '@tabler/icons'
 import { components } from 'react-select'
 import AroHttp from '../../common/aro-http'
 import ToolBarActions from './tool-bar-actions'
@@ -213,24 +215,29 @@ export class PlanSearch extends Component {
     return (
       <div className="aro-plan">
         
-        <div>
-          <div className="form-group row"
-            style={{ 'marginTop': '1rem' }}
-          >
-            <label className="col-sm-4 col-form-label">Upload Plan: </label>
-            <div className="col-sm-8">
-              <input name="file" type="file" onChange={event => this.onFileSelect(event)} className="form-control"/>
-            </div>
+        {/* TODO: NOTE: temporarily hiding */}
+        {/* see https://www.pivotaltracker.com/n/projects/2468285/stories/183252612 */}
+        {/* <div className="upload">
+          <div className="file-input">
+            <FileInput
+              icon={<IconUpload size={14}/>}
+              label="Upload plan"
+              name="file"
+              description="Files must be formatted correctly for upload."
+              placeholder="Choose a file"
+              onChange={file => this.onFileSelect(file)}
+              withAsterisk
+            />
           </div>
-          {/* TODO: NOTE: temporarily hiding */}
-          {/* see https://www.pivotaltracker.com/n/projects/2468285/stories/183252612 */}
-          {/* <Button
-            leftIcon={<IconUpload size={20} stroke={2}/>}
-            onClick={() => this.onUpload()}
-            disabled={!this.state.file}
-            children="Upload"
-          /> */}
-        </div>
+          <div className="action">
+            <Button
+              leftIcon={<IconUpload size={20} stroke={2}/>}
+              onClick={() => this.onUpload()}
+              disabled={!this.state.file}
+              children="Upload"
+            />
+          </div>
+        </div> */}
 
         <div className="input-group">
           <CreatableSelect
@@ -402,6 +409,19 @@ export class PlanSearch extends Component {
           }
         </>
         }
+
+        <style jsx>{`
+          .upload {
+            padding: 20px 0;
+          }
+          .file-input {
+            margin: 0 0 4px;
+          }
+          .action {
+            display: flex;
+            justify-content: flex-end;
+          }
+        `}</style>
       </div>
     )
   }
@@ -762,11 +782,8 @@ export class PlanSearch extends Component {
     this.props.exportPlan(this.props.loggedInUser.id, plan.id, filename)
   }
   // TODO: see https://www.pivotaltracker.com/n/projects/2468285/stories/182441351
-  onFileSelect (event) {
-    event.preventDefault()
-    let file = event.target.files[0]
-    this.setState({ file: file })
-    
+  onFileSelect (file) {
+    this.setState({ file })
   }
   // TODO: see https://www.pivotaltracker.com/n/projects/2468285/stories/182441351
   onUpload () {
