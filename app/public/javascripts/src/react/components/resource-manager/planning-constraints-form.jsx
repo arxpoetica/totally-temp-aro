@@ -279,14 +279,19 @@ export class PlanningConstraints extends Component {
             </tbody>
           </table>
         </form>
+        <style jsx>{`
+          td {
+            width: 50%;
+          }
+        `}</style>
       </div>
     )
   }
 }
 
-// TODO: this is a workaround to fit a new mantine form into the current system
+// this is a workaround to fit a new mantine form into the current system
 const polygonizerMultiSelect = (props) => {
-  // I am just passing specific valuu and onChange down to the input
+  // I am just passing value and onChange down to the input from Field
   // onBlur was clearing out the form in redux-form
   return (
     <MultiSelect 
