@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { Field, reduxForm } from 'redux-form'
+import { MultiSelect } from '@mantine/core';
 import Constants from '../../common/constants'
 
 export class PlanningConstraints extends Component {
@@ -258,12 +259,42 @@ export class PlanningConstraints extends Component {
                   </Field>
                 </td>
               </tr>
+              <tr>
+                <td>Polygonizer Road Edge Types</td>
+                <td>
+                  <Field name='polygonizerRoadEdgeTypes'
+                    component={polygonizerMultiSelect} 
+                    type='select-multiple' /> 
+                </td>
+              </tr>
+              <tr>
+                <td>Polygonizer Hub Cutting Threshold</td>
+                <td>
+                  <Field name='polygonizerhubCuttingThreshold'
+                    className='form-control form-control-sm'
+                    component='input' 
+                    type='text' />
+                </td>
+              </tr>
             </tbody>
           </table>
         </form>
       </div>
     )
   }
+}
+
+// TODO: this is a workaround to fit a new mantine form into the current system
+const polygonizerMultiSelect = (props) => {
+  // I am just passing specific valuu and onChange down to the input
+  // onBlur was clearing out the form in redux-form
+  return (
+    <MultiSelect 
+      data={['primary', 'secondary', 'tertiary']}
+      value={props.input.value} 
+      onChange={props.input.onChange}
+    />
+  )
 }
 
 const PlanningConstraintsForm = reduxForm({
