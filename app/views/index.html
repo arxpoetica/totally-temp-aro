@@ -71,40 +71,23 @@
     <!-- The tile component subscribes to map layer events raised from state.js. Include it before changing the state -->
     <tile map-global-object-name="map"></tile>
 
-    <div ng-controller="data_management_controller">
-      <% include modal_data_management.html %>
-    </div>
-
-    <div ng-controller="settings_controller">
-      <% include modal_application_settings.html %>
-    </div>
-
-    <!-- Remove controller for now. Later, the whole navigation div should be gone<div ng-controller="navigation_menu_controller">-->
-    <div>
-
-      <% include modal_build_sequence.html %>
-
-      <% include modal_share_plan.html %>
-
-    </div>
-
-
     <div id="left-col-wrapper">
       <div id="left-col" class="left-col-expanded">
         <div style="pointer-events: auto">
-          <% include layout_default.html %>
+          <construction-sites></construction-sites>
+          <cables></cables>
+          <copper></copper>
+          <conduits></conduits>
+          <div class="map-tools-buttons-container">
+            <r-map-display-tools></r-map-display-tools>
+          </div>
         </div>
       </div>
-    </div>
-
-    <div ng-controller="selected_location_controller">
-      <% include modal_selected_location.html %>
     </div>
 
     <r-map-split></r-map-split>
 
     <div id="loader-wrapper"><div class="loader"></div></div>
-    <div growl></div>
     <fiber-strand-info></fiber-strand-info>
     <project-settings-modal></project-settings-modal>
     <report-modal></report-modal>
@@ -250,11 +233,6 @@
     <!-- Components -->
     <script src="javascripts/lib/components/common/context-menu/context-menu-service.js"></script>
 
-    <script src="javascripts/lib/controllers/selected_location_controller.js"></script>
-    <script src="javascripts/lib/controllers/global_search_controller.js"></script>
-    <script src="javascripts/lib/controllers/map_tools_controller.js"></script>
-    <script src="javascripts/lib/controllers/settings_controller.js"></script>
-    <script src="javascripts/lib/controllers/data_management_controller.js"></script>
     <script src="javascripts/lib/models/tracker.js"></script>
     <script src="javascripts/lib/models/loader.js"></script>
     <script src="javascripts/lib/models/map_tools.js"></script>
@@ -282,66 +260,11 @@
         })
       })
 
-      $(function () {
-        var popovers = $('#left-col [data-toggle="popover"]')
-        popovers.popover({container: 'body'})
-      })
-
-      var expander = $('#expander')
-      var icon = $('#expander .fa')
-      var leftcol = $('#left-col')
-      expander.on('click', function () {
-        if (leftcol.hasClass('left-col-expanded')) {
-          $('#map-tools-accordion .collapse.in').removeClass('in')
-          icon.removeClass('fa-chevron-left')
-          icon.addClass('fa-chevron-right')
-          leftcol.removeClass('left-col-expanded')
-          leftcol.addClass('left-col-collapsed')
-        } else {
-          icon.addClass('fa-chevron-left')
-          icon.removeClass('fa-chevron-right')
-          leftcol.removeClass('left-col-collapsed')
-          leftcol.addClass('left-col-expanded')
-        }
-      })
-
       // prevent tabs from changing the URL
       $('.nav-tabs a').click((e) => {
         e.preventDefault()
         $(this).tab('show')
       })
-
-      $("#share-plan-search").select2({
-        ajax: {
-          url: "/user/find",
-          dataType: 'json',
-          delay: 250,
-          data: function (text) {
-            return {
-              text: text,
-            };
-          },
-          processResults: function (data, page) {
-            // parse the results into the format expected by Select2.
-            // since we are using custom formatting functions we do not need to
-            // alter the remote JSON data
-            data.forEach(function(row) {
-              row.text = row.first_name+' '+row.last_name+' &lt;'+row.email+'&gt;';
-            })
-            return {
-              results: data,
-            };
-          },
-          cache: true
-        },
-        escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
-        minimumInputLength: 1,
-      })
-
-      // Required for fontawesome icons to show up correctly when using the css "content" property (e.g. for our checkboxes)
-      window.FontAwesomeConfig = {
-        searchPseudoElements: true
-      }
     </script>
   </body>
 </html>

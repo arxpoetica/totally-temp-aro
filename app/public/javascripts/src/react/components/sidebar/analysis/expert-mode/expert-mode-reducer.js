@@ -2,12 +2,10 @@ import Actions from '../../../../common/actions'
 
 const defaultState = {
   expertMode: {
-    OPTIMIZATION_SETTINGS: '',
     MANUAL_PLAN_TARGET_ENTRY: '',
     MANUAL_PLAN_SA_ENTRY: ''
   },
   expertModeTypes: {
-    OPTIMIZATION_SETTINGS: { id: 'OPTIMIZATION_SETTINGS', label: 'Optimization Settings' },
     MANUAL_PLAN_TARGET_ENTRY: { id: 'MANUAL_PLAN_TARGET_ENTRY', label: 'Manual plan Target Selection', isQueryValid: false },
     MANUAL_PLAN_SA_ENTRY: { id: 'MANUAL_PLAN_SA_ENTRY', label: 'Manual Plan Service Area Selection', isQueryValid: false }
   },

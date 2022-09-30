@@ -17,7 +17,6 @@ function loadPlanTargetSelectionsFromServer (planId) {
   return dispatch => {
     // First clear all selections
     dispatch(clearAllPlanTargets())
-
     // Then get selections from the server
     var selectionPromises = [
       AroHttp.get(`/service/plan/${planId}/selected_locations`),

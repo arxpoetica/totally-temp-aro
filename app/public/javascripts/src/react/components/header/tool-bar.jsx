@@ -412,13 +412,20 @@ export class ToolBar extends Component {
           <i className="fa fa-mouse-pointer"></i>
         </button>
 
-        <button style={{ display: selectedMultipleLocation ? 'block' : 'none' }}
+        <button
+          style={{
+            display:
+              selectedMultipleLocation
+              && selectedDisplayMode === this.displayModes.ANALYSIS
+              ? 'block' : 'none',
+          }}
           className={
             `btn ${selectedTargetSelectionMode === this.targetSelectionModes.POLYGON_PLAN_TARGET ? 'btn-selected' : ''}
             ${selectedMultipleLocation === true ? 'ng-hide-remove' : 'ng-hide-add'}`
           }
           onClick={() => this.setSelectionPolygon()}
-          title="Select multiple locations">
+          title="Select multiple locations"
+        >
           <i className="fa fa-draw-polygon"></i>
         </button>
 

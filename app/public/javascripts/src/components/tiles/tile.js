@@ -209,15 +209,12 @@ class TileComponentController {
       }
       Promise.all(pointInPolyPromises)
         .then((results) => {
-          console.log(results)
           var selectedLocations = new Set()
           var selectedServiceAreas = new Set()
           var selectedRoadSegments = new Set()
           results.forEach((result) => {
             result.forEach((selectedObj) => {
-              if (selectedObj.location_id) { // OR selectedObj._data_type === "location" 
-                //selectedLocations.add(selectedObj.location_id) // selectedObj.object_id
-                // #179702878 group select fix
+              if (selectedObj._data_type === 'location') {
                 selectedLocations.add(selectedObj)
               } else if (selectedObj._data_type == 'service_layer' && selectedObj.id) {
                 selectedServiceAreas.add(selectedObj.id)
@@ -246,15 +243,12 @@ class TileComponentController {
           }
 
           if (canSelectLoc) {
-            //selectedLocations.forEach((id) => selectedLocationsIds.push({ location_id: id })) // instead of { location_id: id } should be id (object_id)
             selectedLocationsIds = selectedLocations
           }
 
           if (canSelectSA) {
             selectedServiceAreas.forEach((id) => selectedServiceAreaIds.push({ id: id }))
           }
-          // #179702878 is this still used?
-          state.hackRaiseEvent(selectedLocationsIds)
 
           // Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
           state.mapFeaturesSelectedEvent.next({
@@ -379,7 +373,7 @@ class TileComponentController {
                 menuItemFeatureId = feature.objectId = feature.object_id
               } else if (feature.hasOwnProperty('objectId')) {
                 menuItemFeatureId = feature.objectId
-              } else if (feature.hasOwnProperty('location_id')) { // object ID - also we need a better way to detect if the item IS a location
+              } else if (feature._data_type === 'location') {
                 menuItemFeatureId = feature.location_id
               } else if (feature._data_type === 'census_block') {
                 menuItemFeatureId = `census_block_${feature.id}`
@@ -473,10 +467,6 @@ class TileComponentController {
         }
 
         if (hitFeatures) {
-          if (hitFeatures.locations.length > 0) {
-            this.state.hackRaiseEvent(hitFeatures.locations)
-          }
-
           if (isShiftPressed && hasRoadSegments) {
             const mapFeatures = this.state.mapFeaturesSelectedEvent.getValue()
             const priorRoadSegments = [...mapFeatures.roadSegments || []]
@@ -506,10 +496,10 @@ class TileComponentController {
             // structures for this kind of thing!
 
             // annoying prep (this is reset below)
-            prevHitFeatures.roadSegments = [...prevHitFeatures.roadSegments]
-            prevHitFeatures.fiberFeatures = [...prevHitFeatures.fiberFeatures]
-            hitFeatures.roadSegments = [...hitFeatures.roadSegments]
-            hitFeatures.fiberFeatures = [...hitFeatures.fiberFeatures]
+            prevHitFeatures.roadSegments = [...(prevHitFeatures.roadSegments || [])]
+            prevHitFeatures.fiberFeatures = [...(prevHitFeatures.fiberFeatures || [])]
+            hitFeatures.roadSegments = [...(hitFeatures.roadSegments || [])]
+            hitFeatures.fiberFeatures = [...(hitFeatures.fiberFeatures || [])]
 
             // NOTE: not running anything with boundaries because only
             // focused on selection/deselection of point-based features.
@@ -519,7 +509,7 @@ class TileComponentController {
               // ['censusFeatures', 'id'],
               ['equipmentFeatures', 'object_id'],
               ['fiberFeatures', 'link_id'],
-              ['locations', 'location_id'], //TODO: change to object_id
+              ['locations', 'object_id'],
               ['roadSegments', 'object_id'],
               // ['serviceAreas', 'object_id'],
             ]
@@ -528,7 +518,9 @@ class TileComponentController {
               // https://www.wikiwand.com/en/Difference_(set_theory)#/Relative_complement
               const prevFeatures = prevHitFeatures[featureName]
               hitFeatures[featureName] = hitFeatures[featureName].filter(feature => {
-                const found = prevFeatures.find(prevItem => prevItem[idName] === feature[idName])
+                // FIXME: OH MY HECK GROSS: `prevFeatures.locations` is SOMETIMES an array
+                // and SOMETIMES a Set...WHHHHHUUUUUHHH???? Hence `[...prevFeatures]
+                const found = [...prevFeatures].find(prevItem => prevItem[idName] === feature[idName])
                 return !found
               })
             }
@@ -614,7 +606,7 @@ class TileComponentController {
           results.forEach((result) => {
             // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
             // ToDo: filter out deleted etc
-            if (result.location_id) {
+            if (result._data_type === 'location') {
               locations = locations.concat(result)
             } else if (result.code && result._data_type === 'analysis_area') {
               analysisAreas.push(result)
