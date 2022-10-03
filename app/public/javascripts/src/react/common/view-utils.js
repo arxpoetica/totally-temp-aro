@@ -151,3 +151,10 @@ export const arrayComparer = (otherArray) => {
     }).length === 0
   }
 }
+
+export const setAppcuesQuery = (queryParam) => {
+  const url = new URL(window.location);
+  url.searchParams.set('appcues', queryParam);
+  window.history.pushState(null, '', url.toString());
+  window.Appcues.page()
+}

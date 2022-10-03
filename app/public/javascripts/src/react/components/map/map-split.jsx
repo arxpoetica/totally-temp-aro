@@ -30,6 +30,7 @@ import CustomFooter from '../footer/custom-footer.jsx'
 import MapSelectorExportLocations from '../map/map-selector-export-locations.jsx'
 import MapSelectorPlanTarget from '../map/map-selector-plan-target.jsx'
 import ErrorBoundary from '../common/ErrorBoundary.jsx'
+import { setAppcuesQuery } from '../../common/view-utils'
 import { OptimizationModal } from '../common/optimization-modal.jsx'
 import { NotificationsProvider } from '@mantine/notifications'
 import { ModalsProvider } from '@mantine/modals';
@@ -96,6 +97,16 @@ const MapSplit = (props) => {
       setShowPanel(!!measuredDistance.detail)
       setMeasuredDistance(measuredDistance.detail)
     })
+
+    window.Appcues.on("flow_completed", function(event) {
+      console.log("Appcues completed a flow with ID " + event.flowId);
+      setAppcuesQuery('')
+    });
+
+    window.Appcues.on("flow_skipped", function(event) {
+      console.log("Appcues skipped a flow with ID " + event.flowId);
+      setAppcuesQuery('')
+    });
 
     return () => window.removeEventListener('measuredDistance')
   }, [])
