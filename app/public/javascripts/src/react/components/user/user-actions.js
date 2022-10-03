@@ -79,6 +79,7 @@ function loadAuthRoles () {
 
 // Set the logged in user
 function setLoggedInUser (loggedInUser) {
+  window.Appcues.identify(loggedInUser.id, loggedInUser)
   return dispatch => {
     // Set the logged in user
     dispatch({

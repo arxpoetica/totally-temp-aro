@@ -18,7 +18,7 @@ import RxState from '../../common/rxState'
 import PlanInputsModal from './plan-inputs-modal.jsx'
 import GlobalsettingsActions from '../global-settings/globalsettings-action'
 import GlobalSettings from '../global-settings/global-settings.jsx'
-import { logoutApp } from '../../common/view-utils'
+import { logoutApp, setAppcuesQuery } from '../../common/view-utils'
 import PlanEditorActions from '../plan-editor/plan-editor-actions'
 
 export class ToolBar extends Component {
@@ -663,6 +663,7 @@ export class ToolBar extends Component {
   }
 
   createAndLoadPlan() {
+    setAppcuesQuery('createNewPlan')
     this.props.createNewPlan(true)
       .then((result) => this.props.loadPlan(result.data.id))
       .catch((err) => console.error(err))
