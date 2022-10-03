@@ -8,6 +8,7 @@ import ConduitsPanel from './panels/conduits.jsx'
 import CopperPanel from './panels/copper.jsx'
 import FibersPanel from "./panels/fibers.jsx"
 import LocationsPanel from './panels/locations.jsx'
+import NearNetPanel from './panels/near-net.jsx'
 import NetworkEquipmentPanel from './panels/network.jsx'
 
 export const MapToolActions = {
@@ -27,6 +28,7 @@ const mapToolIntialState = {
       COPPER: 'copper',
       CONDUITS: 'conduits',
       NETWORK_NODES: 'network_nodes',
+      NEAR_NET: 'NEAR_NET',
       AREA_NETWORK_PLANNING: 'area_network_planning',
       TARGET_BUILDER: 'target_builder',
       CONSTRUCTION_SITES: 'construction_sites',
@@ -67,7 +69,11 @@ const mapToolIntialState = {
         toolName: 'Boundaries',
         icon: 'fa fa-th fa-2x',
       },
-      
+      {
+        id: 'near_net',
+        toolName: 'Near Net',
+        icon: 'fa fa-building fa-2x',
+      },
     ],
   },
   visible: [],
@@ -83,6 +89,7 @@ const MapToolPanels = {
   cables: FibersPanel,
   locations: LocationsPanel,
   network_nodes: NetworkEquipmentPanel,
+  near_net: NearNetPanel,
 }
 
 function isMapToolEnabled(disabled, toolName) {
@@ -136,7 +143,7 @@ const MapDisplayTools = ({ mapRef, mapTools }) => {
           return (
             MapToolComponent && <React.Fragment key={id}>
               <MapToolComponent mapToolName={toolName} />
-              {objectHasLength(mapTools) > 0 && mapTools.isVisible[id] && mapTools.showLabels
+              {objectHasLength(mapTools) > 0 && mapTools.toolDetails[id].isVisible && mapTools.showLabels
                 && <div className="map_tool_label label-align">{toolName}</div>
               }
             </React.Fragment>
