@@ -108,7 +108,11 @@ const MapSplit = (props) => {
       setAppcuesQuery('')
     });
 
-    return () => window.removeEventListener('measuredDistance')
+    return () => {
+      window.Appcues.off("flow_skipped")
+      window.Appcues.off("flow_completed")
+      window.removeEventListener('measuredDistance')
+    }
   }, [])
 
   const checkSelectedDisplayMode = (displayMode) => {
