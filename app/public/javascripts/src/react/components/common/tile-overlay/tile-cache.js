@@ -49,8 +49,10 @@ export class TileCache {
   //  the caller should also call tileCull.removeElement UNLESS the caller is tileCull 
   _deleteTile (tileId) {
     delete this._tileCache[tileId.z][tileId.x][tileId.y]
+    // z.x is now empty remove it
     if (!Object.keys(this._tileCache[tileId.z][tileId.x]).length) {
       delete this._tileCache[tileId.z][tileId.x]
+      // if z is now empty remove it
       if (!Object.keys(this._tileCache[tileId.z]).length) {
         delete this._tileCache[tileId.z]
       }

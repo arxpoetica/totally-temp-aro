@@ -29,7 +29,7 @@ import { batch } from 'react-redux'
 //
 //  BUT most of these are derived data so how do we handle that?!
 
-
+// TileDataMutator takes care of clearing the cache when points are added and removed
 
 function setSubnetData (subnetId, locations) { // will make this generic in te future
   if (!tileCaches.subnets[subnetId]) {

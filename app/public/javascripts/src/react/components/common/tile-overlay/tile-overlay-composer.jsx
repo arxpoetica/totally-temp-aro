@@ -1,25 +1,29 @@
 /* globals google */
 import React, { useState, useEffect, Component } from 'react'
-import reduxStore from '../../../redux-store'
-import wrapComponentWithProvider from '../../common/provider-wrapped-component'
-import PlanEditorSelectors from './plan-editor-selectors'
-import PlanEditorActions from './plan-editor-actions'
-import TileUtils from '../common/tile-overlay/tile-overlay-utils'
-import TileDataMutator from '../common/tile-overlay/tile-data-mutator'
-import tileIcons from '../common/tile-overlay/tile-icons'
-import SubnetTileSelectors from './subnet-tile-selectors'
-import { tileCaches } from '../common/tile-overlay/tile-cache'
+import reduxStore from '../../../../redux-store'
+import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 
+import PlanEditorSelectors from '../../plan-editor/plan-editor-selectors'
+import PlanEditorActions from '../../plan-editor/plan-editor-actions'
+import SubnetTileSelectors from '../../plan-editor/subnet-tile-selectors'
+
+import TileUtils from './tile-overlay-utils'
+import TileDataMutator from './tile-data-mutator'
+
+//import tileIcons from './tile-icons'
+import { tileCaches } from './tile-cache'
+
+
+import TileOverlay from './tile-overlay'
 // TODO: ABS: abstract this to general use with modular data set and on/off control
 
 
-let mapIcons = tileIcons.mapIcons
-let iconBadges = tileIcons.iconBadges
-// --- helpers --- //
-//const TWO_PI = 2 * Math.PI
+//let mapIcons = tileIcons.mapIcons
+//let iconBadges = tileIcons.iconBadges
+
 
 // needs to be a class instance becasue is needs to keep a scope for the getTile callback functions
-class _SubnetTileOverlay extends Component {
+class _TileOverlayComposer extends Component {
   constructor (props) {
     super(props)
     this.overlayLayer = null
@@ -29,10 +33,17 @@ class _SubnetTileOverlay extends Component {
     this.overlayMouseMoveListener = null
     this.overlayMouseOutListener = null
     this.overlayRightClickListener = null
+
+
+    // NEW
+    this.tileOverlays = []
+    // this.tileOverlays.push(
+    //   TileOverlay(tileData, tileCache, metaById, badgeLists)
+    // )
   }
 
   // --- renderer --- //
-
+  /*
   // this may become it's own static class
   renderTileCanvas (ownerDocument, points, tileId, pointMetaById, badgeLists) {
     var canvas = ownerDocument.createElement('canvas')
@@ -107,7 +118,7 @@ class _SubnetTileOverlay extends Component {
     }
     return tile
   }
-
+  */
   // --- overlay layer --- //
 
   // arrow function used here to bind the function to 'this'
@@ -150,14 +161,21 @@ class _SubnetTileOverlay extends Component {
           badgeLists['alert'] = this.props.alertLocationIds
         }
 
-        tile = this.getTileCanvas(
-          ownerDocument, 
-          this.props.subnetTileData[tileDataKey], 
-          tileCaches.subnets[tileDataKey], 
-          tileId,
-          pointMetaById,
-          badgeLists
-        )
+        // tile = this.getTileCanvas(
+        //   ownerDocument, 
+        //   this.props.subnetTileData[tileDataKey], 
+        //   tileCaches.subnets[tileDataKey], 
+        //   tileId,
+        //   pointMetaById,
+        //   badgeLists
+        // )
+        let overlay = this.tileOverlays['PLAN_EDIT_LOCATIONS'].overlay
+        overlay.tileData = this.props.subnetTileData[tileDataKey]
+        overlay.tileCache = tileCaches.subnets[tileDataKey]
+        overlay.metaById = pointMetaById
+        overlay.badgeLists = badgeLists
+        tile = overlay.getTileCanvas(ownerDocument, tileId)
+        
       }
       
       if (tile) {
@@ -193,8 +211,29 @@ class _SubnetTileOverlay extends Component {
 
 
   // --- //
+  init () {
+    this.initTileOverlays()
+    this.initMapConnection()
+  }
 
-  initOverlayLayer () {
+  initTileOverlays () {
+    // NEW
+    // no need to de-init TileOverlays don't have listeners or state
+    // ABS: I think badgeLists should be a selector
+    this.tileOverlays = {}
+    this.tileOverlays['PLAN_EDIT_LOCATIONS'] = {
+      'id': 'PLAN_EDIT_LOCATIONS',
+      'overlay': new TileOverlay(),
+      'meta': {
+        'zIndex': 1,
+        'isOn': false,
+        'opacity': 1.0,
+      },
+    }
+  }
+
+
+  initMapConnection () {
     if (this.props.mapRef && this.props.selectedSubnetId && !this.overlayLayer) {
       this.overlayLayer = this.makeOverlayLayer()
       this.props.mapRef.overlayMapTypes.push(this.overlayLayer) // this will cause a tile refresh
@@ -213,6 +252,7 @@ class _SubnetTileOverlay extends Component {
       if (!this.props.subnetTileData[this.props.selectedSubnetId]) return
       //let ts = performance.now()
       let zoom = this.props.mapRef.getZoom()
+      // this.tileOverlays['PLAN_EDIT_LOCATIONS'].overlay.getPointsUnderClick
       let points = TileDataMutator.getPointsUnderClick(
         this.props.subnetTileData[this.props.selectedSubnetId], 
         event.latLng, 
@@ -233,6 +273,7 @@ class _SubnetTileOverlay extends Component {
   onRightClick = (event) => {
     if (!this.props.subnetTileData[this.props.selectedSubnetId]) return
     let zoom = this.props.mapRef.getZoom()
+    // this.tileOverlays['PLAN_EDIT_LOCATIONS'].overlay.getPointsUnderClick
     let points = TileDataMutator.getPointsUnderClick(
       this.props.subnetTileData[this.props.selectedSubnetId], 
       event.latLng, 
@@ -275,7 +316,8 @@ class _SubnetTileOverlay extends Component {
       }
     } else {
       // we haven't initialized yet so try that
-      this.initOverlayLayer()
+      //this.initMapConnection()
+      this.init()
     }
   }
 
@@ -288,6 +330,7 @@ class _SubnetTileOverlay extends Component {
   }
 
   componentDidUpdate(/* prevProps, prevState, snapshot */) {
+    // ABS do a check to see if we need a refresh?
     this.refreshTiles() // will init if it can and hasn't yet
     // we could check to make sure that either selectedSubnetId changed 
     //  OR subnetTileData changed on the subnet we are showing
@@ -338,5 +381,5 @@ const mapDispatchToProps = dispatch => ({
   showContextMenuForLocations: (featureIds, event) => dispatch(PlanEditorActions.showContextMenuForLocations(featureIds, event)),
 })
 
-const SubnetTileOverlay = wrapComponentWithProvider(reduxStore, _SubnetTileOverlay, mapStateToProps, mapDispatchToProps)
-export default SubnetTileOverlay
+const TileOverlayComposer = wrapComponentWithProvider(reduxStore, _TileOverlayComposer, mapStateToProps, mapDispatchToProps)
+export default TileOverlayComposer
