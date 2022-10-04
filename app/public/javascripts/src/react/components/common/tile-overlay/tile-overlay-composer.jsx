@@ -36,7 +36,8 @@ class _TileOverlayComposer extends Component {
 
 
     // NEW
-    this.tileOverlays = []
+    this.tileOverlaysByID = {}
+    this.tileOverlaysByZOrder = []
     // this.tileOverlays.push(
     //   TileOverlay(tileData, tileCache, metaById, badgeLists)
     // )
@@ -146,6 +147,7 @@ class _TileOverlayComposer extends Component {
 
     // for the moment we're just going to sneak the 'all' layer underneith
     //  TODO: make a proper layering system 
+    /*
     for (const tileDataKey of ['all', this.props.selectedSubnetId]) {
       let isUnderlay = (tileDataKey === 'all') // hack will fix later
       let tile = null
@@ -186,6 +188,22 @@ class _TileOverlayComposer extends Component {
         if (isUnderlay) tile.style.opacity = 0.5
       }
     }
+    */
+
+
+
+    let tileId = TileUtils.coordToTileId(coord, zoom)
+    for (let layer of this.tileOverlaysByZOrder) {
+      let tile = layer.overlay.getTileCanvas(ownerDocument, tileId)
+      if (tile) {
+        div.appendChild(tile)
+        tile.style.position = 'absolute'
+        tile.style.left = `-${TileUtils.TILE_MARGIN}px`
+        tile.style.top = `-${TileUtils.TILE_MARGIN}px`
+        if (layer.meta.opacity != 1.0) tile.style.opacity = layer.meta.opacity // change this to apply a style prop directly from meta
+      }
+
+    }
     
     return div;
   }
@@ -216,19 +234,48 @@ class _TileOverlayComposer extends Component {
     this.initMapConnection()
   }
 
-  initTileOverlays () {
-    // NEW
+  makeActiveOverlays () {
+    // this runs whenever state data changes
+    //  we check to see what layers are active, in what state, repopulate with new badge data etc
     // no need to de-init TileOverlays don't have listeners or state
     // ABS: I think badgeLists should be a selector
-    this.tileOverlays = {}
-    this.tileOverlays['PLAN_EDIT_LOCATIONS'] = {
-      'id': 'PLAN_EDIT_LOCATIONS',
-      'overlay': new TileOverlay(),
+    this.tileOverlaysByID = {}
+    this.tileOverlaysByZOrder = []
+
+    this.tileOverlaysByID['PLAN_EDIT_ALL_LOCATIONS'] = {
+      'id': 'PLAN_EDIT_ALL_LOCATIONS',
+      'overlay': new TileOverlay(
+        this.props.subnetTileData['all'], 
+        tileCaches.subnets['all'], 
+        this.props.groupsById,
+        {'inactive': this.props.unselectedLocationGroups}
+      ),
       'meta': {
         'zIndex': 1,
-        'isOn': false,
-        'opacity': 1.0,
+        //'isOn': false,
+        'opacity': 0.5,
+        'isMouseEvents': false,
       },
+    }
+    this.tileOverlaysByZOrder.push(this.tileOverlaysByID['PLAN_EDIT_ALL_LOCATIONS'])
+
+    if (this.props.selectedSubnetId) {
+      this.tileOverlaysByID['PLAN_EDIT_SUBNET_LOCATIONS'] = {
+        'id': 'PLAN_EDIT_SUBNET_LOCATIONS',
+        'overlay': new TileOverlay(
+          this.props.subnetTileData[this.props.selectedSubnetId],
+          tileCaches.subnets[this.props.selectedSubnetId],
+          this.props.locationsById,
+          {'alert': this.props.alertLocationIds}
+        ),
+        'meta': {
+          'zIndex': 2,
+          //'isOn': false,
+          'opacity': 1.0,
+          'isMouseEvents': true,
+        },
+      }
+      this.tileOverlaysByZOrder.push(this.tileOverlaysByID['PLAN_EDIT_SUBNET_LOCATIONS'])
     }
   }
 
@@ -244,6 +291,19 @@ class _TileOverlayComposer extends Component {
       return true
     }
     return false
+  }
+
+  getFeaturesAtLatLng (latLng) {
+    let points = {}
+    let zoom = this.props.mapRef.getZoom()
+    // for each tileOverlay where isOn and isMouseEvents
+    //    order by zIndex (should already have this somewhere)
+    let layerPoints = this.tileOverlays['PLAN_EDIT_LOCATIONS'].overlay.getPointsUnderClick(latLng, zoom)
+    for (let key in layerPoints){
+      // spread operator is much slower!
+      points[key] = layerPoints[key]
+    }
+    return points
   }
 
   onMouseMove = (event) => {
@@ -307,18 +367,20 @@ class _TileOverlayComposer extends Component {
   }
 
   refreshTiles () {
+    // ABS reset layers by new prop vals HERE <-------------------------------<<<
+    this.makeActiveOverlays()
     if (this.overlayLayer) {
       // we have initialized so refresh
-      if (this.removeOverlayLayer()) {
+      if (this.removeOverlayLayer()) { // ABS why do we need to check this?
         // IF we don't want a centralised tile composer we can use 
         //  overlayMapTypes.insertAt to set our tile layer at a specfied Z index
         this.props.mapRef.overlayMapTypes.push(this.overlayLayer) // this will cause a tile refresh
       }
     } else {
       // we haven't initialized yet so try that
-      //this.initMapConnection()
-      this.init()
+      this.initMapConnection()
     }
+    
   }
 
   // --- lifecycle hooks --- //
@@ -330,19 +392,16 @@ class _TileOverlayComposer extends Component {
   }
 
   componentDidUpdate(/* prevProps, prevState, snapshot */) {
-    // ABS do a check to see if we need a refresh?
     this.refreshTiles() // will init if it can and hasn't yet
     // we could check to make sure that either selectedSubnetId changed 
     //  OR subnetTileData changed on the subnet we are showing
     //  BUT that would probably take longer than simply querying cached tiles 
-
-    // - make derived data (or selector?) - //
-
   }
 
   componentWillUnmount() {
     this.removeListeners()
     this.removeOverlayLayer()
+    this.overlayLayer = null
   }
 
 }

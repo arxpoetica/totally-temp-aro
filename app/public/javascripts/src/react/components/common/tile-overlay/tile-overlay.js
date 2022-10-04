@@ -2,7 +2,7 @@
 import TileUtils from './tile-overlay-utils'
 import TileDataMutator from './tile-data-mutator'
 import tileIcons from './tile-icons'
-import { tileCaches } from './tile-cache'
+//import { tileCaches } from './tile-cache'
 
 let mapIcons = tileIcons.mapIcons
 let iconBadges = tileIcons.iconBadges
@@ -80,7 +80,7 @@ export default class TileOverlay {
   }
 
   getTileCanvas (ownerDocument, tileId) { // TODO: should all these be sent or pulled from "this."? Figure it out when we abstract this Component for use with view mode
-    console.log(this.tileData)
+    //console.log(this.tileData)
     let tile = this.tileCache.getTile(tileId)
     if (!tile) {
       // not in the cache so render it
