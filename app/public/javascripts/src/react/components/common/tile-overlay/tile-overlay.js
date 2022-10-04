@@ -7,6 +7,11 @@ import tileIcons from './tile-icons'
 let mapIcons = tileIcons.mapIcons
 let iconBadges = tileIcons.iconBadges
 
+export const overlayTypes = {
+  POINT: 'POINT',
+  LINE: 'LINE',
+  POLYGON: 'POLYGON' // includes multipolygon
+}
 // this will probably be turned to a super-class and subClassed to 
 //  PointTileOverlay, LineTileOverlay, PolygonTileOverlay - each extends TileOverlay
 //  each of those subclassed to suit specfic needs of the layer 
@@ -15,7 +20,7 @@ let iconBadges = tileIcons.iconBadges
 // should this be a static class/utility? it doesn't keep state 
 export default class TileOverlay {
   constructor (tileData, tileCache, metaById, badgeLists) {
-    // ? question: will these auto-update 
+    this.type = overlayTypes.POINT // should be a const but I don't want to make a static getter which is currently the only way 
     this.tileData = tileData
     this.tileCache = tileCache
     this.metaById = metaById
@@ -79,8 +84,7 @@ export default class TileOverlay {
     return canvas
   }
 
-  getTileCanvas (ownerDocument, tileId) { // TODO: should all these be sent or pulled from "this."? Figure it out when we abstract this Component for use with view mode
-    //console.log(this.tileData)
+  getTileCanvas (ownerDocument, tileId) {
     let tile = this.tileCache.getTile(tileId)
     if (!tile) {
       // not in the cache so render it

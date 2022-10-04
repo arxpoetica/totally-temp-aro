@@ -11,7 +11,6 @@ import EquipmentMapObjects from './equipment-map-objects.jsx'
 import EquipmentBoundaryMapObjects from './equipment-boundary-map-objects.jsx'
 import FiberMapObjects  from './fiber-map-objects.jsx'
 import PlanNavigation from './sidebar/plan-navigation.jsx'
-//import SubnetTileOverlay from './subnet-tile-overlay.jsx'
 import TileOverlayComposer from '../common/tile-overlay/tile-overlay-composer.jsx'
 import AlertsTooltip from './alerts-tooltip.jsx'
 import BoundaryDrawCreator from './boundary-draw-creator.jsx'
@@ -20,6 +19,8 @@ import { Overlay } from '@mantine/core'
 import { constants } from './shared'
 const { DRAFT_STATES } = constants
 import './plan-editor.css'
+
+// FUTURE: we'll move TileOverlayComposer to a root coponent so it can be used app-wide
 
 export const PlanEditor = props => {
   const {
