@@ -156,11 +156,11 @@ const EquipmentBoundaryMapObjects = props => {
         // Add vertex to array if it doesn't already exist there.
         multiSelectVertices.addMarker(event)
       }
-      vertexPayload = overlay
     } else {
-      vertexPayload = event.vertex
+      multiSelectVertices.addMarker(event)
     }
 
+    vertexPayload = multiSelectVertices.mapObjectOverlay
     const eventXY = WktUtils.getXYFromEvent(event)
     showContextMenuForBoundary(
       mapObject,

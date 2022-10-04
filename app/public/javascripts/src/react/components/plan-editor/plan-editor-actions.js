@@ -569,15 +569,6 @@ function createConstructionArea(constructionArea) {
   }
 }
 
-function deleteBoundaryVertex (mapObject, vertex) {
-  return dispatch => {
-    // checks it is a valid vertex and that there are at least 3 other vertices left
-    if (mapObject.getPath().getLength() > 3) {
-      mapObject.getPath().removeAt(vertex)
-    }
-  }
-}
-
 function deleteBoundaryVertices (mapObject, vertices, callBack) {
   return dispatch => {
       // We are tracking the multiple selected verticies to delete by markers created.
@@ -910,15 +901,15 @@ function mergeTerminals (terminals) {
   }
 }
 
-function showContextMenuForBoundary (mapObject, x, y, vertex, callBack) {
+function showContextMenuForBoundary (mapObject, x, y, vertex, callBack) {  
   return (dispatch) => {
     const menuActions = []
     menuActions.push(
       new MenuItemAction(
-        Array.isArray(vertex) ? 'DELETE_ALL' : 'DELETE',
-        'Delete',
+        vertex.length > 1 ? 'DELETE_ALL' : 'DELETE',
+        vertex.length > 1 ? 'Delete All' : 'Delete',
         'PlanEditorActions',
-        Array.isArray(vertex) ? 'deleteBoundaryVertices' : 'deleteBoundaryVertex',
+        'deleteBoundaryVertices',
         mapObject,
         vertex,
         // Callback is utilized to update the local state of the react class if it is a multi-delete.
@@ -928,7 +919,7 @@ function showContextMenuForBoundary (mapObject, x, y, vertex, callBack) {
 
     const menuItemFeature = new MenuItemFeature(
       'BOUNDARY',
-      `Boundary ${Array.isArray(vertex) ? 'Vertices' : 'Vertex' }`,
+      `Boundary ${vertex.length > 1 ? 'Vertices' : 'Vertex' }`,
       menuActions
     )
 
@@ -1934,7 +1925,6 @@ export default {
   deleteFeature,
   createConstructionArea,
   moveConstructionArea,
-  deleteBoundaryVertex,
   deleteBoundaryVertices,
   addTransactionFeatures,
   showContextMenuForList,
