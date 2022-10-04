@@ -1055,28 +1055,6 @@ class State {
       return $http.get('/configuration')
         .then(result => {
           var config = result.data
-
-          // TODO: this doesn't really belong here
-          //  when new tile system is complete move this to an init function
-          // these define the badge icons, name, source, offset, and point for offset reference defined as percent of height and width of parent icon
-          tileIcons.setBadge(
-            'alert',
-            '/images/map_icons/badges/badge_alert.png',
-            {x: -9, y:-4},
-            {w: 1.0, h: 0.0},
-          )
-          tileIcons.setBadge(
-            'inactive',
-            '/images/map_icons/badges/badge_inactive.png',
-            {x: -9, y:-4},
-            {w: 1.0, h: 0.0},
-          )
-          // tileIcons.setBadge(
-          //   'xOut',
-          //   '/images/map_icons/badges/badge_x.png',
-          //   {x: -2, y:-10},
-          //   {w: 0.0, h: 1.0},
-          // )
           // filter out conduits that are not to be shown
           // this code may belong in cache.js instead
           var conduits = config.appConfiguration.networkEquipment.conduits || {}
