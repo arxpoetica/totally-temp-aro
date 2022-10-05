@@ -1,5 +1,4 @@
 import React, { useEffect, useContext } from 'react'
-import PanelComponent from './panel-component.jsx'
 import { MapToolContext } from "../map-display-tools.jsx"
 import { createSelector } from 'reselect'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
@@ -344,11 +343,129 @@ export const LocationsPanel = (props) => {
 
 
   return (
-    <PanelComponent
-      panelKey='locations'
-      panelLabel='locations'
-      resourceEntityTypes={locationLayers}
-    />
+    <MapTool className="location">
+      <MapToolIcon
+        handleClick={() =>
+          dispatch({ type: MapToolActions.MAP_SET_TOGGLE_MAP_TOOL, payload: mapToolName })
+        }
+        toolId={"locations"}
+        active={isMapToolVisible(visible, disabled, mapToolName)}
+      />
+      <div className="location-maptool-card">
+        {measuredDistance && (
+          <div className="map-tool panel panel-primary" id="measuring-stick-result">
+            <div className="panel-heading">
+              {`Measured distance: ${(
+                measuredDistance * 0.000621371
+              ).toFixed(2)} mi`}
+            </div>
+          </div>
+        )}
+        <MapToolCard mapToolName={mapToolName}>
+          <CardHeader mapToolName={mapToolName} />
+          <CardBody showCardBody={isMapToolExpanded(collapsed, mapToolName)}>
+            {areAnyLocationFiltersVisible() && (
+              <div className="row title">Location Filters</div>
+            )}
+            {Object.keys(orderedLocationFilters).length > 0 && 
+              Object.keys(orderedLocationFilters).map(filterName => {
+                const { rules } = orderedLocationFilters[filterName]
+                return (
+                  <div key={filterName}>
+                    <ul className="customer-type">
+                      {/* loop through all filter types */}
+                      {Array.isArray(rules) && rules.map((rule, index) =>
+                        <li key={index}>
+                          <div className="ctype-icon">
+                            <img className="image" src={rule.onPass.iconUrl} alt="location-icon" />
+                          </div>
+                          <div className="ctype-name">{rule.description}</div>
+                          <div className="ctype-checkbox">
+                            <input
+                              type="checkbox"
+                              className="checkboxfill"
+                              checked={rule.isChecked || false}
+                              onChange={() => setLocationFilterChecked(filterName, rule.ruleKey, !rule.isChecked)}
+                            />
+                          </div>
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                )
+              })
+            }
+            {areAnyLocationLayersVisible() && (
+              <div className="row title">Location Types</div>
+            )}
+            <form>
+              <ul className="customer-type">
+                {/* <!-- Loop through all location types --> */}
+                {locationLayers &&
+                  locationLayers.map((locationType, index) => {
+                    return (
+                      locationType.show && (
+                        <li key={index}>
+                          {locationType.showIcon && (
+                            <div className="ctype-icon">
+                              <img className="image" src={locationType.iconUrl} alt="location-icon" />
+                            </div>
+                          )}
+                          <div className="ctype-name">{locationType.label}</div>
+                          <div className="ctype-checkbox">
+                            <input
+                              type="checkbox"
+                              className="checkboxfill"
+                              checked={locationType.checked || false}
+                              onChange={() =>
+                                updateLayerVisibility(locationType, !locationType.checked)
+                              }
+                            />
+                          </div>
+                        </li>
+                      )
+                    )
+                  })}
+              </ul>
+            </form>
+            {disablelocations && (
+              <div className="alert alert-warning" role="alert">
+                Locations not displayed at this zoom level
+              </div>
+            )}
+          </CardBody>
+          {/* )} */}
+        </MapToolCard>
+      </div>
+      <style jsx>{`
+        .title {
+          margin-top: -12px;
+          padding: 5px 10px;
+          background-color: #ddd;
+          font-weight: bold;
+        }
+        .title .btn {
+          padding: 3px 5px 0px 5px;
+        }
+        .title .label {
+          line-height: 26px;
+          margin-left: 5px;
+        }
+        .column {
+          padding: 5px 15px;
+        }
+        .layer-type-checkboxes {
+          margin-top: 0px;
+        }
+        .range-input {
+          padding: 15px;
+        }
+        .image {
+          width: 16px;
+          margin-right: 10px;
+        }
+      `}</style>
+    </MapTool>
   )
 }
 

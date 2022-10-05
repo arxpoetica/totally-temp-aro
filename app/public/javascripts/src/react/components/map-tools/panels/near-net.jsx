@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react'
+import PanelComponent from './panel-component.jsx';
 import { Accordion } from '@mantine/core';
 import { MapToolContext } from "../map-display-tools.jsx"
 import { createSelector } from 'reselect'
@@ -387,177 +388,13 @@ export const NearNetPanel = (props) => {
 
 
   return (
-    <MapTool className="location">
-      <MapToolIcon
-        handleClick={() =>
-          dispatch({ type: MapToolActions.MAP_SET_TOGGLE_MAP_TOOL, payload: 'near_net' })
-        }
-        toolId={"near_net"}
-        active={isMapToolVisible(visible, disabled, 'near_net')}
-      />
-      <div className="location-maptool-card">
-        {/* {measuredDistance && (
-          <div className="map-tool panel panel-primary" id="measuring-stick-result">
-            <div className="panel-heading">
-              {`Measured distance: ${(
-                measuredDistance * 0.000621371
-              ).toFixed(2)} mi`}
-            </div>
-          </div>
-        )} */}
-
-        <MapToolCard mapToolName='near_net'>
-          <CardHeader mapToolName='Near Net' />
-
-          <CardBody showCardBody={isMapToolExpanded(collapsed, 'near_net')}>
-            <Accordion multiple value={expandedAccords} onChange={setExpandedAccords}>
-              {/* {areAnyLocationLayersVisible() &&                 */}
-              <Accordion.Item value="global-filters">
-                <Accordion.Control>Location Filters</Accordion.Control>
-                <Accordion.Panel>
-                  {/* {showExisting && */}
-                    <div style={{ display: 'flex', flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
-                      <span>&nbsp;Show Near Net Locations</span>
-                      <input
-                        type="checkbox"
-                        className="checkboxfill layer-type-checkboxes"
-                      />
-                    </div>
-                  {/* } */}
-                  {/* {showPlanned && */}
-                    <div style={{ display: 'flex', flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
-                      <span>&nbsp;Show All Other Planned Locations</span>
-                      <input
-                        type="checkbox"
-                        className="checkboxfill layer-type-checkboxes"
-                      />
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
-                      <span>&nbsp;Show All Locations</span>
-                      <input
-                        type="checkbox"
-                        className="checkboxfill layer-type-checkboxes"
-                      />
-                    </div>
-                  {/* } */}
-                </Accordion.Panel>
-              </Accordion.Item>
-              {/* } */}
-
-              <Accordion.Item value="checkboxes">
-                <Accordion.Control>Location Types</Accordion.Control>
-                <Accordion.Panel>
-                  <form>
-                    <ul className="customer-type">
-                      {/* <!-- Loop through all location types --> */}
-                      {locationLayers &&
-                        locationLayers.map((locationType, index) => {
-                          return (
-                            locationType.show && (
-                              <li key={index}>
-                                {locationType.showIcon && (
-                                  <div className="ctype-icon">
-                                    <img className="image" src={locationType.iconUrl} alt="location-icon" />
-                                  </div>
-                                )}
-
-                                <div className="ctype-name">{locationType.label}</div>
-                                <div className="ctype-checkbox">
-                                  <input
-                                    type="checkbox"
-                                    className="checkboxfill"
-                                    // checked={locationType.checked || false}
-                                    // onChange={() =>
-                                    //   updateLayerVisibility(locationType, !locationType.checked)
-                                    // }
-                                  />
-                                </div>
-                              </li>
-                            )
-                          )
-                        })}
-                    </ul>
-                  </form>
-                </Accordion.Panel>
-              </Accordion.Item>
-              {/* <!-- Markup for any location filters that are specified for the current perspective --> */}
-              {configuration.ui.perspective.mapTools && configuration.ui.perspective.mapTools.toolDetails.near_net.filters.length > 0 &&
-                configuration.ui.perspective.mapTools.toolDetails.near_net.filters.map((filter) => {
-                  return (
-                    <Accordion.Item value={filter.attributeKey} key={filter.attributeKey}>
-                      <Accordion.Control>
-                        {filter.label}
-                      </Accordion.Control>
-                      <Accordion.Panel>
-                        <div>
-                          {filter.type === 'threshold' ? (
-                            <div className="row range-input">
-                              {filter.value.toFixed(2)}
-                              <input
-                                type="range"
-                                min={filter.minValue}
-                                max={filter.maxValue}
-                                step={(filter.maxValue - filter.minValue) / 100}
-                                // value={filter.value}
-                                // onChange={() => setUpdateMapLayerCalled(!updateMapLayerCalled)}
-                                // className="aro-slider"
-                              />
-                            </div>
-                          ) : (
-                            <div style={{ paddingBottom: '1em' }}>
-                              {filter.values.map(value => {
-                                return (
-                                  <div key={value.key} style={{ display: 'flex', flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
-                                    <div className="ctype-name">{value.label}</div>
-                                    <input
-                                      type="checkbox"
-                                      className="checkboxfill"
-                                      // checked={value.checked || false}
-                                    />
-                                  </div>
-                                )
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      </Accordion.Panel>
-                    </Accordion.Item>
-                  )
-              })}
-            </Accordion>
-          </CardBody>
-          {/* )} */}
-        </MapToolCard>
-      </div>
-      <style jsx>{`
-        .title {
-          margin-top: -12px;
-          padding: 5px 10px;
-          background-color: #ddd;
-          font-weight: bold;
-        }
-        .title .btn {
-          padding: 3px 5px 0px 5px;
-        }
-        .title .label {
-          line-height: 26px;
-          margin-left: 5px;
-        }
-        .column {
-          padding: 5px 15px;
-        }
-        .layer-type-checkboxes {
-          margin-top: 0px;
-        }
-        .range-input {
-          padding: 15px;
-        }
-        .image {
-          width: 16px;
-          margin-right: 10px;
-        }
-      `}</style>
-    </MapTool>
+    <PanelComponent
+      panelKey='near_net'
+      panelLabel='Near Net'
+      resourceEntityTypes={locationLayers}
+      // updateFilters={up}
+      // updateLayerVisibility={updateLayerVisibility}
+    />
   )
 }
 

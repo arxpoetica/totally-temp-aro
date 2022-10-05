@@ -59,7 +59,23 @@ const Panel = (props) => {
             <Accordion multiple value={expandedAccords} onChange={setExpandedAccords}>
               {getTopFilters().length > 0 && getTopFilters().map(topFilter => (
                 <Accordion.Item value="global-filters">
-                  <PanelFilterComponent filter={topFilter} panelKey={panelKey} />
+                  <Accordion.Control>{topFilter.label}</Accordion.Control>
+                  <Accordion.Panel>
+                  {/* <PanelFilterComponent filter={topFilter} panelKey={panelKey} /> */}
+                  <div style={{ paddingBottom: '1em' }}>
+                    {topFilter.values.map(value => {
+                      return (
+                        <div key={value.key} style={{ display: 'flex', flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
+                          <div className="ctype-name">{value.label}</div>
+                          <input
+                            type="checkbox"
+                            className="checkboxfill"
+                          />
+                        </div>
+                      )
+                    })}
+                  </div>
+                  </Accordion.Panel>
                 </Accordion.Item>
               ))}
 
@@ -94,7 +110,7 @@ const Panel = (props) => {
                   </form>
                 </Accordion.Panel>
               </Accordion.Item>
-              {getConfigurationFilters().map((filter) => {
+              {getConfigurationFilters().filter(filter => !filter.top).map((filter) => {
                 return (
                   <Accordion.Item value={filter.attributeKey} key={filter.attributeKey}>
                     <Accordion.Control>
