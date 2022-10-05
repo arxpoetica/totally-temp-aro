@@ -100,11 +100,13 @@ const MapSplit = (props) => {
 
     window.Appcues.on("flow_completed", function(event) {
       console.log("Appcues completed a flow with ID " + event.flowId);
+      // TODO: Make query system more robust 183115918
       setAppcuesQuery('')
     });
 
     window.Appcues.on("flow_skipped", function(event) {
       console.log("Appcues skipped a flow with ID " + event.flowId);
+      // TODO: Make query system more robust 183115918
       setAppcuesQuery('')
     });
 
