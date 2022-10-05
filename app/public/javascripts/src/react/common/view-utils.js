@@ -152,6 +152,7 @@ export const arrayComparer = (otherArray) => {
   }
 }
 
+// TODO: Make query system more robust 183115918
 export const setAppcuesQuery = (queryParam) => {
   const url = new URL(window.location);
   url.searchParams.set('appcues', queryParam);

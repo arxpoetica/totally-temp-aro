@@ -663,6 +663,7 @@ export class ToolBar extends Component {
   }
 
   createAndLoadPlan() {
+    // TODO: Make query system more robust 183115918
     setAppcuesQuery('createNewPlan')
     this.props.createNewPlan(true)
       .then((result) => this.props.loadPlan(result.data.id))
