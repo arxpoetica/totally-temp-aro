@@ -59,17 +59,20 @@ class State {
         // At this point we will have access to the global map variable
         map.ready(() => resolve())
         service.setGoogleMapsReference(map)
-        
+
         // TODO: add debounce?
         map.addListener('center_changed', () => {
-          let center = map.getCenter()
-          let latitude = center.lat()
-          let longitude = center.lng()
-          service.updateDefaultPlanCoordinates({latitude, longitude})
+          const center = map.getCenter()
+          const latitude = center.lat()
+          const longitude = center.lng()
+          service.defaultPlanCoordinates.latitude = latitude
+          service.defaultPlanCoordinates.longitude = longitude
+          service.updateDefaultPlanCoordinates({ latitude, longitude })
         })
         map.addListener('zoom_changed', () => {
-          let zoom = map.getZoom()
-          service.updateDefaultPlanCoordinates({zoom})
+          const zoom = map.getZoom()
+          service.defaultPlanCoordinates.zoom = zoom
+          service.updateDefaultPlanCoordinates({ zoom })
         })
       })
     })
@@ -373,23 +376,6 @@ class State {
       
       return inputs
     }
-
-    $document.ready(() => {
-      // We should have a map object at this point. Unfortunately, this is hardcoded for now.
-      if (map) {
-        map.addListener('center_changed', () => {
-          var center = map.getCenter()
-          service.defaultPlanCoordinates.latitude = center.lat()
-          service.defaultPlanCoordinates.longitude = center.lng()
-        })
-        map.addListener('zoom_changed', () => {
-          service.defaultPlanCoordinates.zoom = map.getZoom()
-          $rootScope.$broadcast('map_zoom_changed')
-        })
-      } else {
-        console.warn('Map object not found. Plan coordinates and zoom will not be updated when the user pans or zooms the map')
-      }
-    })
 
     service.getAddressFor = (latitude, longitude) => {
       return new Promise((resolve, reject) => {
