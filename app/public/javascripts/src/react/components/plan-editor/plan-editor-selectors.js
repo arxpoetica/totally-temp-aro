@@ -297,7 +297,9 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
         if (featureEntry && featureEntry.feature.dropLinks) {
           // add droplinks to totalHomes to check if it exceeds maxHubHomes
           totalHomes += featureEntry.feature.dropLinks.length
-
+          // TODO: should be we counting locations in a drop link?
+          // TODO: do we need to worry about atomicUnits?
+          // feature.dropLinks[#].locationLinks[#].atomicUnits
           //checks for max homes in terminal
           if (featureEntry.feature.dropLinks.length > maxTerminalHomes) {
             if (!alerts[featureId]) {
