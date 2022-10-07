@@ -70,12 +70,32 @@ export class MultiSelectVertices {
     removedMarker.setMap(null)
   }
 
+  createsyntheticVertexEvent(marker) {
+    return {
+      vertex: marker.title,
+      latLng: marker.position
+    }
+  }
+
   clearMapObjectOverlay() {
     for (const marker of this.mapObjectOverlay) {
       this.googleUtil.maps.event.clearInstanceListeners(marker);
       marker.setMap(null)
     }
-  
     this.mapObjectOverlay = []
   }
+
+  finishDeletion() {
+    const sortedObjects = this.mapObjectOverlay.sort((a, b) => {
+      return Number(b.title) - Number(a.title)
+    })
+
+    const length = this.mapObject.getPath().getLength();
+    let nextVertexEvent = this.createsyntheticVertexEvent(sortedObjects[0])
+    if (nextVertexEvent.vertex >= length ) nextVertexEvent.vertex -= 1;
+    this.clearMapObjectOverlay()
+
+    this.addMarker(nextVertexEvent)
+  }
 }
+

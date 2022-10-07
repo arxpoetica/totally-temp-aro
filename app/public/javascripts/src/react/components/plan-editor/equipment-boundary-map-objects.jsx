@@ -12,6 +12,7 @@ let deleteKeyListener
 let mapObject
 let multiSelectVertices
 let clearMapObjectOverlay
+let finishDeletion
 
 const EquipmentBoundaryMapObjects = props => {
 
@@ -60,6 +61,7 @@ const EquipmentBoundaryMapObjects = props => {
       fillOpacity: 0.05,
     })
     setupListenersForMapObject(mapObject)
+    if (multiSelectVertices) multiSelectVertices.clearMapObjectOverlay()
     multiSelectVertices = new MultiSelectVertices(
       mapObject,
       googleMaps,
@@ -71,6 +73,7 @@ const EquipmentBoundaryMapObjects = props => {
       invalidBoundaryHandling.stashMapObject(mapObject.subnetId, mapObject)
     }
     clearMapObjectOverlay = multiSelectVertices.clearMapObjectOverlay.bind(multiSelectVertices)
+    finishDeletion = multiSelectVertices.finishDeletion.bind(multiSelectVertices)
   }
 
   function deleteMapObject() {
@@ -128,7 +131,7 @@ const EquipmentBoundaryMapObjects = props => {
         // Sort is necessary to ensure that indexes will not be reassigned while deleting more than one vertex.
         const mapObjectOverlayClone = [...multiSelectVertices.mapObjectOverlay]
         // Using mapObject as the argument being passed instead of the one in the parent function is the only way this consistently works.
-        deleteBoundaryVertices(mapObject, mapObjectOverlayClone, clearMapObjectOverlay)
+        deleteBoundaryVertices(mapObject, mapObjectOverlayClone, finishDeletion)
       }
     })
   }
@@ -167,7 +170,7 @@ const EquipmentBoundaryMapObjects = props => {
       eventXY.x,
       eventXY.y,
       vertexPayload,
-      clearMapObjectOverlay,
+      finishDeletion,
     )
   }
 
