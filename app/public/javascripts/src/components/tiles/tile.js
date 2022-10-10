@@ -78,7 +78,8 @@ class TileComponentController {
   }
 
 
-
+  // this registers to old VTL subscribers, events, and so forth
+  // see `rootUnsubscribeAll` for unsubscribers
   rootSubscribeAll () {
     let state = this.state
     let rxState = this.rxState
@@ -107,7 +108,7 @@ class TileComponentController {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapTileOptions(mapTileOptions)
       }
-    }) 
+    })
 
     this.unsubRXMapLayerRefresh = rxState.requestMapLayerRefresh.getMessage().subscribe((tilesToRefresh) => {
       this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
@@ -135,21 +136,21 @@ class TileComponentController {
     })
 
     // To change the center of the map to given LatLng
-    this.unsubSetMapCenter = state.requestSetMapCenter.subscribe((mapCenter) => {
+    this.unsubSetMapCenter = state.requestSetMapCenter.skip(1).subscribe(mapCenter => {
       if (this.mapRef) {
         this.mapRef.panTo({ lat: mapCenter.latitude, lng: mapCenter.longitude })
       }
     })
     
     // Set the map zoom level
-    this.unsubRXSetMapZoom = rxState.requestSetMapZoom.getMessage().subscribe((zoom) => {
+    this.unsubRXSetMapZoom = rxState.requestSetMapZoom.getMessage().skip(1).subscribe((zoom) => {
       if (this.mapRef) {
         this.mapRef.setZoom(zoom)
       }
     })
 
     // Set the map zoom level
-    this.unsubSetMapZoom = state.requestSetMapZoom.subscribe((zoom) => {
+    this.unsubSetMapZoom = state.requestSetMapZoom.skip(1).subscribe((zoom) => {
       if (this.mapRef) {
         this.mapRef.setZoom(zoom)
       }
@@ -272,6 +273,8 @@ class TileComponentController {
     })
   }
 
+  // this unregisters old VTL subscribers, events, and so forth
+  // see `rootSubscribeAll` for subscribers
   rootUnsubscribeAll () {
     //this.unsubscribeRedux()
     this.unsubPolygonSelect.unsubscribe()
