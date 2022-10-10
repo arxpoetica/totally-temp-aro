@@ -104,13 +104,13 @@ export class AroSearch extends Component {
     AroHttp.get(`/service/odata/LocationObjectEntity?$select=id,geom&$filter=id eq ${selectedLocation.id}&$top=1`)
       .then(result => {
         const location = result.data[0]
+        // TODO: why is this hard coded here???
         const ZOOM_FOR_LOCATION_SEARCH = 17
-        const mapObject = {
-          latitude: location.geom.coordinates[1],
-          longitude: location.geom.coordinates[0],
-        }
-        this.rxState.requestSetMapCenter.sendMessage(mapObject)
-        this.rxState.requestSetMapZoom.sendMessage(ZOOM_FOR_LOCATION_SEARCH)
+        this.props.map.panTo({
+          lat: location.geom.coordinates[1],
+          lng: location.geom.coordinates[0],
+        })
+        this.props.map.setZoom(ZOOM_FOR_LOCATION_SEARCH)
       })
       .catch(err => console.error(err))
   }
@@ -171,6 +171,7 @@ const Option = createClass({
 const mapStateToProps = (state) => ({
   entityTypeList: state.stateViewMode.entityTypeList,
   selectedMapFeatures: state.selection.mapFeatures,
+  map: state.map.googleMaps,
 })
 
 const mapDispatchToProps = (dispatch) => ({
