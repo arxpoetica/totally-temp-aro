@@ -46,12 +46,17 @@ const ViewMode = (props) => {
     }
   }, [selectedLocations])
 
-  const updateSelectedState = (locationId) => {
+  const updateSelectedState = location => {
     if (!perspective) { return }
 
     if (checkSelectedDisplayMode(displayModes.VIEW) && checkIsShowViewModePanels(viewModePanels.LOCATION_INFO)) {
       const newSelection = cloneSelection()
-      newSelection.editable.location = locationId ? { [locationId]: locationId } : {}
+      if (location) {
+        const location_id = typeof location === 'number' ? location : location.location_id
+        newSelection.editable.location = { [location_id]: location_id }
+      } else {
+        newSelection.editable.location = {}
+      }
       setMapSelection(newSelection)
     }
   }
