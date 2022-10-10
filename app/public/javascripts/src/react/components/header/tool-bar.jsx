@@ -1158,7 +1158,6 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   setPlanInputsModal: (status) => dispatch(ToolBarActions.setPlanInputsModal(status)),
-  requestSetMapCenter: (mapRef) => dispatch(MapActions.requestSetMapCenter(mapRef)),
   selectedDisplayModeActions: (value) => dispatch(ToolBarActions.selectedDisplayMode(value)),
   activeViewModePanelActions: (value) => dispatch(ToolBarActions.activeViewModePanel(value)),
   setAnnotationListVisibility: isVisible => {
