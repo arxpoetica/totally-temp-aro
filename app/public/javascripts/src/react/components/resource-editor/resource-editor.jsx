@@ -334,11 +334,6 @@ function ResourceEditor(props) {
 							</div>
 						</div>
 					</div>
-				
-					<div>
-						<p>filterText: {filterText}</p>
-						<p>props.loggedInUser.perspective: {props.loggedInUser.perspective}</p>
-					</div>
 
 					<div>
 						<div className="comp_edit_tbl_contain" style={{flex: '1 1 auto', overflowY: 'auto'}}>
