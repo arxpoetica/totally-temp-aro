@@ -72,6 +72,7 @@ export const equipmentDetail = (props) => {
     configuration,
     selectedMapFeatures,
     allowViewModeClickAction,
+    map,
    } = props
 
   const prevMapFeatures = usePrevious(selectedMapFeatures)
@@ -223,13 +224,15 @@ export const equipmentDetail = (props) => {
     displayEquipment(plan.id, objectId).then((equipmentInfo) => {
       if (equipmentInfo) {
         const selectedEquipmentCor = equipmentInfo.geometry.coordinates
-        const mapObject = {
-          latitude: selectedEquipmentCor[1],
-          longitude: selectedEquipmentCor[0],
-        }
+
+        // TODO: why is this hardcoded here?
         const ZOOM_FOR_EQUIPMENT_SEARCH = 14
-        rxState.requestSetMapCenter.sendMessage(mapObject)
-        isZoom && rxState.requestSetMapZoom.sendMessage(ZOOM_FOR_EQUIPMENT_SEARCH)
+
+        map.panTo({
+          lat: selectedEquipmentCor[1],
+          lng: selectedEquipmentCor[0],
+        })
+        map.setZoom(ZOOM_FOR_EQUIPMENT_SEARCH)
       }
       checkForBounds(equipmentInfo)
     })
@@ -380,6 +383,7 @@ const mapStateToProps = (state) => ({
   showSiteBoundary: state.mapLayers.showSiteBoundary,
   configuration: state.toolbar.appConfiguration,
   selectedMapFeatures: state.selection.mapFeatures,
+  map: state.map.googleMaps,
 })
 
 const mapDispatchToProps = (dispatch) => ({
