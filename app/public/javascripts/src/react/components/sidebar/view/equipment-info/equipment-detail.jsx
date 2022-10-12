@@ -8,7 +8,6 @@ import SelectionActions from '../../../selection/selection-actions'
 import ToolBarActions from '../../../header/tool-bar-actions'
 import StateViewModeActions from '../../../state-view-mode/state-view-mode-actions'
 import AroHttp from '../../../../common/aro-http'
-import RxState from '../../../../common/rxState'
 import AroSearch from '../../view/aro-search.jsx'
 import EquipmentInterfaceTree from './equipment-interface-tree.jsx'
 import FiberDisplay from './fiber-display.jsx'
@@ -23,7 +22,6 @@ const EquipmentDetailView = Object.freeze({
   Fiber: 2
 })
 const tileDataService = new TileDataService()
-const rxState = new RxState()
 
 export const equipmentDetail = (props) => {
 
@@ -64,7 +62,6 @@ export const equipmentDetail = (props) => {
     plan,
     cloneSelection,
     setMapSelection,
-    loggedInUser,
     networkEquipment,
     activeViewModePanelAction,
     showSiteBoundary,
@@ -379,7 +376,6 @@ const mapStateToProps = (state) => ({
   activeViewModePanel: state.toolbar.rActiveViewModePanel,
   plan: state.plan.activePlan,
   networkEquipment: state.mapLayers.networkEquipment,
-  loggedInUser: state.user.loggedInUser,
   showSiteBoundary: state.mapLayers.showSiteBoundary,
   configuration: state.toolbar.appConfiguration,
   selectedMapFeatures: state.selection.mapFeatures,
