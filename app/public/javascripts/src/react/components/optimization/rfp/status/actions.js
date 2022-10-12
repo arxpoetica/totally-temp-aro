@@ -88,13 +88,6 @@ function setPlanListOffset (planListOffset) {
   }
 }
 
-function setSelectedTabId (selectedTabId) {
-  return {
-    type: Actions.RFP_SET_SELECTED_TAB_ID,
-    payload: selectedTabId
-  }
-}
-
 function loadRfpTemplates () {
   return dispatch => {
     AroHttp.get('/ui/rfp_templates')
@@ -138,7 +131,6 @@ export default {
   clearRfpPlans,
   downloadRfpReport,
   setPlanListOffset,
-  setSelectedTabId,
   loadRfpTemplates,
   addRfpTemplate,
   deleteRfpTemplate,
