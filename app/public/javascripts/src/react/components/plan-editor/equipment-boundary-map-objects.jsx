@@ -106,7 +106,7 @@ const EquipmentBoundaryMapObjects = props => {
     mapObject.addListener('contextmenu', event => contextMenuClick(event))
     
     mapObject.addListener('click', event => {
-      if (event.vertex) {
+      if (event.vertex || event.vertex == 0) {
         event.domEvent.stopPropagation()
         if (event.domEvent.shiftKey) {
           multiSelectVertices.addOrRemoveMarker(event)
