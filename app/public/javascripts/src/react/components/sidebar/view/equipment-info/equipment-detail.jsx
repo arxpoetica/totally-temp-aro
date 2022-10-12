@@ -8,7 +8,6 @@ import SelectionActions from '../../../selection/selection-actions'
 import ToolBarActions from '../../../header/tool-bar-actions'
 import StateViewModeActions from '../../../state-view-mode/state-view-mode-actions'
 import AroHttp from '../../../../common/aro-http'
-import RxState from '../../../../common/rxState'
 import AroSearch from '../../view/aro-search.jsx'
 import EquipmentInterfaceTree from './equipment-interface-tree.jsx'
 import FiberDisplay from './fiber-display.jsx'
@@ -23,7 +22,6 @@ const EquipmentDetailView = Object.freeze({
   Fiber: 2
 })
 const tileDataService = new TileDataService()
-const rxState = new RxState()
 
 export const equipmentDetail = (props) => {
 
@@ -64,7 +62,6 @@ export const equipmentDetail = (props) => {
     plan,
     cloneSelection,
     setMapSelection,
-    loggedInUser,
     networkEquipment,
     activeViewModePanelAction,
     showSiteBoundary,
@@ -72,6 +69,7 @@ export const equipmentDetail = (props) => {
     configuration,
     selectedMapFeatures,
     allowViewModeClickAction,
+    map,
    } = props
 
   const prevMapFeatures = usePrevious(selectedMapFeatures)
@@ -223,13 +221,15 @@ export const equipmentDetail = (props) => {
     displayEquipment(plan.id, objectId).then((equipmentInfo) => {
       if (equipmentInfo) {
         const selectedEquipmentCor = equipmentInfo.geometry.coordinates
-        const mapObject = {
-          latitude: selectedEquipmentCor[1],
-          longitude: selectedEquipmentCor[0],
-        }
+
+        // TODO: why is this hardcoded here?
         const ZOOM_FOR_EQUIPMENT_SEARCH = 14
-        rxState.requestSetMapCenter.sendMessage(mapObject)
-        isZoom && rxState.requestSetMapZoom.sendMessage(ZOOM_FOR_EQUIPMENT_SEARCH)
+
+        map.panTo({
+          lat: selectedEquipmentCor[1],
+          lng: selectedEquipmentCor[0],
+        })
+        map.setZoom(ZOOM_FOR_EQUIPMENT_SEARCH)
       }
       checkForBounds(equipmentInfo)
     })
@@ -376,10 +376,10 @@ const mapStateToProps = (state) => ({
   activeViewModePanel: state.toolbar.rActiveViewModePanel,
   plan: state.plan.activePlan,
   networkEquipment: state.mapLayers.networkEquipment,
-  loggedInUser: state.user.loggedInUser,
   showSiteBoundary: state.mapLayers.showSiteBoundary,
   configuration: state.toolbar.appConfiguration,
   selectedMapFeatures: state.selection.mapFeatures,
+  map: state.map.googleMaps,
 })
 
 const mapDispatchToProps = (dispatch) => ({
