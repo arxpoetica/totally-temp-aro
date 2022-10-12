@@ -89,14 +89,8 @@ export class MultiSelectVertices {
     const sortedObjects = this.mapObjectOverlay.sort((a, b) => {
       return Number(b.title) - Number(a.title)
     })
-
-    const length = this.mapObject.getPath().getLength();
-    let nextVertexEvent = this.createSyntheticVertexEvent(sortedObjects[0])
-
-    if (nextVertexEvent.vertex >= length ) nextVertexEvent.vertex = 0;
     this.clearMapObjectOverlay()
-
-    this.addMarker(nextVertexEvent)
+    this.selectNextVertex(sortedObjects[0])
   }
 
   selectNextVertex(marker) {
