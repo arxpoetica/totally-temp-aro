@@ -1,4 +1,8 @@
 import Actions from '../../common/actions'
+import { klona } from 'klona'
+import mapDataIndices from '../common/tile-overlay/tile-cache'
+
+//const defaultState = klona(mapDataIndices)
 
 const defaultState = {
   // subnetIds: tile data object

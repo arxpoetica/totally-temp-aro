@@ -31,6 +31,8 @@ import { batch } from 'react-redux'
 
 // TileDataMutator takes care of clearing the cache when points are added and removed
 
+// ABS: abstract these to work with all the bounded tile data sets
+
 function setSubnetData (subnetId, locations) { // will make this generic in te future
   if (!tileCaches.subnets[subnetId]) {
     tileCaches.subnets[subnetId] = new TileCache()
@@ -70,7 +72,7 @@ function setSubnetsData (subnetsData) {
 
 function clearSubnetDataAndCache () {
   return (dispatch, getState) => {
-    const subnetTileData = getState().subnetTileData
+    const subnetTileData = getState().mapData.tileData.subnets // getState().subnetTileData
     // clear tile cache
     Object.keys(subnetTileData).forEach(subnetId => {
       tileCaches.subnets[subnetId].clear()

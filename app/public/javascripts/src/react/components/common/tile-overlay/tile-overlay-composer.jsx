@@ -275,7 +275,7 @@ const mapStateToProps = (state) => {
   let groupsById = state.planEditor.draftLocations.groups
   return {
     mapRef: state.map.googleMaps,
-    subnetTileData: state.subnetTileData,
+    subnetTileData: state.mapData.tileData.subnets, // state.subnetTileData,
     selectedSubnetId,
     alertLocationIds, // when this changes the action creator needs to clear the cache, this happens because the cache is cleared when the subnet data is updated (parent to this object)
     locationsById,
