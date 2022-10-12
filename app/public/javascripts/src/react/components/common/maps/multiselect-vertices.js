@@ -70,7 +70,7 @@ export class MultiSelectVertices {
     removedMarker.setMap(null)
   }
 
-  createsyntheticVertexEvent(marker) {
+  createSyntheticVertexEvent(marker) {
     return {
       vertex: marker.title,
       latLng: marker.position
@@ -91,8 +91,9 @@ export class MultiSelectVertices {
     })
 
     const length = this.mapObject.getPath().getLength();
-    let nextVertexEvent = this.createsyntheticVertexEvent(sortedObjects[0])
-    if (nextVertexEvent.vertex >= length ) nextVertexEvent.vertex -= 1;
+    let nextVertexEvent = this.createSyntheticVertexEvent(sortedObjects[0])
+
+    if (nextVertexEvent.vertex >= length ) nextVertexEvent.vertex = 0;
     this.clearMapObjectOverlay()
 
     this.addMarker(nextVertexEvent)
