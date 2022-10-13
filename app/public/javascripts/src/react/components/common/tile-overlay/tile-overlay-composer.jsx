@@ -5,7 +5,7 @@ import wrapComponentWithProvider from '../../../common/provider-wrapped-componen
 
 import PlanEditorSelectors from '../../plan-editor/plan-editor-selectors'
 import PlanEditorActions from '../../plan-editor/plan-editor-actions'
-import SubnetTileSelectors from '../../plan-editor/subnet-tile-selectors'
+import MapDataSelectors from './map-data-selectors'
 
 import TileUtils from './tile-overlay-utils'
 import { tileCaches } from './tile-cache'
@@ -280,7 +280,7 @@ const mapStateToProps = (state) => {
     alertLocationIds, // when this changes the action creator needs to clear the cache, this happens because the cache is cleared when the subnet data is updated (parent to this object)
     locationsById,
     groupsById,
-    unselectedLocationGroups: SubnetTileSelectors.getUnselectedLocationGroups(state),
+    unselectedLocationGroups: MapDataSelectors.getUnselectedLocationGroups(state),
   }
 }
 
