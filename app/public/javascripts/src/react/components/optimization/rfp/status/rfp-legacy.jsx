@@ -25,7 +25,6 @@ const TABS = {
 
 export const RfpLegacy = () =>
   <div className="rfp-legacy">
-    <h4>RFP Plans</h4>
     <Tabs defaultValue="LIST_PLANS">
       <Tabs.List>
         {Object.entries(TABS).map(([tabId, { description, icon }]) =>

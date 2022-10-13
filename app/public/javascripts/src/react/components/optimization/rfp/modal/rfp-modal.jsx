@@ -46,7 +46,7 @@ function _RfpModal(props) {
       </div>
 
       <div className='container pt-5 pb-5 d-flex flex-column' style={{ height: '100%' }}>
-        <h2>RFP Plans</h2>
+        <h2>RFPs</h2>
         {/* TODO: genericize this into a component */}
         <Tabs defaultValue="NEW">
           <Tabs.List>
@@ -86,7 +86,7 @@ function _RfpModal(props) {
           cursor: pointer;
         }
         .panel {
-          padding: 80px 0 0 80px;
+          padding: 20px 0 0 20px;
         }
       `}</style>
     </div>
