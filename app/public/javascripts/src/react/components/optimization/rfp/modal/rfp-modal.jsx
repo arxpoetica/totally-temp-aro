@@ -48,7 +48,7 @@ function _RfpModal(props) {
       <div className='container pt-5 pb-5 d-flex flex-column' style={{ height: '100%' }}>
         <h2>RFPs</h2>
         {/* TODO: genericize this into a component */}
-        <Tabs defaultValue="NEW">
+        <Tabs defaultValue="NEW" keepMounted={false}>
           <Tabs.List>
             {Object.entries(TABS).map(([tabId, { description, icon }]) =>
               <Tabs.Tab key={tabId} value={tabId} icon={icon}>

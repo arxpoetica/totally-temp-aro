@@ -25,7 +25,7 @@ const TABS = {
 
 export const RfpLegacy = () =>
   <div className="rfp-legacy">
-    <Tabs defaultValue="LIST_PLANS">
+    <Tabs defaultValue="LIST_PLANS" keepMounted={false}>
       <Tabs.List>
         {Object.entries(TABS).map(([tabId, { description, icon }]) =>
           <Tabs.Tab key={tabId} value={tabId} icon={icon}>
