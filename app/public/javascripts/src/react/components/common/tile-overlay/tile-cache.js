@@ -1,4 +1,5 @@
 import {LinkedListMutator as LLM} from "../../../common/linked-list-mutator"
+import { klona } from 'klona'
 
 /*
 there will be a global cache object that will store caches as such
@@ -21,7 +22,7 @@ For the moment culling is handled here locally with TileCache itself manipulatin
 
 */
 
-export class TileCache {
+class TileCache {
   constructor (itemLimit = 1024) { // 1024 is just a default, set it to what is appropriate for your system 
     this.itemLimit = itemLimit
     this.clear()
@@ -49,8 +50,10 @@ export class TileCache {
   //  the caller should also call tileCull.removeElement UNLESS the caller is tileCull 
   _deleteTile (tileId) {
     delete this._tileCache[tileId.z][tileId.x][tileId.y]
+    // z.x is now empty remove it
     if (!Object.keys(this._tileCache[tileId.z][tileId.x]).length) {
       delete this._tileCache[tileId.z][tileId.x]
+      // if z is now empty remove it
       if (!Object.keys(this._tileCache[tileId.z]).length) {
         delete this._tileCache[tileId.z]
       }
@@ -107,3 +110,19 @@ export class TileCache {
   }
 
 }
+
+// the three sisters:
+//  - tile cache
+//  - tile data
+//  - entity data
+//  are somewhat coupled and should all have the same top level indices, they are defined here:
+const mapDataIndices = Object.freeze({
+  nearnet: {},
+  subnets: {},
+  unbounded: {},
+})
+
+let tileCaches = klona(mapDataIndices)
+tileCaches.nearnet = new TileCache() // near net doesn't have ID indicies 
+
+export {TileCache, tileCaches, mapDataIndices}

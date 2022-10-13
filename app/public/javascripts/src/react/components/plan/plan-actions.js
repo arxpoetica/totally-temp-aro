@@ -13,7 +13,7 @@ import ToolBarActions from '../header/tool-bar-actions.js'
 import AroHttp from '../../common/aro-http'
 import fetch from 'cross-fetch'
 import { Notifier } from '../../common/notifications'
-import subnetTileActions from '../plan-editor/subnet-tile-actions'
+import mapDataActions from '../common/tile-overlay/map-data-actions'
 import RoicReportsActions from '../sidebar/analysis/roic-reports/roic-reports-actions'
 
 function setActivePlanState (planState) {
@@ -165,7 +165,7 @@ function setActivePlan (plan) {
     getState().plan.activePlan && getState().plan.activePlan.id &&
       ClientSocketManager.leaveRoom('plan', getState().plan.activePlan.id) // leave previous plan
     batch(() => {
-      dispatch(subnetTileActions.clearSubnetDataAndCache())
+      dispatch(mapDataActions.clearAllSubnetTileData())
       dispatch({
         type: Actions.PLAN_SET_ACTIVE_PLAN,
         payload: {
