@@ -90,10 +90,11 @@ export class MultiSelectVertices {
       return Number(b.title) - Number(a.title)
     })
     this.clearMapObjectOverlay()
-    this.selectNextVertex(sortedObjects[0])
+    if (sortedObjects[0] && sortedObjects[0].title) this.selectNextVertex(sortedObjects[0])
   }
 
   selectNextVertex(marker) {
+    if (!marker.title) return
     const nextVertexEvent = this.createSyntheticVertexEvent(marker)
 
     const length = this.mapObject.getPath().getLength();
