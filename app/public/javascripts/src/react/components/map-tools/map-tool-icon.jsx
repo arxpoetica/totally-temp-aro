@@ -2,6 +2,7 @@ import React from 'react'
 
 const TOOL_IDS = {
   LOCATIONS: 'locations',
+  NEAR_NET: 'near_net',
   CABLES: 'cables',
   COPPER: 'copper',
   CONDUITS: 'conduits',
@@ -14,6 +15,11 @@ const availableToolsMeta = [
   {
     id: TOOL_IDS.LOCATIONS,
     name: 'Locations',
+    icon: 'fa fa-building fa-2x',
+  },
+  {
+    id: TOOL_IDS.NEAR_NET,
+    name: 'Near Net',
     icon: 'fa fa-building fa-2x',
   },
   {
