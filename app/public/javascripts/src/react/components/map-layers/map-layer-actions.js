@@ -342,6 +342,13 @@ function setMapReadyPromise (mapReadyPromise) {
   }
 }
 
+function updateMapLayerFilters (layer, key, value) {
+  return {
+    type: Actions.LAYERS_SET_MAP_FILTERS,
+    payload: { layer, key, value }
+  }
+}
+
 export default {
   setLayerVisibility,
   setNetworkEquipmentLayerVisibility,
@@ -370,5 +377,6 @@ export default {
   loadEdgeConstructionTypeIds,
   setActiveMapLayers,
   setAngularMapLayerSubject,
-  setMapReadyPromise
+  setMapReadyPromise,
+  updateMapLayerFilters
 }
