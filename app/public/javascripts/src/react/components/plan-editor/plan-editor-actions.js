@@ -1815,6 +1815,7 @@ function parseSubnet (subnet) {
       // TOS: does this make a list for each household? 
       // if subnet.subnetLocationsById[objectId] doesn't exist something has fallen out of sync
       subnet.subnetLocationsById[objectId] = { ...location, parentEquipmentId: null}
+      delete subnet.subnetLocationsById[objectId].objectIds
     })
   })
   delete subnet.subnetLocations
