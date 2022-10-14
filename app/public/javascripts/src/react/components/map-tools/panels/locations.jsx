@@ -170,7 +170,7 @@ export const LocationsPanel = (props) => {
 
   let layerIconUrl = ''
   function getFeatureFilters() {
-    const activeLocationFilters = configuration.ui.perspective.mapTools.locations.filters.filter((item) => item.useFilter)
+    const activeLocationFilters = configuration.ui.perspective.mapTools.toolDetails.locations.filters.filter((item) => item.useFilter)
     let featureFilters = []
 
     activeLocationFilters.forEach((locationFilter) => {

@@ -1,7 +1,7 @@
 import React from 'react'
 
 export const CardBody = (props) => {
-  const { showCardBody, children } = props
+  const { showCardBody, children, padding } = props
 
   return (
     <>
@@ -10,7 +10,7 @@ export const CardBody = (props) => {
           {children}
           <style jsx>{`
             .card-body {
-              padding: 0.75rem;
+              padding: ${padding || '0.75rem'};
               max-height: 600px;
               overflow-y: auto;
               overflow-x: hidden;

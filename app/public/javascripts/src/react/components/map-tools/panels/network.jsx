@@ -1,5 +1,4 @@
 import React, { useEffect, useContext } from 'react'
-import { PanelComponent } from './panel-component.jsx'
 import { MapToolContext } from '../map-display-tools.jsx'
 import { connect } from 'react-redux'
 import { MapToolIcon } from '../map-tool-icon.jsx'
