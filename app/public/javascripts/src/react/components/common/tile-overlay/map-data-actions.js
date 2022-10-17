@@ -80,24 +80,31 @@ function batchSetTileData (entitiesById, dataIndex) {
 }
 
 function setNearnetTileData (entities) {
-  return (dispatch) => {
-    return dispatch(setTileData(entities, 'nearnet'))
-  }
+  return setTileData(entities, 'nearnet')
+}
+
+function batchSetNearnetTileData (entitiesById) {
+  return batchSetTileData(entitiesById, 'nearnet')
 }
 
 function setSubnetTileData (entities, id) {
-  return (dispatch) => {
-    return dispatch(setTileData(entities, 'subnets', id))
-  }
+  return setTileData(entities, 'subnets', id)
 }
 
 function batchSetSubnetTileData (entitiesById) {
-  return (dispatch) => {
-    return dispatch(batchSetTileData(entitiesById, 'subnets'))
-  }
+  return batchSetTileData(entitiesById, 'subnets')
 }
 
 // FUTURE: 'unbounded'
+
+//function setEntityData
+
+function setNearnetEntityData (entityData) {
+  return {
+    type: Actions.MAP_DATA_SET_NEARNET_ENTITY_DATA,
+    payload: {entityData},
+  }
+}
 
 // --- //
 
@@ -106,13 +113,13 @@ function clearTileData (dataIndex) {
     const tileData = getState().mapData.tileData[dataIndex] // getState().subnetTileData
     // TODO: FIX; how do we check if a data store is a single or a dictionary?
     // clear tile cache
-    if ('nearnet' === dataIndex) {
-      tileCaches[dataIndex].clear()
-    } else {
+    //if ('nearnet' === dataIndex) {
+    //  tileCaches[dataIndex].clear()
+    //} else {
       Object.keys(tileData).forEach(subnetId => {
         tileCaches[dataIndex][subnetId].clear()
       })
-    }
+    //}
     // clear data
     return dispatch({
       type: Actions.MAP_DATA_CLEAR_TILE_DATA, 
@@ -124,14 +131,19 @@ function clearTileData (dataIndex) {
 }
 
 function clearAllSubnetTileData () {
-  return (dispatch) => {
-    return dispatch(clearTileData('subnets'))
-  }
+  return clearTileData('subnets')
 }
 
 function clearNearnetTileData () {
+  return clearTileData('nearnet')
+}
+
+function clearAllNearnetData () {
   return (dispatch) => {
-    return dispatch(clearTileData('nearnet'))
+    batch(() => {
+      dispatch(clearNearnetTileData())
+      dispatch({type:Actions.MAP_DATA_CLEAR_NEARNET_ENTITY_DATA})
+    })
   }
 }
 
@@ -141,9 +153,12 @@ export default {
   setTileData,
   batchSetTileData,
   setNearnetTileData,
+  batchSetNearnetTileData,
   setSubnetTileData,
   batchSetSubnetTileData,
+  setNearnetEntityData,
   clearTileData,
   clearAllSubnetTileData,
   clearNearnetTileData,
+  clearAllNearnetData,
 }

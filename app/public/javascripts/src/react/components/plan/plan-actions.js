@@ -159,13 +159,83 @@ function loadPlanDataSelectionFromServer (planId) {
   }
 }
 
+
+
+
+
+
+// TODO: this should move to nearnet-actions
+function _parseNearnet (nearnetData) {
+  let entityData = {}
+  let tileDataEntities = {}
+  nearnetData.locations.forEach(location => {
+    let objectId = location.properties.object_id
+    location.properties.objectId = objectId
+    delete location.properties.object_id
+
+    let plannedType = location.properties.planned_type
+    location.properties.plannedType = plannedType
+    delete location.properties.planned_type
+    
+    // TODO: in the future we should use a standard geom for all map entities 
+    location.point = {
+      latitude: location.geom.coordinates[1],
+      longitude: location.geom.coordinates[0],
+    }
+    delete location.geom
+
+    entityData[objectId] = location
+
+    if (!(plannedType in tileDataEntities)) {
+      tileDataEntities[plannedType] = {}
+    }
+    tileDataEntities[plannedType][objectId] = {point:location.point}
+  })
+  return {entityData, tileDataEntities}
+}
+
+function setNearnetData (nearnetData) {
+  // clear nearnet data
+  return (dispatch) => {
+    if ('undefined' === typeof nearnetData) {
+      // clear near net
+      dispatch(mapDataActions.clearNearnetTileData())
+    } else {
+      let {entityData, tileDataEntities} = _parseNearnet(nearnetData)
+      batch(() => {
+        dispatch(mapDataActions.setNearnetEntityData(entityData))
+        dispatch(mapDataActions.batchSetNearnetTileData(tileDataEntities))
+      })
+    }
+  }
+}
+
+function loadNearnetData (planId) {
+  return (dispatch) => {
+    if ('undefined' === typeof planId) {
+      dispatch(setNearnetData())
+    } else {
+      AroHttp.post(`/service/nearnet-query/${planId}`)
+        .then(nearnetResult => {
+          dispatch(setNearnetData(nearnetResult.data))
+        }).catch(error => Notifier.error(error))
+    }
+  }
+}
+
+
 // Set the currently active plan
 function setActivePlan (plan) {
   return (dispatch, getState) => {
     getState().plan.activePlan && getState().plan.activePlan.id &&
       ClientSocketManager.leaveRoom('plan', getState().plan.activePlan.id) // leave previous plan
+
     batch(() => {
       dispatch(mapDataActions.clearAllSubnetTileData())
+      // clear near net
+      // load new near net
+      dispatch(loadNearnetData(plan.id))
+
       dispatch({
         type: Actions.PLAN_SET_ACTIVE_PLAN,
         payload: {

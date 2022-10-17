@@ -99,8 +99,8 @@ function mapData (state = defaultState, {type, payload}) {
     // case Actions.MAP_DATA_SET_SUBNET_ENTITY_DATA:
     //   return setData(state, payload.entityData, 'entityData', 'subnets', id) // future?
 
-    // case Actions.MAP_DATA_SET_NEARNET_ENTITY_DATA:
-    //   return setData(state, payload.entityData, 'entityData', 'nearnet')
+    case Actions.MAP_DATA_SET_NEARNET_ENTITY_DATA:
+      return setData(state, payload.entityData, 'entityData', 'nearnet')
 
     // case Actions.MAP_DATA_SET_UNBOUNDED_ENTITY_DATA:
     //   return setData(state, payload.entityData, 'entityData', 'unbounded', id) // future
@@ -134,8 +134,8 @@ function mapData (state = defaultState, {type, payload}) {
     // case Actions.MAP_DATA_CLEAR_SUBNET_ENTITY_DATA:
     //   return clearData(state, 'entityData', 'subnets', id) // future?
 
-    // case Actions.MAP_DATA_CLEAR_NEARNET_ENTITY_DATA:
-    //   return clearData(state, 'entityData', 'nearnet')
+    case Actions.MAP_DATA_CLEAR_NEARNET_ENTITY_DATA:
+      return clearData(state, 'entityData', 'nearnet')
 
     // case Actions.MAP_DATA_CLEAR_UNBOUNDED_ENTITY_DATA:
     //   return clearData(state, 'entityData', 'unbounded', id) // future
