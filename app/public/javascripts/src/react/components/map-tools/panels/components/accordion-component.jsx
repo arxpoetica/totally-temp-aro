@@ -9,7 +9,7 @@ import AccordionMultiInputComponent from './accordion-multi-input-component.jsx'
 
 const compDictonary = {
   threshold: AccordionThresholdComponent,
-  range_threshold: AccordionThresholdComponent,
+  rangeThreshold: AccordionThresholdComponent,
   multiSelect: AccordionCheckboxComponent,
   singleSelect: AccordionRadioComponent,
   multiInput: AccordionMultiInputComponent

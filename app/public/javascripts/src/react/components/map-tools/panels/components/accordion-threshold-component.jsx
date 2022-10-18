@@ -16,7 +16,7 @@ const AccordionThreshold = (props) => {
     return { value }
   })
 
-  const Component = filter.type === 'range_threshold'
+  const Component = filter.type === 'rangeThreshold'
     ? RangeSlider
     : Slider
 
@@ -24,13 +24,23 @@ const AccordionThreshold = (props) => {
     return `${filter.labelPrefix ? filter.labelPrefix : ''}${value.toLocaleString('en-US')}${filter.labelSuffix ? filter.labelSuffix : ''}`
   }
 
-  useEffect(() => {
-    updateMapLayerFilters('near_net', filter.attributeKey, { threshold: sliderValue, noMax })
-  }, [])
+  const createPayload = (sVal, noMaxValue) => {
+    const payload = {}
+    payload[filter.type] = sVal
+    payload.noMax = noMaxValue
 
+    return payload
+  }
+
+  useEffect(() => {
+    const payload = createPayload(sliderValue, noMax)
+    updateMapLayerFilters('near_net', filter.attributeKey, payload)
+  }, [])
+  
   const onFilterChange = (value) => {
+    const payload = createPayload(value, noMax)
     setSliderValue(value)
-    debounceDispatch('near_net', filter.attributeKey, { threshold: value, noMax })
+    debounceDispatch('near_net', filter.attributeKey, payload)
   }
 
   const debounceDispatch = _.debounce(updateMapLayerFilters, 250)
@@ -65,8 +75,9 @@ const AccordionThreshold = (props) => {
         <Switch
           label="No Maximum"
           onChange={() => {
-            updateMapLayerFilters('near_net', filter.attributeKey, { threshold: sliderValue, noMax: !noMax })
+            const payload = createPayload(sliderValue, !noMax)
             setNoMax(!noMax)
+            updateMapLayerFilters('near_net', filter.attributeKey, payload)
           }}
           styles={{
             root: {
