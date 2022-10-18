@@ -15,6 +15,7 @@ const ToolBarSearch = (props) => {
   const handleInputChange = (searchTerm, { action }) => {
     if (action === 'input-change') {
       clearTimeout(timer)
+      const promises = []
       timer = setTimeout(() => {
         const params = new URLSearchParams({
           text: searchTerm,
@@ -22,9 +23,11 @@ const ToolBarSearch = (props) => {
           biasLatitude: defaultPlanCoordinates.latitude,
           biasLongitude: defaultPlanCoordinates.longitude,
         })
-        AroHttp.get(`/search/addresses?${params.toString()}`)
-          .then(({ data }) => {
-            setOptions(data.map(option => {
+        const esc = encodeURIComponent
+        promises.push(AroHttp.get(`/search/addresses?${params.toString()}`))
+        promises.push(AroHttp.get(`/service/v1/plan?search="${esc(searchTerm)}"`))
+        Promise.all(promises).then((searchData) => {
+            setOptions(searchData[0].data.map(option => {
               option.label = option.displayText
               return option
             }))
