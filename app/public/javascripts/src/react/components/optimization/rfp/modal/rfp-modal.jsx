@@ -45,8 +45,8 @@ function _RfpModal(props) {
         <i className="fas fa-4x fa-times" />
       </div>
 
-      <div className='container pt-5 pb-5 d-flex flex-column' style={{ height: '100%' }}>
-        <h2>RFPs</h2>
+      <div className="content">
+        <h2 className="title h1">RFPs</h2>
         {/* TODO: genericize this into a component */}
         <Tabs defaultValue="NEW" keepMounted={false}>
           <Tabs.List>
@@ -85,8 +85,25 @@ function _RfpModal(props) {
           color: #777;
           cursor: pointer;
         }
+        .title {
+          margin: 0;
+        }
+        .content {
+          display: grid;
+          grid-template-rows: auto 1fr;
+          gap: 20px;
+          max-width: 1000px;
+          height: 100%;
+          margin: 0 auto;
+          padding: 50px;
+        }
+        .rfp-modal :global(.mantine-Tabs-root) {
+          display: grid;
+          grid-template-rows: auto 1fr;
+          gap: 10px;
+        }
         .panel {
-          padding: 20px 0 0 20px;
+          height: 100%;
         }
       `}</style>
     </div>

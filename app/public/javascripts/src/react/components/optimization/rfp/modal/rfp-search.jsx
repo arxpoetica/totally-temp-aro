@@ -32,7 +32,6 @@ export const RfpSearch = ({ onSearch }) => {
         .rfp-search {
           display: flex;
           justify-content: center;
-          margin: 0 20px;
         }
         .controls {
           display: grid;
