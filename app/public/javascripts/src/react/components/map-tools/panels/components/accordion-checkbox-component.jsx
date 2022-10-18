@@ -21,7 +21,7 @@ const AccordionCheckbox = (props) => {
   const onFilterChange = (value) => {
     setCheckboxValues(value)
     // Async issue where the value isn't added to state before we call action
-    updateMapLayerFilters('near_net', filter.attributeKey, { multiSelect: checkboxValues.concat(value) })
+    updateMapLayerFilters('near_net', filter.attributeKey, { multiSelect: value })
   }
 
 
