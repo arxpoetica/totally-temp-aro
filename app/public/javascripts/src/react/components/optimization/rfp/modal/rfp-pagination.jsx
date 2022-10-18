@@ -12,7 +12,10 @@ export const Pagination = ({ onPage, total }) => {
 
       <MantinePagination
         page={activePage}
-        onChange={setActivePage}
+        onChange={page => {
+          setActivePage(page)
+          onPage(page)
+        }}
         total={total}
       />
 

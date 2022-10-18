@@ -16,13 +16,13 @@ export const RfpSearch = ({ onSearch }) => {
           onChange={event => setSearchValue(event.currentTarget.value)}
           onKeyDown={event => {
             if (event.key === 'Enter') {
-              onSearch({ search: searchValue })
+              onSearch(searchValue)
             }
           }}
         />
         <Button
           leftIcon={<IconSearch size={20} stroke={2}/>}
-          onClick={() => onSearch({ search: searchValue })}
+          onClick={() => onSearch(searchValue)}
         >
           Search
         </Button>

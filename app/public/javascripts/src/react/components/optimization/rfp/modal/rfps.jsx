@@ -5,23 +5,27 @@ import { Pagination } from './rfp-pagination.jsx'
 import AroHttp from '../../../../common/aro-http'
 import { Notifier } from '../../../../common/notifications'
 
+const PAGE_SIZE = 10
 // FIXME: figure out how to get pagination totals accurately:
-const PAGINATION_TOTAL = 33 / 10
+const PAGINATION_TOTAL = Math.ceil(33 / PAGE_SIZE)
 
 export const Rfps = () => {
 
   const [rfps, setRfps] = useState([])
   const [values, setValues] = useState([])
+  const [search, setSearch] = useState('')
+  const [skip, setSkip] = useState(0)
 
   useEffect(() => { loadData() }, [])
 
   const loadData = async (query = {}) => {
     try {
-      const { search, $top = '10', $skip } = query
+      const { search, skip } = query
+
       const params = new URLSearchParams()
+      params.set('$top', PAGE_SIZE)
+      if (skip) params.set('$skip', skip)
       if (search) params.set('search', search)
-      if ($top) params.set('$top', $top)
-      if ($skip) params.set('$skip', $skip)
 
       const { data } = await AroHttp.get(`/service/v2/rfp/items?${params.toString()}`)
       setRfps(data)
@@ -32,7 +36,11 @@ export const Rfps = () => {
 
   return (
     <div className="rfps">
-      <RfpSearch onSearch={loadData}/>
+      <RfpSearch onSearch={search => {
+        loadData({ search })
+        setSearch(search || '')
+        setSkip(0)
+      }}/>
 
       <div className="rfps-list">
         <div className="scroll">
@@ -58,7 +66,12 @@ export const Rfps = () => {
       </div>
 
       <Pagination
-        onPage={loadData}
+        onPage={page => {
+          const skip = (page - 1) * PAGE_SIZE
+          loadData({ skip, search })
+          setSkip(skip)
+          // setSearch(search || '')
+        }}
         total={PAGINATION_TOTAL}
       />
 
