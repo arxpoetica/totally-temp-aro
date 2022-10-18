@@ -24,7 +24,10 @@ export const RfpSearch = ({ onSearch }) => {
           {searchValue &&
             <div className="close">
               <CloseButton
-                onClick={() => setSearchValue('')}
+                onClick={() => {
+                  setSearchValue('')
+                  onSearch('')
+                }}
                 aria-label="Clear search input"
               />
             </div>

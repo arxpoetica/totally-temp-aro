@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Accordion, Badge } from '@mantine/core'
+import { RfpsList } from './rfps-list.jsx'
 import { RfpSearch } from './rfp-search.jsx'
 import { Pagination } from './rfp-pagination.jsx'
 import AroHttp from '../../../../common/aro-http'
@@ -12,7 +12,6 @@ const PAGINATION_TOTAL = Math.ceil(33 / PAGE_SIZE)
 export const Rfps = () => {
 
   const [rfps, setRfps] = useState([])
-  const [values, setValues] = useState([])
   const [search, setSearch] = useState('')
   const [skip, setSkip] = useState(0)
 
@@ -42,27 +41,11 @@ export const Rfps = () => {
         setSkip(0)
       }}/>
 
-      <div className="rfps-list">
-        <div className="scroll">
-          <Accordion
-            value={values}
-            onChange={setValues}
-            multiple
-          >
-            {rfps.map(rfp =>
-              <Accordion.Item key={rfp.id} value={rfp.request.rfpId}>
-                <Accordion.Control>
-                  <div className="control">
-                    <h2 className="title h5">{rfp.request.rfpId}</h2>
-                    <Badge>{rfp.status}</Badge>
-                  </div>
-                </Accordion.Control>
-                <Accordion.Panel>
-                </Accordion.Panel>
-              </Accordion.Item>
-            )}
-          </Accordion>
-        </div>
+      <div className="content">
+        {rfps.length > 0
+          ? <RfpsList rfps={rfps}/>
+          : <p>No results.</p>
+        }
       </div>
 
       <Pagination
@@ -83,28 +66,8 @@ export const Rfps = () => {
           gap: 20px;
           min-height: 0;
         }
-        .rfps-list {
+        .content {
           position: relative;
-        }
-        .scroll {
-          overflow: auto;
-          position: absolute;
-          top: 0;
-          right: 0;
-          bottom: 0;
-          left: 0;
-        }
-        .rfp {
-          margin: 0 0 20px;
-          border: 1px solid gray;
-        }
-        .title {
-          margin: 0;
-        }
-        .control {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
         }
       `}</style>
     </div>
