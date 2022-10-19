@@ -11,7 +11,7 @@ export const CardBody = (props) => {
           <style jsx>{`
             .card-body {
               padding: ${padding || '0.75rem'};
-              max-height: 600px;
+              max-height: calc(100vh - 260px);
               overflow-y: auto;
               overflow-x: hidden;
             }

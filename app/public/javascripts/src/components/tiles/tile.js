@@ -135,6 +135,13 @@ class TileComponentController {
       }
     })
 
+    // If setselectedDisplayMode changed
+    this.unsubRXNearnetLayers = state.nearnetLayers.subscribe((nearnetLayers) => {
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setNearnetLayers(nearnetLayers)
+      }
+    })
+
     // To change the center of the map to given LatLng
     this.unsubSetMapCenter = state.requestSetMapCenter.skip(1).subscribe(mapCenter => {
       if (this.mapRef) {
@@ -284,6 +291,7 @@ class TileComponentController {
     this.unsubRXSetMapZoom.unsubscribe()
     this.unsubSetMapZoom.unsubscribe()
     this.unsubDisplayMode.unsubscribe()
+    this.unsubRXNearnetLayers.unsubscribe()
     this.unsubCategories.unsubscribe()
     this.unsubRXMapLayerRefresh.unsubscribe()
     this.unsubMapLayerRefresh.unsubscribe()
@@ -320,7 +328,8 @@ class TileComponentController {
       this.locationAlerts,
       this.rShowFiberSize,
       this.rViewSetting,
-      this.selectionIds
+      this.selectionIds,
+      this.nearnetLayers,
     ))
     this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
     //this.state.isShiftPressed = false // make this per-overlay or move it somewhere more global

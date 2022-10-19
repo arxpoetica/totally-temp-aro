@@ -221,6 +221,8 @@ class State {
     })
     service.selectedTargetSelectionMode = service.targetSelectionModes.SINGLE_PLAN_TARGET
 
+    service.nearnetLayers = new Rx.BehaviorSubject([])
+
     // location filters for sales
     service.locationFilters = [
       {
@@ -1198,6 +1200,13 @@ class State {
         service.onActivePlanChanged()
       }
 
+      if (
+        nextReduxState.rNearnetLayers
+        && JSON.stringify(service.rNearnetLayers) !== JSON.stringify(service.nearnetLayers.getValue())
+      ){
+        service.nearnetLayers.next(service.rNearnetLayers)
+      }
+
       // ToDo: replace all instances of service.selectedDisplayMode
       //  with reduxState.plan.selectedDisplayMode
       //  We are currently maintaining state in two places
@@ -1243,6 +1252,12 @@ class State {
   }
 
   mapStateToThis (reduxState) {
+    let nearnetLayers = []
+    if (reduxState.mapLayers.filters.near_net
+      && reduxState.mapLayers.filters.near_net.location_filters
+      && reduxState.mapLayers.filters.near_net.location_filters.multiSelect
+    ) nearnetLayers = reduxState.mapLayers.filters.near_net.location_filters.multiSelect
+
     return {
       plan: reduxState.plan.activePlan,
       mapLayersRedux: reduxState.mapLayers,
@@ -1262,6 +1277,7 @@ class State {
       rHeatmapOptions: reduxState.toolbar.heatmapOptions,
       isRecreateTiles: reduxState.viewSettings.isRecreateTiles,
       reduxMapTools: reduxState.map.map_tools,
+      rNearnetLayers: nearnetLayers,
     }
   }
 

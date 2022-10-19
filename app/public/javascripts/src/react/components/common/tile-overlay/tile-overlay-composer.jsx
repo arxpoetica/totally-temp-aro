@@ -281,6 +281,10 @@ const mapStateToProps = (state) => {
     locationsById,
     groupsById,
     unselectedLocationGroups: MapDataSelectors.getUnselectedLocationGroups(state),
+    nearnetTileData: state.mapData.tileData.nearnet,
+    nearnetEntityData: state.mapData.entityData.nearnet,
+    nearnetFilters: state.mapLayers.filters.near_net,
+    // state.toolbar.rSelectedDisplayMode
   }
 }
 

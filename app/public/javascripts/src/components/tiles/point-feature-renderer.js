@@ -4,7 +4,7 @@ import PlanEditorSelectors from '../../react/components/plan-editor/plan-editor-
 
 class PointFeatureRenderer {
   // I can not wait to rewrite this whole system!!!
-  static renderFeatures (pointFeatureRendererList, ARO_CLIENT, selectedSubnetLocations = {}, locationAlerts = {}) {
+  static renderFeatures (pointFeatureRendererList, ARO_CLIENT, selectedSubnetLocations = {}, locationAlerts = {}, nearnetLayers = []) {
     var deletedPointFeatureRendererList = pointFeatureRendererList.filter((featureObj) => {
       if (this.getModificationTypeForFeature(featureObj.feature, featureObj.mapLayer, featureObj.tileDataService) === PointFeatureRenderer.modificationTypes.DELETED) {
         return featureObj
@@ -21,21 +21,21 @@ class PointFeatureRenderer {
       PointFeatureRenderer.renderFeature(Obj.ctx, Obj.shape, Obj.feature, Obj.featureData, Obj.geometryOffset, Obj.mapLayer, Obj.mapLayers, Obj.tileDataService,
         Obj.selection, Obj.oldSelection, Obj.selectedLocationImage, Obj.lockOverlayImage, Obj.invalidatedOverlayImage,
         Obj.selectedDisplayMode, Obj.displayModes, Obj.analysisSelectionMode, Obj.selectionModes, Obj.equipmentLayerTypeVisibility,
-        ARO_CLIENT, selectedSubnetLocations, locationAlerts)
+        ARO_CLIENT, selectedSubnetLocations, locationAlerts, nearnetLayers)
     })
 
     unDeletedPointFeatureRendererList.forEach((Obj) => {
       PointFeatureRenderer.renderFeature(Obj.ctx, Obj.shape, Obj.feature, Obj.featureData, Obj.geometryOffset, Obj.mapLayer, Obj.mapLayers, Obj.tileDataService,
         Obj.selection, Obj.oldSelection, Obj.selectedLocationImage, Obj.lockOverlayImage, Obj.invalidatedOverlayImage,
         Obj.selectedDisplayMode, Obj.displayModes, Obj.analysisSelectionMode, Obj.selectionModes, Obj.equipmentLayerTypeVisibility,
-        ARO_CLIENT, selectedSubnetLocations, locationAlerts)
+        ARO_CLIENT, selectedSubnetLocations, locationAlerts, nearnetLayers)
     })
   }
 
   static renderFeature (ctx, shape, feature, featureData, geometryOffset, mapLayer, mapLayers, tileDataService,
     selection, oldSelection, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage,
     selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes, equipmentLayerTypeVisibility, 
-    ARO_CLIENT, selectedSubnetLocations, locationAlerts) 
+    ARO_CLIENT, selectedSubnetLocations, locationAlerts, nearnetLayers) 
   {
 
     var entityImage = this.getEntityImageForFeature(feature, featureData, ARO_CLIENT, mapLayer)
@@ -53,6 +53,14 @@ class PointFeatureRenderer {
       }
     }
 
+    // once again not really the right place for this
+    //console.log({_data_type: feature.properties._data_type, nearnetLayers, len:nearnetLayers.length})
+    if (
+      feature.properties._data_type === 'location'
+      && nearnetLayers.length
+    ) {
+      return
+    }
     // this may not be in the right place but this whole system is a mess so ...
     if (selectedDisplayMode === displayModes.EDIT_PLAN) {
       let newGlobalAlpha = 0.333 // equipment
