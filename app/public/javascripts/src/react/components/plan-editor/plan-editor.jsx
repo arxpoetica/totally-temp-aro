@@ -11,7 +11,7 @@ import EquipmentMapObjects from './equipment-map-objects.jsx'
 import EquipmentBoundaryMapObjects from './equipment-boundary-map-objects.jsx'
 import FiberMapObjects  from './fiber-map-objects.jsx'
 import PlanNavigation from './sidebar/plan-navigation.jsx'
-import TileOverlayComposer from '../common/tile-overlay/tile-overlay-composer.jsx'
+//import TileOverlayComposer from '../common/tile-overlay/tile-overlay-composer.jsx'
 import AlertsTooltip from './alerts-tooltip.jsx'
 import BoundaryDrawCreator from './boundary-draw-creator.jsx'
 import AroFeatureEditor from '../common/editor-interface/aro-feature-editor.jsx'
@@ -93,8 +93,6 @@ export const PlanEditor = props => {
         {(!isChangesSaved || isRecalculating || isCommittingTransaction) &&
           <Overlay opacity={0.75} color="#ffffff" zIndex={5}/>
         }
-        
-        <TileOverlayComposer />
       </div>
 
       <style jsx>{`

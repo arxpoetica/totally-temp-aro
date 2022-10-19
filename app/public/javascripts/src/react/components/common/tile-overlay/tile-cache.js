@@ -123,6 +123,6 @@ const mapDataIndices = Object.freeze({
 })
 
 let tileCaches = klona(mapDataIndices)
-tileCaches.nearnet = new TileCache() // near net doesn't have ID indicies 
+//tileCaches.nearnet = new TileCache() // near net doesn't have ID indicies 
 
 export {TileCache, tileCaches, mapDataIndices}

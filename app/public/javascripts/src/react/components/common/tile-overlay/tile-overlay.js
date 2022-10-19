@@ -19,7 +19,7 @@ export const overlayTypes = {
 
 // should this be a static class/utility? it doesn't keep state 
 export default class TileOverlay {
-  constructor (tileData, tileCache, metaById, badgeLists) {
+  constructor (tileData, tileCache, metaById, badgeLists = {}) {
     this.type = overlayTypes.POINT // should be a const but I don't want to make a static getter which is currently the only way 
     this.tileData = tileData
     this.tileCache = tileCache

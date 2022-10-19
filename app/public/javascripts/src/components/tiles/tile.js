@@ -139,6 +139,7 @@ class TileComponentController {
     this.unsubRXNearnetLayers = state.nearnetLayers.subscribe((nearnetLayers) => {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setNearnetLayers(nearnetLayers)
+        this.refreshMapTiles()
       }
     })
 

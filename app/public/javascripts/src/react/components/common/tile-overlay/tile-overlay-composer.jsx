@@ -44,16 +44,18 @@ class _TileOverlayComposer extends Component {
     mapOverlayEle.getTile = this.overlayGetTileCallback
     mapOverlayEle.releaseTile = this.overlayReleaseTileCallback
     // TODO: remove this once old VTS is retired
-    mapOverlayEle.redrawCachedTiles = (prop) => {console.log(prop)} // called by the OLD VTS
+    mapOverlayEle.redrawCachedTiles = (prop) => {/*console.log(prop)*/} // called by the OLD VTS
 
     return mapOverlayEle
   }
 
   initMapConnection () {
-    if (this.props.mapRef && this.props.selectedSubnetId && !this.mapOverlayEle) {
+    console.log("--- try init ---")
+    console.log(this.props.mapRef)
+    if (this.props.mapRef && !this.mapOverlayEle) {
       this.mapOverlayEle = this.makeMapOverlayEle()
       this.props.mapRef.overlayMapTypes.push(this.mapOverlayEle) // this will cause a tile refresh
-
+      console.log(this.props.mapRef.overlayMapTypes)
       // - add mouse listeners 
       this.addListeners()
 
@@ -69,18 +71,21 @@ class _TileOverlayComposer extends Component {
     this.makeActiveOverlays()
     if (this.mapOverlayEle) {
       // we have initialized so refresh
-      if (this.removeMapOverlayEle()) { // ABS why do we need to check this?
-        // IF we don't want a centralised tile composer we can use 
-        //  overlayMapTypes.insertAt to set our tile layer at a specfied Z index
-        this.props.mapRef.overlayMapTypes.push(this.mapOverlayEle) // this will cause a tile refresh
-      }
+      // if (this.removeMapOverlayEle()) { // ABS why do we need to check this?
+      //   // IF we don't want a centralised tile composer we can use 
+      //   //  overlayMapTypes.insertAt to set our tile layer at a specfied Z index
+      //   this.props.mapRef.overlayMapTypes.push(this.mapOverlayEle) // this will cause a tile refresh
+      // }
+      this.removeMapOverlayEle()
+      this.props.mapRef.overlayMapTypes.push(this.mapOverlayEle) // this will cause a tile refresh
     } else {
       // we haven't initialized yet so try that
       this.initMapConnection()
-    } 
+    }
   }
 
   makeActiveOverlays () {
+    //console.log(tileCaches)
     // this runs whenever state data changes
     //  we check to see what layers are active, in what state, repopulate with new badge data etc
     // no need to de-init TileOverlays don't have listeners or state
@@ -88,40 +93,67 @@ class _TileOverlayComposer extends Component {
     this.tileOverlaysByID = {}
     this.tileOverlaysByZOrder = []
 
-    this.tileOverlaysByID['PLAN_EDIT_ALL_LOCATIONS'] = {
-      'id': 'PLAN_EDIT_ALL_LOCATIONS',
-      'overlay': new TileOverlay(
-        this.props.subnetTileData['all'], 
-        tileCaches.subnets['all'], 
-        this.props.groupsById,
-        {'inactive': this.props.unselectedLocationGroups}
-      ),
-      'meta': {
-        'zIndex': 1,
-        //'isOn': false,
-        'opacity': 0.5,
-        'isMouseEvents': false, // TODO: expand this when we have layers that have different event needs
-      },
-    }
-    this.tileOverlaysByZOrder.push(this.tileOverlaysByID['PLAN_EDIT_ALL_LOCATIONS'])
-
-    if (this.props.selectedSubnetId) {
-      this.tileOverlaysByID['PLAN_EDIT_SUBNET_LOCATIONS'] = {
-        'id': 'PLAN_EDIT_SUBNET_LOCATIONS',
+    if ('EDIT_PLAN' === this.props.selectedDisplayMode) {
+      this.tileOverlaysByID['PLAN_EDIT_ALL_LOCATIONS'] = {
+        'id': 'PLAN_EDIT_ALL_LOCATIONS',
         'overlay': new TileOverlay(
-          this.props.subnetTileData[this.props.selectedSubnetId],
-          tileCaches.subnets[this.props.selectedSubnetId],
-          this.props.locationsById,
-          {'alert': this.props.alertLocationIds}
+          this.props.subnetTileData['all'], 
+          tileCaches.subnets['all'], 
+          this.props.groupsById,
+          {'inactive': this.props.unselectedLocationGroups}
         ),
         'meta': {
-          'zIndex': 2,
+          'zIndex': 1,
           //'isOn': false,
-          'opacity': 1.0,
-          'isMouseEvents': true,
+          'opacity': 0.5,
+          'isMouseEvents': false, // TODO: expand this when we have layers that have different event needs
         },
       }
-      this.tileOverlaysByZOrder.push(this.tileOverlaysByID['PLAN_EDIT_SUBNET_LOCATIONS'])
+      this.tileOverlaysByZOrder.push(this.tileOverlaysByID['PLAN_EDIT_ALL_LOCATIONS'])
+
+      if (this.props.selectedSubnetId) {
+        this.tileOverlaysByID['PLAN_EDIT_SUBNET_LOCATIONS'] = {
+          'id': 'PLAN_EDIT_SUBNET_LOCATIONS',
+          'overlay': new TileOverlay(
+            this.props.subnetTileData[this.props.selectedSubnetId],
+            tileCaches.subnets[this.props.selectedSubnetId],
+            this.props.locationsById,
+            {'alert': this.props.alertLocationIds}
+          ),
+          'meta': {
+            'zIndex': 2,
+            //'isOn': false,
+            'opacity': 1.0,
+            'isMouseEvents': true,
+          },
+        }
+        this.tileOverlaysByZOrder.push(this.tileOverlaysByID['PLAN_EDIT_SUBNET_LOCATIONS'])
+      }
+    }
+
+    if (
+      'VIEW' === this.props.selectedDisplayMode 
+      && 'nearnet' in this.props.nearnetTileData
+      && 'excluded' in this.props.nearnetTileData
+    ) {
+      console.log(nearnetLayers.includes('near_net'))
+      if (nearnetLayers.includes('near_net')) {
+        this.tileOverlaysByID['NEARNET_NEARNET'] = {
+          'id': 'NEARNET_NEARNET',
+          'overlay': new TileOverlay(
+            this.props.nearnetTileData['nearnet'],
+            tileCaches.nearnet.nearnet,
+            this.props.nearnetEntityData,
+          ),
+          'meta': {
+            'zIndex': 1,
+            //'isOn': false,
+            'opacity': 1.0,
+            'isMouseEvents': false,
+          },
+        }
+        this.tileOverlaysByZOrder.push(this.tileOverlaysByID['NEARNET_NEARNET'])
+      }
     }
   }
 
@@ -244,7 +276,8 @@ class _TileOverlayComposer extends Component {
     this.refreshTiles() // will init if it can and hasn't yet
   }
 
-  componentDidUpdate(/* prevProps, prevState, snapshot */) {
+  componentDidUpdate(/*prevProps, prevState*/) {
+    console.log(' --- component update --- ')
     this.refreshTiles() // will init if it can and hasn't yet
   }
 
@@ -258,12 +291,21 @@ class _TileOverlayComposer extends Component {
 
 // --- //
 
+// this is needed because:
+//  A component's mapStateToProps function is called EVERY time ANYTHING in redux changes, 
+//  the return is then evaluated against the previous return and if they don't match exactly the component rerenders. 
+//  If you redeclare the empty object every function call it will be a NEW empty object 
+//  and will not match the previous return and thus will rerender EVERY time ANYTHING in redux changes. 
+
+const defaultAlertLocationIds = {}
+const defaultLocationsById = {}
+
 const mapStateToProps = (state) => {
   const selectedSubnetId = PlanEditorSelectors.getNearestSubnetIdOfSelected(state)
   // TODO: this should probably be a selector 
   //  OR we make it a dictionary in state
-  let alertLocationIds = {}
-  let locationsById = {}
+  let alertLocationIds = defaultAlertLocationIds
+  let locationsById = defaultLocationsById
   if (
     selectedSubnetId
     && state.planEditor.subnets[selectedSubnetId]
@@ -272,19 +314,20 @@ const mapStateToProps = (state) => {
     alertLocationIds = state.planEditor.subnets[selectedSubnetId].faultTree.rootNode.childNodes
     locationsById = state.planEditor.draftLocations.households
   }
-  let groupsById = state.planEditor.draftLocations.groups
+  
   return {
     mapRef: state.map.googleMaps,
     subnetTileData: state.mapData.tileData.subnets, // state.subnetTileData,
     selectedSubnetId,
     alertLocationIds, // when this changes the action creator needs to clear the cache, this happens because the cache is cleared when the subnet data is updated (parent to this object)
     locationsById,
-    groupsById,
+    groupsById: state.planEditor.draftLocations.groups,
     unselectedLocationGroups: MapDataSelectors.getUnselectedLocationGroups(state),
     nearnetTileData: state.mapData.tileData.nearnet,
     nearnetEntityData: state.mapData.entityData.nearnet,
-    nearnetFilters: state.mapLayers.filters.near_net,
-    // state.toolbar.rSelectedDisplayMode
+    //nearnetFilters: state.mapLayers.filters.near_net,
+    nearnetLayers: state.mapLayers.filters.near_net.location_filters.multiSelect,
+    selectedDisplayMode: state.toolbar.rSelectedDisplayMode,
   }
 }
 

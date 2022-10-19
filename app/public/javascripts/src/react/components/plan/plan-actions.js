@@ -184,6 +184,20 @@ function _parseNearnet (nearnetData) {
     }
     delete location.geom
 
+    // TODO: BIG fix this! 
+    //  get rid of 'small_businesses' etc and replace with 'small'
+    //  unify all entity types 
+    //  replace the property 'locationEntityType' with more generic entityType
+    //  here, plan-editor-actions, tile-overlay, some JSON in the DB, probably plan edit ...  
+    let enumPatch = {
+      'small': 'small_businesses', 
+      'medium': 'medium_businesses',
+      'large': 'large_businesses',
+    }
+    location.locationEntityType = location.properties.entity_type
+    if (location.locationEntityType in enumPatch) {
+      location.locationEntityType = enumPatch[location.locationEntityType]
+    }
     entityData[objectId] = location
 
     if (!(plannedType in tileDataEntities)) {
@@ -663,6 +677,8 @@ function setSelectedProjectId (selectedProjectId){
   }
 }
 
+// TODO: this needs to go away
+// how about we ask for them when we need them instead of constantly screaming them out
 function updateDefaultPlanCoordinates (payload) {
   return {
     type: Actions.PLAN_UPDATE_DEFAULT_PLAN_COORDINATES,
