@@ -1,22 +1,35 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { Tabs } from '@mantine/core'
-import { IconStar, IconArchive } from '@tabler/icons'
-import { Rfps } from './rfps.jsx'
-import { RfpLegacy } from '../status/rfp-legacy.jsx'
+import { IconList, IconUpload, IconSettings } from '@tabler/icons'
+import { Rfps } from './rfp-list-lander.jsx'
+import RfpPlanList from '../status/rfp-plan-list.jsx'
+import RfpSubmitter from '../status/rfp-submitter.jsx'
+import RfpTemplateManager from '../status/rfp-template-manager.jsx'
 import RfpActions from '../rfp-actions'
 
 const TABS = {
-  NEW: {
-    description: 'New RFPs',
-    component: <Rfps/>,
-    icon: <IconStar size={20} stroke={2}/>
+  RFPS_LIST: {
+    description: 'List all RFPs',
+    component: <Rfps/>, // <RfpPlanList/>
+    icon: <IconList size={20} stroke={2}/>
   },
-  LEGACY: {
-    description: 'Legacy RFPs',
-    component: <RfpLegacy/>,
-    icon: <IconArchive size={20} stroke={2}/>
+  DELETE_THIS_SOON: {
+    description: 'OLD RFPs TO DELETE',
+    component: <RfpPlanList/>,
+    icon: <IconList size={20} stroke={2}/>
   },
+  SUBMIT_RFP: {
+    description: 'Submit RFP',
+    component: <RfpSubmitter/>,
+    icon: <IconUpload size={20} stroke={2}/>
+  },
+  MANAGE_RFP_TEMPLATES: {
+    description: 'Manage RFP templates',
+    component: <RfpTemplateManager/>,
+    icon: <IconSettings size={20} stroke={2}/>
+  },
+
 }
 
 function _RfpModal(props) {
@@ -48,7 +61,7 @@ function _RfpModal(props) {
       <div className="content">
         <h2 className="title h1">RFPs</h2>
         {/* TODO: genericize this into a component */}
-        <Tabs defaultValue="NEW" keepMounted={false}>
+        <Tabs defaultValue="RFPS_LIST" keepMounted={false}>
           <Tabs.List>
             {Object.entries(TABS).map(([tabId, { description, icon }]) =>
               <Tabs.Tab key={tabId} value={tabId} icon={icon}>

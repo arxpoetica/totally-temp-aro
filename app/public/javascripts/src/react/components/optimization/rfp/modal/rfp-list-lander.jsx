@@ -1,28 +1,28 @@
 import React, { useState, useEffect } from 'react'
-import { RfpsList } from './rfps-list.jsx'
+import { RfpsList } from './rfp-list.jsx'
 import { RfpSearch } from './rfp-search.jsx'
 import { Pagination } from './rfp-pagination.jsx'
 import AroHttp from '../../../../common/aro-http'
 import { Notifier } from '../../../../common/notifications'
 
 const PAGE_SIZE = 10
-// FIXME: figure out how to get pagination totals accurately:
-const PAGINATION_TOTAL = Math.ceil(33 / PAGE_SIZE)
+const $TOP = 200
 
 export const Rfps = () => {
 
   const [rfps, setRfps] = useState([])
-  const [search, setSearch] = useState('')
-  const [skip, setSkip] = useState(0)
+  const [page, setPage] = useState(1)
+  const rfpsStart = (page - 1) * PAGE_SIZE
+  const rfpsEnd = rfpsStart + PAGE_SIZE
 
   useEffect(() => { loadData() }, [])
 
   const loadData = async (query = {}) => {
     try {
-      const { search, skip } = query
+      const { search, skip, top } = query
 
       const params = new URLSearchParams()
-      params.set('$top', PAGE_SIZE)
+      params.set('$top', top || $TOP)
       if (skip) params.set('$skip', skip)
       if (search) params.set('search', search)
 
@@ -37,25 +37,20 @@ export const Rfps = () => {
     <div className="rfps">
       <RfpSearch onSearch={search => {
         loadData({ search })
-        setSearch(search || '')
-        setSkip(0)
+        setPage(1)
       }}/>
 
       <div className="content">
         {rfps.length > 0
-          ? <RfpsList rfps={rfps}/>
+          ? <RfpsList rfps={rfps.slice(rfpsStart, rfpsEnd)}/>
           : <p>No results.</p>
         }
       </div>
 
       <Pagination
-        onPage={page => {
-          const skip = (page - 1) * PAGE_SIZE
-          loadData({ skip, search })
-          setSkip(skip)
-          // setSearch(search || '')
-        }}
-        total={PAGINATION_TOTAL}
+        page={page}
+        total={Math.ceil(rfps.length / PAGE_SIZE)}
+        onChange={setPage}
       />
 
       <style jsx>{`

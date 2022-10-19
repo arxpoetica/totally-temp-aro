@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Accordion, Badge } from '@mantine/core'
+import { RfpPlans } from './rfp-plans.jsx'
 
 export const RfpsList = ({ rfps }) => {
 
@@ -21,7 +22,8 @@ export const RfpsList = ({ rfps }) => {
               </div>
             </Accordion.Control>
             <Accordion.Panel>
-              ...TODO:...
+              {/* <pre>{JSON.stringify(rfp, null, '  ')}</pre> */}
+              <RfpPlans rfp={rfp}/>
             </Accordion.Panel>
           </Accordion.Item>
         )}
