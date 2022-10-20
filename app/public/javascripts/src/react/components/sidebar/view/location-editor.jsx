@@ -550,6 +550,9 @@ export const LocationEditor = (props) => {
   const getDisabled = (value) => {
     if (!userCanChangeWorkflowState) return true 
 
+    // The below limitations should only apply to frontier
+    if (ARO_CLIENT !== 'frontier') return false
+
     const workflowStateId = objectIdToProperties[selectedMapObject.objectId].workflowStateId
     // if state is created don't allow switching to locked or invalidated
     if (workflowStateId ===  WorkflowState.CREATED.id
