@@ -741,6 +741,11 @@ export const LocationEditor = (props) => {
                               markSelectedLocationPropertiesDirty()
                             }}
                           />
+                          <style jsx>{`
+                            .radiofill:disabled {
+                              background-color: lightgray;
+                            }
+                          `}</style>
                           <span>
                             <img
                               className="overlay-close"
