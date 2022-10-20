@@ -1,11 +1,15 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { Table, Button } from '@mantine/core'
 import { connect } from 'react-redux'
+import { RfpContext } from './rfp-modal.jsx'
 import PlanActions from '../../../plan/plan-actions'
 import RfpActions from '../rfp-actions'
 
-const _RfpPlans = ({ rfp, loadPlan, clearRfpState, closeModal }) =>
-  <div className="rfp-plans">
+const _RfpPlans = ({ rfp, loadPlan, clearRfpState, closeModal }) => {
+
+  const { rfpReportDefinitions } = useContext(RfpContext)
+
+  return <div className="rfp-plans">
     <Table striped highlightOnHover withBorder withColumnBorders>
       <thead>
         <tr>
@@ -50,6 +54,7 @@ const _RfpPlans = ({ rfp, loadPlan, clearRfpState, closeModal }) =>
       }
     `}</style>
   </div>
+}
 
 const mapStateToProps = state => ({})
 const mapDispatchToProps = dispatch => ({
