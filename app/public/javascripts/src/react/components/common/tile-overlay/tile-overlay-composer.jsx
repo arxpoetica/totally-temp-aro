@@ -43,19 +43,14 @@ class _TileOverlayComposer extends Component {
     
     mapOverlayEle.getTile = this.overlayGetTileCallback
     mapOverlayEle.releaseTile = this.overlayReleaseTileCallback
-    // TODO: remove this once old VTS is retired
-    mapOverlayEle.redrawCachedTiles = (prop) => {/*console.log(prop)*/} // called by the OLD VTS
-
+    
     return mapOverlayEle
   }
 
   initMapConnection () {
-    console.log("--- try init ---")
-    console.log(this.props.mapRef)
     if (this.props.mapRef && !this.mapOverlayEle) {
       this.mapOverlayEle = this.makeMapOverlayEle()
       this.props.mapRef.overlayMapTypes.push(this.mapOverlayEle) // this will cause a tile refresh
-      console.log(this.props.mapRef.overlayMapTypes)
       // - add mouse listeners 
       this.addListeners()
 
@@ -85,7 +80,6 @@ class _TileOverlayComposer extends Component {
   }
 
   makeActiveOverlays () {
-    //console.log(tileCaches)
     // this runs whenever state data changes
     //  we check to see what layers are active, in what state, repopulate with new badge data etc
     // no need to de-init TileOverlays don't have listeners or state
@@ -131,22 +125,42 @@ class _TileOverlayComposer extends Component {
       }
     }
 
-    if (
-      'VIEW' === this.props.selectedDisplayMode 
-      && 'nearnet' in this.props.nearnetTileData
-      && 'excluded' in this.props.nearnetTileData
-    ) {
-      console.log(nearnetLayers.includes('near_net'))
-      if (nearnetLayers.includes('near_net')) {
-        this.tileOverlaysByID['NEARNET_NEARNET'] = {
-          'id': 'NEARNET_NEARNET',
+    if ('VIEW' === this.props.selectedDisplayMode) {
+      
+      if (
+        this.props.nearnetLayers.includes('far_net')
+        && 'excluded' in this.props.nearnetTileData
+      ) {
+        this.tileOverlaysByID['NEARNET_EXCLUDED'] = {
+          'id': 'NEARNET_EXCLUDED',
           'overlay': new TileOverlay(
-            this.props.nearnetTileData['nearnet'],
-            tileCaches.nearnet.nearnet,
+            this.props.nearnetTileData['excluded'],
+            tileCaches.nearnet['excluded'],
             this.props.nearnetEntityData,
           ),
           'meta': {
             'zIndex': 1,
+            //'isOn': false,
+            'opacity': 0.5,
+            'isMouseEvents': false,
+          },
+        }
+        this.tileOverlaysByZOrder.push(this.tileOverlaysByID['NEARNET_EXCLUDED'])
+      }
+
+      if (
+        this.props.nearnetLayers.includes('near_net')
+        && 'nearnet' in this.props.nearnetTileData
+      ) {
+        this.tileOverlaysByID['NEARNET_NEARNET'] = {
+          'id': 'NEARNET_NEARNET',
+          'overlay': new TileOverlay(
+            this.props.nearnetTileData['nearnet'],
+            tileCaches.nearnet['nearnet'],
+            this.props.nearnetEntityData,
+          ),
+          'meta': {
+            'zIndex': 2,
             //'isOn': false,
             'opacity': 1.0,
             'isMouseEvents': false,
@@ -154,6 +168,7 @@ class _TileOverlayComposer extends Component {
         }
         this.tileOverlaysByZOrder.push(this.tileOverlaysByID['NEARNET_NEARNET'])
       }
+
     }
   }
 
@@ -277,7 +292,6 @@ class _TileOverlayComposer extends Component {
   }
 
   componentDidUpdate(/*prevProps, prevState*/) {
-    console.log(' --- component update --- ')
     this.refreshTiles() // will init if it can and hasn't yet
   }
 
@@ -299,6 +313,7 @@ class _TileOverlayComposer extends Component {
 
 const defaultAlertLocationIds = {}
 const defaultLocationsById = {}
+const defaultNearnetLayers = []
 
 const mapStateToProps = (state) => {
   const selectedSubnetId = PlanEditorSelectors.getNearestSubnetIdOfSelected(state)
@@ -314,6 +329,16 @@ const mapStateToProps = (state) => {
     alertLocationIds = state.planEditor.subnets[selectedSubnetId].faultTree.rootNode.childNodes
     locationsById = state.planEditor.draftLocations.households
   }
+
+  // TODO: there has to be a better way to do this
+  let nearnetLayers = defaultNearnetLayers
+  if (
+    'near_net' in state.mapLayers.filters
+    && 'location_filters' in state.mapLayers.filters.near_net
+    && 'multiSelect' in state.mapLayers.filters.near_net.location_filters
+  ) {
+    nearnetLayers = state.mapLayers.filters.near_net.location_filters.multiSelect
+  }
   
   return {
     mapRef: state.map.googleMaps,
@@ -326,7 +351,7 @@ const mapStateToProps = (state) => {
     nearnetTileData: state.mapData.tileData.nearnet,
     nearnetEntityData: state.mapData.entityData.nearnet,
     //nearnetFilters: state.mapLayers.filters.near_net,
-    nearnetLayers: state.mapLayers.filters.near_net.location_filters.multiSelect,
+    nearnetLayers,
     selectedDisplayMode: state.toolbar.rSelectedDisplayMode,
   }
 }
