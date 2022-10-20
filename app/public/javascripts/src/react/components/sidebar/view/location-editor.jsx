@@ -550,7 +550,8 @@ export const LocationEditor = (props) => {
   const getDisabled = (value) => {
     if (!userCanChangeWorkflowState) return true 
 
-    // The below limitations should only apply to frontier
+    // The below limitations should only apply to frontier details below
+    // https://www.pivotaltracker.com/story/show/183536801
     if (ARO_CLIENT !== 'frontier') return false
 
     const workflowStateId = objectIdToProperties[selectedMapObject.objectId].workflowStateId
