@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { Accordion } from '@mantine/core';
+import { Accordion as MantineAccordion } from '@mantine/core';
 import { IconMinus } from '@tabler/icons';
 import AccordionCheckboxComponent from './accordion-checkbox-component.jsx';
 import AccordionThresholdComponent from './accordion-threshold-component.jsx';
@@ -15,7 +15,7 @@ const compDictonary = {
   multiInput: AccordionMultiInputComponent
 }
 
-const PanelAccordion = (props) => {
+const Accordion = (props) => {
   const {
     filter,
     isExpanded,
@@ -24,20 +24,20 @@ const PanelAccordion = (props) => {
   const Component = compDictonary[filter.type]
 
   return (
-    <Accordion.Item value={filter.attributeKey}>
-      <Accordion.Control
+    <MantineAccordion.Item value={filter.attributeKey}>
+      <MantineAccordion.Control
         chevron={ isExpanded && <IconMinus size={16} /> }
       >
         {filter.label}
-      </Accordion.Control>
-      <Accordion.Panel>
+      </MantineAccordion.Control>
+      <MantineAccordion.Panel>
         <Component filter={filter} values={filter.values} />
-      </Accordion.Panel>
-    </Accordion.Item>
+      </MantineAccordion.Panel>
+    </MantineAccordion.Item>
   )
 }
 
 const mapStateToProps = () => {return {}}
 
-const PanelAccordionComponent = connect(mapStateToProps, {})(PanelAccordion)
-export default PanelAccordionComponent
+const AccordionComponent = connect(mapStateToProps, {})(Accordion)
+export default AccordionComponent

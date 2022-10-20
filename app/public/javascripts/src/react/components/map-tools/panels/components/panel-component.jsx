@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react'
 import { connect } from 'react-redux'
 import { Accordion } from '@mantine/core';
 import { IconPlus } from '@tabler/icons';
-import PanelAccordionComponent from './accordion-component.jsx';
+import AccordionComponent from './accordion-component.jsx';
 import { CardBody } from '../../card-body.jsx'
 import { CardHeader } from '../../card-header.jsx'
 import { MapToolContext } from "../../map-display-tools.jsx"
@@ -86,7 +86,7 @@ const Panel = (props) => {
               {orderedFilters().map(oFilter => {
                 return (
                   <div key={oFilter.attributeKey} style={{ paddingBottom: '1px' }}>
-                    <PanelAccordionComponent 
+                    <AccordionComponent 
                       filter={oFilter}
                       isExpanded={expandedAccords.includes(oFilter.attributeKey)}
                       layer={panelKey}
