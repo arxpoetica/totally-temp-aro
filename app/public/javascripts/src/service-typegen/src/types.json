@@ -352,7 +352,8 @@
                 "DIRECT_ROUTING",
                 "ODN_1",
                 "ODN_2",
-                "ODN_3"
+                "ODN_3",
+                "P2P"
               ]
             }
           }
