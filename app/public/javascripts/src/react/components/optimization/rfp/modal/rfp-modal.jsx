@@ -4,7 +4,7 @@ import { Tabs } from '@mantine/core'
 import { IconList, IconUpload, IconSettings } from '@tabler/icons'
 import { Rfps } from './rfp-list-lander.jsx'
 import RfpPlanList from '../status/rfp-plan-list.jsx'
-import RfpSubmitter from '../status/rfp-submitter.jsx'
+import RfpUploader from './rfp-uploader.jsx'
 import RfpTemplateManager from '../status/rfp-template-manager.jsx'
 import RfpActions from '../rfp-actions'
 import AroHttp from '../../../../common/aro-http'
@@ -25,7 +25,7 @@ const TABS = {
   },
   SUBMIT_RFP: {
     description: 'Submit RFP',
-    component: <RfpSubmitter/>,
+    component: <RfpUploader/>,
     icon: <IconUpload size={20} stroke={2}/>
   },
   MANAGE_RFP_TEMPLATES: {

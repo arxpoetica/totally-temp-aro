@@ -1,7 +1,7 @@
 /* globals FileReader */
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { PropTypes } from 'prop-types'
+import { TextInput, Select, Button, Table } from '@mantine/core'
 import RfpStatusActions from './actions'
 
 export class RfpTemplateManager extends Component {
@@ -18,22 +18,22 @@ export class RfpTemplateManager extends Component {
       {this.renderExistingTemplates()}
       <hr />
       <h4>Upload new template</h4>
-      <div className='row'>
-        <div className='col-md-4'>
+      <div className="row p-2">
+        <div className="col-md-4">
           Template name
         </div>
-        <div className='col-md-8'>
-          <input
-            className='form-control'
+        <div className="col-md-8">
+          <TextInput
             value={this.state.newTemplateName}
-            onChange={event => this.setState({ newTemplateName: event.target.value })} />
+            onChange={event => this.setState({ newTemplateName: event.currentTarget.value })}
+          />
         </div>
       </div>
-      <div className='row'>
-        <div className='col-md-4'>
+      <div className="row p-2">
+        <div className="col-md-4">
           Select JSON file to upload
         </div>
-        <div className='col-md-8'>
+        <div className="col-md-8">
           <input
             className='form-control-file'
             type='file'
@@ -41,8 +41,26 @@ export class RfpTemplateManager extends Component {
           />
         </div>
       </div>
-      <div className='row'>
-        <div className='col-md-12'>
+
+      <div className="row p-2">
+        <div className="col-md-4">
+          RFP Type
+        </div>
+        <div className="col-md-8">
+            <Select
+              label=""
+              value={'ad-hoc'}
+              data={[
+                { value: 'ad-hoc', label: 'Ad Hoc' },
+                { value: 'service-area', label: 'Service Area' },
+              ]}
+              onChange={value => console.log(value)}
+            />
+        </div>
+      </div>
+
+      <div className="row p-2">
+        <div className="col-md-12">
           <button
             className='btn btn-primary'
             onClick={event => this.uploadTemplate()}>
@@ -56,7 +74,7 @@ export class RfpTemplateManager extends Component {
   renderExistingTemplates () {
     return <div>
       <h4>Existing templates</h4>
-      <table className='table table-striped'>
+      <Table striped highlightOnHover withBorder withColumnBorders>
         <thead>
           <tr>
             <th>Name</th>
@@ -81,7 +99,7 @@ export class RfpTemplateManager extends Component {
             </tr>
           ))}
         </tbody>
-      </table>
+      </Table>
     </div>
   }
 
@@ -99,10 +117,6 @@ export class RfpTemplateManager extends Component {
   componentDidMount () {
     this.props.loadRfpTemplates()
   }
-}
-
-RfpTemplateManager.propTypes = {
-  templates: PropTypes.array
 }
 
 const mapStateToProps = state => ({

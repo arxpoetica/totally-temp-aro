@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { PropTypes } from 'prop-types'
-import RfpStatusActions from './actions'
+import { TextInput, Select, Button } from '@mantine/core'
+import RfpStatusActions from '../status/actions'
 import RfpFileImporterUtils from '../rfp-file-importer-utils'
 
 export class RfpSubmitter extends Component {
@@ -9,7 +9,7 @@ export class RfpSubmitter extends Component {
     super(props)
     this.fileInput = React.createRef()
     this.state = {
-      newRfpPlanName: 'unnamed'
+      newRfpPlanName: 'New RFP Plan'
     }
   }
 
@@ -37,37 +37,72 @@ export class RfpSubmitter extends Component {
 
   renderNewRfpInputs () {
     return <div>
-      <div className='row'>
-        <div className='col-md-4'>
+      <div className="row p-2">
+        <div className="col-md-4">
           RFP plan name
         </div>
-        <div className='col-md-8'>
-          <input
-            className='form-control'
+        <div className="col-md-8">
+          <TextInput
             value={this.state.newRfpPlanName}
-            onChange={event => this.setState({ newRfpPlanName: event.target.value })}
+            placeholder="Type a plan name..."
+            onChange={event => this.setState({ newRfpPlanName: event.currentTarget.value })}
           />
         </div>
       </div>
-      <div className='row'>
-        <div className='col-md-4'>
+      <div className="row p-2">
+        <div className="col-md-4">
           RFP Template
         </div>
-        <div className='col-md-8'>
-          <select
-            className='form-control'
+        <div className="col-md-8">
+          <Select
             value={this.props.selectedTemplateId || ''}
-            onChange={event => this.props.setSelectedTemplateId(+event.target.value)}
-          >
-            {this.props.templates.map(template => <option key={template.id} value={template.id}>{template.name}</option>)}
-          </select>
+            data={this.props.templates.map(template => {
+              return { value: template.id, label: template.name }
+            })}
+            onChange={value => this.props.setSelectedTemplateId(+value)}
+          />
         </div>
       </div>
-      <div className='row'>
-        <div className='col-md-4'>
+
+      <div className="row p-2">
+        <div className="col-md-4">
+          RFP Type
+        </div>
+        <div className="col-md-8">
+            <Select
+              label=""
+              value={'ad-hoc'}
+              data={[
+                { value: 'ad-hoc', label: 'Ad Hoc' },
+                { value: 'service-area', label: 'Service Area' },
+              ]}
+              onChange={value => console.log(value)}
+            />
+        </div>
+      </div>
+
+      <div className="row p-2">
+        <div className="col-md-4">
+          Network Type
+        </div>
+        <div className="col-md-8">
+            <Select
+              label=""
+              value={'P2P'}
+              data={[
+                { value: 'P2P', label: 'Point-to-Point' },
+                { value: 'full-network', label: 'Full Network' },
+              ]}
+              onChange={value => console.log(value)}
+            />
+        </div>
+      </div>
+
+      <div className="row p-2">
+        <div className="col-md-4">
           CSV with locations
         </div>
-        <div className='col-md-8'>
+        <div className="col-md-8">
           <input
             className='form-control-file'
             type='file'
@@ -75,14 +110,11 @@ export class RfpSubmitter extends Component {
           />
         </div>
       </div>
-      <div className='row'>
-        <div className='col-md-12'>
-          <button
-            className='btn btn-primary'
-            onClick={() => this.submitRfp()}
-          >
+      <div className="row p-2">
+        <div className="col-md-12">
+          <Button onClick={() => this.submitRfp()}>
             Submit RFP
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -93,8 +125,8 @@ export class RfpSubmitter extends Component {
       return null
     }
     const alertClass = 'alert' + ((this.props.submitResult.type === 'success') ? ' alert-success' : ' alert-danger')
-    return <div className='row'>
-      <div className='col-md-12'>
+    return <div className="row p-2">
+      <div className="col-md-12">
         <div className={alertClass}>
           {this.props.submitResult.message}
         </div>
@@ -127,17 +159,6 @@ export class RfpSubmitter extends Component {
       })
       .catch(err => console.error(err))
   }
-}
-
-RfpSubmitter.propTypes = {
-  isSubmittingRfp: PropTypes.bool,
-  submitResult: PropTypes.shape({
-    type: PropTypes.string,
-    message: PropTypes.string
-  }),
-  selectedTemplateId: PropTypes.number,
-  templates: PropTypes.array,
-  userId: PropTypes.number
 }
 
 const mapStateToProps = state => ({
