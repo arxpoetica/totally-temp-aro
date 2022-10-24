@@ -9,7 +9,7 @@ const AccordionThreshold = (props) => {
     updateMapLayerFilters,
   } = props
   const [sliderValue, setSliderValue] = useState(filter.value)
-  const [noMax, setNoMax] = useState(false)
+  const [noMax, setNoMax] = useState(true)
 
   const marks = [.25, .5, .75].map(markSteps => {
     const value = filter.maxValue * markSteps
