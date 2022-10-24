@@ -98,7 +98,7 @@ export class MultiSelectVertices {
     const nextVertexEvent = this.createSyntheticVertexEvent(marker)
 
     const length = this.mapObject.getPath().getLength();
-    if (nextVertexEvent.vertex >= length ) nextVertexEvent.vertex = 0;
+    if (nextVertexEvent.vertex >= length ) nextVertexEvent.vertex = '0';
 
     this.addMarker(nextVertexEvent)
   }

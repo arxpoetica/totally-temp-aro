@@ -516,7 +516,7 @@ export const ServiceLayerMapObjects = (props) => {
 
         if (!results.length) {
           const options = []
-          options.push(new MenuItemAction('ADD_BOUNDARY', 'Add Boundary', 'ViewSettingsActions', 'setServiceAreaBoundaryDetails', latLng))
+          options.push(new MenuItemAction('ADD_BOUNDARY', 'Add Boundary', 'ViewSettingsActions', 'setServiceAreaBoundaryDetails', false, latLng))
           menuItems.push(new MenuItemFeature('SERVICE_AREA', 'Add Service Area', options))
         } else {
           results.forEach((result) => {
@@ -537,11 +537,11 @@ export const ServiceLayerMapObjects = (props) => {
               if (createdMapObjects.hasOwnProperty(result.objectId)) {
                 // it's on the edit layer / in the transaction
                 feature = createdMapObjects[result.objectId].feature
-                options.push(new MenuItemAction('SELECT', 'Select', 'ViewSettingsActions', 'selectServiceArea', result.objectId))
-                options.push(new MenuItemAction('DELETE', 'Delete', 'ViewSettingsActions', 'deleteServiceArea', result.objectId))
+                options.push(new MenuItemAction('SELECT', 'Select', 'ViewSettingsActions', 'selectServiceArea', false, result.objectId))
+                options.push(new MenuItemAction('DELETE', 'Delete', 'ViewSettingsActions', 'deleteServiceArea', false, result.objectId))
               } else {
                 const serviceAreaFeature = { result, latLng }
-                options.push(new MenuItemAction('EDIT', 'Edit', 'ViewSettingsActions', 'editServiceArea', serviceAreaFeature))
+                options.push(new MenuItemAction('EDIT', 'Edit', 'ViewSettingsActions', 'editServiceArea', false, serviceAreaFeature))
               }
               const name = feature.code || feature.siteClli || 'Unnamed service area'
               menuItemsById[result.objectId] = options
