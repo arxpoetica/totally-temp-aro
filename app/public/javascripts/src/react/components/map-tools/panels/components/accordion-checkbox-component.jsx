@@ -14,7 +14,7 @@ const AccordionCheckbox = (props) => {
   useEffect(() => {
     if (values[0] && values[0].key) {
       setCheckboxValues([values[0].key])
-      updateMapLayerFilters('near_net', filter.attributeKey, { multiSelect: [values[0].key] })
+      updateMapLayerFilters('near_net', filter.attributeKey, { multiSelect: [] })
     }
   }, [])
 
