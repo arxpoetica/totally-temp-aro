@@ -362,19 +362,20 @@ export const ServiceLayerMapObjects = (props) => {
       return
     }
     let vertexPayload = event.vertex;
-    if (multiSelectVertices.mapObjectOverlay.length > 0) {
-      if(multiSelectVertices.markerIndex(event.vertex) < 0) {
-        multiSelectVertices.addMarker(event)
-      }
-      vertexPayload = [...multiSelectVertices.mapObjectOverlay]
+    if(multiSelectVertices.markerIndex(event.vertex) < 0) {
+      multiSelectVertices.addMarker(event)
     }
-    const clearMapObjectOverlay = multiSelectVertices.clearMapObjectOverlay.bind(multiSelectVertices)
+    vertexPayload = [...multiSelectVertices.mapObjectOverlay]
+
+    const finishDeletion = multiSelectVertices.finishDeletion.bind(multiSelectVertices)
+
     deleteMenu.open(
       mapRef, 
       mapObject.getPath(),
       mapObject.getPath().getAt(event.vertex),
       vertexPayload,
-      clearMapObjectOverlay
+      finishDeletion,
+      true // makes action repeatable
     )
   }
 
