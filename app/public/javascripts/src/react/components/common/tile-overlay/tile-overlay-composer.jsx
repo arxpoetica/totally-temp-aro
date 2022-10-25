@@ -139,9 +139,9 @@ class _TileOverlayComposer extends Component {
             this.props.nearnetEntityData,
           ),
           'meta': {
-            'zIndex': 1,
+            'zIndex': 3,
             //'isOn': false,
-            'opacity': 0.5,
+            'opacity': 0.7,
             'isMouseEvents': false,
           },
         }
@@ -158,9 +158,11 @@ class _TileOverlayComposer extends Component {
             this.props.nearnetTileData['nearnet'],
             tileCaches.nearnet['nearnet'],
             this.props.nearnetEntityData,
+            {},
+            ['nearnet'],
           ),
           'meta': {
-            'zIndex': 2,
+            'zIndex': 4,
             //'isOn': false,
             'opacity': 1.0,
             'isMouseEvents': false,
@@ -292,6 +294,7 @@ class _TileOverlayComposer extends Component {
   }
 
   componentDidUpdate(/*prevProps, prevState*/) {
+    console.log(' ------- TOS updated ------- ')
     this.refreshTiles() // will init if it can and hasn't yet
   }
 
@@ -350,7 +353,7 @@ const mapStateToProps = (state) => {
     unselectedLocationGroups: MapDataSelectors.getUnselectedLocationGroups(state),
     nearnetTileData: state.mapData.tileData.nearnet,
     nearnetEntityData: state.mapData.entityData.nearnet,
-    //nearnetFilters: state.mapLayers.filters.near_net,
+    nearnetFilters: state.mapLayers.filters.near_net,
     nearnetLayers,
     selectedDisplayMode: state.toolbar.rSelectedDisplayMode,
   }

@@ -19,12 +19,13 @@ export const overlayTypes = {
 
 // should this be a static class/utility? it doesn't keep state 
 export default class TileOverlay {
-  constructor (tileData, tileCache, metaById, badgeLists = {}) {
+  constructor (tileData, tileCache, metaById, badgeLists = {}, defaultBadges = []) {
     this.type = overlayTypes.POINT // should be a const but I don't want to make a static getter which is currently the only way 
     this.tileData = tileData
     this.tileCache = tileCache
     this.metaById = metaById
     this.badgeLists = badgeLists
+    this.defaultBadges = defaultBadges
   }
 
   renderTileCanvas (ownerDocument, points, tileId) {
@@ -67,7 +68,10 @@ export default class TileOverlay {
         //    or if the value of badgeLists[badgeId][id] is false
         //    the badge will not be drawn for this point, all three are valid means and are usful in different scenarios 
         
-        if (this.badgeLists[badgeId] && this.badgeLists[badgeId][id]) {
+        if (
+          this.defaultBadges.includes(badgeId)
+          || (this.badgeLists[badgeId] && this.badgeLists[badgeId][id])
+        ) {
           let badgeCoord = {
             x: imageCoord.x + badge.offset.x + (icon.image.width * badge.offsetMult.w),
             y: imageCoord.y + badge.offset.y + (icon.image.width * badge.offsetMult.h)

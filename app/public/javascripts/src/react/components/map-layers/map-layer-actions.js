@@ -343,6 +343,15 @@ function setMapReadyPromise (mapReadyPromise) {
 }
 
 function updateMapLayerFilters (layer, key, value) {
+  // TODO: refilters
+  if ('near_net' === layer) {
+    // refilter nearnet locations state.mapData.entityData.nearnet
+    //  by the filter values into 
+    //  state.mapData.tileData.nearnet.nearnet
+    //  and state.mapData.tileData.nearnet.excluded
+    //  OR should that happen in a component? (reducer doesn't work cause that shouldn't have side effects)
+    console.log({key, value})
+  } 
   return {
     type: Actions.LAYERS_SET_MAP_FILTERS,
     payload: { layer, key, value }
