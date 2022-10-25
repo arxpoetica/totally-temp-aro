@@ -663,6 +663,7 @@ export class ToolBar extends Component {
   }
 
   createAndLoadPlan() {
+    // TODO: Make query system more robust 183115918
     setAppcuesQuery('createNewPlan')
     this.props.createNewPlan(true)
       .then((result) => this.props.loadPlan(result.data.id))
@@ -1157,7 +1158,6 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   setPlanInputsModal: (status) => dispatch(ToolBarActions.setPlanInputsModal(status)),
-  requestSetMapCenter: (mapRef) => dispatch(MapActions.requestSetMapCenter(mapRef)),
   selectedDisplayModeActions: (value) => dispatch(ToolBarActions.selectedDisplayMode(value)),
   activeViewModePanelActions: (value) => dispatch(ToolBarActions.activeViewModePanel(value)),
   setAnnotationListVisibility: isVisible => {

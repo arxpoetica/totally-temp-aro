@@ -453,7 +453,7 @@ class TileDataService {
         const tileDataKey = `${tileZoom}-${tileX}-${tileY}` // Do not use htmlCacheKey, that has a fourth component
         const tileData = this.tileDataCache[tileDataKey]
         var hasInvalidatedLayer = false
-        Object.keys(tileData).forEach(key => {
+        Object.keys(tileData || {}).forEach(key => {
           if (this.doesNamePassAnyRegex(key, regexes)) {
             hasInvalidatedLayer = true
           }

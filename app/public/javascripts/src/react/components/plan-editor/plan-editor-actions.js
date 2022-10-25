@@ -781,15 +781,24 @@ function _spliceLocationFromTerminal (state, locationId, subnetId) {
   if (!subnetFeature) return null
   subnetFeature = klona(subnetFeature)
   
+  let locationLinkIndex = null
   let index = subnetFeature.feature.dropLinks.findIndex(dropLink => {
     //planEditor.subnetFeatures["0c9e9415-e5e2-4146-9594-bb3057ca54dc"].feature.dropLinks[0].locationLinks[0].locationId
-    return (0 <= dropLink.locationLinks.findIndex(locationLink => {
+    // return (0 <= dropLink.locationLinks.findIndex(locationLink => {
+    //   return (locationId === locationLink.locationId)
+    // }))
+    locationLinkIndex = dropLink.locationLinks.findIndex(locationLink => {
       return (locationId === locationLink.locationId)
-    }))
+    })
+    return (0 <= locationLinkIndex)
   })
-  
+  //console.log({index, locationLinkIndex})
   if (index !== -1) {
-    subnetFeature.feature.dropLinks.splice(index, 1)
+    subnetFeature.feature.dropLinks[index].locationLinks.splice(locationLinkIndex, 1)
+    if (!subnetFeature.feature.dropLinks[index].locationLinks.length) {
+      subnetFeature.feature.dropLinks.splice(index, 1)
+    }
+    //console.log(subnetFeature)
     return subnetFeature
   } else {
     return null
@@ -822,7 +831,8 @@ function assignLocation (locationId, terminalId) {
     // unassign location if location is assigned
     let fromFeature = _spliceLocationFromTerminal(state, locationId, subnetId)
     if (fromFeature) features.push(fromFeature)
-
+    // #183319067 TODO: should we check for a drop link to the same lat/lng 
+    //  and add the location to that instead of making a new one?
     // assign location
     let defaultDropLink = {
       dropCableLength: 0, // ?
@@ -1798,6 +1808,7 @@ function parseSubnet (subnet) {
       // TOS: does this make a list for each household? 
       // if subnet.subnetLocationsById[objectId] doesn't exist something has fallen out of sync
       subnet.subnetLocationsById[objectId] = { ...location, parentEquipmentId: null}
+      delete subnet.subnetLocationsById[objectId].objectIds
     })
   })
   delete subnet.subnetLocations
