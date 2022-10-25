@@ -134,9 +134,11 @@ export const ServiceLayerMapObjects = (props) => {
 
   useEffect(() => {
     mapRef.setOptions({ draggableCursor: 'crosshair' })
-    overlayRightClickListener = mapRef.addListener('rightclick', (event) => {
-      rightClickServicArea(event)
-    })
+
+    // TODO: is this needed? Right click was happening twice
+    // overlayRightClickListener = mapRef.addListener('rightclick', (event) => {
+    //   rightClickServicArea(event)
+    // })
     overlayContextMenuListener = mapRef.addListener('contextmenu', (event) => {
       rightClickServicArea(event)
     })
@@ -326,9 +328,10 @@ export const ServiceLayerMapObjects = (props) => {
         })
       })
       
-      google.maps.event.addListener(mapObject, 'rightclick', event => {
-        openDeleteMenu(event, mapObject)
-      })
+      // TODO: is this needed? open was happening twice
+      // google.maps.event.addListener(mapObject, 'rightclick', event => {
+      //   openDeleteMenu(event, mapObject)
+      // })
       google.maps.event.addListener(mapObject, 'contextmenu', event => {
         openDeleteMenu(event, mapObject)
       })
