@@ -3,6 +3,9 @@ import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
 import { hsvToRgb } from '../../common/view-utils'
 import tileIcons from '../common/tile-overlay/tile-icons'
+import mapDataActions from '../common/tile-overlay/map-data-actions'
+import { klona } from 'klona'
+import { batch } from 'react-redux'
 
 // Sets the visibility for a specified layer
 // ToDo: LOCATIONS refactor callers of this to send layer Key instead of whole layer
@@ -342,19 +345,46 @@ function setMapReadyPromise (mapReadyPromise) {
   }
 }
 
+// helper, maybe make a utility
+function _filterEntitiesByProps (set, filter) {
+  console.log(filter)
+  let filteredSets = {
+    'nearnet': {},
+    'excluded': {}
+  }
+  for (const [id, entity] of Object.entries(set)) {
+    // TODO: function for each prop, early return on ... false? There are AND filters
+    if (filter.resourceEntityTypes && filter.resourceEntityTypes.multiSelect.includes(entity.locationEntityType)) {
+      const plannedType = entity.properties.plannedType
+      //if (!(plannedType in filteredSets)) filteredSets[plannedType] = {}
+      filteredSets[plannedType][id] = entity
+    }
+  }
+
+  return filteredSets
+}
+
 function updateMapLayerFilters (layer, key, value) {
-  // TODO: refilters
-  if ('near_net' === layer) {
-    // refilter nearnet locations state.mapData.entityData.nearnet
-    //  by the filter values into 
-    //  state.mapData.tileData.nearnet.nearnet
-    //  and state.mapData.tileData.nearnet.excluded
-    //  OR should that happen in a component? (reducer doesn't work cause that shouldn't have side effects)
-    console.log({key, value})
-  } 
-  return {
-    type: Actions.LAYERS_SET_MAP_FILTERS,
-    payload: { layer, key, value }
+  return (dispatch, getState) => {
+    // TODO: refilters
+    if ('near_net' === layer) {
+      const state = getState()
+      const nearnetLocations = state.mapData.entityData.nearnet // defaults to {} so iterating thorugh it will return immediately 
+      let newNearnetFilters = klona(state.mapLayers.filters.near_net)
+      if (!newNearnetFilters) newNearnetFilters = {}
+      newNearnetFilters[key] = value // TODO: I don't like this approach, we should be doing this after state updates - we're making assumption about how the reducer updates state
+      // refilter nearnet locations state.mapData.entityData.nearnet
+      //  by the filter values into 
+      //  state.mapData.tileData.nearnet.nearnet
+      //  and state.mapData.tileData.nearnet.excluded
+      //  OR should that happen in a component? (reducer doesn't work cause that shouldn't have side effects)
+      let filteredSets = _filterEntitiesByProps(nearnetLocations, newNearnetFilters)
+      dispatch(mapDataActions.batchSetNearnetTileData(filteredSets))
+    } 
+    dispatch({
+      type: Actions.LAYERS_SET_MAP_FILTERS,
+      payload: { layer, key, value }
+    })
   }
 }
 
