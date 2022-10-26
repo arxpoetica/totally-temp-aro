@@ -345,19 +345,91 @@ function setMapReadyPromise (mapReadyPromise) {
   }
 }
 
+// --- utility make these a utility? --- //
+function _filterMultiselect (filter, val) {
+  return filter.multiSelect.includes(val)
+}
+
+function _filterRange (filter, val) {
+  return (
+    val >= filter.rangeThreshold[0] 
+    && (
+      filter.noMax
+      || val <= filter.rangeThreshold[1]
+    )
+  )
+}
+
+const nearnetFilterProps = {
+  "location_filters": {
+    "type": "MULTISELECT",
+    "filterFunc": _filterMultiselect,
+  },
+  "employee_count": {
+    "type": "RANGE",
+    "filterFunc": _filterRange,
+  },
+  "month_rev": {
+    "type": "RANGE",
+    "filterFunc": _filterRange,
+  },
+  "fair_share": {
+    "type": "RANGE",
+    "filterFunc": _filterRange,
+  },
+  "num_of_comp": {
+    "type": "RANGE",
+    "filterFunc": _filterRange,
+  },
+  "current_cust": {
+    "type": "MULTISELECT",
+    "filterFunc": _filterMultiselect,
+  },
+  "lit_build": {
+    "type": "MULTISELECT",
+    "filterFunc": _filterMultiselect,
+  },
+  "industry": {
+    "type": "MULTISELECT",
+    "filterFunc": _filterMultiselect,
+  },
+  "resourceEntityTypes": {
+    "type": "MULTISELECT",
+    "filterFunc": _filterMultiselect,
+  },
+}
+
 // helper, maybe make a utility
-function _filterEntitiesByProps (set, filter) {
-  console.log(filter)
-  let filteredSets = {
+function _filterEntitiesByProps (set, filters) {
+  console.log(filters)
+  var filteredSets = {
     'nearnet': {},
     'excluded': {}
   }
+
   for (const [id, entity] of Object.entries(set)) {
-    // TODO: function for each prop, early return on ... false? There are AND filters
-    if (filter.resourceEntityTypes && filter.resourceEntityTypes.multiSelect.includes(entity.locationEntityType)) {
-      const plannedType = entity.properties.plannedType
-      //if (!(plannedType in filteredSets)) filteredSets[plannedType] = {}
-      filteredSets[plannedType][id] = entity
+    var doInclude = true
+    
+    for (const [propName, filter] of Object.entries(filters)) {
+      if (
+        doInclude
+        && (propName in entity.properties)
+        && (propName in nearnetFilterProps)
+      ) {
+        doInclude = doInclude && nearnetFilterProps[propName].filterFunc(filter, entity.properties[propName])
+      }
+    }
+
+    // if (
+    //   doInclude
+    //   //&& entity.properties.
+    //   && filter.resourceEntityTypes 
+    // ) {
+    //   doInclude = filter.resourceEntityTypes.multiSelect.includes(entity.locationEntityType)
+    // }
+
+    if (doInclude) {
+      filteredSets[entity.properties.plannedType][id] = entity
     }
   }
 
