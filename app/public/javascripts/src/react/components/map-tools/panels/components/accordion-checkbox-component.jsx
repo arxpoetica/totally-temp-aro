@@ -12,10 +12,7 @@ const AccordionCheckbox = (props) => {
   const [checkboxValues, setCheckboxValues] = useState([])
 
   useEffect(() => {
-    if (values[0] && values[0].key) {
-      setCheckboxValues([values[0].key])
-      updateMapLayerFilters('near_net', filter.attributeKey, { multiSelect: [] })
-    }
+    updateMapLayerFilters('near_net', filter.attributeKey, { multiSelect: [] })
   }, [])
 
   const onFilterChange = (value) => {
@@ -43,7 +40,7 @@ const AccordionCheckbox = (props) => {
                 <div className="ctype-name">{value.label}</div>
               </span>
               <Checkbox
-                value={value.key}
+                value={'value' in value ? value.value.toString() : value.key}
               />
             </div>
         )
