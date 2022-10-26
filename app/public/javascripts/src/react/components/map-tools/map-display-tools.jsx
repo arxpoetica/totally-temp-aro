@@ -143,9 +143,9 @@ const MapDisplayTools = ({ mapRef, mapTools }) => {
           return (
             MapToolComponent && <React.Fragment key={id}>
               <MapToolComponent mapToolName={toolName} />
-              {objectHasLength(mapTools) > 0 && mapTools.toolDetails[id].isVisible && mapTools.showLabels
+              {/* {objectHasLength(mapTools) > 0 && mapTools.toolDetails[id].isVisible && mapTools.showLabels
                 && <div className="map_tool_label label-align">{toolName}</div>
-              }
+              } */}
             </React.Fragment>
           )
         })}

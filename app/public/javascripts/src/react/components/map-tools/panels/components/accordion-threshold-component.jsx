@@ -57,7 +57,7 @@ const AccordionThreshold = (props) => {
         onChange={(value) => {
           onFilterChange(value)
         }}
-        disabled={noMax}
+        disabled={filter.unboundedMax ? noMax : false}
         labelAlwaysOn
         styles={{
           root: {
