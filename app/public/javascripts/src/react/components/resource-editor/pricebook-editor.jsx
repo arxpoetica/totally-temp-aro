@@ -87,7 +87,7 @@ export class PriceBookEditor extends Component {
         {/* Create tabs for each priceBookDefinition */}
         <ul className="nav nav-tabs" role="tablist">
           {this.props.priceBookDefinition.structuredPriceBookDefinitions.map((priceBookValue, pricebookIndex) => {
-              if (priceBookValue.items.length) {
+              if (PRICE_BOOK_TAB_NAMES_BY_ID[priceBookValue.id] && priceBookValue.items.length) {
                 return <li
                   key={pricebookIndex}
                   role="presentation"
