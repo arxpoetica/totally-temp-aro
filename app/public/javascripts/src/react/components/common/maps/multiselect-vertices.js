@@ -93,7 +93,7 @@ export class MultiSelectVertices {
       return Number(b.title) - Number(a.title)
     })
     this.clearMapObjectOverlay()
-    if (sortedObjects[0] && sortedObjects[0].title) this.selectNextVertex(sortedObjects[0])
+    if (sortedObjects.length === 1 && sortedObjects[0].title) this.selectNextVertex(sortedObjects[0])
   }
 
   selectNextVertex(marker) {

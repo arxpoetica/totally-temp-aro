@@ -296,7 +296,7 @@ export const ServiceLayerMapObjects = (props) => {
               mapObject.getPath().removeAt(Number(marker.title))
             }
           })
-          multiSelectVertices.selectNextVertex(finalMarker)
+          if (mapObjectOverlayClone.length === 1) multiSelectVertices.selectNextVertex(finalMarker)
         }
       })
 
@@ -378,7 +378,7 @@ export const ServiceLayerMapObjects = (props) => {
       mapObject.getPath().getAt(event.vertex),
       vertexPayload,
       finishDeletion,
-      true // makes action repeatable
+      vertexPayload.length === 1 // makes action repeatable if only one vertex
     )
   }
 

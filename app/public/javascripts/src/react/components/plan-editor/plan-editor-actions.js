@@ -921,7 +921,7 @@ function showContextMenuForBoundary (mapObject, x, y, vertex, callBack) {
         vertex.length > 1 ? 'Delete All' : 'Delete',
         'PlanEditorActions',
         'deleteBoundaryVertices',
-        true, // makes action repeatable
+        vertex.length === 1, // makes action repeatable if one vertex
         mapObject,
         vertex,
         // Callback is utilized to update the local state of the react class if it is a multi-delete.
