@@ -70,6 +70,8 @@ export class MultiSelectVertices {
     removedMarker.setMap(null)
   }
 
+  // this is for creating markers not directly from an event
+  // the return from this can be passed to this.addMarker()
   createSyntheticVertexEvent(marker) {
     return {
       vertex: marker.title,
@@ -85,6 +87,7 @@ export class MultiSelectVertices {
     this.mapObjectOverlay = []
   }
 
+  // clears existing markers and tries to select subsequent vertex
   finishDeletion() {
     const sortedObjects = this.mapObjectOverlay.sort((a, b) => {
       return Number(b.title) - Number(a.title)

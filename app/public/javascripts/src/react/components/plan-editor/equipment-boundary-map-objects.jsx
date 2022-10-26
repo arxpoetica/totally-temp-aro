@@ -19,9 +19,7 @@ const EquipmentBoundaryMapObjects = props => {
   // any changes to state props should cause a rerender
   const {
     subnets,
-    subnetFeatures,
     selectedSubnetId,
-    planType,
     googleMaps,
     showContextMenuForBoundary,
     boundaryChange,
@@ -184,8 +182,6 @@ const mapStateToProps = state => ({
   googleMaps: state.map.googleMaps,
   subnets: state.planEditor.subnets,
   selectedSubnetId: state.planEditor.selectedSubnetId,
-  subnetFeatures: state.planEditor.subnetFeatures,
-  planType: state.plan.activePlan.planType
 })
 
 const mapDispatchToProps = dispatch => ({
