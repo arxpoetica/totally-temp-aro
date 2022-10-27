@@ -1,13 +1,29 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
-import { Grid, TextInput, Select, FileInput, Button, Alert } from '@mantine/core'
+import { Grid, Radio, TextInput, Select, FileInput, Button, Alert } from '@mantine/core'
 import { IconUpload } from '@tabler/icons'
 import RfpModalActions from './rfp-modal-actions'
 import RfpFileImporterUtils from '../rfp-file-importer-utils'
 import { Notifier } from '../../../../common/notifications'
 import { klona } from 'klona'
 
-const _RfpUploader = props => {
+const RFP_TYPES = {
+  SERVICE_AREA: {
+    value: 'service-area',
+    label: 'Service Area',
+  },
+  NO_SERVICE_AREA: {
+    value: 'no-service-area',
+    label: 'No Service Area',
+  },
+}
+
+const NETWORK_TYPES = {
+  DIRECT_ROUTING: { value: 'DIRECT_ROUTING', label: 'Direct Routing' },
+  P2P: { value: 'P2P', label: 'Point-to-Point' },
+}
+
+const _RfpSubmit = props => {
 
   const {
     loadRfpTemplates,
@@ -22,7 +38,9 @@ const _RfpUploader = props => {
 
   useEffect(() => { loadRfpTemplates() }, [])
 
+  const [rfpType, setRfpType] = useState(RFP_TYPES.SERVICE_AREA.value)
   const [rfpId, setRfpId] = useState('New RFP Plan')
+  const [networkType, setNetworkType] = useState(NETWORK_TYPES.DIRECT_ROUTING.value)
   const [file, setFile] = useState()
 
   async function submitRfp() {
@@ -52,17 +70,18 @@ const _RfpUploader = props => {
           </div>
         </div>
 
-      : <Grid>
+      : <Grid align="center">
+
           <Grid.Col lg={4} md={12}>RFP Type</Grid.Col>
           <Grid.Col lg={8} md={12}>
-              <Select
-                value={'ad-hoc'}
-                data={[
-                  { value: 'ad-hoc', label: 'Ad Hoc' },
-                  { value: 'service-area', label: 'Service Area' },
-                ]}
-                onChange={value => console.log(value)}
-              />
+            <Radio.Group
+              value={rfpType}
+              onChange={setRfpType}
+            >
+              {Object.values(RFP_TYPES).map(({ value, label }) =>
+                <Radio key={value} value={value} label={label} />
+              )}
+            </Radio.Group>
           </Grid.Col>
 
           <Grid.Col lg={4} md={12}>RFP plan name</Grid.Col>
@@ -85,19 +104,18 @@ const _RfpUploader = props => {
             />
           </Grid.Col>
 
-          <Grid.Col lg={4} md={12}>Network Type</Grid.Col>
-          <Grid.Col lg={8} md={12}>
-              <Select
-                value={'P2P'}
-                data={[
-                  { value: 'P2P', label: 'Point-to-Point' },
-                  { value: 'full-network', label: 'Full Network' },
-                ]}
-                onChange={value => console.log(value)}
-              />
-          </Grid.Col>
+          {rfpType === RFP_TYPES.SERVICE_AREA.value && <>
+            <Grid.Col lg={4} md={12}>Network Type</Grid.Col>
+            <Grid.Col lg={8} md={12}>
+                <Select
+                  value={networkType}
+                  data={Object.values(NETWORK_TYPES)}
+                  onChange={setNetworkType}
+                />
+            </Grid.Col>
+          </>}
 
-          <Grid.Col lg={4} md={12}>CSV with locations</Grid.Col>
+          <Grid.Col lg={4} md={12}>CSV with Locations</Grid.Col>
           <Grid.Col lg={8} md={12}>
             <FileInput
               value={file}
@@ -112,6 +130,7 @@ const _RfpUploader = props => {
             <Button onClick={submitRfp}>Submit RFP</Button>
           </Grid.Col>
         </Grid>
+
     }
     {submitResult &&
       <div className="message">
@@ -145,4 +164,4 @@ const mapDispatchToProps = dispatch => ({
   loadRfpTemplates: () => dispatch(RfpModalActions.loadRfpTemplates())
 })
 
-export const RfpUploader = connect(mapStateToProps, mapDispatchToProps)(_RfpUploader)
+export const RfpSubmit = connect(mapStateToProps, mapDispatchToProps)(_RfpSubmit)
