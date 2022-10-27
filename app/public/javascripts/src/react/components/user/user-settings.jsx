@@ -110,12 +110,14 @@ initSearchBox () {
         }, this);
     }   
 
+    // WHY IS THIS HARD CODED OH MY GOSH
     let perspectiveList = []
     perspectiveList.push(<option key={'admin'} value={'admin'}>{'Admin'}</option>)
     perspectiveList.push(<option key={'standard'} value={'standard'}>{'Standard'}</option>)
     perspectiveList.push(<option key={'biz-dev'} value={'biz-dev'}>{'Biz-dev'}</option>)
     perspectiveList.push(<option key={'sales_engineer'}  value={'sales_engineer'}>{'Sales Engineers'}</option>)
     perspectiveList.push(<option key={'account_exec'}  value={'account_exec'}>{'Account Executive'}</option>)
+    perspectiveList.push(<option key={'sales_exec'}  value={'sales_exec'}>{'Sales Executive'}</option>)
 
     return (
       <div className="no-collapse" id="set-default-location" style={{display: 'flex',flexDirection: 'column', height: '100%'}}>

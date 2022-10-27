@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { klona } from 'klona'
 import { connect } from 'react-redux'
 import { Slider, RangeSlider, Switch } from '@mantine/core';
 import MapLayerActions from '../../../map-layers/map-layer-actions'
@@ -24,10 +25,15 @@ const AccordionThreshold = (props) => {
     return `${filter.labelPrefix ? filter.labelPrefix : ''}${value.toLocaleString('en-US')}${filter.labelSuffix ? filter.labelSuffix : ''}`
   }
 
-  const createPayload = (sVal, noMaxValue) => {
+  const createPayload = (value, noMaxValue) => {
     const payload = {}
-    payload[filter.type] = sVal
-    payload.noMax = noMaxValue
+    let newValue = klona(value)
+    if (filter.labelSuffix === '%') {
+      // scale to decimal
+      newValue = newValue.map(range => range / 100)
+    }
+    payload[filter.type] = newValue
+    payload.noMax = filter.unboundedMax ? noMaxValue : false
 
     return payload
   }
