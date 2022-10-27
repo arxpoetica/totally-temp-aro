@@ -1,27 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
-import { Grid, Radio, TextInput, Select, FileInput, Button, Alert } from '@mantine/core'
+import { Grid, TextInput, Select, FileInput, Button, Alert } from '@mantine/core'
 import { IconUpload } from '@tabler/icons'
+import { RfpVersionRadioGroup } from './rfp-version-radio-group.jsx'
 import RfpModalActions from './rfp-modal-actions'
+import { RFP_VERSIONS, NETWORK_TYPES } from './rfp-modal-shared'
 import RfpFileImporterUtils from '../rfp-file-importer-utils'
 import { Notifier } from '../../../../common/notifications'
 import { klona } from 'klona'
-
-export const RFP_VERSIONS = {
-  SERVICE_AREA: {
-    value: 2,
-    label: 'Service Area',
-  },
-  NO_SERVICE_AREA: {
-    value: 1,
-    label: 'No Service Area',
-  },
-}
-
-const NETWORK_TYPES = {
-  DIRECT_ROUTING: { value: 'DIRECT_ROUTING', label: 'Direct Routing' },
-  P2P: { value: 'P2P', label: 'Point-to-Point' },
-}
 
 const _RfpSubmit = props => {
 
@@ -29,7 +15,6 @@ const _RfpSubmit = props => {
     loadRfpTemplates,
     templates,
     submitRfpReport,
-    userId,
     isSubmittingRfp,
     submitResult,
   } = props
@@ -43,7 +28,7 @@ const _RfpSubmit = props => {
   }
 
   const [rfpVersion, setRfpVersion] = useState(RFP_VERSIONS.SERVICE_AREA.value)
-  const [rfpId, setRfpId] = useState('New RFP Plan')
+  const [rfpId, setRfpId] = useState('')
   const [selectedTemplateId, setSelectedTemplateId] = useState(null)
   const [networkType, setNetworkType] = useState(NETWORK_TYPES.DIRECT_ROUTING.value)
   const [file, setFile] = useState()
@@ -70,7 +55,7 @@ const _RfpSubmit = props => {
         requestBody.routingMode = networkType
       }
 
-      submitRfpReport(userId, rfpVersion, requestBody)
+      submitRfpReport(rfpVersion, requestBody)
     } catch (error) {
       Notifier.error(error)
     }
@@ -89,28 +74,23 @@ const _RfpSubmit = props => {
 
       : <Grid align="center">
 
-          <Grid.Col lg={4} md={12}>RFP Type</Grid.Col>
-          <Grid.Col lg={8} md={12}>
-            <Radio.Group
-              value={rfpVersion}
-              onChange={value => {
-                const { id } = templates.find(({ version }) => (+value) === version)
-                setSelectedTemplateId(+id)
-                setRfpVersion(+value)
-              }}
-            >
-              {Object.values(RFP_VERSIONS).map(({ value, label }) =>
-                <Radio key={value} value={value} label={label} />
-              )}
-            </Radio.Group>
-          </Grid.Col>
+          <RfpVersionRadioGroup
+            value={rfpVersion}
+            onChange={value => {
+              const { id } = templates.find(({ version }) => (+value) === version)
+              setSelectedTemplateId(+id)
+              setRfpVersion(+value)
+            }}
+          />
 
           <Grid.Col lg={4} md={12}>RFP plan name</Grid.Col>
           <Grid.Col lg={8} md={12}>
             <TextInput
+              label="Required"
               value={rfpId}
-              placeholder="Type a plan name..."
+              placeholder="RFP plan name"
               onChange={event => setRfpId(event.currentTarget.value)}
+              withAsterisk
             />
           </Grid.Col>
 
@@ -151,11 +131,14 @@ const _RfpSubmit = props => {
           </Grid.Col>
 
           <Grid.Col span={12}>
-            <Button onClick={submitRfp} disabled={!selectedTemplateId}>Submit RFP</Button>
+            <Button onClick={submitRfp} disabled={!rfpId || !selectedTemplateId}>
+              Submit RFP
+            </Button>
           </Grid.Col>
         </Grid>
 
     }
+
     {submitResult &&
       <div className="message">
         <Alert title="Results" color={submitResult.type === 'success' ? 'green' : 'red'}>
@@ -178,11 +161,10 @@ const mapStateToProps = state => ({
   isSubmittingRfp: state.optimization.rfp.isSubmittingRfp,
   submitResult: state.optimization.rfp.submitResult,
   templates: state.optimization.rfp.templates,
-  userId: state.user.loggedInUser.id
 })
 
 const mapDispatchToProps = dispatch => ({
-  submitRfpReport: (userId, rfpVersion, requestBody) => dispatch(RfpModalActions.submitRfpReport(userId, rfpVersion, requestBody)),
+  submitRfpReport: (rfpVersion, requestBody) => dispatch(RfpModalActions.submitRfpReport(rfpVersion, requestBody)),
   loadRfpTemplates: initial => dispatch(RfpModalActions.loadRfpTemplates(initial))
 })
 

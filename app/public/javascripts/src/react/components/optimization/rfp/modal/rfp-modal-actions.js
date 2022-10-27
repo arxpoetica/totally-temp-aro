@@ -1,18 +1,20 @@
 /* globals Blob */
 import { saveAs } from 'file-saver'
-import { RFP_VERSIONS } from './rfp-submit.jsx'
+import { RFP_VERSIONS } from './rfp-modal-shared'
 import Actions from '../../../../common/actions'
 import AroHttp from '../../../../common/aro-http'
 import { Notifier } from '../../../../common/notifications'
 
-function submitRfpReport (userId, rfpVersion, requestBody) {
+function submitRfpReport (rfpVersion, requestBody) {
   return dispatch => {
     dispatch({
       type: Actions.RFP_SET_IS_SUBMITTING_RESULT,
       payload: true
     })
-    const url = rfpVersion === RFP_VERSIONS.SERVICE_AREA.value ? '/service/v2/rfp/process' : `/service/rfp/process`
-    
+    const url = rfpVersion === RFP_VERSIONS.SERVICE_AREA.value
+      ? '/service/v2/rfp/process'
+      : `/service/rfp/process`
+
     AroHttp.post(url, requestBody)
       .then(result => {
         dispatch({
