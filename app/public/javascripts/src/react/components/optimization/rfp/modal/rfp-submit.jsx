@@ -7,7 +7,7 @@ import RfpFileImporterUtils from '../rfp-file-importer-utils'
 import { Notifier } from '../../../../common/notifications'
 import { klona } from 'klona'
 
-const RFP_VERSIONS = {
+export const RFP_VERSIONS = {
   SERVICE_AREA: {
     value: 2,
     label: 'Service Area',
@@ -49,11 +49,23 @@ const _RfpSubmit = props => {
       const targets = await RfpFileImporterUtils.loadPointsFromFile(file)
       const requestBody = klona(selectedTemplate.value)
       requestBody.rfpId = rfpId
+
       requestBody.targets = targets.map(target => {
         const { id, lat, lng, props } = target
-        return { id: id, point: { type: 'Point', coordinates: [lng, lat] }, props }
+        if (rfpVersion === RFP_VERSIONS.NO_SERVICE_AREA.value) {
+          return { id: id, point: { type: 'Point', coordinates: [lng, lat] }, props }
+        }
+
+        if (rfpVersion === RFP_VERSIONS.SERVICE_AREA.value) {
+          return {id: id, latitude: lat, longitude: lng}
+        }
       })
-      submitRfpReport(userId, requestBody)
+
+      if (rfpVersion === RFP_VERSIONS.SERVICE_AREA.value) {
+        requestBody.routingMode = networkType
+      }
+
+      submitRfpReport(userId, rfpVersion, requestBody)
     } catch (error) {
       Notifier.error(error)
     }
@@ -99,7 +111,6 @@ const _RfpSubmit = props => {
               value={selectedTemplateId || ''}
               data={templates
                 .filter(({ version }) => {
-                  console.log({ rfpVersion, version, 'typeof rfpVersion': typeof rfpVersion, 'typeof version': typeof version })
                   return rfpVersion === version
                 })
                 .map(template => ({ value: template.id, label: template.name }))
@@ -163,7 +174,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  submitRfpReport: (userId, requestBody) => dispatch(RfpModalActions.submitRfpReport(userId, requestBody)),
+  submitRfpReport: (userId, rfpVersion, requestBody) => dispatch(RfpModalActions.submitRfpReport(userId, rfpVersion, requestBody)),
   setSelectedTemplateId: selectedTemplateId => dispatch(RfpModalActions.setSelectedTemplateId(selectedTemplateId)),
   loadRfpTemplates: () => dispatch(RfpModalActions.loadRfpTemplates())
 })
