@@ -45,7 +45,7 @@ const _RfpPlans = props => {
             </td>
             <td>
               {definitions &&
-                <RfpReportDownload planId={rfp.id} reportDefinitions={definitions}/>
+                <RfpReportDownload planId={planId} reportDefinitions={definitions}/>
               }
             </td>
           </tr>
