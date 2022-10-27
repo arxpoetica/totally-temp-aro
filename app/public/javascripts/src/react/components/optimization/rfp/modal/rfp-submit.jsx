@@ -7,13 +7,13 @@ import RfpFileImporterUtils from '../rfp-file-importer-utils'
 import { Notifier } from '../../../../common/notifications'
 import { klona } from 'klona'
 
-const RFP_TYPES = {
+const RFP_VERSIONS = {
   SERVICE_AREA: {
-    value: 'service-area',
+    value: 2,
     label: 'Service Area',
   },
   NO_SERVICE_AREA: {
-    value: 'no-service-area',
+    value: 1,
     label: 'No Service Area',
   },
 }
@@ -38,7 +38,7 @@ const _RfpSubmit = props => {
 
   useEffect(() => { loadRfpTemplates() }, [])
 
-  const [rfpType, setRfpType] = useState(RFP_TYPES.SERVICE_AREA.value)
+  const [rfpVersion, setRfpVersion] = useState(RFP_VERSIONS.SERVICE_AREA.value)
   const [rfpId, setRfpId] = useState('New RFP Plan')
   const [networkType, setNetworkType] = useState(NETWORK_TYPES.DIRECT_ROUTING.value)
   const [file, setFile] = useState()
@@ -75,10 +75,10 @@ const _RfpSubmit = props => {
           <Grid.Col lg={4} md={12}>RFP Type</Grid.Col>
           <Grid.Col lg={8} md={12}>
             <Radio.Group
-              value={rfpType}
-              onChange={setRfpType}
+              value={rfpVersion}
+              onChange={value => setRfpVersion(+value)}
             >
-              {Object.values(RFP_TYPES).map(({ value, label }) =>
+              {Object.values(RFP_VERSIONS).map(({ value, label }) =>
                 <Radio key={value} value={value} label={label} />
               )}
             </Radio.Group>
@@ -97,21 +97,25 @@ const _RfpSubmit = props => {
           <Grid.Col lg={8} md={12}>
             <Select
               value={selectedTemplateId || ''}
-              data={templates.map(template => {
-                return { value: template.id, label: template.name }
-              })}
+              data={templates
+                .filter(({ version }) => {
+                  console.log({ rfpVersion, version, 'typeof rfpVersion': typeof rfpVersion, 'typeof version': typeof version })
+                  return rfpVersion === version
+                })
+                .map(template => ({ value: template.id, label: template.name }))
+              }
               onChange={value => setSelectedTemplateId(+value)}
             />
           </Grid.Col>
 
-          {rfpType === RFP_TYPES.SERVICE_AREA.value && <>
+          {rfpVersion === RFP_VERSIONS.SERVICE_AREA.value && <>
             <Grid.Col lg={4} md={12}>Network Type</Grid.Col>
             <Grid.Col lg={8} md={12}>
-                <Select
-                  value={networkType}
-                  data={Object.values(NETWORK_TYPES)}
-                  onChange={setNetworkType}
-                />
+              <Select
+                value={networkType}
+                data={Object.values(NETWORK_TYPES)}
+                onChange={setNetworkType}
+              />
             </Grid.Col>
           </>}
 
