@@ -28,18 +28,23 @@ const _RfpSubmit = props => {
   const {
     loadRfpTemplates,
     templates,
-    selectedTemplateId,
     submitRfpReport,
     userId,
     isSubmittingRfp,
-    setSelectedTemplateId,
     submitResult,
   } = props
 
-  useEffect(() => { loadRfpTemplates() }, [])
+  useEffect(() => { loadData() }, [])
+
+  async function loadData() {
+    const templates = await loadRfpTemplates(true)
+    const { id } = templates.find(({ version }) => version === RFP_VERSIONS.SERVICE_AREA.value)
+    setSelectedTemplateId(+id)
+  }
 
   const [rfpVersion, setRfpVersion] = useState(RFP_VERSIONS.SERVICE_AREA.value)
   const [rfpId, setRfpId] = useState('New RFP Plan')
+  const [selectedTemplateId, setSelectedTemplateId] = useState(null)
   const [networkType, setNetworkType] = useState(NETWORK_TYPES.DIRECT_ROUTING.value)
   const [file, setFile] = useState()
 
@@ -76,7 +81,11 @@ const _RfpSubmit = props => {
           <Grid.Col lg={8} md={12}>
             <Radio.Group
               value={rfpVersion}
-              onChange={value => setRfpVersion(+value)}
+              onChange={value => {
+                const { id } = templates.find(({ version }) => (+value) === version)
+                setSelectedTemplateId(+id)
+                setRfpVersion(+value)
+              }}
             >
               {Object.values(RFP_VERSIONS).map(({ value, label }) =>
                 <Radio key={value} value={value} label={label} />
@@ -93,20 +102,19 @@ const _RfpSubmit = props => {
             />
           </Grid.Col>
 
-          <Grid.Col lg={4} md={12}>RFP Template</Grid.Col>
-          <Grid.Col lg={8} md={12}>
-            <Select
-              value={selectedTemplateId || ''}
-              data={templates
-                .filter(({ version }) => {
-                  console.log({ rfpVersion, version, 'typeof rfpVersion': typeof rfpVersion, 'typeof version': typeof version })
-                  return rfpVersion === version
-                })
-                .map(template => ({ value: template.id, label: template.name }))
-              }
-              onChange={value => setSelectedTemplateId(+value)}
-            />
-          </Grid.Col>
+          {setSelectedTemplateId && <>
+            <Grid.Col lg={4} md={12}>RFP Template</Grid.Col>
+            <Grid.Col lg={8} md={12}>
+              <Select
+                value={selectedTemplateId}
+                data={templates
+                  .filter(({ version }) => rfpVersion === version)
+                  .map(template => ({ value: template.id, label: template.name }))
+                }
+                onChange={value => setSelectedTemplateId(+value)}
+              />
+            </Grid.Col>
+          </>}
 
           {rfpVersion === RFP_VERSIONS.SERVICE_AREA.value && <>
             <Grid.Col lg={4} md={12}>Network Type</Grid.Col>
@@ -131,7 +139,7 @@ const _RfpSubmit = props => {
           </Grid.Col>
 
           <Grid.Col span={12}>
-            <Button onClick={submitRfp}>Submit RFP</Button>
+            <Button onClick={submitRfp} disabled={!selectedTemplateId}>Submit RFP</Button>
           </Grid.Col>
         </Grid>
 
@@ -157,15 +165,13 @@ const _RfpSubmit = props => {
 const mapStateToProps = state => ({
   isSubmittingRfp: state.optimization.rfp.isSubmittingRfp,
   submitResult: state.optimization.rfp.submitResult,
-  selectedTemplateId: state.optimization.rfp.selectedTemplateId,
   templates: state.optimization.rfp.templates,
   userId: state.user.loggedInUser.id
 })
 
 const mapDispatchToProps = dispatch => ({
   submitRfpReport: (userId, requestBody) => dispatch(RfpModalActions.submitRfpReport(userId, requestBody)),
-  setSelectedTemplateId: selectedTemplateId => dispatch(RfpModalActions.setSelectedTemplateId(selectedTemplateId)),
-  loadRfpTemplates: () => dispatch(RfpModalActions.loadRfpTemplates())
+  loadRfpTemplates: initial => dispatch(RfpModalActions.loadRfpTemplates(initial))
 })
 
 export const RfpSubmit = connect(mapStateToProps, mapDispatchToProps)(_RfpSubmit)

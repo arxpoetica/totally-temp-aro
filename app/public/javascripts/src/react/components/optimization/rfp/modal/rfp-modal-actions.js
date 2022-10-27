@@ -2,6 +2,7 @@
 import { saveAs } from 'file-saver'
 import Actions from '../../../../common/actions'
 import AroHttp from '../../../../common/aro-http'
+import { Notifier } from '../../../../common/notifications'
 
 function submitRfpReport (userId, requestBody) {
   return dispatch => {
@@ -71,14 +72,15 @@ function downloadRfpReport (filename, reportUrl) {
   }
 }
 
-function loadRfpTemplates () {
-  return dispatch => {
-    AroHttp.get('/ui/rfp_templates')
-      .then(result => dispatch({
-        type: Actions.RFP_SET_TEMPLATES,
-        payload: result.data
-      }))
-      .catch(err => console.error(err))
+function loadRfpTemplates(initial) {
+  return async dispatch => {
+    try {
+      const { data } = await AroHttp.get('/ui/rfp_templates')
+      dispatch({ type: Actions.RFP_SET_TEMPLATES, payload: data })
+      if (initial) return data
+    } catch (error) {
+      Notifier.error(error)
+    }
   }
 }
 
@@ -102,18 +104,10 @@ function deleteRfpTemplate (templateId) {
   }
 }
 
-function setSelectedTemplateId (selectedTemplateId) {
-  return {
-    type: Actions.RFP_SET_SELECTED_TEMPLATE_ID,
-    payload: selectedTemplateId
-  }
-}
-
 export default {
   submitRfpReport,
   downloadRfpReport,
   loadRfpTemplates,
   addRfpTemplate,
   deleteRfpTemplate,
-  setSelectedTemplateId
 }
