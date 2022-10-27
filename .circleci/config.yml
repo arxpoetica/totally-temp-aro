@@ -73,6 +73,7 @@ workflows:
                 - master
                 - dev
                 - uat
+                - 183466975-rfp/submit-and-templates
       - deploy:
           context: aro_qa_builds
           requires:
