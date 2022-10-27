@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
+import { RfpContext } from './rfp-modal.jsx'
 import { RfpsList } from './rfp-list.jsx'
 import { RfpSearch } from './rfp-search.jsx'
 import { Pagination } from './rfp-pagination.jsx'
@@ -10,14 +11,15 @@ const $TOP = 200
 
 export const Rfps = () => {
 
-  const [rfps, setRfps] = useState([])
+  const ctx = useContext(RfpContext)
+
   const [page, setPage] = useState(1)
   const rfpsStart = (page - 1) * PAGE_SIZE
   const rfpsEnd = rfpsStart + PAGE_SIZE
 
-  useEffect(() => { loadData() }, [])
+  useEffect(() => { loadRfps() }, [])
 
-  const loadData = async (query = {}) => {
+  const loadRfps = async (query = {}) => {
     try {
       const { search, skip, top } = query
 
@@ -27,7 +29,7 @@ export const Rfps = () => {
       if (search) params.set('search', search)
 
       const { data } = await AroHttp.get(`/service/v2/rfp/items?${params.toString()}`)
-      setRfps(data)
+      ctx.setRfps(data)
     } catch (error) {
       Notifier.error(error)
     }
@@ -36,20 +38,20 @@ export const Rfps = () => {
   return (
     <div className="rfps">
       <RfpSearch onSearch={search => {
-        loadData({ search })
+        loadRfps({ search })
         setPage(1)
       }}/>
 
       <div className="content">
-        {rfps.length > 0
-          ? <RfpsList rfps={rfps.slice(rfpsStart, rfpsEnd)}/>
+        {ctx.rfps.length > 0
+          ? <RfpsList rfps={ctx.rfps.slice(rfpsStart, rfpsEnd)}/>
           : <p>No results.</p>
         }
       </div>
 
       <Pagination
         page={page}
-        total={Math.ceil(rfps.length / PAGE_SIZE)}
+        total={Math.ceil(ctx.rfps.length / PAGE_SIZE)}
         onChange={setPage}
       />
 

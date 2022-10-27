@@ -7,7 +7,7 @@ import RfpActions from '../rfp-actions'
 
 const _RfpPlans = ({ rfp, loadPlan, clearRfpState, closeModal }) => {
 
-  const { rfpReportDefinitions } = useContext(RfpContext)
+  // const { rfpReportDefinitions } = useContext(RfpContext)
 
   return <div className="rfp-plans">
     <Table striped highlightOnHover withBorder withColumnBorders>

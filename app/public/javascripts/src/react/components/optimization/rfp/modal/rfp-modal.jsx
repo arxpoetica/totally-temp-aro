@@ -37,7 +37,12 @@ const TABS = {
 
 function _RfpModal(props) {
 
-  const [rfpReportDefinitions, setRfpReportDefinitions] = useState([])
+  const [rfps, setRfps] = useState([])
+  const [reportDefinitions, setReportDefinitions] = useState([])
+  const ctx = {
+    rfps, setRfps,
+    reportDefinitions, setReportDefinitions,
+  }
 
   const {
     showAllRfpStatus,
@@ -46,21 +51,22 @@ function _RfpModal(props) {
     clearRfpState,
   } = props
 
-  useEffect(() => { loadData() }, [])
-  const loadData = async () => {
+  useEffect(() => { loadOldDefinitions() }, [])
+
+  const loadOldDefinitions = async () => {
     try {
       const { data = [] } = await AroHttp.get('/service/rfp/report-definition')
       const filteredDefinitions = data.filter(definition => {
         const { reportData: { reportType } } = definition
         return reportType === 'COVERAGE' || reportType === 'RFP'
       })
-      setRfpReportDefinitions(filteredDefinitions)
+      ctx.setReportDefinitions(filteredDefinitions)
     } catch (error) {
       Notifier.error(error)
     }
   }
 
-  return <RfpContext.Provider value={{ rfpReportDefinitions }}>
+  return <RfpContext.Provider value={ctx}>
     {showFullScreenContainer && showAllRfpStatus &&
       <div className="rfp-modal">
 
