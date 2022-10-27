@@ -62,6 +62,7 @@ const MapSplit = (props) => {
     areTilesRendering,
     selectedDisplayMode,
     selectedTargetSelectionMode,
+    displayModeButtons
   } = props
 
   const { meters_to_length_units, length_units } = appConfigUnits
@@ -91,6 +92,12 @@ const MapSplit = (props) => {
     }
     if (map) { map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(mapViewToggle.current) }
   }, [map])
+  
+  useEffect(() => {    
+    if (displayModeButtons && splitterObj && displayModeButtons.IS_COLLAPSED) {
+      toggleCollapseSideBar()
+    }
+  }, [displayModeButtons, splitterObj])
 
   useEffect(() => {
     window.addEventListener('measuredDistance', (measuredDistance) => { 
@@ -320,6 +327,9 @@ const mapStateToProps = (state) => ({
   isRulerEnabled: state.toolbar.isRulerEnabled,
   appConfigUnits: Object.keys(state.toolbar.appConfiguration).length
     && state.toolbar.appConfiguration.units,
+  displayModeButtons: Object.keys(state.toolbar.appConfiguration).length
+    && state.toolbar.appConfiguration.perspective.showDisplayModeButtons,
+
 })
 
 const mapDispatchToProps = (dispatch) => ({

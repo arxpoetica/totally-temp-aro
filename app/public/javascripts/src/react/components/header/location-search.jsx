@@ -134,6 +134,11 @@ const ToolBarSearch = (props) => {
         onSearchChange={(value) => handleInputChange(value)}
         searchvalue={searchTerm}
         itemComponent={SelectItem}
+        styles={{
+          wrapper: {
+            margin: '2px'
+          }
+        }}
       />
     </div>
   )
