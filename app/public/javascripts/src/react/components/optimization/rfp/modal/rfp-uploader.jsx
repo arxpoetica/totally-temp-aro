@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import { Grid, TextInput, Select, FileInput, Button, Alert } from '@mantine/core'
 import { IconUpload } from '@tabler/icons'
-import RfpStatusActions from '../status/actions'
+import RfpModalActions from './rfp-modal-actions'
 import RfpFileImporterUtils from '../rfp-file-importer-utils'
 import { Notifier } from '../../../../common/notifications'
 import { klona } from 'klona'
@@ -53,6 +53,18 @@ const _RfpUploader = props => {
         </div>
 
       : <Grid>
+          <Grid.Col lg={4} md={12}>RFP Type</Grid.Col>
+          <Grid.Col lg={8} md={12}>
+              <Select
+                value={'ad-hoc'}
+                data={[
+                  { value: 'ad-hoc', label: 'Ad Hoc' },
+                  { value: 'service-area', label: 'Service Area' },
+                ]}
+                onChange={value => console.log(value)}
+              />
+          </Grid.Col>
+
           <Grid.Col lg={4} md={12}>RFP plan name</Grid.Col>
           <Grid.Col lg={8} md={12}>
             <TextInput
@@ -71,18 +83,6 @@ const _RfpUploader = props => {
               })}
               onChange={value => setSelectedTemplateId(+value)}
             />
-          </Grid.Col>
-
-          <Grid.Col lg={4} md={12}>RFP Type</Grid.Col>
-          <Grid.Col lg={8} md={12}>
-              <Select
-                value={'ad-hoc'}
-                data={[
-                  { value: 'ad-hoc', label: 'Ad Hoc' },
-                  { value: 'service-area', label: 'Service Area' },
-                ]}
-                onChange={value => console.log(value)}
-              />
           </Grid.Col>
 
           <Grid.Col lg={4} md={12}>Network Type</Grid.Col>
@@ -140,9 +140,9 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  submitRfpReport: (userId, requestBody) => dispatch(RfpStatusActions.submitRfpReport(userId, requestBody)),
-  setSelectedTemplateId: selectedTemplateId => dispatch(RfpStatusActions.setSelectedTemplateId(selectedTemplateId)),
-  loadRfpTemplates: () => dispatch(RfpStatusActions.loadRfpTemplates())
+  submitRfpReport: (userId, requestBody) => dispatch(RfpModalActions.submitRfpReport(userId, requestBody)),
+  setSelectedTemplateId: selectedTemplateId => dispatch(RfpModalActions.setSelectedTemplateId(selectedTemplateId)),
+  loadRfpTemplates: () => dispatch(RfpModalActions.loadRfpTemplates())
 })
 
 export const RfpUploader = connect(mapStateToProps, mapDispatchToProps)(_RfpUploader)

@@ -80,7 +80,7 @@ function _RfpModal(props) {
         <div className="content">
           <h2 className="title h1">RFPs</h2>
           {/* TODO: genericize this into a component */}
-          <Tabs defaultValue="RFPS_LIST" keepMounted={false}>
+          <Tabs defaultValue={TABS.RFPS_LIST} keepMounted={false}>
             <Tabs.List>
               {Object.entries(TABS).map(([tabId, { description, icon }]) =>
                 <Tabs.Tab key={tabId} value={tabId} icon={icon}>
