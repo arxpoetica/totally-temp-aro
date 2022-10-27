@@ -130,8 +130,17 @@ function clearTileData (dataIndex) {
   }
 }
 
-function clearAllSubnetTileData () {
+function clearSubnetTileData () {
   return clearTileData('subnets')
+}
+
+function clearAllSubnetData () {
+  return (dispatch) => {
+    batch(() => {
+      dispatch(clearSubnetTileData())
+      dispatch({type:Actions.MAP_DATA_CLEAR_SUBNET_ENTITY_DATA})
+    })
+  }
 }
 
 function clearNearnetTileData () {
@@ -158,7 +167,8 @@ export default {
   batchSetSubnetTileData,
   setNearnetEntityData,
   clearTileData,
-  clearAllSubnetTileData,
+  clearSubnetTileData,
+  clearAllSubnetData,
   clearNearnetTileData,
   clearAllNearnetData,
 }

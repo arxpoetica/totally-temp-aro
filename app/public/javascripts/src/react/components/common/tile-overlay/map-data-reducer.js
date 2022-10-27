@@ -131,8 +131,8 @@ function mapData (state = defaultState, {type, payload}) {
     //   return clearData(state, 'tileData', 'unbounded', id) // future
 
 
-    // case Actions.MAP_DATA_CLEAR_SUBNET_ENTITY_DATA:
-    //   return clearData(state, 'entityData', 'subnets', id) // future?
+    case Actions.MAP_DATA_CLEAR_SUBNET_ENTITY_DATA:
+      return clearData(state, 'entityData', 'subnets')
 
     case Actions.MAP_DATA_CLEAR_NEARNET_ENTITY_DATA:
       return clearData(state, 'entityData', 'nearnet')

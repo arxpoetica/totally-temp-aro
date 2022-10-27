@@ -347,12 +347,18 @@ function setMapReadyPromise (mapReadyPromise) {
 
 // --- utility make these a utility? --- //
 function _filterMultiselect (filter, val) {
+  if (!filter.multiSelect.length) return true
   return filter.multiSelect.includes(val)
+}
+
+function _filterMultiInput (filter, val) {
+  if (!filter.multiInput.length) return true
+  return filter.multiInput.includes(val)
 }
 
 function _filterRange (filter, val) {
   return (
-    val >= filter.rangeThreshold[0] 
+    val >= filter.rangeThreshold[0]
     && (
       filter.noMax
       || val <= filter.rangeThreshold[1]
@@ -360,11 +366,15 @@ function _filterRange (filter, val) {
   )
 }
 
+function _filterMax (filter, val) {
+  return val <= filter.threshold
+}
+
 const nearnetFilterProps = {
-  "location_filters": {
-    "type": "MULTISELECT",
-    "filterFunc": _filterMultiselect,
-  },
+  // "location_filters": {
+  //   "type": "MULTISELECT",
+  //   "filterFunc": _filterMultiselect,
+  // },
   "employee_count": {
     "type": "RANGE",
     "filterFunc": _filterRange,
@@ -378,10 +388,10 @@ const nearnetFilterProps = {
     "filterFunc": _filterRange,
   },
   "num_of_comp": {
-    "type": "RANGE",
-    "filterFunc": _filterRange,
+    "type": "RANGE_MAX",
+    "filterFunc": _filterMax,
   },
-  "current_cust": {
+  "current_customer": {
     "type": "MULTISELECT",
     "filterFunc": _filterMultiselect,
   },
@@ -390,10 +400,10 @@ const nearnetFilterProps = {
     "filterFunc": _filterMultiselect,
   },
   "industry": {
-    "type": "MULTISELECT",
-    "filterFunc": _filterMultiselect,
+    "type": "MULTIINPUT",
+    "filterFunc": _filterMultiInput,
   },
-  "resourceEntityTypes": {
+  "entity_type": {
     "type": "MULTISELECT",
     "filterFunc": _filterMultiselect,
   },
@@ -401,7 +411,7 @@ const nearnetFilterProps = {
 
 // helper, maybe make a utility
 function _filterEntitiesByProps (set, filters) {
-  console.log(filters)
+  console.log({filters, set})
   var filteredSets = {
     'nearnet': {},
     'excluded': {}
@@ -413,23 +423,23 @@ function _filterEntitiesByProps (set, filters) {
     for (const [propName, filter] of Object.entries(filters)) {
       if (
         doInclude
-        && (propName in entity.properties)
+        && (propName in entity)
         && (propName in nearnetFilterProps)
       ) {
-        doInclude = doInclude && nearnetFilterProps[propName].filterFunc(filter, entity.properties[propName])
+        doInclude = doInclude && nearnetFilterProps[propName].filterFunc(filter, entity[propName])
       }
     }
 
     // if (
     //   doInclude
-    //   //&& entity.properties.
+    //   //&& entity.
     //   && filter.resourceEntityTypes 
     // ) {
     //   doInclude = filter.resourceEntityTypes.multiSelect.includes(entity.locationEntityType)
     // }
 
     if (doInclude) {
-      filteredSets[entity.properties.plannedType][id] = entity
+      filteredSets[entity.plannedType][id] = entity
     }
   }
 

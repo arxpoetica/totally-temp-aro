@@ -166,38 +166,41 @@ function loadPlanDataSelectionFromServer (planId) {
 
 // TODO: this should move to nearnet-actions
 function _parseNearnet (nearnetData) {
+  // TODO: BIG fix this! 
+  //  get rid of 'small_businesses' etc and replace with 'small'
+  //  unify all entity types 
+  //  replace the property 'locationEntityType' with more generic entityType
+  //  here, plan-editor-actions, tile-overlay, some JSON in the DB, probably plan edit ...  
+  let enumPatch = {
+    'small': 'small_businesses', 
+    'medium': 'medium_businesses',
+    'large': 'large_businesses',
+  }
   let entityData = {}
   let tileDataEntities = {}
-  nearnetData.locations.forEach(location => {
-    let objectId = location.properties.object_id
-    location.properties.objectId = objectId
-    delete location.properties.object_id
 
-    let plannedType = location.properties.planned_type
-    location.properties.plannedType = plannedType
-    delete location.properties.planned_type
+  nearnetData.forEach(location => {
+    let objectId = location.object_id
+    location.objectId = objectId
+    delete location.object_id
+
+    let plannedType = location.planned_type
+    location.plannedType = plannedType
+    delete location.planned_type
     
     // TODO: in the future we should use a standard geom for all map entities 
     location.point = {
-      latitude: location.geom.coordinates[1],
-      longitude: location.geom.coordinates[0],
+      latitude: location.latitude,
+      longitude: location.longitude,
     }
-    delete location.geom
+    delete location.latitude
+    delete location.longitude
 
-    // TODO: BIG fix this! 
-    //  get rid of 'small_businesses' etc and replace with 'small'
-    //  unify all entity types 
-    //  replace the property 'locationEntityType' with more generic entityType
-    //  here, plan-editor-actions, tile-overlay, some JSON in the DB, probably plan edit ...  
-    let enumPatch = {
-      'small': 'small_businesses', 
-      'medium': 'medium_businesses',
-      'large': 'large_businesses',
-    }
-    location.locationEntityType = location.properties.entity_type
+    location.locationEntityType = location.entity_type
     if (location.locationEntityType in enumPatch) {
       location.locationEntityType = enumPatch[location.locationEntityType]
     }
+    location.entity_type = location.locationEntityType
     entityData[objectId] = location
 
     if (!(plannedType in tileDataEntities)) {
@@ -205,6 +208,21 @@ function _parseNearnet (nearnetData) {
     }
     tileDataEntities[plannedType][objectId] = {point:location.point}
   })
+  console.log(nearnetData)
+  // {
+  //   "employee_count": "33",
+  //   "monthly_rev": 0,
+  //   "lit_build": "false",
+  //   "latitude": 47.829707,
+  //   "root_plan_id": 11,
+  //   "industry": 5113,
+  //   "object_id": "02724c86-4c00-11ed-8cab-e7b248644b92",
+  //   "num_of_comp": 0,
+  //   "planned_type": "nearnet",
+  //   "current_customer": "false",
+  //   "entity_type": "medium",
+  //   "longitude": -122.272485
+  // }
   return {entityData, tileDataEntities}
 }
 
@@ -218,7 +236,7 @@ function setNearnetData (nearnetData) {
       let {entityData, tileDataEntities} = _parseNearnet(nearnetData)
       batch(() => {
         dispatch(mapDataActions.setNearnetEntityData(entityData))
-        dispatch(mapDataActions.batchSetNearnetTileData(tileDataEntities))
+        dispatch(mapDataActions.batchSetNearnetTileData(tileDataEntities)) // TODO: filter by filters map-layer-actions
       })
     }
   }
@@ -229,9 +247,30 @@ function loadNearnetData (planId) {
     if ('undefined' === typeof planId) {
       dispatch(setNearnetData())
     } else {
-      AroHttp.post(`/service/nearnet-query/${planId}`)
-        .then(nearnetResult => {
-          dispatch(setNearnetData(nearnetResult.data))
+      // AroHttp.post(`/service/nearnet-query/${planId}`)
+      //   .then(nearnetResult => {
+      //     dispatch(setNearnetData(nearnetResult.data))
+      //   }).catch(error => Notifier.error(error))
+
+
+      AroHttp.get('/service/v3/installed/report/meta-data')
+        .then(reportResult => {
+          let nearnetReportId = null
+          let foundId = reportResult.data.some(report => {
+            if ("SYSTEM_NEARNET" === report.name) {
+              nearnetReportId = report.oid
+              return true // return true breaks the loop
+            }
+            return false
+          })
+          if (foundId) {
+            AroHttp.get(`/service/v3/report-extended/${nearnetReportId}/${planId}.json`)
+              .then(nearnetResult => {
+                dispatch(setNearnetData(nearnetResult.data))
+              }).catch(error => Notifier.error(error))
+          } else {
+            dispatch(setNearnetData())
+          }
         }).catch(error => Notifier.error(error))
     }
   }
@@ -245,9 +284,11 @@ function setActivePlan (plan) {
       ClientSocketManager.leaveRoom('plan', getState().plan.activePlan.id) // leave previous plan
 
     batch(() => {
-      dispatch(mapDataActions.clearAllSubnetTileData())
-      // clear near net
+      // clear ALL tile data
+      dispatch(mapDataActions.clearAllSubnetData())
+      dispatch(mapDataActions.clearAllNearnetData())
       // load new near net
+      // TODO: if plan type
       dispatch(loadNearnetData(plan.id))
 
       dispatch({
