@@ -14,7 +14,6 @@ const defaultState = {
   status: RfpStatusTypes.UNINITIALIZED,
   showAllRfpStatus: false,
   templates: [],
-  selectedTemplateId: null,
   isSubmittingRfp: false,
   submitResult: null,
   rfpPlans: [],
@@ -94,13 +93,6 @@ function setIsLoadingRfpPlans (state, isLoadingRfpPlans) {
 function setRfpTemplates (state, rfpTemplates) {
   return { ...state,
     templates: rfpTemplates,
-    selectedTemplateId: rfpTemplates[0].id
-  }
-}
-
-function setSelectedTemplateId (state, selectedTemplateId) {
-  return { ...state,
-    selectedTemplateId: selectedTemplateId
   }
 }
 
@@ -172,9 +164,6 @@ function rfpReducer (state = defaultState, action) {
 
     case Actions.RFP_SET_TEMPLATES:
       return setRfpTemplates(state, action.payload)
-
-    case Actions.RFP_SET_SELECTED_TEMPLATE_ID:
-      return setSelectedTemplateId(state, action.payload)
 
     case Actions.RFP_SET_IS_SUBMITTING_RESULT:
       return setIsSubmittingRfp(state, action.payload)
