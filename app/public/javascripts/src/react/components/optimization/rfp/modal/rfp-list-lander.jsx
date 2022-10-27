@@ -38,8 +38,10 @@ export const Rfps = () => {
   return (
     <div className="rfps">
       <RfpSearch onSearch={search => {
-        loadRfps({ search })
-        setPage(1)
+        if (search) {
+          loadRfps({ search })
+          setPage(1)
+        }
       }}/>
 
       <div className="content">
