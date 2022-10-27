@@ -3,7 +3,6 @@ import { connect } from 'react-redux'
 import { Tabs } from '@mantine/core'
 import { IconList, IconUpload, IconSettings } from '@tabler/icons'
 import { Rfps } from './rfp-list-lander.jsx'
-import RfpPlanList from '../status/rfp-plan-list.jsx'
 import { RfpUploader } from './rfp-uploader.jsx'
 import { RfpTemplateManager } from './rfp-template-manager.jsx'
 import RfpActions from '../rfp-actions'
@@ -16,11 +15,6 @@ const TABS = {
   RFPS_LIST: {
     description: 'List all RFPs',
     component: <Rfps/>, // <RfpPlanList/>
-    icon: <IconList size={20} stroke={2}/>
-  },
-  DELETE_THIS_SOON: {
-    description: 'OLD RFPs TO DELETE',
-    component: <RfpPlanList/>,
     icon: <IconList size={20} stroke={2}/>
   },
   SUBMIT_RFP: {

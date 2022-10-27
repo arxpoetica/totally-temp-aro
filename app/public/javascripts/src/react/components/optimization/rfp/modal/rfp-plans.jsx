@@ -1,13 +1,23 @@
-import React, { useContext } from 'react'
-import { Table, Button } from '@mantine/core'
+import React from 'react'
+import { Table, Anchor } from '@mantine/core'
 import { connect } from 'react-redux'
-import { RfpContext } from './rfp-modal.jsx'
+import { RfpReportDownload } from './rfp-report-download.jsx'
 import PlanActions from '../../../plan/plan-actions'
 import RfpActions from '../rfp-actions'
 
-const _RfpPlans = ({ rfp, loadPlan, clearRfpState, closeModal }) => {
+const _RfpPlans = props => {
 
-  // const { rfpReportDefinitions } = useContext(RfpContext)
+  const {
+    rfp,
+    definitionsByVersion,
+    userId,
+    projectId,
+    loadPlan,
+    clearRfpState,
+    closeModal,
+  } = props
+
+  const definitions = definitionsByVersion[rfp.protocolVersion]
 
   return <div className="rfp-plans">
     <Table striped highlightOnHover withBorder withColumnBorders>
@@ -15,8 +25,7 @@ const _RfpPlans = ({ rfp, loadPlan, clearRfpState, closeModal }) => {
         <tr>
           <th>ID</th>
           <th>Name</th>
-          {/* <th>Created by</th> */}
-          {/* <th>Reports</th> */}
+          <th>Reports</th>
         </tr>
       </thead>
       <tbody>
@@ -24,39 +33,41 @@ const _RfpPlans = ({ rfp, loadPlan, clearRfpState, closeModal }) => {
           <tr key={planId}>
             <td>{planId}</td>
             <td>
-              <div className="plan">
-                {rfp.request.rfpId} {index + 1}
-                <Button
-                  variant="outline"
-                  color="dark"
-                  onClick={() => {
-                    loadPlan(planId)
-                    clearRfpState()
-                    closeModal()
-                  }}
-                >
-                  Load Plan
-                </Button>
-              </div>
+              <Anchor
+                component="button"
+                type="button"
+                onClick={() => {
+                  loadPlan(planId)
+                  clearRfpState()
+                  closeModal()
+                }}
+              >
+                {rfp.rfpId} ({index + 1})
+              </Anchor>
             </td>
-            {/* <td>Created by</td> */}
-            {/* <td>Reports</td> */}
+            <td>
+              {definitions && 
+                <RfpReportDownload
+                  planId={rfp.id}
+                  userId={userId}
+                  projectId={projectId}
+                  reportDefinitions={definitions}
+                />
+              }
+            </td>
           </tr>
         )}
       </tbody>
     </Table>
-    <style jsx>{`
-      .plan {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 20px;
-      }
-    `}</style>
+    {/* <style jsx>{``}</style> */}
   </div>
 }
 
-const mapStateToProps = state => ({})
+const mapStateToProps = state => ({
+  userId: state.user.loggedInUser && state.user.loggedInUser.id,
+  projectId: state.user.loggedInUser.projectId,
+})
+
 const mapDispatchToProps = dispatch => ({
   loadPlan: (planId) => dispatch(PlanActions.loadPlan(planId)),
   clearRfpState: () => dispatch(RfpActions.clearRfpState()),

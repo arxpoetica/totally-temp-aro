@@ -1,9 +1,25 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { PropTypes } from 'prop-types'
-import RfpStatusActions from './actions'
+import RfpModalActions from './rfp-modal-actions'
 
-export class RfpReportDownloadCell extends Component {
+const DownloadButtonContent = ({ mediaType }) => {
+  switch (mediaType) {
+    case 'csv':
+      return <span><i className='fas fa-file-csv' /> {mediaType}</span>
+
+    case 'json':
+      return <span><span style={{ fontFamily: 'monospace' }}>{'{}'}</span> {mediaType}</span>
+
+    case 'xls':
+    case 'xlsx':
+      return <span><i className='fas fa-file-excel' /> {mediaType}</span>
+
+    default:
+      return <span><i className='fa fa-download' /> {mediaType}</span>
+  }
+}
+
+class _RfpReportDownload extends Component {
   constructor (props) {
     super(props)
     this.state = {
@@ -30,7 +46,7 @@ export class RfpReportDownloadCell extends Component {
       </select>
       <div className='btn btn-group p-0'>
         {
-          selectedReport ? selectedReport.reportData.media_types.map(mediaType => {
+          selectedReport && selectedReport.reportData.media_types.map(mediaType => {
             // "(new Date()).toISOString().split('T')[0]" will give "YYYY-MM-DD"
             // Note that we are doing (new Date(Date.now())) so that we can have deterministic tests (by replacing the Date.now() function when testing)
             const downloadFileName = `${(new Date(Date.now())).toISOString().split('T')[0]}_${selectedReport.reportData.name}.${mediaType}`
@@ -48,35 +64,15 @@ export class RfpReportDownloadCell extends Component {
               {
                 this.props.reportsBeingDownloaded.has(downloadUrl)
                   ? <i className='fa fa-spinner fa-spin' />
-                  : this.renderDownloadButtonContent(mediaType)
+                  : <DownloadButtonContent mediaType={mediaType} />
               }
             </button>
-          }) : ""
+          })
         }
       </div>
     </div>
   }
 
-  renderDownloadButtonContent (mediaType) {
-    switch (mediaType) {
-      case 'csv':
-        return <span><i className='fas fa-file-csv' /> {mediaType}</span>
-
-      case 'json':
-        return <span><span style={{ fontFamily: 'monospace' }}>{'{}'}</span> {mediaType}</span>
-
-      case 'xls':
-      case 'xlsx':
-        return <span><i className='fas fa-file-excel' /> {mediaType}</span>
-
-      default:
-        return <span><i className='fa fa-download' /> {mediaType}</span>
-    }
-  }
-}
-
-RfpReportDownloadCell.propTypes = {
-  reportsBeingDownloaded: PropTypes.instanceOf(Set)
 }
 
 const mapStateToProps = state => ({
@@ -84,8 +80,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  downloadRfpReport: (filename, reportUrl) => dispatch(RfpStatusActions.downloadRfpReport(filename, reportUrl))
+  downloadRfpReport: (filename, reportUrl) => dispatch(RfpModalActions.downloadRfpReport(filename, reportUrl))
 })
 
-const RfpReportDownloadCellComponent = connect(mapStateToProps, mapDispatchToProps)(RfpReportDownloadCell)
-export default RfpReportDownloadCellComponent
+export const RfpReportDownload = connect(mapStateToProps, mapDispatchToProps)(_RfpReportDownload)

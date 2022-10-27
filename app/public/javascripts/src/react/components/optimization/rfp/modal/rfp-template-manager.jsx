@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { connect } from 'react-redux'
 import { Grid, TextInput, Select, FileInput, Button, Table } from '@mantine/core'
 import { IconTrash, IconUpload } from '@tabler/icons'
-import RfpStatusActions from '../status/actions'
+import RfpModalActions from './rfp-modal-actions'
 
 const _RfpTemplateManager = props => {
 
@@ -116,9 +116,9 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  addRfpTemplate: (name, template) => dispatch(RfpStatusActions.addRfpTemplate(name, template)),
-  deleteRfpTemplate: templateId => dispatch(RfpStatusActions.deleteRfpTemplate(templateId)),
-  loadRfpTemplates: () => dispatch(RfpStatusActions.loadRfpTemplates())
+  addRfpTemplate: (name, template) => dispatch(RfpModalActions.addRfpTemplate(name, template)),
+  deleteRfpTemplate: templateId => dispatch(RfpModalActions.deleteRfpTemplate(templateId)),
+  loadRfpTemplates: () => dispatch(RfpModalActions.loadRfpTemplates())
 })
 
 export const RfpTemplateManager = connect(mapStateToProps, mapDispatchToProps)(_RfpTemplateManager)

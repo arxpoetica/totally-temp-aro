@@ -40,16 +40,6 @@ function submitRfpReport (userId, requestBody) {
   }
 }
 
-function clearRfpPlans () {
-  return {
-    type: Actions.RFP_SET_PLANS,
-    payload: {
-      rfpPlans: [],
-      isLoadingRfpPlans: false
-    }
-  }
-}
-
 function downloadRfpReport (filename, reportUrl) {
   return dispatch => {
     dispatch({
@@ -78,13 +68,6 @@ function downloadRfpReport (filename, reportUrl) {
           payload: reportUrl
         })
       })
-  }
-}
-
-function setPlanListOffset (planListOffset) {
-  return {
-    type: Actions.RFP_SET_PLAN_LIST_OFFSET,
-    payload: planListOffset
   }
 }
 
@@ -128,9 +111,7 @@ function setSelectedTemplateId (selectedTemplateId) {
 
 export default {
   submitRfpReport,
-  clearRfpPlans,
   downloadRfpReport,
-  setPlanListOffset,
   loadRfpTemplates,
   addRfpTemplate,
   deleteRfpTemplate,
