@@ -32,7 +32,7 @@ const AccordionCheckbox = (props) => {
         return (
             <div key={value.key} style={{ display: 'flex', flexDirection: 'row', width: '100%', justifyContent: 'space-between', paddingBottom: '.5em' }}>
               <span style={{ display: 'flex', flexDirection: 'row' }}>
-                {value.showIcon && (
+                {value.iconUrl && (
                   <div className="ctype-icon" style={{ paddingRight: '.5em' }}>
                     <img className="image" src={value.iconUrl} alt="location-icon" />
                   </div>

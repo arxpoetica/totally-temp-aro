@@ -14,13 +14,12 @@ const Panel = (props) => {
   const { mapToolState, globalMethods, dispatch } = useContext(MapToolContext)
   const { visible, disabled, collapsed } = mapToolState
   const { MapToolActions, isMapToolExpanded, isMapToolVisible } = globalMethods
-  const [expandedAccords, setExpandedAccords] = useState(['resourceEntityTypes'])
+  const [expandedAccords, setExpandedAccords] = useState(['resource_entity_types'])
 
   const {
     configuration,
     panelKey,
-    panelLabel,
-    resourceEntityTypes
+    panelLabel
   } = props
 
   const orderedFilters = () => {
@@ -29,15 +28,6 @@ const Panel = (props) => {
     const configurationFilters = configuration.ui.perspective.mapTools.toolDetails[panelKey].filters
     return [
       ...configurationFilters.filter(filter => filter.top),
-      { 
-        label: `${panelLabel.replace(/[s]$/, "")} Types`,
-        attributeKey: 'resourceEntityTypes',
-        type: 'multiSelect',
-        values: resourceEntityTypes.map(entity => {
-          entity.shown = true
-          return entity
-        })
-      },
       ...configurationFilters.filter(filter => !filter.top)
     ]
   }

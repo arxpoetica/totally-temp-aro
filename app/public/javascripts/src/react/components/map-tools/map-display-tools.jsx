@@ -140,12 +140,15 @@ const MapDisplayTools = ({ mapRef, mapTools }) => {
       <MapToolContext.Provider value={{ mapToolState, dispatch, globalMethods }}>
         {available_tools.map(({id, toolName}) => {
           const MapToolComponent = MapToolPanels[id]
+          const toolDetail = mapTools && mapTools.toolDetails && mapTools.toolDetails[id]
+          if (!toolDetail || toolDetail && !mapTools.toolDetails[id].isVisible) return
+
           return (
-            MapToolComponent && <React.Fragment key={id}>
+            <React.Fragment key={id}>
               <MapToolComponent mapToolName={toolName} />
-              {/* {objectHasLength(mapTools) > 0 && mapTools.toolDetails[id].isVisible && mapTools.showLabels
+              {objectHasLength(mapTools) > 0 && mapTools.showLabels
                 && <div className="map_tool_label label-align">{toolName}</div>
-              } */}
+              }
             </React.Fragment>
           )
         })}
@@ -173,7 +176,7 @@ const mapStateToProps = (state) => {
   return {
     mapRef: state.map.googleMaps,
     mapTools: objectHasLength(state.toolbar.appConfiguration)
-     ? state.toolbar.appConfiguration.perspective.mapTools : [],
+      ? state.toolbar.appConfiguration.perspective.mapTools : [],
   }
 }
 
