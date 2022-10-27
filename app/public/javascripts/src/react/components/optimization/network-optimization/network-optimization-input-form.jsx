@@ -38,7 +38,8 @@ export class NetworkOptimizationInputFormProto extends Component {
 
     this.RoutingModes = [// Network Construction
       { label: 'Direct Routing', value: 'DIRECT_ROUTING' },
-      { label: 'Hub-only split', value: 'ODN_1' },
+      { label: 'Hub-only Split', value: 'ODN_1' },
+      { label: 'Point-to-Point', value: 'P2P' },
     ]
 
     this.OptimizationModes = [// Pruning Strategy

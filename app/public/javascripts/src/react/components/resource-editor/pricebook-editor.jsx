@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import ResourceActions from './resource-actions'
-import Select from "react-select";
+import Select from 'react-select'
+import { PRICE_BOOK_TAB_NAMES_BY_ID } from './resource-config'
 
 export class PriceBookEditor extends Component {
   constructor (props) {
@@ -85,14 +86,19 @@ export class PriceBookEditor extends Component {
 
         {/* Create tabs for each priceBookDefinition */}
         <ul className="nav nav-tabs" role="tablist">
-          {this.props.priceBookDefinition.structuredPriceBookDefinitions.map((priceBookValue, pricebookIndex) => { 
-              return (
-                <li key={pricebookIndex} role="presentation" onClick={(e)=>this.handlepriceBookDefinition(priceBookValue.id)} className="nav-item">
+          {this.props.priceBookDefinition.structuredPriceBookDefinitions.map((priceBookValue, pricebookIndex) => {
+              if (PRICE_BOOK_TAB_NAMES_BY_ID[priceBookValue.id] && priceBookValue.items.length) {
+                return <li
+                  key={pricebookIndex}
+                  role="presentation"
+                  onClick={(e)=>this.handlepriceBookDefinition(priceBookValue.id)}
+                  className="nav-item"
+                >
                   <a href={`#${priceBookValue.id}`} className={`nav-link ${this.props.priceBookDefinition.selectedDefinitionId === priceBookValue.id ? 'active' : ''}`} role="tab" data-toggle="tab">
-                    {priceBookValue.description}
+                    {PRICE_BOOK_TAB_NAMES_BY_ID[priceBookValue.id]}
                   </a>
                 </li>
-              )
+              }
             })
           }
         </ul>
@@ -224,23 +230,6 @@ export class PriceBookEditor extends Component {
                                         {definitionItem.subItems.map((subItem, subKey) => { 
                                           return (
                                             <tr key={subKey}>
-                                              {/* START TD block for sub-items with detailType === 'reference' */}
-                                              {subItem.detailType === 'reference' &&
-                                                <td style={{verticalAlign: 'middle'}}>{subItem.item.description}</td>
-                                              }
-                                              {subItem.detailType === 'reference' &&
-                                                <td style={{width: '100px', borderRight: 'none'}}>
-                                                  <input type="text" onChange={(e)=>this.handleDetailAssignmentChange(e, definitionKey)}  value={subItem.detailAssignment !== undefined ? subItem.detailAssignment.quantity : 0} className="form-control form-control-sm"/>
-                                                </td>
-                                              }
-                                              {subItem.detailType === 'reference' &&
-                                                <td style={{verticalAlign: 'middle', borderLeft: 'none'}}>
-                                                  {/* "UnitPerHour" becomes "Hours", etc. */}
-                                                  {subItem.item.unitOfMeasure.replace('UnitPer', '') + 's'}
-                                                </td>
-                                              }
-                                              {/* END TD block for sub-items with detailType === 'reference' */}
-
                                               {/* START TD block for sub-items with detailType === 'value' */}
                                               {subItem.detailType === 'value' &&
                                                 <td style={{verticalAlign: 'middle'}}>{subItem.item.description}</td>
@@ -321,23 +310,6 @@ export class PriceBookEditor extends Component {
               definitionItem.costAssignment.cost = e.target.value
           }
           }
-        }
-      })
-    });
-    this.setState({ structuredPriceBookDefinitions: pristineStructuredPriceBookDefinitions })
-  }
-
-  handleDetailAssignmentChange(e, parentDefinitionKey){
-
-    let pristineStructuredPriceBookDefinitions = this.state.structuredPriceBookDefinitions
-    pristineStructuredPriceBookDefinitions.map((priceBookValue, pricebookIndex) => {
-      priceBookValue.items.map((definitionItem, definitionKey) => {
-        if(parentDefinitionKey === definitionKey){
-          definitionItem.subItems.map((subItem, subKey) => { 
-            if(subItem.detailType === 'reference'){
-              subItem.detailAssignment.quantity = e.target.value
-            }
-          })
         }
       })
     });

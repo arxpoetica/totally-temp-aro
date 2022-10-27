@@ -33,7 +33,8 @@ import ErrorBoundary from '../common/ErrorBoundary.jsx'
 import { setAppcuesQuery } from '../../common/view-utils'
 import { OptimizationModal } from '../common/optimization-modal.jsx'
 import { NotificationsProvider } from '@mantine/notifications'
-import { ModalsProvider } from '@mantine/modals';
+import { ModalsProvider } from '@mantine/modals'
+import { RfpModal } from '../optimization/rfp/modal/rfp-modal.jsx'
 
 const transitionTimeMsec = 100
 // This must be the same for the map and sidebar, otherwise animations don't work correctly.
@@ -291,6 +292,9 @@ const MapSplit = (props) => {
           </div>
         </div>
       }
+
+      {/* TODO: this is a modal, and should be moved into our modal system */}
+      <RfpModal/>
 
       <style jsx>{`
         :global(.mantine-Modal-title) {

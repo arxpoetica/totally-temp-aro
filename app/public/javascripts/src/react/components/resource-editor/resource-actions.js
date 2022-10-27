@@ -269,10 +269,6 @@ function createPriceBook (priceBook, cloneManager) {
           costAssignment.state = '*'
           costAssignment.cost = 0
         })
-        newManagerAssignments.detailAssignments.forEach((detailAssignment) => {
-          detailAssignment.quantity = 0
-          detailAssignment.ratioFixed = 1
-        })
       }
       return AroHttp.put(`/service/v1/pricebook/${createdManagerId}/assignment`, newManagerAssignments)
     })
@@ -393,15 +389,9 @@ function definePriceBookForSelectedState (selectedStateForStrategy, priceBookDef
 
     // Build a map of cost assignment ids to objects
     const itemIdToCostAssignment = {}
-    const itemDetailIdToDetailAssignment = {}
     const costAssignmentsForState = pristineAssignments.costAssignments.filter((item) => item.state === selectedStateForStrategy)
     costAssignmentsForState.forEach((costAssignment) => {
       itemIdToCostAssignment[costAssignment.itemId] = costAssignment
-    })
-
-    // Build a map of detail assignment ids to objects
-    pristineAssignments.detailAssignments.forEach((detailAssignment) => {
-      itemDetailIdToDetailAssignment[detailAssignment.itemDetailId] = detailAssignment
     })
 
     // Build the pricebookdefinitions
@@ -428,16 +418,14 @@ function definePriceBookForSelectedState (selectedStateForStrategy, priceBookDef
           subItems: [],
           tagMapping: definitionItem.tagMapping
         }
-        if (definitionItem.subItems) {
+        if (definitionItem.subItems && definitionItem.subItems.length) {
           definitionItem.subItems.forEach((subItem) => {
             const subItemToPush = {
               id: subItem.id,
               item: subItem.item,
               detailType: subItem.detailType
             }
-            if (subItem.detailType === 'reference') {
-              subItemToPush.detailAssignment = itemDetailIdToDetailAssignment[subItem.id]
-            } else if (subItem.detailType === 'value') {
+            if (subItem.detailType === 'value') {
               subItemToPush.costAssignment = itemIdToCostAssignment[subItem.item.id]
             }
             item.subItems.push(subItemToPush)
@@ -501,14 +489,8 @@ function saveAssignmentsToServer (pristineAssignments, structuredPriceBookDefini
     // Build a map of cost assignment ids to their index within the array
     const assignments = JSON.parse(JSON.stringify(pristineAssignments))
     const itemIdToCostAssignmentIndex = {}
-    const itemDetailIdToDetailAssignmentIndex = {}
     assignments.costAssignments.forEach((costAssignment, index) => {
       itemIdToCostAssignmentIndex[`${costAssignment.itemId}_${costAssignment.state}`] = index
-    })
-
-    // Build a map of detail assignment ids to their index within the array
-    assignments.detailAssignments.forEach((detailAssignment, index) => {
-      itemDetailIdToDetailAssignmentIndex[detailAssignment.itemDetailId] = index
     })
 
     // Loop through the pricebook definitions
@@ -526,11 +508,6 @@ function saveAssignmentsToServer (pristineAssignments, structuredPriceBookDefini
             // Sub item has a cost assignment. Save it.
             const costAssignmentIndex = itemIdToCostAssignmentIndex[`${subItem.item.id}_${subItem.state}`]
             assignments.costAssignments[costAssignmentIndex] = subItem.costAssignment
-          }
-          if (subItem.detailAssignment) {
-            // Sub item has a detail assignment. Save it.
-            const detailAssignmentIndex = itemDetailIdToDetailAssignmentIndex[subItem.id]
-            assignments.detailAssignments[detailAssignmentIndex] = subItem.detailAssignment
           }
         })
       })

@@ -114,9 +114,10 @@ class State {
 
     service.routingModes = {
       DIRECT_ROUTING: { id: 'DIRECT_ROUTING', label: 'Direct Routing' },
-      ODN_1: { id: 'ODN_1', label: 'Hub-only split' },
-      ODN_2: { id: 'ODN_2', label: 'Hub-distribution split' },
-      ODN_3: { id: 'ODN_3', label: 'Hybrid split' }
+      ODN_1: { id: 'ODN_1', label: 'Hub-only Split' },
+      ODN_2: { id: 'ODN_2', label: 'Hub-distribution Split' },
+      ODN_3: { id: 'ODN_3', label: 'Hybrid Split' },
+      P2P: { id: 'P2P', label: 'Point-to-Point' },
     }
 
     // View Settings layer - define once
