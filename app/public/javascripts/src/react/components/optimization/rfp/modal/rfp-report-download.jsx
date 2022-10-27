@@ -4,20 +4,6 @@ import { Select, Button } from '@mantine/core'
 import { IconTable, IconBraces, IconFileSpreadsheet, IconDownload } from '@tabler/icons'
 import RfpModalActions from './rfp-modal-actions'
 
-const LeftIcon = ({ mediaType }) => {
-  switch (mediaType) {
-    case 'csv':
-      return <IconTable size={20} stroke={2}/>
-    case 'json':
-      return <IconBraces size={20} stroke={2}/>
-    case 'xls':
-    case 'xlsx':
-      return <IconFileSpreadsheet size={20} stroke={2}/>
-    default:
-      return <IconDownload size={20} stroke={2}/>
-  }
-}
-
 const _RfpReportDownload = props => {
 
   const {
@@ -56,9 +42,22 @@ const _RfpReportDownload = props => {
           .replace('{userId}', userId)
         const loading = reportsBeingDownloaded.has(url)
 
+        let LeftIcon
+        switch (mediaType) {
+          case 'csv':
+            LeftIcon = <IconTable size={20} stroke={2}/>
+          case 'json':
+            LeftIcon = <IconBraces size={20} stroke={2}/>
+          case 'xls':
+          case 'xlsx':
+            LeftIcon = <IconFileSpreadsheet size={20} stroke={2}/>
+          default:
+            LeftIcon = <IconDownload size={20} stroke={2}/>
+        }
+
         return <Button
           key={mediaType}
-          leftIcon={<LeftIcon mediaType={mediaType}/>}
+          leftIcon={LeftIcon}
           variant="outline"
           onClick={() => downloadRfpReport(filename, url)}
           disabled={loading}
