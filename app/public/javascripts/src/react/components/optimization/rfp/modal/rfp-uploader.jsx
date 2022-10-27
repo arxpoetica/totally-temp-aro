@@ -1,11 +1,22 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
-import { Grid, TextInput, Select, FileInput, Button, Alert } from '@mantine/core'
+import { Grid, Radio, TextInput, Select, FileInput, Button, Alert } from '@mantine/core'
 import { IconUpload } from '@tabler/icons'
 import RfpModalActions from './rfp-modal-actions'
 import RfpFileImporterUtils from '../rfp-file-importer-utils'
 import { Notifier } from '../../../../common/notifications'
 import { klona } from 'klona'
+
+const RFP_TYPES = {
+  SERVICE_AREA: {
+    value: 'service-area',
+    label: 'Service Area',
+  },
+  NO_SERVICE_AREA: {
+    value: 'no-service-area',
+    label: 'No Service Area',
+  },
+}
 
 const _RfpUploader = props => {
 
@@ -22,6 +33,7 @@ const _RfpUploader = props => {
 
   useEffect(() => { loadRfpTemplates() }, [])
 
+  const [rfpType, setRfpType] = useState(RFP_TYPES.SERVICE_AREA.value)
   const [rfpId, setRfpId] = useState('New RFP Plan')
   const [file, setFile] = useState()
 
@@ -52,19 +64,21 @@ const _RfpUploader = props => {
           </div>
         </div>
 
-      : <Grid>
-          <Grid.Col lg={4} md={12}>RFP Type</Grid.Col>
-          <Grid.Col lg={8} md={12}>
-              <Select
-                value={'ad-hoc'}
-                data={[
-                  { value: 'ad-hoc', label: 'Ad Hoc' },
-                  { value: 'service-area', label: 'Service Area' },
-                ]}
-                onChange={value => console.log(value)}
-              />
-          </Grid.Col>
+      : <>
 
+        <div className="radio-group">
+          <h2 className="subtitle h5">RFP Type</h2>
+          <Radio.Group
+            value={rfpType}
+            onChange={setRfpType}
+          >
+            {Object.values(RFP_TYPES).map(({ value, label }) =>
+               <Radio key={value} value={value} label={label} />
+            )}
+          </Radio.Group>
+        </div>
+
+        <Grid>
           <Grid.Col lg={4} md={12}>RFP plan name</Grid.Col>
           <Grid.Col lg={8} md={12}>
             <TextInput
@@ -112,6 +126,8 @@ const _RfpUploader = props => {
             <Button onClick={submitRfp}>Submit RFP</Button>
           </Grid.Col>
         </Grid>
+      </>
+
     }
     {submitResult &&
       <div className="message">
@@ -122,6 +138,16 @@ const _RfpUploader = props => {
     }
 
     <style jsx>{`
+      .radio-group {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin: 0 0 20px;
+      }
+      .subtitle {
+        margin: 0;
+      }
       .message {
         max-width: 600px;
         margin: 0 auto;

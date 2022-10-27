@@ -13,16 +13,19 @@ export const RfpContext = createContext()
 
 const TABS = {
   RFPS_LIST: {
+    tabId: 'RFPS_LIST',
     description: 'List all RFPs',
     component: <Rfps/>, // <RfpPlanList/>
     icon: <IconList size={20} stroke={2}/>
   },
   SUBMIT_RFP: {
+    tabId: 'SUBMIT_RFP',
     description: 'Submit RFP',
     component: <RfpUploader/>,
     icon: <IconUpload size={20} stroke={2}/>
   },
   MANAGE_RFP_TEMPLATES: {
+    tabId: 'MANAGE_RFP_TEMPLATES',
     description: 'Manage RFP templates',
     component: <RfpTemplateManager/>,
     icon: <IconSettings size={20} stroke={2}/>
@@ -80,15 +83,15 @@ function _RfpModal(props) {
         <div className="content">
           <h2 className="title h1">RFPs</h2>
           {/* TODO: genericize this into a component */}
-          <Tabs defaultValue={TABS.RFPS_LIST} keepMounted={false}>
+          <Tabs defaultValue={TABS.RFPS_LIST.tabId} keepMounted={false}>
             <Tabs.List>
-              {Object.entries(TABS).map(([tabId, { description, icon }]) =>
+              {Object.values(TABS).map(({ tabId, description, icon }) =>
                 <Tabs.Tab key={tabId} value={tabId} icon={icon}>
                   {description}
                 </Tabs.Tab>
               )}
             </Tabs.List>
-            {Object.entries(TABS).map(([tabId, { component }]) =>
+            {Object.values(TABS).map(({ tabId, component }) =>
               <Tabs.Panel key={tabId} value={tabId} pt="xs">
                 <div className="panel">
                   {component}
