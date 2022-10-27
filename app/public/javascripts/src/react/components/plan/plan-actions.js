@@ -159,11 +159,6 @@ function loadPlanDataSelectionFromServer (planId) {
   }
 }
 
-
-
-
-
-
 // TODO: this should move to nearnet-actions
 function _parseNearnet (nearnetData) {
   // TODO: BIG fix this! 
@@ -208,21 +203,7 @@ function _parseNearnet (nearnetData) {
     }
     tileDataEntities[plannedType][objectId] = {point:location.point}
   })
-  console.log(nearnetData)
-  // {
-  //   "employee_count": "33",
-  //   "monthly_rev": 0,
-  //   "lit_build": "false",
-  //   "latitude": 47.829707,
-  //   "root_plan_id": 11,
-  //   "industry": 5113,
-  //   "object_id": "02724c86-4c00-11ed-8cab-e7b248644b92",
-  //   "num_of_comp": 0,
-  //   "planned_type": "nearnet",
-  //   "current_customer": "false",
-  //   "entity_type": "medium",
-  //   "longitude": -122.272485
-  // }
+  
   return {entityData, tileDataEntities}
 }
 
@@ -289,6 +270,7 @@ function setActivePlan (plan) {
       dispatch(mapDataActions.clearAllNearnetData())
       // load new near net
       // TODO: if plan type
+      console.log(plan)
       dispatch(loadNearnetData(plan.id))
 
       dispatch({

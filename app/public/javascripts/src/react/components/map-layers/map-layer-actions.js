@@ -461,6 +461,10 @@ function updateMapLayerFilters (layer, key, value) {
       //  and state.mapData.tileData.nearnet.excluded
       //  OR should that happen in a component? (reducer doesn't work cause that shouldn't have side effects)
       let filteredSets = _filterEntitiesByProps(nearnetLocations, newNearnetFilters)
+      console.log({
+        'nearnet': Object.keys(filteredSets['nearnet']).length,
+        'excluded': Object.keys(filteredSets['excluded']).length,
+      })
       dispatch(mapDataActions.batchSetNearnetTileData(filteredSets))
     } 
     dispatch({

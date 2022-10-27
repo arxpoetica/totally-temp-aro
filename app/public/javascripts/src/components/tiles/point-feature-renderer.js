@@ -57,6 +57,7 @@ class PointFeatureRenderer {
     //console.log({_data_type: feature.properties._data_type, nearnetLayers, len:nearnetLayers.length})
     if (
       feature.properties._data_type === 'location'
+      && selectedDisplayMode === displayModes.VIEW
       && nearnetLayers.length
     ) {
       return
