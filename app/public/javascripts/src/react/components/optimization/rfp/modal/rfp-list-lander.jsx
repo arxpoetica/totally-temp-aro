@@ -13,15 +13,16 @@ export const Rfps = () => {
 
   const ctx = useContext(RfpContext)
 
+  const [initialListCount, setInitialListCount] = useState(0)
   const [page, setPage] = useState(1)
   const rfpsStart = (page - 1) * PAGE_SIZE
   const rfpsEnd = rfpsStart + PAGE_SIZE
 
-  useEffect(() => { loadRfps() }, [])
+  useEffect(() => { loadRfps({ initial: true }) }, [])
 
   const loadRfps = async (query = {}) => {
     try {
-      const { search, skip, top } = query
+      const { initial, search, skip, top } = query
 
       const params = new URLSearchParams()
       params.set('$top', top || $TOP)
@@ -29,6 +30,7 @@ export const Rfps = () => {
       if (search) params.set('search', search)
 
       const { data } = await AroHttp.get(`/service/v2/rfp/items?${params.toString()}`)
+      if (initial) setInitialListCount(data.length)
       ctx.setRfps(data)
     } catch (error) {
       Notifier.error(error)
@@ -37,12 +39,14 @@ export const Rfps = () => {
 
   return (
     <div className="rfps">
-      <RfpSearch onSearch={search => {
-        if (search) {
+      <RfpSearch
+        onSearch={search => {
+          if (!search && initialListCount === ctx.rfps.length) return
           loadRfps({ search })
           setPage(1)
-        }
-      }}/>
+        }}
+        canClear={ctx.rfps.length < initialListCount}
+      />
 
       <div className="content">
         {ctx.rfps.length > 0

@@ -3,7 +3,7 @@ import { TextInput, CloseButton, Button } from '@mantine/core';
 import { IconSearch } from '@tabler/icons'
 
 // TODO: genericize into a library
-export const RfpSearch = ({ onSearch }) => {
+export const RfpSearch = ({ onSearch, canClear = false }) => {
 
   const [searchValue, setSearchValue] = useState('')
 
@@ -21,8 +21,8 @@ export const RfpSearch = ({ onSearch }) => {
               }
             }}
           />
-          {searchValue &&
-            <div className="close">
+          {(searchValue || canClear) &&
+            <div className="clear">
               <CloseButton
                 onClick={() => {
                   setSearchValue('')
@@ -56,7 +56,7 @@ export const RfpSearch = ({ onSearch }) => {
         .input {
           position: relative;
         }
-        .close {
+        .clear {
           position: absolute;
           top: 4px;
           right: 4px;
