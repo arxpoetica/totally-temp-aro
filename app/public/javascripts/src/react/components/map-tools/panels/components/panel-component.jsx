@@ -14,7 +14,7 @@ const Panel = (props) => {
   const { mapToolState, globalMethods, dispatch } = useContext(MapToolContext)
   const { visible, disabled, collapsed } = mapToolState
   const { MapToolActions, isMapToolExpanded, isMapToolVisible } = globalMethods
-  const [expandedAccords, setExpandedAccords] = useState(['resource_entity_types'])
+  const [expandedAccords, setExpandedAccords] = useState(['location_filters', 'entity_type'])
 
   const {
     configuration,

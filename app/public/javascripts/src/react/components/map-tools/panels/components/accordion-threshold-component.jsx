@@ -80,6 +80,7 @@ const AccordionThreshold = (props) => {
       {filter.unboundedMax && (
         <Switch
           label="No Maximum"
+          checked={noMax}
           onChange={() => {
             const payload = createPayload(sliderValue, !noMax)
             setNoMax(!noMax)
