@@ -18,6 +18,11 @@ const RFP_TYPES = {
   },
 }
 
+const NETWORK_TYPES = {
+  DIRECT_ROUTING: { value: 'DIRECT_ROUTING', label: 'Direct Routing' },
+  P2P: { value: 'P2P', label: 'Point-to-Point' },
+}
+
 const _RfpSubmit = props => {
 
   const {
@@ -35,6 +40,7 @@ const _RfpSubmit = props => {
 
   const [rfpType, setRfpType] = useState(RFP_TYPES.SERVICE_AREA.value)
   const [rfpId, setRfpId] = useState('New RFP Plan')
+  const [networkType, setNetworkType] = useState(NETWORK_TYPES.DIRECT_ROUTING.value)
   const [file, setFile] = useState()
 
   async function submitRfp() {
@@ -64,21 +70,20 @@ const _RfpSubmit = props => {
           </div>
         </div>
 
-      : <>
+      : <Grid align="center">
 
-        <div className="radio-group">
-          <h2 className="subtitle h5">RFP Type</h2>
-          <Radio.Group
-            value={rfpType}
-            onChange={setRfpType}
-          >
-            {Object.values(RFP_TYPES).map(({ value, label }) =>
-               <Radio key={value} value={value} label={label} />
-            )}
-          </Radio.Group>
-        </div>
+          <Grid.Col lg={4} md={12}>RFP Type</Grid.Col>
+          <Grid.Col lg={8} md={12}>
+            <Radio.Group
+              value={rfpType}
+              onChange={setRfpType}
+            >
+              {Object.values(RFP_TYPES).map(({ value, label }) =>
+                <Radio key={value} value={value} label={label} />
+              )}
+            </Radio.Group>
+          </Grid.Col>
 
-        <Grid>
           <Grid.Col lg={4} md={12}>RFP plan name</Grid.Col>
           <Grid.Col lg={8} md={12}>
             <TextInput
@@ -99,19 +104,18 @@ const _RfpSubmit = props => {
             />
           </Grid.Col>
 
-          <Grid.Col lg={4} md={12}>Network Type</Grid.Col>
-          <Grid.Col lg={8} md={12}>
-              <Select
-                value={'P2P'}
-                data={[
-                  { value: 'P2P', label: 'Point-to-Point' },
-                  { value: 'full-network', label: 'Full Network' },
-                ]}
-                onChange={value => console.log(value)}
-              />
-          </Grid.Col>
+          {rfpType === RFP_TYPES.SERVICE_AREA.value && <>
+            <Grid.Col lg={4} md={12}>Network Type</Grid.Col>
+            <Grid.Col lg={8} md={12}>
+                <Select
+                  value={networkType}
+                  data={Object.values(NETWORK_TYPES)}
+                  onChange={setNetworkType}
+                />
+            </Grid.Col>
+          </>}
 
-          <Grid.Col lg={4} md={12}>CSV with locations</Grid.Col>
+          <Grid.Col lg={4} md={12}>CSV with Locations</Grid.Col>
           <Grid.Col lg={8} md={12}>
             <FileInput
               value={file}
@@ -126,7 +130,6 @@ const _RfpSubmit = props => {
             <Button onClick={submitRfp}>Submit RFP</Button>
           </Grid.Col>
         </Grid>
-      </>
 
     }
     {submitResult &&
@@ -138,16 +141,6 @@ const _RfpSubmit = props => {
     }
 
     <style jsx>{`
-      .radio-group {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        margin: 0 0 20px;
-      }
-      .subtitle {
-        margin: 0;
-      }
       .message {
         max-width: 600px;
         margin: 0 auto;
