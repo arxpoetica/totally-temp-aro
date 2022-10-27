@@ -10,8 +10,6 @@ const _RfpPlans = props => {
   const {
     rfp,
     definitionsByVersion,
-    userId,
-    projectId,
     loadPlan,
     clearRfpState,
     closeModal,
@@ -20,7 +18,7 @@ const _RfpPlans = props => {
   const definitions = definitionsByVersion[rfp.protocolVersion]
 
   return <div className="rfp-plans">
-    <Table striped highlightOnHover withBorder withColumnBorders>
+    <Table striped withBorder withColumnBorders>
       <thead>
         <tr>
           <th>ID</th>
@@ -46,13 +44,8 @@ const _RfpPlans = props => {
               </Anchor>
             </td>
             <td>
-              {definitions && 
-                <RfpReportDownload
-                  planId={rfp.id}
-                  userId={userId}
-                  projectId={projectId}
-                  reportDefinitions={definitions}
-                />
+              {definitions &&
+                <RfpReportDownload planId={rfp.id} reportDefinitions={definitions}/>
               }
             </td>
           </tr>
@@ -63,10 +56,7 @@ const _RfpPlans = props => {
   </div>
 }
 
-const mapStateToProps = state => ({
-  userId: state.user.loggedInUser && state.user.loggedInUser.id,
-  projectId: state.user.loggedInUser.projectId,
-})
+const mapStateToProps = state => ({})
 
 const mapDispatchToProps = dispatch => ({
   loadPlan: (planId) => dispatch(PlanActions.loadPlan(planId)),

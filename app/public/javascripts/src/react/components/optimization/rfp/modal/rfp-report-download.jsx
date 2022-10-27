@@ -1,82 +1,90 @@
-import React, { Component } from 'react'
+import React, { useState } from 'react'
 import { connect } from 'react-redux'
+import { Select, Button } from '@mantine/core'
+import { IconTable, IconBraces, IconFileSpreadsheet, IconDownload } from '@tabler/icons'
 import RfpModalActions from './rfp-modal-actions'
 
-const DownloadButtonContent = ({ mediaType }) => {
+const LeftIcon = ({ mediaType }) => {
   switch (mediaType) {
     case 'csv':
-      return <span><i className='fas fa-file-csv' /> {mediaType}</span>
-
+      return <IconTable size={20} stroke={2}/>
     case 'json':
-      return <span><span style={{ fontFamily: 'monospace' }}>{'{}'}</span> {mediaType}</span>
-
+      return <IconBraces size={20} stroke={2}/>
     case 'xls':
     case 'xlsx':
-      return <span><i className='fas fa-file-excel' /> {mediaType}</span>
-
+      return <IconFileSpreadsheet size={20} stroke={2}/>
     default:
-      return <span><i className='fa fa-download' /> {mediaType}</span>
+      return <IconDownload size={20} stroke={2}/>
   }
 }
 
-class _RfpReportDownload extends Component {
-  constructor (props) {
-    super(props)
-    this.state = {
-      selectedReportTypeId: this.props.reportDefinitions.length ? this.props.reportDefinitions[0].reportData.id : 0
-    }
-  }
+const _RfpReportDownload = props => {
 
-  render () {
-    const selectedReport = this.props.reportDefinitions.filter(report => report.reportData.id === this.state.selectedReportTypeId)[0]
-    return <div className='d-flex'>
-      <select
-        id='selectRfpReportDefinition'
-        className='form-control'
-        style={{ marginTop: '1px' }}
-        value={this.state.selectedReportTypeId}
-        onChange={event => this.setState({ selectedReportTypeId: +event.target.value })}>
-        {this.props.reportDefinitions.map(reportDefinition => (
-          <option
-            key={reportDefinition.reportData.id}
-            value={reportDefinition.reportData.id}>
-            {reportDefinition.reportData.displayName}
-          </option>
-        ))}
-      </select>
-      <div className='btn btn-group p-0'>
-        {
-          selectedReport && selectedReport.reportData.media_types.map(mediaType => {
-            // "(new Date()).toISOString().split('T')[0]" will give "YYYY-MM-DD"
-            // Note that we are doing (new Date(Date.now())) so that we can have deterministic tests (by replacing the Date.now() function when testing)
-            const downloadFileName = `${(new Date(Date.now())).toISOString().split('T')[0]}_${selectedReport.reportData.name}.${mediaType}`
-            const downloadUrl = selectedReport.href
-              .replace('{planId}', this.props.planId)
-              .replace('{mediaType}', mediaType)
-              .replace('{userId}', this.props.userId)
-            return <button
-              key={mediaType}
-              className='btn btn-light'
-              style={{ whiteSpace: 'nowrap', width: '75px' }}
-              onClick={event => this.props.downloadRfpReport(downloadFileName, downloadUrl)}
-              disabled={this.props.reportsBeingDownloaded.has(downloadUrl)}
-            >
-              {
-                this.props.reportsBeingDownloaded.has(downloadUrl)
-                  ? <i className='fa fa-spinner fa-spin' />
-                  : <DownloadButtonContent mediaType={mediaType} />
-              }
-            </button>
-          })
-        }
-      </div>
-    </div>
-  }
+  const {
+    planId,
+    reportDefinitions,
+    userId,
+    reportsBeingDownloaded,
+    downloadRfpReport,
+  } = props
+
+  const [selectedId, setSelectedId] = useState(
+    reportDefinitions.length ? reportDefinitions[0].reportData.id : 0
+  )
+
+  const selectedReport = reportDefinitions
+    .filter(report => report.reportData.id === selectedId)[0]
+
+  return <div className="rfp-report-download">
+    <Select
+      value={selectedId}
+      placeholder="Select Template"
+      onChange={value => setSelectedId(+value)}
+      data={reportDefinitions.map(({ reportData }) => ({
+        value: reportData.id,
+        label: reportData.displayName,
+      }))}
+    />
+    <Button.Group>
+      {selectedReport && selectedReport.reportData.media_types.map(mediaType => {
+
+        const yyyyMmDd = (new Date(Date.now())).toISOString().split('T')[0]
+        const filename = `${yyyyMmDd}_${selectedReport.reportData.name}.${mediaType}`
+        const url = selectedReport.href
+          .replace('{planId}', planId)
+          .replace('{mediaType}', mediaType)
+          .replace('{userId}', userId)
+        const loading = reportsBeingDownloaded.has(url)
+
+        return <Button
+          key={mediaType}
+          leftIcon={<LeftIcon mediaType={mediaType}/>}
+          variant="outline"
+          onClick={() => downloadRfpReport(filename, url)}
+          disabled={loading}
+          loading={loading}
+        >
+          {mediaType}
+        </Button>
+
+      })}
+    </Button.Group>
+
+    <style jsx>{`
+      .rfp-report-download {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+      }
+    `}</style>
+  </div>
 
 }
 
 const mapStateToProps = state => ({
-  reportsBeingDownloaded: state.optimization.rfp.reportsBeingDownloaded
+  userId: state.user.loggedInUser && state.user.loggedInUser.id,
+  reportsBeingDownloaded: state.optimization.rfp.reportsBeingDownloaded,
 })
 
 const mapDispatchToProps = dispatch => ({
