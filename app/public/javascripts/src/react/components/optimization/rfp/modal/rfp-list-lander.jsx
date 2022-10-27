@@ -9,7 +9,7 @@ import { Notifier } from '../../../../common/notifications'
 const PAGE_SIZE = 10
 const $TOP = 200
 
-export const Rfps = () => {
+export const RfpListLander = () => {
 
   const ctx = useContext(RfpContext)
 

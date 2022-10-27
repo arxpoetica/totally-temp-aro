@@ -2,8 +2,8 @@ import React, { createContext, useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import { Tabs } from '@mantine/core'
 import { IconList, IconUpload, IconSettings } from '@tabler/icons'
-import { Rfps } from './rfp-list-lander.jsx'
-import { RfpUploader } from './rfp-uploader.jsx'
+import { RfpListLander } from './rfp-list-lander.jsx'
+import { RfpSubmit } from './rfp-submit.jsx'
 import { RfpTemplateManager } from './rfp-template-manager.jsx'
 import RfpActions from '../rfp-actions'
 import AroHttp from '../../../../common/aro-http'
@@ -15,13 +15,13 @@ const TABS = {
   RFPS_LIST: {
     tabId: 'RFPS_LIST',
     description: 'List all RFPs',
-    component: <Rfps/>, // <RfpPlanList/>
+    component: <RfpListLander/>,
     icon: <IconList size={20} stroke={2}/>
   },
   SUBMIT_RFP: {
     tabId: 'SUBMIT_RFP',
     description: 'Submit RFP',
-    component: <RfpUploader/>,
+    component: <RfpSubmit/>,
     icon: <IconUpload size={20} stroke={2}/>
   },
   MANAGE_RFP_TEMPLATES: {

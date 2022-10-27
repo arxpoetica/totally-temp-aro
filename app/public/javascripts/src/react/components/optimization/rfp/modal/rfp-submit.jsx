@@ -18,7 +18,7 @@ const RFP_TYPES = {
   },
 }
 
-const _RfpUploader = props => {
+const _RfpSubmit = props => {
 
   const {
     loadRfpTemplates,
@@ -171,4 +171,4 @@ const mapDispatchToProps = dispatch => ({
   loadRfpTemplates: () => dispatch(RfpModalActions.loadRfpTemplates())
 })
 
-export const RfpUploader = connect(mapStateToProps, mapDispatchToProps)(_RfpUploader)
+export const RfpSubmit = connect(mapStateToProps, mapDispatchToProps)(_RfpSubmit)
