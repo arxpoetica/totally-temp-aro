@@ -349,7 +349,7 @@ function setMapReadyPromise (mapReadyPromise) {
 
 // --- utility make these a utility? --- //
 function _filterMultiselect (filter, val) {
-  if (!filter.multiSelect.length) return true
+  //if (!filter.multiSelect.length) return true
   return filter.multiSelect.includes(val)
 }
 
