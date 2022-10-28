@@ -17,9 +17,11 @@ import mapDataActions from '../common/tile-overlay/map-data-actions'
 import RoicReportsActions from '../sidebar/analysis/roic-reports/roic-reports-actions'
 
 function setActivePlanState (planState) {
-  return dispatch => {
+  return (dispatch, getState) => {
     if (planState === "COMPLETED" || planState === "FAILED") {
+      const planId = getState().plan.activePlan.id
       dispatch(setActivePlanErrors())
+      dispatch(loadNearnetData(planId))
     }
 
     dispatch({
@@ -270,7 +272,6 @@ function setActivePlan (plan) {
       dispatch(mapDataActions.clearAllNearnetData())
       // load new near net
       // TODO: if plan type
-      console.log(plan)
       dispatch(loadNearnetData(plan.id))
 
       dispatch({
