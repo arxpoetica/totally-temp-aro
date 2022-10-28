@@ -11,6 +11,8 @@ import TileUtils from './tile-overlay-utils'
 import { tileCaches } from './tile-cache'
 
 import TileOverlay from './tile-overlay'
+import { mapHitFeatures } from '../../sidebar/constants'
+import selectionActions from '../../selection/selection-actions'
 
 
 // needs to be a class instance becasue is needs to keep a scope for the getTile callback functions
@@ -100,7 +102,7 @@ class _TileOverlayComposer extends Component {
           'zIndex': 1,
           //'isOn': false,
           'opacity': 0.5,
-          'isMouseEvents': false, // TODO: expand this when we have layers that have different event needs
+          'mouseEvents': ['mouseover', 'rightclick'], 
         },
       }
       this.tileOverlaysByZOrder.push(this.tileOverlaysByID['PLAN_EDIT_ALL_LOCATIONS'])
@@ -118,7 +120,7 @@ class _TileOverlayComposer extends Component {
             'zIndex': 2,
             //'isOn': false,
             'opacity': 1.0,
-            'isMouseEvents': true,
+            'mouseEvents': ['mouseover', 'rightclick'],
           },
         }
         this.tileOverlaysByZOrder.push(this.tileOverlaysByID['PLAN_EDIT_SUBNET_LOCATIONS'])
@@ -142,7 +144,7 @@ class _TileOverlayComposer extends Component {
             'zIndex': 3,
             //'isOn': false,
             'opacity': 0.7,
-            'isMouseEvents': false,
+            'mouseEvents': ['click', 'rightclick'],
           },
         }
         this.tileOverlaysByZOrder.push(this.tileOverlaysByID['NEARNET_EXCLUDED'])
@@ -165,7 +167,7 @@ class _TileOverlayComposer extends Component {
             'zIndex': 4,
             //'isOn': false,
             'opacity': 1.0,
-            'isMouseEvents': false,
+            'mouseEvents': ['click', 'rightclick'],
           },
         }
         this.tileOverlaysByZOrder.push(this.tileOverlaysByID['NEARNET_NEARNET'])
@@ -224,24 +226,32 @@ class _TileOverlayComposer extends Component {
 
   // - on mouse - //
   // FUTURE: different layers may have different event->action needs
-  getFeaturesAtLatLng (latLng) {
+  getFeaturesAtLatLng (latLng, layers) {
     let points = []
     let zoom = this.props.mapRef.getZoom()
     // for each tileOverlay where isOn and isMouseEvents
-    for (let layer of this.tileOverlaysByZOrder) {
-      if (layer.meta.isMouseEvents) {
-        let layerPoints = layer.overlay.getPointsUnderClick(latLng, zoom)
-        points = Object.keys(layerPoints).concat(points) // points order is inverse layer order, top at beginning
-      }
+    for (let layer of layers) {
+      let layerPoints = layer.overlay.getPointsUnderClick(latLng, zoom)
+      points = Object.keys(layerPoints).concat(points) // points order is inverse layer order, top at beginning
     }
     return points
+  }
+
+  getLayersForEvent (eventName) {
+    let layers = []
+    for (let layer of this.tileOverlaysByZOrder) {
+      if (layer.meta.mouseEvents.includes(eventName)) {
+        layers.push(layer)
+      }
+    }
+    return layers
   }
 
   onMouseMove = (event) => {
     clearTimeout(this.mousemoveTimer)
     this.mousemoveTimer = setTimeout(async() => {
       //let ts = performance.now()
-      let points = this.getFeaturesAtLatLng(event.latLng)
+      let points = this.getFeaturesAtLatLng(event.latLng, this.getLayersForEvent('mouseover'))
       // ts = performance.now() - ts
       // console.log(ts)
       // console.log(points)
@@ -255,8 +265,24 @@ class _TileOverlayComposer extends Component {
   }
 
   onRightClick = (event) => {
-    let points = this.getFeaturesAtLatLng(event.latLng)
+    let points = this.getFeaturesAtLatLng(event.latLng, this.getLayersForEvent('rightclick'))
     this.props.showContextMenuForLocations(points, event)
+  }
+
+  onClick = (event) => {
+    let points = this.getFeaturesAtLatLng(event.latLng, this.getLayersForEvent('click'))
+    //if (points.length) event.stopPropagation()
+    this.onClickNearnet(points, event)// TODO: generalize this
+  }
+  onClickNearnet (points, event) {
+    console.log(points)
+    console.log(this.props.nearnetEntityData)
+    let locations = []
+    for (const locationId of points) {
+      locations.push(this.props.nearnetEntityData[locationId])
+    }
+    console.log(locations)
+    this.props.setMapFeaturesShim(locations, event)
   }
 
   addListeners () {
@@ -264,12 +290,14 @@ class _TileOverlayComposer extends Component {
     this.overlayMouseMoveListener = google.maps.event.addListener(this.props.mapRef, 'mousemove', this.onMouseMove)
     this.overlayMouseOutListener = google.maps.event.addListener(this.props.mapRef, 'mouseout', this.onMouseOut)
     this.overlayRightClickListener = google.maps.event.addListener(this.props.mapRef, 'rightclick', this.onRightClick)
+    this.overlayClickListener = google.maps.event.addListener(this.props.mapRef, 'click', this.onClick)
   }
 
   removeListeners () {
     google.maps.event.removeListener(this.overlayMouseMoveListener)
     google.maps.event.removeListener(this.overlayMouseOutListener)
     google.maps.event.removeListener(this.overlayRightClickListener)
+    google.maps.event.removeListener(this.overlayClickListener)
   }
 
   // --- //
@@ -362,6 +390,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = dispatch => ({
   setCursorLocationIds: ids => dispatch(PlanEditorActions.setCursorLocationIds(ids)),
   clearCursorLocationIds: () => dispatch(PlanEditorActions.clearCursorLocationIds()),
+  setMapFeaturesShim: (locations, event) => dispatch(selectionActions.setMapFeaturesLocationsShim(locations, event)), // setIsMapClicked?
   showContextMenuForLocations: (featureIds, event) => dispatch(PlanEditorActions.showContextMenuForLocations(featureIds, event)),
 })
 

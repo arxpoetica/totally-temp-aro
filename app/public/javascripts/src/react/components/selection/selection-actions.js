@@ -136,7 +136,49 @@ function setLocations (locationIds) {
   }
 }
 
+// this and setMapFeatures will be replaced 
+//  when we get rid of the old vector tile
+function setMapFeaturesLocationsShim (locations, event) {
+  console.log(locations)
+  return (dispatch, getState) => {
+    const state = getState()
+    // look up the locations by ID
+    let features = {
+      "latLng": event.latLng,
+      // "locations": [
+      //     {
+      //         "salesType": "",
+      //         "workflow_state_id": 1,
+      //         "entity_count": 1,
+      //         "location_entity_type": 3,
+      //         "netType": "",
+      //         "opportunitySize": "",
+      //         "_data_type": "location",
+      //         "locationType": "",
+      //         "competitiveness": "",
+      //         "object_id": "8efd21a4-4bff-11ed-8ca5-e762ac3f6cec",
+      //         "location_id": 12661,
+      //         "monthly_spend": 302789.66250000003,
+      //         "locationCategory": "",
+      //         "propensity": "",
+      //         "residentialOrBusiness": "",
+      //         "subType": ""
+      //     }
+      // ],
+      'locations': locations,
+      "serviceAreas": [],
+      "analysisAreas": [],
+      "roadSegments": {},
+      "equipmentFeatures": [],
+      "censusFeatures": [],
+      "fiberFeatures": {}
+    }
+    dispatch(setMapFeatures(features))
+  }
+}
+
 function setMapFeatures (mapFeatures) {
+  console.log(mapFeatures)
   return {
     type: Actions.SELECTION_SET_MAP_FEATURES,
     payload: mapFeatures
@@ -212,6 +254,7 @@ export default {
   removePlanTargets,
   setLocations,
   setPlanEditorFeatures,
+  setMapFeaturesLocationsShim,
   setMapFeatures,
   setRoadSegments,
   cloneSelection,
