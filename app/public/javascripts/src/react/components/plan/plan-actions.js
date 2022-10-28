@@ -15,6 +15,7 @@ import fetch from 'cross-fetch'
 import { Notifier } from '../../common/notifications'
 import mapDataActions from '../common/tile-overlay/map-data-actions'
 import RoicReportsActions from '../sidebar/analysis/roic-reports/roic-reports-actions'
+import mapLayerActions from '../map-layers/map-layer-actions'
 
 function setActivePlanState (planState) {
   return (dispatch, getState) => {
@@ -219,7 +220,9 @@ function setNearnetData (nearnetData) {
       let {entityData, tileDataEntities} = _parseNearnet(nearnetData)
       batch(() => {
         dispatch(mapDataActions.setNearnetEntityData(entityData))
-        dispatch(mapDataActions.batchSetNearnetTileData(tileDataEntities)) // TODO: filter by filters map-layer-actions
+        //dispatch(mapDataActions.batchSetNearnetTileData(tileDataEntities))
+        //  filter by filters map-layer-actions
+        dispatch(mapLayerActions.updateMapLayerFilters('near_net'))
       })
     }
   }

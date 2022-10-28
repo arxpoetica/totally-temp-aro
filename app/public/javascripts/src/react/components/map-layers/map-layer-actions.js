@@ -58,6 +58,8 @@ function setLayerVisibility (layer, newVisibility) {
             isIncluded: newVisibility,
           }
         })
+        // TODO: filter UI isn't tied to state, F!
+        //dispatch( updateMapLayerFilters("near_net", "location_filters", {"multiSelect":[]}) )
       }
     }
   }
@@ -449,12 +451,12 @@ function _filterEntitiesByProps (set, filters) {
 function updateMapLayerFilters (layer, key, value) {
   return (dispatch, getState) => {
     // TODO: refilters
-    if ('near_net' === layer) {
+    if ('near_net' === layer) { // we shouldn't need to run this when key: location_filters
       const state = getState()
       const nearnetLocations = state.mapData.entityData.nearnet // defaults to {} so iterating thorugh it will return immediately 
       let newNearnetFilters = klona(state.mapLayers.filters.near_net)
       if (!newNearnetFilters) newNearnetFilters = {}
-      newNearnetFilters[key] = value // TODO: I don't like this approach, we should be doing this after state updates - we're making assumption about how the reducer updates state
+      if (key) newNearnetFilters[key] = value // TODO: I don't like this approach, we should be doing this after state updates - we're making assumption about how the reducer updates state
       // refilter nearnet locations state.mapData.entityData.nearnet
       //  by the filter values into 
       //  state.mapData.tileData.nearnet.nearnet
@@ -466,11 +468,13 @@ function updateMapLayerFilters (layer, key, value) {
         'excluded': Object.keys(filteredSets['excluded']).length,
       })
       dispatch(mapDataActions.batchSetNearnetTileData(filteredSets))
-    } 
-    dispatch({
-      type: Actions.LAYERS_SET_MAP_FILTERS,
-      payload: { layer, key, value }
-    })
+    }
+    if (key) {
+      dispatch({
+        type: Actions.LAYERS_SET_MAP_FILTERS,
+        payload: { layer, key, value }
+      })
+    }
   }
 }
 
