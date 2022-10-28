@@ -1,4 +1,5 @@
 import React from 'react'
+import { Avatar } from '@mantine/core'
 
 const TOOL_IDS = {
   LOCATIONS: 'locations',
@@ -20,7 +21,7 @@ const availableToolsMeta = [
   {
     id: TOOL_IDS.NEAR_NET,
     name: 'Near Net',
-    icon: 'fa fa-building fa-2x',
+    imageUrl: '/svg/near-net.svg',
   },
   {
     id: TOOL_IDS.NETWORK_NODES,
@@ -55,12 +56,17 @@ const availableToolsMeta = [
 ]
 
 export const MapToolIcon = ({ toolId, handleClick, active }) => {
+  const iconInfo = availableToolsMeta.find(({ id }) => id === toolId)
   return (
     <div
       className={`icon btn btn-primary map-tools-button text-white ${active ? 'active' : ''}`}
       onClick={handleClick}
     >
-      <i className={"icon-image " + availableToolsMeta.filter(({ id }) => id === toolId)[0].icon} />
+      {iconInfo.icon ? (
+        <i className={"icon-image " + iconInfo.icon} />
+      ) : (
+        <Avatar src={iconInfo.imageUrl} styles={{ root: { height: "unset", width: "unset", padding: "4px" }}} />
+      )}
       <style jsx>
         {`
         .icon {
