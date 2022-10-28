@@ -3,7 +3,9 @@ import React, { useEffect, useState } from 'react'
 import { connect } from 'react-redux'
 import { Grid, TextInput, Select, FileInput, Button, Table } from '@mantine/core'
 import { IconTrash, IconUpload } from '@tabler/icons'
+import { RfpVersionRadioGroup } from './rfp-version-radio-group.jsx'
 import RfpModalActions from './rfp-modal-actions'
+import { RFP_VERSIONS } from './rfp-modal-shared'
 
 const _RfpTemplateManager = props => {
 
@@ -16,6 +18,7 @@ const _RfpTemplateManager = props => {
 
   useEffect(() => { loadRfpTemplates() }, [])
 
+  const [rfpVersion, setRfpVersion] = useState(RFP_VERSIONS.SERVICE_AREA.value)
   const [templateName, setTemplateName] = useState('New Template')
   const [file, setFile] = useState()
 
@@ -33,6 +36,7 @@ const _RfpTemplateManager = props => {
     <Table striped highlightOnHover withBorder withColumnBorders>
       <thead>
         <tr>
+          <th>Version</th>
           <th>Name</th>
           <th>Value</th>
           <th>Action</th>
@@ -41,6 +45,7 @@ const _RfpTemplateManager = props => {
       <tbody>
         {templates.map(template => (
           <tr key={template.id}>
+            <td>{template.version}</td>
             <td>{template.name}</td>
             <td>
               <pre>
@@ -64,25 +69,17 @@ const _RfpTemplateManager = props => {
     <hr />
 
     <h4>Upload new template</h4>
-    <Grid>
+    <Grid align="center">
+      <RfpVersionRadioGroup
+        value={rfpVersion}
+        onChange={value => setRfpVersion(+value)}
+      />
+
       <Grid.Col lg={4} md={12}>Template name</Grid.Col>
       <Grid.Col lg={8} md={12}>
         <TextInput
           value={templateName}
           onChange={event => setTemplateName(event.currentTarget.value)}
-        />
-      </Grid.Col>
-
-      <Grid.Col lg={4} md={12}>RFP Type</Grid.Col>
-      <Grid.Col lg={8} md={12}>
-        <Select
-          label=""
-          value={'ad-hoc'}
-          data={[
-            { value: 'ad-hoc', label: 'Ad Hoc' },
-            { value: 'service-area', label: 'Service Area' },
-          ]}
-          onChange={value => console.log(value)}
         />
       </Grid.Col>
 
