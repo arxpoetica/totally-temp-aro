@@ -138,6 +138,7 @@ class TileComponentController {
     // If setselectedDisplayMode changed
     this.unsubRXNearnetLayers = state.nearnetLayers.subscribe((nearnetLayers) => {
       if (this.mapTileRenderer) {
+        this.nearnetLayers = nearnetLayers
         this.mapTileRenderer.setNearnetLayers(nearnetLayers)
         this.refreshMapTiles()
       }
