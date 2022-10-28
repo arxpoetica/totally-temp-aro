@@ -16,13 +16,13 @@ const planStateToBadgeColor = {
 
 export const RfpsList = ({ rfps }) => {
 
-  const [rfpId, setRfpId] = useState('')
+  const [id, setId] = useState('')
   const [definitionsByVersion, setDefinitionsByVersion] = useState({})
 
-  const loadDefinition = async rfpId => {
+  const loadDefinition = async id => {
     try {
-      if (!rfpId) return
-      const { protocolVersion } = rfps.find(rfp => rfp.rfpId === rfpId)
+      if (!id) return
+      const { protocolVersion } = rfps.find(rfp => rfp.id === +id)
       if (definitionsByVersion[protocolVersion]) return
 
       // cache definitions by protocol version
@@ -37,14 +37,14 @@ export const RfpsList = ({ rfps }) => {
   return <>
     <div className="rfps-list">
       <Accordion
-        value={rfpId}
-        onChange={rfpId => {
-          setRfpId(rfpId)
-          loadDefinition(rfpId)
+        value={id}
+        onChange={id => {
+          setId(id)
+          loadDefinition(id)
         }}
       >
         {rfps.map(rfp =>
-          <Accordion.Item key={rfp.id} value={rfp.rfpId}>
+          <Accordion.Item key={rfp.id} value={rfp.id.toString()}>
             <Accordion.Control>
               <div className="control">
                 <h2 className="title h5">{rfp.rfpId}</h2>
