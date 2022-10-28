@@ -220,7 +220,7 @@ function setNearnetData (nearnetData) {
       let {entityData, tileDataEntities} = _parseNearnet(nearnetData)
       batch(() => {
         dispatch(mapDataActions.setNearnetEntityData(entityData))
-        //dispatch(mapDataActions.batchSetNearnetTileData(tileDataEntities))
+        dispatch(mapDataActions.batchSetNearnetTileData(tileDataEntities))
         //  filter by filters map-layer-actions
         dispatch(mapLayerActions.updateMapLayerFilters('near_net'))
       })
