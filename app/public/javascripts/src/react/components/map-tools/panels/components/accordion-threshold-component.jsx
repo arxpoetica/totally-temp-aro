@@ -8,6 +8,7 @@ const AccordionThreshold = (props) => {
   const {
     filter,
     updateMapLayerFilters,
+    layer
   } = props
   const [sliderValue, setSliderValue] = useState(filter.value)
   const [noMax, setNoMax] = useState(true)
@@ -40,13 +41,13 @@ const AccordionThreshold = (props) => {
 
   useEffect(() => {
     const payload = createPayload(sliderValue, noMax)
-    updateMapLayerFilters('near_net', filter.attributeKey, payload)
+    updateMapLayerFilters(layer, filter.attributeKey, payload)
   }, [])
   
   const onFilterChange = (value) => {
     const payload = createPayload(value, noMax)
     setSliderValue(value)
-    debounceDispatch('near_net', filter.attributeKey, payload)
+    debounceDispatch(layer, filter.attributeKey, payload)
   }
 
   const debounceDispatch = _.debounce(updateMapLayerFilters, 250)
@@ -84,7 +85,7 @@ const AccordionThreshold = (props) => {
           onChange={() => {
             const payload = createPayload(sliderValue, !noMax)
             setNoMax(!noMax)
-            updateMapLayerFilters('near_net', filter.attributeKey, payload)
+            updateMapLayerFilters(layer, filter.attributeKey, payload)
           }}
           styles={{
             root: {

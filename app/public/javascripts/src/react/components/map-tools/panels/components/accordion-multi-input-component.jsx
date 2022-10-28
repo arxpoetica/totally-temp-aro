@@ -7,7 +7,8 @@ const AccordionMultiInput = (props) => {
   const {
     nearNetFilters,
     filter,
-    updateMapLayerFilters
+    updateMapLayerFilters,
+    layer
   } = props
   const [savedInputs, setSavedInputs] = useState([])
   const [activeChips, setActiveChips] = useState([])
@@ -17,13 +18,13 @@ const AccordionMultiInput = (props) => {
     setSavedInputs(savedInputs.concat(textInput))
     setActiveChips(activeChips.concat(textInput))
     // Async issue where the value isn't added to state before we call action
-    updateMapLayerFilters('near_net', filter.attributeKey, { multiInput: activeChips.concat(textInput) })
+    updateMapLayerFilters(layer, filter.attributeKey, { multiInput: activeChips.concat(textInput) })
 
     setTextInput("")
   }
 
   useEffect(() => {
-    updateMapLayerFilters('near_net', filter.attributeKey, { multiInput: activeChips })
+    updateMapLayerFilters(layer, filter.attributeKey, { multiInput: activeChips })
   }, [])
   
   return (
@@ -57,7 +58,7 @@ const AccordionMultiInput = (props) => {
         value={activeChips}
         onChange={(value) => {
           setActiveChips(value)
-          updateMapLayerFilters('near_net', filter.attributeKey, { multiInput: value })
+          updateMapLayerFilters(layer, filter.attributeKey, { multiInput: value })
         }}
         styles={{
           root: {

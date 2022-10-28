@@ -19,6 +19,7 @@ const Accordion = (props) => {
   const {
     filter,
     isExpanded,
+    layer
   } = props
 
   const Component = compDictonary[filter.type]
@@ -31,7 +32,7 @@ const Accordion = (props) => {
         {filter.label}
       </MantineAccordion.Control>
       <MantineAccordion.Panel>
-        <Component filter={filter} values={filter.values} />
+        <Component layer={layer} filter={filter} values={filter.values} />
       </MantineAccordion.Panel>
     </MantineAccordion.Item>
   )

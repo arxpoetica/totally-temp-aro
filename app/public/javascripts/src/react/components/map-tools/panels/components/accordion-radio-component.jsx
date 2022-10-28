@@ -7,17 +7,18 @@ const AccordionRadio = (props) => {
   const {
     filter,
     values,
-    updateMapLayerFilters
+    updateMapLayerFilters,
+    layer
   } = props
   const [radioValue, setRadioValue] = useState(values[0].key);
   
   useEffect(() => {
-    updateMapLayerFilters('near_net', filter.attributeKey, { singleSelect: radioValue })
+    updateMapLayerFilters(layer, filter.attributeKey, { singleSelect: radioValue })
   }, [])
 
   const onFilterChange = (value) => {
     setRadioValue(value)
-    updateMapLayerFilters('near_net', filter.attributeKey, { singleSelect: value })
+    updateMapLayerFilters(layer, filter.attributeKey, { singleSelect: value })
   }
 
   return (

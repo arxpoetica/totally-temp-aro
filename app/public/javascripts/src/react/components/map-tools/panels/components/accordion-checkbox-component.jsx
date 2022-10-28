@@ -7,20 +7,33 @@ const AccordionCheckbox = (props) => {
   const {
     filter,
     values,
-    updateMapLayerFilters
+    updateMapLayerFilters,
+    filters,
+    layer
   } = props
   const [checkboxValues, setCheckboxValues] = useState([])
 
   useEffect(() => {
-    updateMapLayerFilters('near_net', filter.attributeKey, { multiSelect: [] })
+    const defaultValues = []
+    filter.values.forEach(value => {
+      value.checked && value.shown &&
+        defaultValues.push('value' in value ? value.value.toString() : value.key)
+    })
+
+    updateMapLayerFilters(layer, filter.attributeKey, { multiSelect: defaultValues })
+    setCheckboxValues(defaultValues)
   }, [])
 
   const onFilterChange = (value) => {
     setCheckboxValues(value)
-    // Async issue where the value isn't added to state before we call action
-    updateMapLayerFilters('near_net', filter.attributeKey, { multiSelect: value })
+    updateMapLayerFilters(layer, filter.attributeKey, { multiSelect: value })
   }
 
+  useEffect(() => {
+    if (filters[layer][filter.attributeKey].multiSelect !== checkboxValues) {
+      setCheckboxValues(filters[layer][filter.attributeKey].multiSelect)
+    }
+  }, [filters])
 
   return (
     <Checkbox.Group
@@ -59,7 +72,7 @@ const AccordionCheckbox = (props) => {
 
 const mapStateToProps = (state) => {
   return {
-    nearNetFilters: state.mapLayers.filters.near_net
+    filters: state.mapLayers.filters
   }
 }
 
