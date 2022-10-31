@@ -40,7 +40,15 @@ const AccordionCheckbox = (props) => {
   const truncate = (string) => {
     if (string.length < 16) return string
 
-    return <Tooltip label={string}><span>{string.slice(0, 15).concat("...")}</span></Tooltip>
+    return (
+      <Tooltip
+        label={string}
+        withArrow
+        multiline
+      >
+        <span>{string.slice(0, 15).concat("...")}</span>
+      </Tooltip>
+    )
   }
 
 const MultiSelectValue = ({
