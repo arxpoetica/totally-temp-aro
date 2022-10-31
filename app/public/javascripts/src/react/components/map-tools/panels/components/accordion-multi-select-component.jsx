@@ -45,6 +45,7 @@ const AccordionCheckbox = (props) => {
         label={string}
         withArrow
         multiline
+        color='blue'
       >
         <span>{string.slice(0, 15).concat("...")}</span>
       </Tooltip>
