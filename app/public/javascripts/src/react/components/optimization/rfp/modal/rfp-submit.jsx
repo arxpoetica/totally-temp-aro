@@ -131,7 +131,10 @@ const _RfpSubmit = props => {
           </Grid.Col>
 
           <Grid.Col span={12}>
-            <Button onClick={submitRfp} disabled={!rfpId || !selectedTemplateId}>
+            <Button
+              onClick={submitRfp}
+              disabled={!rfpId || !selectedTemplateId || !file}
+            >
               Submit RFP
             </Button>
           </Grid.Col>
