@@ -282,7 +282,7 @@ class _TileOverlayComposer extends Component {
       locations.push(this.props.nearnetEntityData[locationId])
     }
     console.log(locations)
-    this.props.setMapFeaturesShim(locations, event)
+    //this.props.setMapFeaturesShim(locations, event)
   }
 
   addListeners () {

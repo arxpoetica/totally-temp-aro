@@ -4,9 +4,8 @@ import Actions from '../../common/actions'
 // Fetch the getLocationInfo
 function getLocationInfo (planId, location) {
   return dispatch => {
-    console.log(location.location_id)
     // FIXME: these should all be object_id
-    AroHttp.get(`/locations/${planId}/${location.location_id || location.objectId || location}/show`)
+    AroHttp.get(`/locations/${planId}/${location.location_id || location}/show`)
       .then(result => {
         if (result.data) {
           dispatch({ type: Actions.LOCATION_INFO_SET_DETAILS, payload: result.data })

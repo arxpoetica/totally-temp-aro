@@ -256,9 +256,9 @@ class State {
       // set all mapFeatures in redux
       if (service.selectedDisplayMode.getValue() == service.displayModes.VIEW
         || service.selectedDisplayMode.getValue() == service.displayModes.ANALYSIS) {
-        //service.setMapFeatures(hitFeatures)
+        service.setMapFeatures(hitFeatures)
         // For tracking when map clicked by the user.
-        //service.setIsMapClicked(true)
+        service.setIsMapClicked(true)
       }
 
       // ToDo: this check may need to move into REACT
