@@ -4,7 +4,6 @@ import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import './tool-bar.css'
 import LocationSearch from './location-search.jsx'
 import Tools from '../tool/tools'
-import MapActions from '../map/map-actions'
 import ToolBarActions from './tool-bar-actions'
 import MapReportsActions from '../map-reports/map-reports-actions'
 import ToolActions from '../tool/tool-actions'
@@ -20,6 +19,7 @@ import GlobalsettingsActions from '../global-settings/globalsettings-action'
 import GlobalSettings from '../global-settings/global-settings.jsx'
 import { logoutApp, setAppcuesQuery } from '../../common/view-utils'
 import PlanEditorActions from '../plan-editor/plan-editor-actions'
+import cx from 'clsx'
 
 export class ToolBar extends Component {
   constructor (props) {
@@ -471,8 +471,16 @@ export class ToolBar extends Component {
           <i className="fa fa-cube"></i>
         </button>
 
-        <button className="btn" title="Show RFP status"
-          onClick={() => this.showRfpWindow()}>
+        <button
+          className={cx(
+            'btn', (
+              selectedDisplayMode === this.displayModes.EDIT_PLAN
+              || selectedDisplayMode === this.displayModes.EDIT_RINGS
+            ) && 'hide'
+          )}
+          title="Show RFP status"
+          onClick={() => this.showRfpWindow()}
+        >
           <i className="fa fa-cloud"></i>
         </button>
 
@@ -528,6 +536,9 @@ export class ToolBar extends Component {
             openAccountSettingsModal={this.openAccountSettingsModal}
           />
         }
+        <style jsx>{`
+          .hide { display: none; }
+        `}</style>
       </div>
     )
   }
