@@ -6,13 +6,15 @@ import AccordionCheckboxComponent from './accordion-checkbox-component.jsx';
 import AccordionThresholdComponent from './accordion-threshold-component.jsx';
 import AccordionRadioComponent from './accordion-radio-component.jsx';
 import AccordionMultiInputComponent from './accordion-multi-input-component.jsx'
+import AccordionMultiSelectComponent from './accordion-multi-select-component.jsx'
 
 const compDictonary = {
   threshold: AccordionThresholdComponent,
   rangeThreshold: AccordionThresholdComponent,
   multiSelect: AccordionCheckboxComponent,
   singleSelect: AccordionRadioComponent,
-  multiInput: AccordionMultiInputComponent
+  multiInput: AccordionMultiInputComponent,
+  multiSelectDropdown: AccordionMultiSelectComponent
 }
 
 const Accordion = (props) => {
