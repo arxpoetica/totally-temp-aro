@@ -106,9 +106,10 @@ const EquipmentBoundaryMapObjects = props => {
     mapObject.addListener('click', event => {
       if (event.vertex || event.vertex === 0) {
         event.domEvent.stopPropagation()
-        if (event.domEvent.shiftKey) {
-          multiSelectVertices.addOrRemoveMarker(event)
+        if (!event.domEvent.shiftKey) {
+          multiSelectVertices.clearMapObjectOverlay()
         }
+        multiSelectVertices.addOrRemoveMarker(event)
       }
     })
 

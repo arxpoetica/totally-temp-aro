@@ -270,8 +270,11 @@ export const ServiceLayerMapObjects = (props) => {
       // Set up listeners on the map object
       mapObject.addListener('click', (event) => {
         // Select this map object
-        if (event.vertex && event.domEvent.shiftKey) {
+        if (event.vertex || event.vertex === 0) {
           event.domEvent.stopPropagation()
+          if (!event.domEvent.shiftKey) {
+            multiSelectVertices.clearMapObjectOverlay()
+          }
           multiSelectVertices.addOrRemoveMarker(event)
         } else {
           selectMapObject(mapObject)
