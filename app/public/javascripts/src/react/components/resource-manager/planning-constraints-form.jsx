@@ -278,21 +278,21 @@ export class PlanningConstraints extends Component {
                 </td>
               </tr>
               <tr>
-                <td>Feeder Fiber Cable Code Config</td>
+                <td>Feeder Fiber Cable Codes</td>
                 <td>
-                <Field name='cableCodeConfig.cableCodeMap.FEEDER'
-                  component={genericMultiSelect}
-                  props={{data: this.props.cableSizeList}}
-                  type='select-multiple' />
+                  <Field name='cableCodeConfig.cableCodeMap.FEEDER'
+                    component={genericMultiSelect}
+                    props={{data: this.props.cableSizeList}}
+                    type='select-multiple' />
                 </td>
               </tr>
               <tr>
-                <td>Distribution Fiber Cable Code Config</td>
+                <td>Distribution Fiber Cable Codes</td>
                 <td>
-                <Field name='cableCodeConfig.cableCodeMap.DISTRIBUTION'
-                  component={genericMultiSelect}
-                  props={{data: this.props.cableSizeList}}
-                  type='select-multiple' />
+                  <Field name='cableCodeConfig.cableCodeMap.DISTRIBUTION'
+                    component={genericMultiSelect}
+                    props={{data: this.props.cableSizeList}}
+                    type='select-multiple' />
                 </td>
               </tr>
             </tbody>
@@ -308,7 +308,7 @@ export class PlanningConstraints extends Component {
   }
 }
 // this is a workaround to fit a new mantine form into the current system
-// To use just pass props with a data value that is an array of strings
+// To use pass props with a data value that works with mantine multi select
 const genericMultiSelect = (props) => {
   // I am just passing value and onChange down to the input from Field
   // onBlur was clearing out the form in redux-form

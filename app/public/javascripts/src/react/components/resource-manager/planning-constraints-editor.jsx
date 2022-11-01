@@ -34,7 +34,9 @@ export const PlanningConstraintsEditor = (props) => {
       // extract strings from list, and filter 'generic' as that shouldn't be selectable
       const formattedCableSizes = fiberCableList
         .filter((cable) => cable.name !== 'generic')
-        .map((cableSize) => cableSize.name)
+        .map((cableSize) => {
+          return { value: cableSize.name, label: cableSize.description }
+        })
 
       setCableSizeList(formattedCableSizes)
     } catch (error) {
