@@ -263,7 +263,8 @@ export class PlanningConstraints extends Component {
                 <td>Polygonizer Road Edge Types</td>
                 <td>
                   <Field name='polygonizerRoadEdgeTypes'
-                    component={polygonizerMultiSelect} 
+                    component={genericMultiSelect} 
+                    props={{data: ['primary', 'secondary', 'tertiary']}}
                     type='select-multiple' /> 
                 </td>
               </tr>
@@ -280,8 +281,8 @@ export class PlanningConstraints extends Component {
                 <td>Feeder Fiber Cable Code Config</td>
                 <td>
                 <Field name='cableCodeConfig.cableCodeMap.FEEDER'
-                  component={cableSizeMultiSelect}
-                  props={{cableSizeList: this.props.cableSizeList}}
+                  component={genericMultiSelect}
+                  props={{data: this.props.cableSizeList}}
                   type='select-multiple' />
                 </td>
               </tr>
@@ -289,8 +290,8 @@ export class PlanningConstraints extends Component {
                 <td>Distribution Fiber Cable Code Config</td>
                 <td>
                 <Field name='cableCodeConfig.cableCodeMap.DISTRIBUTION'
-                  component={cableSizeMultiSelect}
-                  props={{cableSizeList: this.props.cableSizeList}}
+                  component={genericMultiSelect}
+                  props={{data: this.props.cableSizeList}}
                   type='select-multiple' />
                 </td>
               </tr>
@@ -306,24 +307,14 @@ export class PlanningConstraints extends Component {
     )
   }
 }
-
-const cableSizeMultiSelect = (props) => {
-  return (
-    <MultiSelect 
-      data={props.cableSizeList}
-      value={props.input.value}
-      onChange={props.input.onChange}
-    />
-  )
-}
-
 // this is a workaround to fit a new mantine form into the current system
-const polygonizerMultiSelect = (props) => {
+// To use just pass props with a data value that is an array of strings
+const genericMultiSelect = (props) => {
   // I am just passing value and onChange down to the input from Field
   // onBlur was clearing out the form in redux-form
   return (
     <MultiSelect 
-      data={['primary', 'secondary', 'tertiary']}
+      data={props.data}
       value={props.input.value} 
       onChange={props.input.onChange}
     />
