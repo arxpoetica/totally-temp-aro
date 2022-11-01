@@ -276,6 +276,24 @@ export class PlanningConstraints extends Component {
                     type='text' />
                 </td>
               </tr>
+              <tr>
+                <td>Feeder Fiber Cable Code Config</td>
+                <td>
+                <Field name='cableCodeConfig.cableCodeMap.FEEDER'
+                  component={cableSizeMultiSelect}
+                  props={{cableSizeList: this.props.cableSizeList}}
+                  type='select-multiple' />
+                </td>
+              </tr>
+              <tr>
+                <td>Distribution Fiber Cable Code Config</td>
+                <td>
+                <Field name='cableCodeConfig.cableCodeMap.DISTRIBUTION'
+                  component={cableSizeMultiSelect}
+                  props={{cableSizeList: this.props.cableSizeList}}
+                  type='select-multiple' />
+                </td>
+              </tr>
             </tbody>
           </table>
         </form>
@@ -287,6 +305,16 @@ export class PlanningConstraints extends Component {
       </div>
     )
   }
+}
+
+const cableSizeMultiSelect = (props) => {
+  return (
+    <MultiSelect 
+      data={props.cableSizeList}
+      value={props.input.value}
+      onChange={props.input.onChange}
+    />
+  )
 }
 
 // this is a workaround to fit a new mantine form into the current system
