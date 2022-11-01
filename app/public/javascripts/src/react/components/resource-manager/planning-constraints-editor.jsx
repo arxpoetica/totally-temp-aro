@@ -6,6 +6,7 @@ import Constants from '../../common/constants'
 import ResourceManagerActions from './resource-manager-actions'
 import ResourceActions from '../resource-editor/resource-actions'
 import AroHttp from '../../common/aro-http'
+import { Notifier } from '../../common/notifications.js'
 const planningConstraintsSelector = getFormValues(Constants.PLANNING_CONSTRAINTS_FORM)
 
 
@@ -17,18 +18,27 @@ export const PlanningConstraintsEditor = (props) => {
     getCableSizesFromPricebook()
   }, [])
 
-  const getCableSizesFromPricebook = () => {
-    const pricebook = props.resourceManagers.find((manager) => manager.resourceType === 'price_book')
+  const getCableSizesFromPricebook = async () => {
+    try {
+      const pricebook = props.resourceManagers.find(
+        (manager) => manager.resourceType === 'price_book',
+      )
+      if (!pricebook) return
 
-    if (pricebook) {
-      AroHttp.get(`/service/v1/pricebook/${pricebook.id}/definition`).then((result) => {
-        const cableSizes = result.data.fiberCableList
+      const { data } = await AroHttp.get(
+        `/service/v1/pricebook/${pricebook.id}/definition`,
+      )
 
-        const formattedCableSizes = cableSizes.filter((cable) => cable.name !== 'generic').map((cableSize) => {
-          return cableSize.name
-        })
-        setCableSizeList(formattedCableSizes)
-      })
+      const { fiberCableList } = data
+
+      // extract strings from list, and filter 'generic' as that shouldn't be selectable
+      const formattedCableSizes = fiberCableList
+        .filter((cable) => cable.name !== 'generic')
+        .map((cableSize) => cableSize.name)
+
+      setCableSizeList(formattedCableSizes)
+    } catch (error) {
+      Notifier.error(error)
     }
   }
 
