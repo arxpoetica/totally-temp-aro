@@ -134,9 +134,11 @@ export const ServiceLayerMapObjects = (props) => {
 
   useEffect(() => {
     mapRef.setOptions({ draggableCursor: 'crosshair' })
-    overlayRightClickListener = mapRef.addListener('rightclick', (event) => {
-      rightClickServicArea(event)
-    })
+
+    // TODO: is this needed? Right click was happening twice
+    // overlayRightClickListener = mapRef.addListener('rightclick', (event) => {
+    //   rightClickServicArea(event)
+    // })
     overlayContextMenuListener = mapRef.addListener('contextmenu', (event) => {
       rightClickServicArea(event)
     })
@@ -288,11 +290,13 @@ export const ServiceLayerMapObjects = (props) => {
           mapObjectOverlayClone.sort((a, b) => {
             return Number(b.title) - Number(a.title)
           })
+          const finalMarker = mapObjectOverlayClone[0]
           mapObjectOverlayClone.forEach(marker => {
             if (marker && marker.title && mapObject.getPath().getLength() > 3) {
               mapObject.getPath().removeAt(Number(marker.title))
             }
           })
+          if (mapObjectOverlayClone.length === 1) multiSelectVertices.selectNextVertex(finalMarker)
         }
       })
 
@@ -324,9 +328,10 @@ export const ServiceLayerMapObjects = (props) => {
         })
       })
       
-      google.maps.event.addListener(mapObject, 'rightclick', event => {
-        openDeleteMenu(event, mapObject)
-      })
+      // TODO: is this needed? open was happening twice
+      // google.maps.event.addListener(mapObject, 'rightclick', event => {
+      //   openDeleteMenu(event, mapObject)
+      // })
       google.maps.event.addListener(mapObject, 'contextmenu', event => {
         openDeleteMenu(event, mapObject)
       })
@@ -360,19 +365,20 @@ export const ServiceLayerMapObjects = (props) => {
       return
     }
     let vertexPayload = event.vertex;
-    if (multiSelectVertices.mapObjectOverlay.length > 0) {
-      if(multiSelectVertices.markerIndex(event.vertex) < 0) {
-        multiSelectVertices.addMarker(event)
-      }
-      vertexPayload = [...multiSelectVertices.mapObjectOverlay]
+    if(multiSelectVertices.markerIndex(event.vertex) < 0) {
+      multiSelectVertices.addMarker(event)
     }
-    const clearMapObjectOverlay = multiSelectVertices.clearMapObjectOverlay.bind(multiSelectVertices)
+    vertexPayload = [...multiSelectVertices.mapObjectOverlay]
+
+    const finishDeletion = multiSelectVertices.finishDeletion.bind(multiSelectVertices)
+
     deleteMenu.open(
       mapRef, 
       mapObject.getPath(),
       mapObject.getPath().getAt(event.vertex),
       vertexPayload,
-      clearMapObjectOverlay
+      finishDeletion,
+      vertexPayload.length === 1 // makes action repeatable if only one vertex
     )
   }
 
@@ -514,7 +520,7 @@ export const ServiceLayerMapObjects = (props) => {
 
         if (!results.length) {
           const options = []
-          options.push(new MenuItemAction('ADD_BOUNDARY', 'Add Boundary', 'ViewSettingsActions', 'setServiceAreaBoundaryDetails', latLng))
+          options.push(new MenuItemAction('ADD_BOUNDARY', 'Add Boundary', 'ViewSettingsActions', 'setServiceAreaBoundaryDetails', false, latLng))
           menuItems.push(new MenuItemFeature('SERVICE_AREA', 'Add Service Area', options))
         } else {
           results.forEach((result) => {
@@ -535,11 +541,11 @@ export const ServiceLayerMapObjects = (props) => {
               if (createdMapObjects.hasOwnProperty(result.objectId)) {
                 // it's on the edit layer / in the transaction
                 feature = createdMapObjects[result.objectId].feature
-                options.push(new MenuItemAction('SELECT', 'Select', 'ViewSettingsActions', 'selectServiceArea', result.objectId))
-                options.push(new MenuItemAction('DELETE', 'Delete', 'ViewSettingsActions', 'deleteServiceArea', result.objectId))
+                options.push(new MenuItemAction('SELECT', 'Select', 'ViewSettingsActions', 'selectServiceArea', false, result.objectId))
+                options.push(new MenuItemAction('DELETE', 'Delete', 'ViewSettingsActions', 'deleteServiceArea', false, result.objectId))
               } else {
                 const serviceAreaFeature = { result, latLng }
-                options.push(new MenuItemAction('EDIT', 'Edit', 'ViewSettingsActions', 'editServiceArea', serviceAreaFeature))
+                options.push(new MenuItemAction('EDIT', 'Edit', 'ViewSettingsActions', 'editServiceArea', false, serviceAreaFeature))
               }
               const name = feature.code || feature.siteClli || 'Unnamed service area'
               menuItemsById[result.objectId] = options

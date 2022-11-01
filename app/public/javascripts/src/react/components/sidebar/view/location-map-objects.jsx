@@ -144,7 +144,7 @@ const LocationMapObjects = (props) => {
       const menuActions = []
       const { objectId } = clickedMapObject
       menuActions.push(
-        new MenuItemAction('DELETE', 'Delete', 'ViewSettingsActions', 'deleteLocationWithId', objectId))
+        new MenuItemAction('DELETE', 'Delete', 'ViewSettingsActions', 'deleteLocationWithId', false, objectId))
       const menuItems = new MenuItemFeature('LOCATION', 'Location', menuActions)
       openContextMenu(x, y, [menuItems])
     }
