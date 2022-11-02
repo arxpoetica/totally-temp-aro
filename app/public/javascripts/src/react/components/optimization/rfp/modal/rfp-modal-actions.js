@@ -1,4 +1,3 @@
-/* globals Blob */
 import { saveAs } from 'file-saver'
 import { RFP_VERSIONS } from './rfp-modal-shared'
 import Actions from '../../../../common/actions'
@@ -89,30 +88,8 @@ function loadRfpTemplates(initial) {
   }
 }
 
-function addRfpTemplate (name, template) {
-  return dispatch => {
-    const requestBody = {
-      name: name,
-      value: template
-    }
-    AroHttp.post('/ui/rfp_template', requestBody)
-      .then(result => dispatch(loadRfpTemplates()))
-      .catch(err => console.error(err))
-  }
-}
-
-function deleteRfpTemplate (templateId) {
-  return dispatch => {
-    AroHttp.delete(`/ui/rfp_template/${templateId}`)
-      .then(result => dispatch(loadRfpTemplates()))
-      .catch(err => console.error(err))
-  }
-}
-
 export default {
   submitRfpReport,
   downloadRfpReport,
   loadRfpTemplates,
-  addRfpTemplate,
-  deleteRfpTemplate,
 }
