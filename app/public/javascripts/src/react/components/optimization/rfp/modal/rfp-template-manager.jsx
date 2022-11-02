@@ -1,35 +1,46 @@
-/* globals FileReader */
 import React, { useEffect, useState } from 'react'
 import { connect } from 'react-redux'
-import { Grid, TextInput, Select, FileInput, Button, Table } from '@mantine/core'
+import { Grid, TextInput, FileInput, Button, Table } from '@mantine/core'
 import { IconTrash, IconUpload } from '@tabler/icons'
 import { RfpVersionRadioGroup } from './rfp-version-radio-group.jsx'
 import RfpModalActions from './rfp-modal-actions'
+import AroHttp from '../../../../common/aro-http'
 import { RFP_VERSIONS } from './rfp-modal-shared'
+import { Notifier } from '../../../../common/notifications'
+
+const uploadTemplate = async (file, templateName, rfpVersion) => {
+  try {
+    const reader = new FileReader()
+    const template = await new Promise((resolve, reject) => {
+      reader.onload = event => resolve(event.target.result)
+      reader.onerror = () => reject(new Error('Failed to read JSON template file.'))
+      reader.readAsText(file)
+    })
+    // FIXME: this should be a service endpoint
+    await AroHttp.post('/ui/rfp_template', { templateName, template, rfpVersion })
+  } catch (error) {
+    Notifier.error(error)
+  }
+}
+
+const deleteTemplate = async templateId => {
+  try {
+    // FIXME: this should be a service endpoint
+    await AroHttp.delete(`/ui/rfp_template/${templateId}`)
+  } catch (error) {
+    Notifier.error(error)
+  }
+}
 
 const _RfpTemplateManager = props => {
 
-  const {
-    loadRfpTemplates,
-    templates,
-    addRfpTemplate,
-    deleteRfpTemplate,
-  } = props
+  const { templates, loadRfpTemplates } = props
 
   useEffect(() => { loadRfpTemplates() }, [])
 
   const [rfpVersion, setRfpVersion] = useState(RFP_VERSIONS.SERVICE_AREA.value)
-  const [templateName, setTemplateName] = useState('New Template')
-  const [file, setFile] = useState()
-
-  function uploadTemplate() {
-    const reader = new FileReader()
-    reader.onload = event => {
-      const template = event.target.result
-      addRfpTemplate(templateName, template)
-    }
-    reader.readAsText(file)
-  }
+  const [templateName, setTemplateName] = useState('')
+  const [file, setFile] = useState('')
 
   return <>
     <h4>Existing templates</h4>
@@ -55,7 +66,10 @@ const _RfpTemplateManager = props => {
             <td>
               <Button
                 leftIcon={<IconTrash size={20} stroke={2}/>}
-                onClick={() => deleteRfpTemplate(template.id)}
+                onClick={async() => {
+                  await deleteTemplate(template.id)
+                  loadRfpTemplates()
+                }}
                 color="red"
               >
                 Delete
@@ -97,7 +111,13 @@ const _RfpTemplateManager = props => {
       <Grid.Col span={12}>
         <Button
           leftIcon={<IconUpload size={20} stroke={2}/>}
-          onClick={uploadTemplate}
+          onClick={async() => {
+            await uploadTemplate(file, templateName, rfpVersion)
+            setTemplateName('')
+            setFile('')
+            loadRfpTemplates()
+          }}
+          disabled={!templateName || !file}
         >
           Upload
         </Button>
@@ -109,13 +129,11 @@ const _RfpTemplateManager = props => {
 }
 
 const mapStateToProps = state => ({
-  templates: state.optimization.rfp.templates
+  templates: state.optimization.rfp.templates,
 })
 
 const mapDispatchToProps = dispatch => ({
-  addRfpTemplate: (name, template) => dispatch(RfpModalActions.addRfpTemplate(name, template)),
-  deleteRfpTemplate: templateId => dispatch(RfpModalActions.deleteRfpTemplate(templateId)),
-  loadRfpTemplates: () => dispatch(RfpModalActions.loadRfpTemplates())
+  loadRfpTemplates: () => dispatch(RfpModalActions.loadRfpTemplates()),
 })
 
 export const RfpTemplateManager = connect(mapStateToProps, mapDispatchToProps)(_RfpTemplateManager)
