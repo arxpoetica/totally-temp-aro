@@ -73,6 +73,8 @@ workflows:
                 - master
                 - dev
                 - uat
+                - main-183115939
+                - sales-ux/main-4989090
       - deploy:
           context: aro_qa_builds
           requires:
