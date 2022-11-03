@@ -6,7 +6,7 @@ import Constants from '../../common/constants'
 import ResourceManagerActions from './resource-manager-actions'
 import ResourceActions from '../resource-editor/resource-actions'
 import AroHttp from '../../common/aro-http'
-import { Notifier } from '../../common/notifications.js'
+import { Notifier } from '../../common/notifications'
 const planningConstraintsSelector = getFormValues(Constants.PLANNING_CONSTRAINTS_FORM)
 
 

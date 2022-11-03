@@ -19,7 +19,7 @@
     "watch-dotenv": "dotenv nodemon --inspect=0.0.0.0:9229 ./app.js",
     "watch-client": "babel public/javascripts/src -d public/javascripts/lib --ignore public/javascripts/src/service-typegen/,public/javascripts/src/react/ --watch --copy-files --source-maps",
     "watch-webpack": "NODE_ENV=development webpack --watch",
-    "watch-esbuild": "esbuild public/javascripts/src/components/index.js --outfile=public/javascripts/lib/aro-bundle.js --bundle --define:process.env.NODE_ENV=\\\"development\\\" --external:/svg/* --watch --sourcemap=external",
+    "watch-esbuild": "esbuild public/javascripts/src/components/index.js --outfile=public/javascripts/lib/aro-bundle.js --bundle --define:process.env.NODE_ENV=\\\"development\\\" --external:/svg/* --external:/images/* --watch --sourcemap=external",
     "dev": "npm run build-vendor-bundle && npm run build-service-types && concurrently \"npm run watch-client\" \"npm run watch-server\" \"npm run watch-webpack\"",
     "local": "concurrently \"npm run watch-client\" \"npm run watch-server\" \"npm run watch-webpack\"",
     "upgrade-check": "npx npm-check -u"
@@ -133,7 +133,7 @@
     "ansi-colors": "^4.1.1",
     "concurrently": "^3.5.1",
     "dotenv-cli": "4.1.0",
-    "esbuild": "0.9.0",
+    "esbuild": "0.15.13",
     "nodemon": "^2.0.7",
     "react-redux": "^7.2.0"
   }

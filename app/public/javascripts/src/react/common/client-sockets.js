@@ -23,7 +23,7 @@ function createSocketManager() {
   const sockets = {}
   const ioObject = sockets.default = io()
 
-  const sessionIdPromise = new Promise((resolve, reject) => {
+  let sessionIdPromise = new Promise((resolve, reject) => {
     sockets.default.on('connect', () => {
       const sessionId = sockets.default.io.engine.id
       joinRoom('client', sessionId)
