@@ -7,8 +7,8 @@
   "private": true,
   "main": "app.js",
   "volta": {
-    "node": "10.23.2",
-    "npm": "6.14.10"
+    "node": "18.12.0",
+    "npm": "8.19.2"
   },
   "scripts": {
     "build-service-types": "cd ./public/javascripts/src/service-typegen/src && node class-generator.js",
