@@ -1,4 +1,4 @@
-import t from 'typy'; 
+import typy from 'typy'
 
 var nargs = /\${([0-9a-zA-Z_.0-9a-zA-Z_]+)\}/g
 // Replace the key of type "${<key>}" in the string with associated value in the json
@@ -35,8 +35,8 @@ export default function template(string) {
         return ""
       }
       return result
-    } else if (t(args,i).isDefined) {
-      result = t(args,i).safeObject
+    } else if (typy(args,i).isDefined) {
+      result = typy(args,i).safeObject
       return result
     } else {
       return ""

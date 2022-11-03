@@ -4,7 +4,6 @@ const otplib = require('otplib')
 const qrcode = require('qrcode')
 const crypto = require('crypto')
 const base32Encode = require('base32-encode')
-const dedent = require('dedent')
 otplib.authenticator.options = {
   window: [1, 0]  // Allow OTP from one previous timestep, in case it changes just as the user is typing it
 }
@@ -100,18 +99,15 @@ module.exports = class MultiFactor {
     return database.findOne('SELECT email, totp_secret FROM auth.users WHERE id = $1', [userId])
       .then(user => {
         const currentToken = otplib.authenticator.generate(user.totp_secret)
-        var text = dedent`
-          You're receiving this email because someone (hopefully you) requested a One-Time Password (OTP) to
-          be sent to this email address.
-
-          Your One-Time Password (OTP) to access the ARO application is: ${currentToken}
-          This OTP is valid for 30 seconds.
-
-          If you did not request this OTP, you do not need to do anything. If you want, you can
-          reset your password by logging into the ARO application.
-
-          Please do not reply to this email. It was automatically generated.
-        `
+        var text = [
+          `You're receiving this email because someone (hopefully you) `,
+          `requested a One-Time Password (OTP) to be sent to this email address.`,
+          `\n\nYour One-Time Password (OTP) to access the ARO application is: ${currentToken}`,
+          `\nThis OTP is valid for 30 seconds.`,
+          `\n\nIf you did not request this OTP, you do not need to do anything. `,
+          `If you want, you can reset your password by logging into the ARO application.`,
+          `\n\nPlease do not reply to this email. It was automatically generated.`,
+        ].join('')
         helpers.mail.sendMail({
           subject: 'One time password (OTP): ARO Application',
           to: user.email,

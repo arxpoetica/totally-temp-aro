@@ -9,7 +9,6 @@ var bcrypt = require('bcryptjs')
 var crypto = require('crypto')
 var querystring = require('querystring')
 var validate = helpers.validate
-var dedent = require('dedent')
 var pify = require('pify')
 var stringify = pify(require('csv-stringify'))
 var pync = require('pync')
@@ -463,14 +462,13 @@ module.exports = class User {
     return database.execute(sql, [code, user.id])
       .then(() => {
         var base_url = config.base_url
-        var text = dedent`
-          You're receiving this email because a password reset was requested for your user account in the ARO platform
-
-          Follow the link below to reset your password
-          ${base_url + '/reset_password?' + querystring.stringify({ code: code })}
-
-          Please do not reply to this email. It was automatically generated.
-        `
+        var text = [
+          `You're receiving this email because a password reset was requested `,
+          `for your user account in the ARO platform.`,
+          `\n\nFollow the link below to reset your password.`,
+          `\n${base_url}/reset_password?${querystring.stringify({ code: code })}`,
+          `\n\nPlease do not reply to this email. It was automatically generated.`,
+        ].join('')
         helpers.mail.sendMail({
           subject: 'Password reset: ARO Application',
           to: user.email,
