@@ -21,7 +21,7 @@ class Foldout extends Component {
     // console.log({prevState, state: this.state})
     // console.log(Object.is(prevState, this.state))
     
-    if (! 'initIsOpen' in this.props) return
+    if (!('initIsOpen' in this.props)) return
     if (this.props.initIsOpen == this.state.isOpen) return
     let doUpdate = false
     if (this.props.initIsOpen != prevProps.initIsOpen) doUpdate = true

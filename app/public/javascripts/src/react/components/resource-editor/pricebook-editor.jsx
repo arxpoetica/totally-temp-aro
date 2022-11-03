@@ -107,7 +107,7 @@ export class PriceBookEditor extends Component {
         <div className="tab-content" style={{maxHeight: '500px', overflowY: 'auto'}}>
           {this.state.structuredPriceBookDefinitions.map((priceBookValue, pricebookIndex) => { 
             return (
-              <div key={pricebookIndex} role="tabpanel" id={priceBookValue.id} className={`tab-pane ${this.state.selectedpriceBookDefinition === priceBookValue.id ? 'active' : ''}`} id="">
+              <div key={pricebookIndex} role="tabpanel" id={priceBookValue.id} className={`tab-pane ${this.state.selectedpriceBookDefinition === priceBookValue.id ? 'active' : ''}`}>
                 {/* Filter equipment items. Only for equipmentItemList */}
                 {this.state.selectedpriceBookDefinition === 'equipmentItemList' &&
                   <div className="row pt-3 pb-2 pl-2">

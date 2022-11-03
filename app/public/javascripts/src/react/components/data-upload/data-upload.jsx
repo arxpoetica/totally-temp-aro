@@ -262,7 +262,7 @@ export class DataUpload extends Component {
                 <div className="form-group row">
                   <label className="col-sm-4 col-form-label">File Location</label>
                   <div className="col-sm-8">
-                    <input name="file" type="file" onChange={event => this.handleUpload(event)} name="dataset" className="form-control"/>
+                    <input name="file" type="file" onChange={event => this.handleUpload(event)} className="form-control"/>
                   </div>
                 </div>
               } 

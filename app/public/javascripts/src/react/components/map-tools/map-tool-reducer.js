@@ -1,4 +1,4 @@
-import { MapToolActions, setReduxMapToolsDispatch } from './map-display-tools.jsx'
+import { MapToolActions } from './map-display-tools.jsx'
 
 function setMapTools(state, updatedState) {
   return {
