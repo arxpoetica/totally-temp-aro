@@ -90,7 +90,8 @@ const AccordionThreshold = (props) => {
         styles={{
           root: {
             marginTop: '1.5em',
-            width: '97%'
+            width: '95%',
+            marginLeft: '5px'
           },
           label: {
             backgroundColor: '#228be6',
