@@ -3,8 +3,9 @@ import { fiberTypes } from '../../constants'
 
 
 const fiberInfo = [
+  { key: 'cable_size', label: 'Cable Size'},
+  { key: 'fiber_strands', label: 'Fiber Strand Demand' },
   { key: 'atomic_units', label: 'Atomic Units' },
-  { key: 'fiber_strands', label: 'Fiber Strands' },
   { key: 'spatial_edge_type', label: 'Spatial Edge Type' },
   // { key: 'link_id', label: 'Link ID' },
   // { key: 'subnet_id', label: 'Subnet ID' },
