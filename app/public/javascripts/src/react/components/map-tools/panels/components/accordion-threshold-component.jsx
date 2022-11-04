@@ -27,7 +27,6 @@ const AccordionThreshold = (props) => {
     if (Array.isArray(sliderValue)) {
       isNoMax = !!(noMax && newValue === sliderValue[1] && filter.unboundedMax)
       isNoMin = !!(noMin && newValue === sliderValue[0] && filter.unboundedMin)
-      console.log(value, isNoMin, isNoMax)
       if (isNoMax) newValue = "No Max"
       if (isNoMin) newValue = "No Min"
     }
