@@ -405,10 +405,10 @@ const nearnetFilterProps = {
   //   "type": "MULTIINPUT",
   //   "filterFunc": _filterMultiInput,
   // },
-  "industry": {
-    "type": "MULTISELECT",
-    "filterFunc": _filterMultiselect,
-  },
+  // "industry": {
+  //   "type": "MULTISELECT",
+  //   "filterFunc": _filterMultiselect,
+  // },
   "entity_type": {
     "type": "MULTISELECT",
     "filterFunc": _filterMultiselect,
