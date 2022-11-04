@@ -21,10 +21,22 @@ const AccordionThreshold = (props) => {
   })
 
   const createLabel = (value) => {
-    return `${filter.labelPrefix ? filter.labelPrefix : ''}${value.toLocaleString('en-US')}${filter.labelSuffix ? filter.labelSuffix : ''}`
+    let newValue = klona(value);
+    let isNoMax = false;
+    let isNoMin = false;
+    if (Array.isArray(sliderValue)) {
+      isNoMax = !!(noMax && newValue === sliderValue[1] && filter.unboundedMax)
+      isNoMin = !!(noMin && newValue === sliderValue[0] && filter.unboundedMin)
+      console.log(value, isNoMin, isNoMax)
+      if (isNoMax) newValue = "No Max"
+      if (isNoMin) newValue = "No Min"
+    }
+    return (isNoMax || isNoMin)
+      ? newValue
+      : `${filter.labelPrefix ? filter.labelPrefix : ''}${value.toLocaleString('en-US')}${filter.labelSuffix ? filter.labelSuffix : ''}`
   }
 
-  const createPayload = ({ value, noMaxValue, noMinValue }) => {
+  const createPayload = (value, noMaxValue, noMinValue) => {
     const payload = {}
     let newValue = klona(value)
     if (filter.labelSuffix === '%') {
@@ -40,7 +52,7 @@ const AccordionThreshold = (props) => {
 
   useEffect(() => {
     setComponent(filter.type === 'rangeThreshold' ? RangeSlider : Slider)
-    const payload = createPayload({ value: sliderValue, noMaxValue: noMax, noMinValue: noMin })
+    const payload = createPayload(sliderValue, noMax, noMin)
     updateMapLayerFilters(layer, filter.attributeKey, payload)
   }, [])
 
@@ -49,39 +61,15 @@ const AccordionThreshold = (props) => {
   }
   
   const onFilterChange = (value) => {
-    let newSliderValue = value
-    if (Array.isArray(sliderValue) && !Array.isArray(value)) {
-      newSliderValue = klona(sliderValue)
-      // We want to mantain the array if it was a range
-      // but we want it to go to the component as a single digit
-      newSliderValue[noMax ? 0 : 1] = value
-      
-      // while maintaining a seperation between the 2 sliders in a range
-      // until max or min is reached
-      const clamp = (num) => Math.min(Math.max(num, filter.minValue), filter.maxValue)
-      newSliderValue[noMax ? 1 : 0] = noMax 
-        ? clamp(value + (calculateStep() * 10))
-        : clamp(value - (calculateStep() * 10))
-    }
-    const payload = createPayload({ value: newSliderValue, noMaxValue: noMax, noMinValue: noMin})
-    setSliderValue(newSliderValue)
+    // Check if max value is set or min value is set
+    const newNoMax = !!(value[1] === filter.maxValue && filter.unboundedMax)
+    const newNoMin = !!(value[0] === filter.minValue && filter.unboundedMin)
+
+    setSliderValue(value)
+    setNoMax(newNoMax)
+    setNoMin(newNoMin)
+    const payload = createPayload(value, newNoMax, newNoMin)
     debounceDispatch(layer, filter.attributeKey, payload)
-  }
-
-  const onSwitchChange = (payload, setSwitchValue) => {
-    const key = Object.keys(payload)[0]
-    key === 'noMinValue'
-      ? payload.noMaxValue = noMax
-      : payload.noMinValue = noMin
-    
-    payload.value = sliderValue
-    setSwitchValue(payload[key])
-    const newPayload = createPayload(payload)
-    updateMapLayerFilters(layer, filter.attributeKey, newPayload)
-  }
-
-  const onlyNoMaxOrNoMin = (noMaxValue = noMax, noMinValue = noMin) => {
-    return (noMaxValue && !noMinValue) || (!noMaxValue && noMinValue)
   }
 
   const debounceDispatch = _.debounce(updateMapLayerFilters, 250)
@@ -92,79 +80,30 @@ const AccordionThreshold = (props) => {
         min={filter.minValue}
         max={filter.maxValue}
         step={calculateStep()}
-        label={(value) => createLabel(value || "0")}
+        label={(value) => createLabel(value || 0)}
         marks={filter.marks || marks}
-        value={
-          onlyNoMaxOrNoMin()
-            ? sliderValue[noMax ? 0 : 1]
-            : sliderValue
-        }
+        value={sliderValue}
         onChange={(value) => {
           onFilterChange(value)
         }}
         labelAlwaysOn
-        inverted={!noMin && noMax}
-        disabled={filter.unboundedMax && filter.unboundedMin && noMax && noMin}
         styles={{
           root: {
             marginTop: '1.5em',
-            marginBottom: !filter.unboundedMax && '1em',
             width: '97%'
           },
           label: {
             backgroundColor: '#228be6',
             color: '#fff'
           },
-          markFilled: {
-            border: noMax && !noMin && 'none'
-          },
-          mark: {
-            border: noMax && !noMin && 'none'
-          }
         }}
       />
-      <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-        {filter.unboundedMin && (
-          <Switch
-            label={`<= ${createLabel(filter.minValue)}`}
-            checked={noMin}
-            onChange={() => {
-              setComponent(onlyNoMaxOrNoMin(noMax, !noMin) ? Slider : RangeSlider)
-              onSwitchChange({ noMinValue: !noMin }, setNoMin)
-            }}
-            styles={{
-              root: {
-                justifyContent: 'end',
-                marginTop: '1em'
-              }
-            }}
-          />
-        )}
-        {filter.unboundedMax && (
-          <Switch
-            label={`>= ${createLabel(filter.maxValue)}`}
-            checked={noMax}
-            onChange={() => {
-              setComponent(onlyNoMaxOrNoMin(!noMax, noMin) ? Slider : RangeSlider)
-              onSwitchChange({ noMaxValue: !noMax }, setNoMax)
-            }}
-            styles={{
-              root: {
-                justifyContent: 'end',
-                marginTop: '1em'
-              }
-            }}
-          />
-        )}
-      </div>
     </div>
   )
 }
 
-const mapStateToProps = (state) => {
-  return {
-    nearNetFilters: state.mapLayers.filters.near_net
-  }
+const mapStateToProps = () => {
+  return {}
 }
 
 const mapDispatchToProps = (dispatch) => ({
