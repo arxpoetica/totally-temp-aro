@@ -277,27 +277,10 @@ export class PlanningConstraints extends Component {
                 </td>
               </tr>
               <tr>
-                <td colSpan={2}>Near Net Configuration</td>
-              </tr>
-              <tr>
-                <td className='pl-4'>Band Count</td>
+                <td>Run Near Net</td>
                 <td>
-                  <Field name='nearNetConfiguration.bandCount'
-                    className='form-control form-control-sm' component='input' type='text' />
-                </td>
-              </tr>
-              <tr>
-                <td className='pl-4'>Band Range Cost</td>
-                <td>
-                  <Field name='nearNetConfiguration.bandRangeCost'
-                    className='form-control form-control-sm' component='input' type='text' />
-                </td>
-              </tr>
-              <tr>
-                <td className='pl-4'>Construction Cost</td>
-                <td>
-                  <Field name='nearNetConfiguration.constructionCost'
-                    className='form-control form-control-sm' component='input' type='text' />
+                  <Field name='generateNearNetAnalysis'
+                    className='checkboxfill' component='input' type='checkbox' />
                 </td>
               </tr>
             </tbody>
