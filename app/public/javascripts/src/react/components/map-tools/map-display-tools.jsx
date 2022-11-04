@@ -28,7 +28,7 @@ const mapToolIntialState = {
       COPPER: 'copper',
       CONDUITS: 'conduits',
       NETWORK_NODES: 'network_nodes',
-      NEAR_NET: 'NEAR_NET',
+      NEAR_NET: 'near_net',
       AREA_NETWORK_PLANNING: 'area_network_planning',
       TARGET_BUILDER: 'target_builder',
       CONSTRUCTION_SITES: 'construction_sites',
@@ -107,7 +107,6 @@ export const MapToolContext = createContext()
 const MapDisplayTools = ({ mapRef, mapTools }) => {
 
   const [mapToolState, dispatch] = useReducer(mapToolReducer, mapToolIntialState)
-
   const { tools : { available_tools } } = mapToolState
   // TODO: a lot of repeat code with network.jsx 
   const globalMethods = {

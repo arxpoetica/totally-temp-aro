@@ -2,8 +2,20 @@ import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
 
 function saveResourceManagerDefinition (resourceManagerId, managerType, definition) {
-  return dispatch => {
+  return (dispatch, getState) => {
     AroHttp.put(`/service/v2/resource-manager/${resourceManagerId}/${managerType}`, definition)
+      .then(response => {
+        const state = getState()
+        // update store with information coming back from call
+        dispatch({
+          type: Actions.RESOURCE_MANAGER_SET_MANAGER_DEFINITION,
+          payload: {
+            resourceManagerId: resourceManagerId,
+            resourceManagerName: state.resourceManager.managers[resourceManagerId].resourceManagerName,
+            definition: response.data
+          }
+        })
+      })
       .catch(err => console.error(err))
   }
 }
