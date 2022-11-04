@@ -354,23 +354,25 @@ function _filterMultiselect (filter, val) {
 }
 
 function _filterMultiInput (filter, val) {
-  if (!filter.multiInput.length) return true
+  //if (!filter.multiInput.length) return true
   return filter.multiInput.includes(val)
 }
-
+// note: all on the range filters are inclusive
 function _filterRange (filter, val) {
   return (
-    val >= filter.rangeThreshold[0]
-    && (
-      filter.noMax
-      || val <= filter.rangeThreshold[1]
-    )
+    (filter.noMin || filter.rangeThreshold[0] <= val)
+    && 
+    (filter.noMax || val <= filter.rangeThreshold[1])
   )
 }
 
 function _filterMax (filter, val) {
-  return val <= filter.threshold
+  return filter.noMax || val <= filter.threshold
 }
+
+function _filterMin (filter, val) {
+  return filter.noMin || filter.rangeThreshold[0] <= val
+} 
 
 const nearnetFilterProps = {
   // "location_filters": {
@@ -405,10 +407,10 @@ const nearnetFilterProps = {
   //   "type": "MULTIINPUT",
   //   "filterFunc": _filterMultiInput,
   // },
-  // "industry": {
-  //   "type": "MULTISELECT",
-  //   "filterFunc": _filterMultiselect,
-  // },
+  "industry": {
+    "type": "MULTISELECT",
+    "filterFunc": _filterMultiselect,
+  },
   "entity_type": {
     "type": "MULTISELECT",
     "filterFunc": _filterMultiselect,
@@ -436,17 +438,12 @@ function _filterEntitiesByProps (set, filters) {
       }
     }
 
-    // if (
-    //   doInclude
-    //   //&& entity.
-    //   && filter.resourceEntityTypes 
-    // ) {
-    //   doInclude = filter.resourceEntityTypes.multiSelect.includes(entity.locationEntityType)
-    // }
-
     if (doInclude) {
       filteredSets[entity.plannedType][id] = entity
-    }
+    }// else {
+    //   console.log('nope')
+    //   console.log(entity)
+    // }
   }
 
   return filteredSets
