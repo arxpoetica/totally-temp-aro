@@ -59,7 +59,7 @@ function setLayerVisibility (layer, newVisibility) {
           }
         })
         // TODO: filter UI isn't tied to state, F!
-        //dispatch( updateMapLayerFilters("near_net", "location_filters", {"multiSelect":[]}) )
+        if (newVisibility) dispatch( updateMapLayerFilters("near_net", "location_filters", {"multiSelect":[]}) )
       }
     }
   }
@@ -401,10 +401,14 @@ const nearnetFilterProps = {
     "type": "MULTISELECT",
     "filterFunc": _filterMultiselect,
   },
-  "industry": {
-    "type": "MULTIINPUT",
-    "filterFunc": _filterMultiInput,
-  },
+  // "industry": {
+  //   "type": "MULTIINPUT",
+  //   "filterFunc": _filterMultiInput,
+  // },
+  // "industry": {
+  //   "type": "MULTISELECT",
+  //   "filterFunc": _filterMultiselect,
+  // },
   "entity_type": {
     "type": "MULTISELECT",
     "filterFunc": _filterMultiselect,
