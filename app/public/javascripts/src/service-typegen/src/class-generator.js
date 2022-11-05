@@ -1,20 +1,27 @@
-var fs = require('fs')
-var path = require('path')
-var rimraf = require('rimraf')
-var Handlebars = require('handlebars')
+import fs from 'fs'
+import { dirname, join } from 'path'
+import { fileURLToPath } from 'url'
+import rimraf from 'rimraf'
+import Handlebars from 'handlebars'
+
+// https://stackoverflow.com/a/62892482/209803
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
+// SEE: https://github.com/tc39/proposal-import-assertions for json type assertion
+
+// TODO: use GET '/v1/schema/attributes' endpoint in the app, not in build
+import classMetas from './typesmeta.json' assert { type: 'json' }
+// TODO: use GET '/v1/schema/json' endpoint in the app, not in build
+import typeDefinitions from './types.json' assert { type: 'json' }
+// TODO: use GET '/v1/schema/type-mapping' endpoint in the app, not in build
+import dataTypeToUrnList from './dataTypeToUrn.json' assert { type: 'json' }
 
 class ClassGenerator {
   constructor () {}
 
   // The main function that generates the source code for our class definitions
   static generateSourceCode () {
-    // TODO: use GET '/v1/schema/attributes' endpoint in the app, not in build
-    var classMetas = require('./typesmeta.json')
-    // TODO: use GET '/v1/schema/json' endpoint in the app, not in build
-    var typeDefinitions = require('./types.json')
-    // TODO: use GET '/v1/schema/type-mapping' endpoint in the app, not in build
-    var dataTypeToUrnList = require('./dataTypeToUrn.json')
-
     // Register Handlebars helpers - used to compile class definition into source code
     this.registerHandlebarsHelpers(Handlebars)
     // Hold a list of class names to compiled strings
@@ -39,17 +46,17 @@ class ClassGenerator {
     // Save to distribution folder
     this.deleteDistributionFolder()
       .then(() => {
-        fs.mkdirSync(path.join(__dirname, '../dist'))
+        fs.mkdirSync(join(__dirname, '../dist'))
         Object.keys(typeToSourceCode).forEach((typeKey) => {
           const className = this.getClassName(typeKey)
-          const fileName = path.join(__dirname, `../dist/${className}.js`)
+          const fileName = join(__dirname, `../dist/${className}.js`)
           fs.writeFileSync(fileName, typeToSourceCode[typeKey])
         })
 
         // Build the AroFeatureFactory
         var templateFactory = Handlebars.compile(fs.readFileSync('./aro-feature-factory.hbs').toString())
         
-        const fileName = path.join(__dirname, `../dist/AroFeatureFactory.js`)
+        const fileName = join(__dirname, `../dist/AroFeatureFactory.js`)
         fs.writeFileSync(fileName, templateFactory(dataTypeToUrnList))
       })
   }
