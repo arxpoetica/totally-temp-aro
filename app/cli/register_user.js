@@ -1,6 +1,10 @@
 #!/usr/bin/env node
 
-var argv = require('yargs')
+import yargs from 'yargs'
+import database from '../helpers/database.cjs'
+import User from '../models/user.js'
+
+var argv = yargs
   .usage('Usage: $0 [options]')
   .describe('f', 'First name')
   .describe('l', 'Last name')
@@ -17,9 +21,6 @@ var argv = require('yargs')
   .demandOption(['f', 'l', 'e'])
   .argv
 
-var models = require('../models')
-var helpers = require('../helpers')
-var database = helpers.database
 
 // Code to add user to a group. We cannot use aro-service for ETL
 var addUserToGroup = (email, groupName) => {
@@ -58,7 +59,7 @@ var initializeUserLibraryPermission = (userId) => {
 argv.groupIds = []
 argv.isGlobalSuperUser = true
 var createdUserId = null
-models.User.registerFromETL(argv, argv.password)
+User.registerFromETL(argv, argv.password)
   .then((userId) => {
     createdUserId = userId
     console.log('User registered successfully with id =', userId)

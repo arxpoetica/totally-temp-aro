@@ -1,10 +1,13 @@
-var path = require('path')
-var gm = require('gm')
-var fs = require('fs')
-var pync = require('pync')
+import { dirname, join } from 'path'
+import { fileURLToPath } from 'url'
+import fs from 'fs'
+import gm from 'gm'
+import pync from 'pync'
+import database from '../helpers/database.cjs'
 
-var helpers = require('../helpers')
-var database = helpers.database
+// https://stackoverflow.com/a/62892482/209803
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 var nodeTypes = [
   'businesses_default',
@@ -36,7 +39,7 @@ var nodeTypes = [
 ]
 
 const ARO_CLIENT = process.env.ARO_CLIENT
-const fullPath = (filename) => path.join(__dirname, `../public/images/map_icons/${ARO_CLIENT}`, filename)
+const fullPath = (filename) => join(__dirname, `../public/images/map_icons/${ARO_CLIENT}`, filename)
 
 database.query('(SELECT name FROM client.service_layer WHERE is_user_defined=false ORDER BY description ASC) UNION ALL (SELECT \'all\' AS name)')
   .then((serviceLayers) => (
