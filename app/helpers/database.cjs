@@ -2,8 +2,8 @@
 
 var pg = require('pg')
 var _ = require('underscore')
-var config = require('./config')
-var geojson = require('./geojson')
+var config = require('./config.cjs')
+var geojson = require('./geojson.cjs')
 
 module.exports = class Database {
 

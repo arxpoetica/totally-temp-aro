@@ -1,7 +1,8 @@
-const amqp = require('amqplib')
-const { createLogger, LOGGER_GROUPS } = require('../helpers/logger')
+import amqp from 'amqplib'
+import { createLogger, LOGGER_GROUPS } from '../helpers/logger.cjs'
+import { Consumer } from './server-socket-utils.js'
+
 const logger = createLogger(LOGGER_GROUPS.RABBIT_MQ)
-const { Consumer } = require('./server-socket-utils')
 const RETRY_CONNECTION_IN_MSEC = 10000
 
 class MessageQueueManager {
@@ -56,4 +57,4 @@ class MessageQueueManager {
   }
 }
 
-module.exports = MessageQueueManager
+export default MessageQueueManager

@@ -1,10 +1,12 @@
-const ejs = require('ejs')
-const express = require('express')
-const { initServerSockets } = require('./sockets/server-sockets')
-const passport = require('passport')
-const bodyParser = require('body-parser')
-const compression = require('compression')
-const morgan = require('morgan')
+import ejs from 'ejs'
+import express from 'express'
+import { initServerSockets } from './sockets/server-sockets.js'
+import passport from 'passport'
+import bodyParser from 'body-parser'
+import compression from 'compression'
+import morgan from 'morgan'
+import cookieSession from 'cookie-session'
+import expressFlash from 'express-flash'
 
 async function kickoff() {
 
@@ -54,11 +56,11 @@ async function kickoff() {
   // skip logging for all vector tile calls
   app.use(morgan(loggerFunction, { skip: ({ url }) => url.includes('.mvt?') }))
 
-  app.use(require('cookie-session')({
+  app.use(cookieSession({
     name: 'session',
     keys: ['key1', 'key2']
   }))
-  app.use(require('express-flash')())
+  app.use(expressFlash())
   app.use(passport.initialize())
   app.use(passport.session())
   app.use(express.static('public'))
@@ -69,34 +71,35 @@ async function kickoff() {
     app.set('env', 'production')
   }
 
-  const middleware = require('./middleware')
-  require('./routes/routes_authentication').configure(app, middleware)
-  require('./routes/routes_api_external').configure(app, middleware)  // Has its own authorization scheme
-
   const api = express.Router()
 
-  require('./routes/routes_status').configure(api, middleware)
-  require('./routes/routes_api').configure(api, middleware)
-  require('./routes/routes_competitors').configure(api, middleware)
-  require('./routes/routes_map').configure(api, middleware)
-  require('./routes/routes_multifactor').configure(api, middleware)
-  require('./routes/routes_wirecenter').configure(api, middleware)
-  require('./routes/routes_county_subdivision').configure(api, middleware)
-  require('./routes/routes_census_block').configure(api, middleware)
-  require('./routes/routes_location').configure(api, middleware)
-  require('./routes/routes_etl_template').configure(api, middleware)
-  // TODO: don't use ServerSocketManager in route endpoints...remove...
-  require('./routes/routes_service').configure(api, middleware, ServerSocketManager)
-  require('./routes/routes_network_plan').configure(api, middleware)
-  require('./routes/routes_admin_users').configure(api, middleware)
-  require('./routes/routes_admin_settings').configure(api, middleware)
-  require('./routes/routes_settings').configure(api, middleware)
-  require('./routes/routes_reports').configure(api, middleware)
-  require('./routes/routes_ui_assets').configure(api, middleware)
-  require('./routes/routes_ui_settings').configure(api, middleware)
+  // need to put semi-colons on these lines; otherwise it's a function of the prior line
+  const middleware = (await import ('./middleware.js')).default;
+  (await import('./routes/routes_authentication.js')).configure(app, middleware);
+  (await import('./routes/routes_api_external.js')).configure(app, middleware);  // Has its own authorization scheme
 
-  require('./routes/routes_errors').configure(api, middleware)
-  require('./routes/routes_errors').configure(app, middleware)
+  (await import('./routes/routes_status.js')).configure(api, middleware);
+  (await import('./routes/routes_api.js')).configure(api, middleware);
+  (await import('./routes/routes_competitors.js')).configure(api, middleware);
+  (await import('./routes/routes_map.js')).configure(api, middleware);
+  (await import('./routes/routes_multifactor.js')).configure(api, middleware);
+  (await import('./routes/routes_wirecenter.js')).configure(api, middleware);
+  (await import('./routes/routes_county_subdivision.js')).configure(api, middleware);
+  (await import('./routes/routes_census_block.js')).configure(api, middleware);
+  (await import('./routes/routes_location.js')).configure(api, middleware);
+  (await import('./routes/routes_etl_template.js')).configure(api, middleware);
+  // TODO: don't use ServerSocketManager in route endpoints...remove...
+  (await import('./routes/routes_service.js')).configure(api, middleware, ServerSocketManager);
+  (await import('./routes/routes_network_plan.js')).configure(api, middleware);
+  (await import('./routes/routes_admin_users.js')).configure(api, middleware);
+  (await import('./routes/routes_admin_settings.js')).configure(api, middleware);
+  (await import('./routes/routes_settings.js')).configure(api, middleware);
+  (await import('./routes/routes_reports.js')).configure(api, middleware);
+  (await import('./routes/routes_ui_assets.js')).configure(api, middleware);
+  (await import('./routes/routes_ui_settings.js')).configure(api, middleware);
+  (await import('./routes/routes_errors.js')).configure(api, middleware);
+
+  (await import('./routes/routes_errors.js')).configure(app, middleware);
   app.use(api)
 
 }

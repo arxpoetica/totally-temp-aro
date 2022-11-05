@@ -1,14 +1,18 @@
-var models = require('../models')
-var helpers = require('../helpers')
-var passport = require('passport')
-var querystring = require('querystring')
-var public_config = helpers.public_config
-var config = helpers.config
-const authenticationConfigPromise = models.Authentication.getConfig('ldap')
+import passport from 'passport'
+import querystring from 'querystring'
+import nodeErrors from 'node-errors'
+import Authentication from '../models/authentication.js'
+import User from '../models/user.js'
+import AROService from '../models/aro_service.js'
+import MultiFactor from '../models/multifactor.js'
+import config from '../helpers/config.cjs'
+import public_config from '../helpers/public_config.js'
+import { Strategy as LocalStrategy } from 'passport-local'
+import { Strategy as CustomStrategy } from 'passport-custom'
 
-exports.configure = (app, middleware) => {
-  var LocalStrategy = require('passport-local').Strategy
-  var CustomStrategy = require('passport-custom').Strategy
+const authenticationConfigPromise = Authentication.getConfig('ldap')
+
+export const configure = (app, middleware) => {
   var mapUserIdToProjectId = {}
   const jsonSuccess = middleware.jsonSuccess
 
@@ -21,7 +25,7 @@ exports.configure = (app, middleware) => {
       .then((authenticationConfig) => {
         if (authenticationConfig && authenticationConfig.enabled) {
           console.log(`Attempting LDAP login for user ${email}`)
-          models.User.loginLDAP(email, password)
+          User.loginLDAP(email, password)
             .then((user) => {
               console.log(`Successfully logged in user ${email} with LDAP`)
               console.log(user)
@@ -31,13 +35,13 @@ exports.configure = (app, middleware) => {
             .catch((err) => {
               console.warn(`LDAP login failed for user ${email}. Trying local login`)
               var loggedInUser = null
-              models.User.login(email, password)
+              User.login(email, password)
                 .then((user) => { 
                   console.log(`Logged in user ${email} with local cached login (fallback from LDAP login)`)
                   loggedInUser = {
                     id: user.id
                   }
-                  return models.User.doesUserNeedMultiFactor(loggedInUser.id)
+                  return User.doesUserNeedMultiFactor(loggedInUser.id)
                 })
                 .then(result => {
                   loggedInUser.multiFactorAuthenticationDone = !result.is_totp_enabled
@@ -45,20 +49,20 @@ exports.configure = (app, middleware) => {
                 })
                 .catch((err) => {
                   console.error(`Could not log in user ${email} with either LDAP or local login`)
-                  if (!require('node-errors').isCustomError(err)) return callback(err)
+                  if (!nodeErrors.isCustomError(err)) return callback(err)
                   return callback(null, false, { message: err.message })
                 })
           })
         } else {
           // Regular login, not LDAP
           var loggedInUser = null
-          models.User.login(email, password)
+          User.login(email, password)
           .then((user) => {
             console.log(`Logged in user ${email} with local login`)
             loggedInUser = {
               id: user.id
             }
-            return models.User.doesUserNeedMultiFactor(loggedInUser.id)
+            return User.doesUserNeedMultiFactor(loggedInUser.id)
           })
           .then(result => {
             loggedInUser.multiFactorAuthenticationDone = !result.is_totp_enabled
@@ -67,7 +71,7 @@ exports.configure = (app, middleware) => {
           .catch((err) => {
             console.error(`Could not log in user ${email} with local login`)
             console.error(err)
-            if (!require('node-errors').isCustomError(err)) return callback(err)
+            if (!nodeErrors.isCustomError(err)) return callback(err)
             return callback(null, false, { message: err.message })
           })
         }
@@ -75,7 +79,7 @@ exports.configure = (app, middleware) => {
       .catch((err) => {
         console.error(`Error when getting authentication configuration`)
         console.error(err)
-        if (!require('node-errors').isCustomError(err)) return callback(err)
+        if (!nodeErrors.isCustomError(err)) return callback(err)
         return callback(null, false, { message: err.message })
       })
   }))
@@ -84,7 +88,7 @@ exports.configure = (app, middleware) => {
     function(req, callback) {
       const verificationCode = req.body.verificationCode
       const errorMessage = 'The OTP code was invalid. If you are using an authenticator app, please ensure that your device time is correct'
-      models.MultiFactor.verifyTotp(req.user.id, verificationCode)
+      MultiFactor.verifyTotp(req.user.id, verificationCode)
         .then(result => {
           console.log(`Successfully verified OTP for user with id ${req.user.id}`)
           req.user.multiFactorAuthenticationDone = true
@@ -110,7 +114,7 @@ exports.configure = (app, middleware) => {
       // This can happen if a user has logged in with an earlier version of ARO and has a cookie with just the user id
       callback(null, null)
     }
-    models.User.find_by_id(user.id)
+    User.find_by_id(user.id)
       .then((dbUser) => {
         if (!dbUser) {
           callback(null, null)
@@ -127,7 +131,7 @@ exports.configure = (app, middleware) => {
             },
             json: true
           }
-          models.AROService.request(req)
+          AROService.request(req)
             .then((result) => {
               dbUser.projectId = result.id
               mapUserIdToProjectId[dbUser.id] = dbUser.projectId
@@ -170,7 +174,7 @@ exports.configure = (app, middleware) => {
       totpPromise = Promise.reject('User ID not found, cannot send OTP')
     } else {
       const userId = request.user.id
-      totpPromise = models.MultiFactor.sendTotpByEmail(userId)
+      totpPromise = MultiFactor.sendTotpByEmail(userId)
     }
     totpPromise
       .then(jsonSuccess(response, next))
@@ -208,7 +212,7 @@ exports.configure = (app, middleware) => {
 
   app.post('/forgot_password', (request, response, next) => {
     var email = request.body.email
-    models.User.forgotPassword(email)
+    User.forgotPassword(email)
       .then(() => {
         request.flash('info', 'We just sent reset instructions to your email address')
         response.redirect('/login')
@@ -239,7 +243,7 @@ exports.configure = (app, middleware) => {
       return response.redirect('/reset_password?' + querystring.stringify({ code: code }))
     }
 
-    models.User.resetPassword(code, password)
+    User.resetPassword(code, password)
       .then(() => {
         request.flash('success', 'Password changed successfully. Now you can log in')
         response.redirect('/login')

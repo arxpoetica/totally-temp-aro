@@ -2,8 +2,6 @@
  * Directive to show a model value as a percentage.
  * For example, a model value of 0.1 will correspond to a value of 10 (and vice versa)
  */
-'use strict'
-
 app.directive('percentageInput', function () {
   return {
     require: 'ngModel',

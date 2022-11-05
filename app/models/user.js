@@ -1,24 +1,33 @@
-// User
-'use strict'
+import errors from 'node-errors'
+import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
+import querystring from 'querystring'
+import pify from 'pify'
+import csvStringify from 'csv-stringify'
+import pync from 'pync'
+import ldap from 'ldapjs'
+import pgHstore from 'pg-hstore'
 
-var helpers = require('../helpers')
-var database = helpers.database
-var config = helpers.config
-var errors = require('node-errors')
-var bcrypt = require('bcryptjs')
-var crypto = require('crypto')
-var querystring = require('querystring')
-var validate = helpers.validate
-var pify = require('pify')
-var stringify = pify(require('csv-stringify'))
-var pync = require('pync')
-const ldap = require('ldapjs')
-var models = require('../models')
-var hstore = require('pg-hstore')()
-const LoginStatus = require('./constants/loginStatus')
-const authenticationConfigPromise = models.Authentication.getConfig('ldap')
+import Authentication from './authentication.js'
+import AROService from './aro_service.js'
 
-module.exports = class User {
+import config from '../helpers/config.cjs'
+import database from '../helpers/database.cjs'
+import validate from '../helpers/validate.js'
+import { sendMail } from '../helpers/mail.js'
+
+const hstore = pgHstore()
+const stringify = pify(csvStringify)
+const authenticationConfigPromise = Authentication.getConfig('ldap')
+
+const LOGIN_STATUS = Object.freeze({
+  LOGIN_SUCCESSFUL_CACHED_PASSWORD: 1,
+  LOGIN_SUCCESSFUL_EXTERNAL_AUTH: 2,
+  INCORRECT_PASSWORD: 3,
+  UNDEFINED_ERROR: 4,
+})
+
+export default class User {
 
   static hashPassword (pass) {
     return new Promise((resolve, reject) => {
@@ -72,7 +81,7 @@ module.exports = class User {
           // Time out if the LDAP bind fails (setting timeout on the client does not help).
           // The LDAP server may be unreachable, or may not be sending a response.
           setTimeout(() => {
-            sessionDetails.login_status_id = LoginStatus.LDAP_SERVER_TIMEOUT
+            sessionDetails.login_status_id = LOGIN_STATUS.LDAP_SERVER_TIMEOUT
             reject('ldapGetUserNames(): LDAP bind timed out')
           }, 8000)
           const ldapOpts = {
@@ -86,7 +95,7 @@ module.exports = class User {
             if (err) {
               console.log('LDAP search returned error:')
               console.log(err)
-              sessionDetails.login_status_id = LoginStatus.LDAP_ERROR_GETTING_ATTRIBUTES
+              sessionDetails.login_status_id = LOGIN_STATUS.LDAP_ERROR_GETTING_ATTRIBUTES
               reject(err) // There was an error when performing the search
             }
             search.on('searchEntry', (entry) => {
@@ -104,7 +113,7 @@ module.exports = class User {
             search.on('error', (err) => {
               console.log('LDAP search.on.error')
               console.log(err)
-              sessionDetails.login_status_id = LoginStatus.UNDEFINED_ERROR
+              sessionDetails.login_status_id = LOGIN_STATUS.UNDEFINED_ERROR
               reject(err)
             })
           })
@@ -131,7 +140,7 @@ module.exports = class User {
           },
           json: true
         }
-        return models.AROService.request(createUserRequest)
+        return AROService.request(createUserRequest)
       })
       .then(() => {
         return this.hashPassword(password)
@@ -160,7 +169,7 @@ module.exports = class User {
 
     var ldapClient = null
     var sessionDetails = {
-      login_status_id: LoginStatus.UNDEFINED_ERROR,
+      login_status_id: LOGIN_STATUS.UNDEFINED_ERROR,
       attributes: {}
     }
 
@@ -175,7 +184,7 @@ module.exports = class User {
         ldapClient.on('error', (err) => {
           console.error('Error from ldap client:')
           console.log(err)
-          sessionDetails.login_status_id = LoginStatus.UNDEFINED_ERROR
+          sessionDetails.login_status_id = LOGIN_STATUS.UNDEFINED_ERROR
         })
         // Create a Distinguished Name (DN) that we represents the user that is trying to login
         const distinguishedName = authenticationConfig.distinguishedName.replace('$USERNAME$', username)
@@ -200,7 +209,7 @@ module.exports = class User {
         this.saveCachedPasswordForUser(username, password)   // Even if this fails, we should continue
         console.log('LDAP - returned from database.findOne()')
         delete user.password
-        sessionDetails.login_status_id = LoginStatus.LOGIN_SUCCESSFUL_EXTERNAL_AUTH
+        sessionDetails.login_status_id = LOGIN_STATUS.LOGIN_SUCCESSFUL_EXTERNAL_AUTH
         this.saveLoginAudit(user.id, sessionDetails)
         return user
       })
@@ -235,7 +244,7 @@ module.exports = class User {
               WHERE NOT sa.is_deleted AND LOWER(email)=$1`
     var user
     var sessionDetails = {
-      login_status_id: LoginStatus.UNDEFINED_ERROR,
+      login_status_id: LOGIN_STATUS.UNDEFINED_ERROR,
       attributes: {}
     }
 
@@ -250,12 +259,12 @@ module.exports = class User {
       })
       .then((res) => {
         if (!res) {
-          sessionDetails.login_status_id = LoginStatus.INCORRECT_PASSWORD
+          sessionDetails.login_status_id = LOGIN_STATUS.INCORRECT_PASSWORD
           this.saveLoginAudit(user.id, sessionDetails)
           return Promise.reject(errors.forbidden('Invalid username or password'))
         }
         delete user.password
-        sessionDetails.login_status_id = LoginStatus.LOGIN_SUCCESSFUL_CACHED_PASSWORD
+        sessionDetails.login_status_id = LOGIN_STATUS.LOGIN_SUCCESSFUL_CACHED_PASSWORD
         this.saveLoginAudit(user.id, sessionDetails)
         return user
       })
@@ -345,7 +354,7 @@ module.exports = class User {
           },
           json: true
         }
-        return models.AROService.request(createUserRequest)
+        return AROService.request(createUserRequest)
           .then((result) => Promise.resolve(result))
       } else {
         return database.query(`SELECT auth.add_user('${user.firstName}', '${user.lastName}', '${user.email}');`)
@@ -469,7 +478,7 @@ module.exports = class User {
           `\n${base_url}/reset_password?${querystring.stringify({ code: code })}`,
           `\n\nPlease do not reply to this email. It was automatically generated.`,
         ].join('')
-        helpers.mail.sendMail({
+        sendMail({
           subject: 'Password reset: ARO Application',
           to: user.email,
           text: text
@@ -540,7 +549,7 @@ module.exports = class User {
       .then((users) => (
         pync.series(users, (user) => {
           // do not return the promise. We don't wait
-          helpers.mail.sendMail({
+          sendMail({
             subject: subject,
             to: user.email,
             text: text

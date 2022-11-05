@@ -1,13 +1,10 @@
 // Settings
-'use strict'
+import database from '../helpers/database.cjs'
+import config from '../helpers/config.cjs'
+import AROService from './aro_service.js'
+import pync from 'pync'
 
-var helpers = require('../helpers')
-var database = helpers.database
-var config = helpers.config
-var models = require('../models')
-var pync = require('pync')
-
-module.exports = class Settings {
+export default class Settings {
 
   static view () {
     return Promise.all([
@@ -153,7 +150,7 @@ module.exports = class Settings {
         invalidation.push('ROIC_SERVICE_INPUTS')
       }
       return pync.series(invalidation, (key) => (
-        models.AROService.request({
+        AROService.request({
           url: config.aro_service_url + `/ref-cache/${key}`,
           method: 'DELETE',
           json: true
@@ -179,7 +176,7 @@ module.exports = class Settings {
       url: config.aro_service_url + '/ref-cache',
       json: true
     }
-    models.AROService.request(req)
+    AROService.request(req)
       .then((data) => {
         console.log('data', data)
       })

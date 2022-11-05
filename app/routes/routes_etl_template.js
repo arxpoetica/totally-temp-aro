@@ -1,23 +1,24 @@
-const models = require('../models')
-const multer = require('multer')
-const os = require('os')
-const upload = multer({ dest: os.tmpdir() })
-const fs = require('fs')
+import multer from 'multer'
+import os from 'os'
+import fs from 'fs'
+import UiEtlTemplate from '../models/ui_etl_template.js'
 
-exports.configure = (app, middleware) => {
+const upload = multer({ dest: os.tmpdir() })
+
+export const configure = (app, middleware) => {
   var check_admin = middleware.check_admin
   var jsonSuccess = middleware.jsonSuccess
 
   app.get('/etltemplate', check_admin, (request, response, next) => {
       const dataType = request.query.datatype || 1
-      models.UiEtlTemplate.getEtlTemplateNamesByType(dataType)
+      UiEtlTemplate.getEtlTemplateNamesByType(dataType)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
 
   app.get('/etltemplate/download', check_admin, (request, response, next) => {
       const templateId = request.query.id
-      models.UiEtlTemplate.getEtlTemplateFileText(templateId)
+      UiEtlTemplate.getEtlTemplateFileText(templateId)
       .then( output => {
             response.setHeader('Content-type', "application/octet-stream")
             response.setHeader('Content-disposition', 'attachment; filename=' + output.name + '.' + output.type)
@@ -30,7 +31,7 @@ exports.configure = (app, middleware) => {
   // Remove all plan targets from a plan
   app.delete('/etltemplate/:templateId', check_admin, (request, response, next) => {
     var templateId = request.params.templateId
-    models.UiEtlTemplate.deleteEtlTemplate(templateId)
+    UiEtlTemplate.deleteEtlTemplate(templateId)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -51,7 +52,7 @@ exports.configure = (app, middleware) => {
     }
 
     const fileNameWithoutExtension = request.file.originalname.replace(/\.[^/.]+$/, "")
-    models.UiEtlTemplate.addEtlTemplate(dataType, fileNameWithoutExtension, fileNameWithoutExtension, mediaType, data)
+    UiEtlTemplate.addEtlTemplate(dataType, fileNameWithoutExtension, fileNameWithoutExtension, mediaType, data)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

@@ -1,11 +1,8 @@
 // Permission
 
-'use strict'
+import database from '../helpers/database.cjs'
 
-var helpers = require('../helpers')
-var database = helpers.database
-
-module.exports = class Permission {
+export default class Permission {
 
   static grantAccess (plan_id, user_id, rol) {
     return Promise.resolve()

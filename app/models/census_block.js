@@ -1,12 +1,10 @@
 // CensusBlock
 //
 // The County Subdivision is a geographic area used in map layers.
-'use strict'
 
-var helpers = require('../helpers')
-var database = helpers.database
+import database from '../helpers/database.cjs'
 
-module.exports = class CensusBlock {
+export default class CensusBlock {
 
   // FIXME: legacy code, transfer to service
   static getCensusBlockDetails (id) {

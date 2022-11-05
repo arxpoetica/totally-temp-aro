@@ -1,8 +1,8 @@
-const { socketLogger } = require('./server-socket-utils')
-const { CHANNEL_NAMES, SOCKET_EVENTS } = require('../socket-namespaces')
-const kleur = require('kleur')
+import { socketLogger } from './server-socket-utils.js'
+import { CHANNEL_NAMES, SOCKET_EVENTS } from '../socket-namespaces.js'
+import kleur from 'kleur'
 
-module.exports.setSubscribers = (channelName, socket, channel) => {
+export const setSubscribers = (channelName, socket, channel) => {
 
   socket.on('SOCKET_JOIN_ROOM', roomId => {
     socketLogger(`Client with id ${socket.client.id} joined room ${roomId} on socket with namespace ${channelName}`)

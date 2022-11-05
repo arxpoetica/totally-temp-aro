@@ -1,12 +1,10 @@
 // CountySubdivision
 //
 // The County Subdivision is a geographic area used in map layers.
-'use strict'
 
-var helpers = require('../helpers')
-var database = helpers.database
+import database from '../helpers/database.cjs'
 
-module.exports = class CountySubdivision {
+export default class CountySubdivision {
 
   // Find all County Subdivisions in a US state by querying the `statefp` field
   //

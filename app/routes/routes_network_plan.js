@@ -1,6 +1,6 @@
-var models = require('../models')
+import NetworkPlan from '../models/network_plan.js'
 
-exports.configure = (api, middleware) => {
+export const configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
 
   // FIXME: legacy code, transfer to service
@@ -13,7 +13,7 @@ exports.configure = (api, middleware) => {
       const text = request.query.text
       const biasLatitude = request.query.biasLatitude   // Optional
       const biasLongitude = request.query.biasLongitude // Optional
-      models.NetworkPlan.searchAddresses(text, sessionToken, biasLatitude, biasLongitude)
+      NetworkPlan.searchAddresses(text, sessionToken, biasLatitude, biasLongitude)
         .then(jsonSuccess(response, next))
         .catch(next)
     }
@@ -23,7 +23,7 @@ exports.configure = (api, middleware) => {
   // Get addresses for the specified locations from table aro.location_entity
   api.post('/network_plan/targets/addresses', (request, response, next) => {
     var locationIds = request.body.locationIds
-    models.NetworkPlan.getTargetsAddresses(locationIds)
+    NetworkPlan.getTargetsAddresses(locationIds)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -32,7 +32,7 @@ exports.configure = (api, middleware) => {
   // Get addresses for the specified service areas
   api.post('/network_plan/service_area/addresses', (request, response, next) => {
     var serviceAreaIds = request.body.serviceAreaIds
-    models.NetworkPlan.getServiceAreaAddresses(serviceAreaIds)
+    NetworkPlan.getServiceAreaAddresses(serviceAreaIds)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -41,7 +41,7 @@ exports.configure = (api, middleware) => {
   // Get addresses for the specified analysis areas
   api.post('/network_plan/analysis_area/addresses', (request, response, next) => {
     var analysisAreaIds = request.body.analysisAreaIds
-    models.NetworkPlan.getAnalysisAreaAddresses(analysisAreaIds)
+    NetworkPlan.getAnalysisAreaAddresses(analysisAreaIds)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -56,7 +56,7 @@ exports.configure = (api, middleware) => {
     })
 
     if(!hasExcludeTerm && query.toLowerCase().indexOf("select") > -1 ) {
-      models.NetworkPlan.getIdsFromSql(query)
+      NetworkPlan.getIdsFromSql(query)
       .then(jsonSuccess(response, next))
       .catch(next)
     } else {

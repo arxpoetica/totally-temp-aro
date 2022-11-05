@@ -1,5 +1,5 @@
-var _ = require('underscore')
-var config = require('./config')
+import _ from 'underscore'
+import config from './config.cjs'
 
 var public_config = _.pick(config,
   'ui',
@@ -9,4 +9,4 @@ var public_config = _.pick(config,
   'currency_code',
   'intl_number_format')
 
-module.exports = public_config
+export default public_config

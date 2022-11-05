@@ -1,4 +1,4 @@
-var _ = require('underscore')
+import _ from 'underscore'
 
 function expect (obj, path, type) {
   var comps = []
@@ -20,7 +20,7 @@ function expect (obj, path, type) {
   })
 }
 
-module.exports = function (validations) {
+export default function (validations) {
   return new Promise((resolve, reject) => {
     validations(expect)
     resolve()

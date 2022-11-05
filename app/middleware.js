@@ -1,13 +1,13 @@
-var models = require('./models')
-var helpers = require('./helpers')
-var validate = helpers.validate
-var database = helpers.database
-var _ = require('underscore')
-var nook = require('node-errors').nook
-var NodeCache = require('node-cache')
-var cache = new NodeCache()
-var crypto = require('crypto')
-var querystring = require('querystring')
+import Permission from './models/permission.js'
+import validate from './helpers/validate.js'
+import database from './helpers/database.cjs'
+import _ from 'underscore'
+import { nook } from 'node-errors'
+import NodeCache from 'node-cache'
+import crypto from 'crypto'
+import querystring from 'querystring'
+
+const cache = new NodeCache()
 
 function cacheable (request, response, next) {
   var obj = {
@@ -54,7 +54,7 @@ function check_permission (rol) {
   return (request, response, next) => {
     var user = request.user
     var project_id = user.projectId
-    models.Permission.findPermission(project_id, user.id)
+    Permission.findPermission(project_id, user.id)
       .then((permission) => {
         // !rol means any permission is ok
         if (permission && (!rol || rol === permission.rol || permission.rol === 'Owner')) {
@@ -141,7 +141,7 @@ function viewport (request, response, next) {
 
 var check_any_permission = check_permission(null)
 var check_owner_permission = check_permission('owner')
-module.exports = {
+export default {
   check_any_permission: check_any_permission,
   check_owner_permission: check_owner_permission,
   check_admin: check_admin,
@@ -150,17 +150,4 @@ module.exports = {
   jsonSuccess: jsonSuccess,
   viewport: viewport,
   cacheable: cacheable
-}
-
-if (module.id === require.main.id) {
-  var req = {
-    query: querystring.parse('nelat=43.12129441054818&nelon=-89.31565700358885&swlat=42.91470789848055&swlon=-89.66138301677245&threshold=0&zoom=12')
-  }
-  viewport(req, null, (err) => {
-    if (err) return console.log('err', err)
-    console.log('viewport', req.viewport.linestring)
-    console.log()
-    console.log()
-    console.log('intersects', database.intersects(req.viewport, 'geom', 'WHERE'))
-  })
 }

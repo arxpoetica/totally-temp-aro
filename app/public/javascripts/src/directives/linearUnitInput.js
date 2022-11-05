@@ -2,8 +2,6 @@
  * Directive to show and update a linear model value (e.g. 1000 meters) in user units (e.g. 3280.84 ft).
  * For example, a model value of 0.1 will correspond to a value of 10 (and vice versa)
  */
-'use strict'
-
 app.directive('linearUnitInput', ['state', function (state) {
   return {
     require: 'ngModel',

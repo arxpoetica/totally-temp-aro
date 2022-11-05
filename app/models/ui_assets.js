@@ -1,9 +1,6 @@
-'use strict'
+import database from '../helpers/database.cjs'
 
-var helpers = require('../helpers')
-var database = helpers.database
-
-module.exports = class UiAssets {
+export default class UiAssets {
   static getAssetKeys (offset = 0, limit = 10) {
     limit = Math.min(limit, 1000)
     const sql = 'SELECT key FROM ui.assets OFFSET $1 LIMIT $2'

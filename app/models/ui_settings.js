@@ -1,9 +1,6 @@
-'use strict'
+import database from '../helpers/database.cjs'
 
-var helpers = require('../helpers')
-var database = helpers.database
-
-module.exports = class UiSettings {
+export default class UiSettings {
   static getSettingsForClient (aroClient) {
     const sql = 'SELECT type, settings FROM ui.settings WHERE client=$1'
     return database.query(sql, [aroClient])

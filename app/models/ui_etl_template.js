@@ -1,9 +1,6 @@
-'use strict'
+import database from '../helpers/database.cjs'
 
-var helpers = require('../helpers')
-var database = helpers.database
-
-module.exports = class UiEtlTemplate {
+export default class UiEtlTemplate {
   static getEtlTemplateNamesByType (dataType) {
     
     return this.getClientId()

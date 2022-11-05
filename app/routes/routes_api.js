@@ -1,4 +1,4 @@
-exports.configure = (api, middleware) => {
+export const configure = (api, middleware) => {
   api.use((request, response, next) => {
     if (!request.user) {
       // The user is not logged in.

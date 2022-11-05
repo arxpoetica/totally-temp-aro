@@ -1,13 +1,13 @@
 // These are routes for external API access to ARO-Service
 
-const helpers = require('../helpers')
-const config = helpers.config
-const database = helpers.database
-const expressProxy = require('express-http-proxy')
-const requestPromise = require('request-promise-native')
-const jwt = require('jsonwebtoken')
-const userIdInjector = require('./user-id-injector')
-const { createLogger, LOGGER_GROUPS } = require('../helpers/logger')
+import expressProxy from 'express-http-proxy'
+import requestPromise from 'request-promise-native'
+import jwt from 'jsonwebtoken'
+import userIdInjector from './user-id-injector.js'
+import config from '../helpers/config.cjs'
+import database from '../helpers/database.cjs'
+import { createLogger, LOGGER_GROUPS } from '../helpers/logger.cjs'
+
 const logger = createLogger(LOGGER_GROUPS.ROUTES)
 
 const OAUTH_CONNECTION_STRING = `http://${config.oauth_server_host}`
@@ -80,7 +80,7 @@ const bearerTokenCheckMiddleware = (req, res, next) => {
   }
 }
 
-exports.configure = (api, middleware) => {
+export const configure = (api, middleware) => {
   // Expose an unsecured endpoint for API logins.
   api.post(`/oauth/*`, expressProxy(OAUTH_CONNECTION_STRING))
 

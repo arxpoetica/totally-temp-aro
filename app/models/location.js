@@ -1,13 +1,14 @@
 // Location
 //
 // A Location is a point in space which can contain other objects such as businesses and households
-'use strict'
 
-var helpers = require('../helpers')
-var database = helpers.database
-var hstore = require('pg-hstore')()
+import pgHstore from 'pg-hstore'
+import json2csv from 'json2csv'
+import database from '../helpers/database.cjs'
 
-module.exports = class Location {
+const hstore = pgHstore()
+
+export default class Location {
 
   // FIXME: legacy code, transfer to service
   // Get summary information for a given location
@@ -299,7 +300,6 @@ module.exports = class Location {
     })
     .then((results)=>{
       //send response as csv
-      var json2csv = require("json2csv");
       return json2csv({data:results});
     })
   }
