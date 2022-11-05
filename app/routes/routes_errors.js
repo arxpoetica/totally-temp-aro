@@ -1,6 +1,6 @@
-var request = require('request')
+import request from 'request'
 
-exports.configure = (app, middleware) => {
+export const configure = (app, middleware) => {
   // For testing the error handler
   app.get('/error', (request, response, next) => {
     next(new Error('test'))

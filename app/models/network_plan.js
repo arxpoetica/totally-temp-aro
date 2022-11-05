@@ -2,15 +2,13 @@
 //
 // The Route Optimizer finds shortest paths between sources and targets
 
-'use strict'
+import database from '../helpers/database.cjs'
+import _ from 'underscore'
+import pify from 'pify'
+import request from 'request'
+import { createLogger, LOGGER_GROUPS } from '../helpers/logger.cjs'
 
-var helpers = require('../helpers')
-var database = helpers.database
-var models = require('./')
-var _ = require('underscore')
-var pify = require('pify')
-var request = pify(require('request'), { multiArgs: true })
-const { createLogger, LOGGER_GROUPS } = require('../helpers/logger')
+const requestPify = pify(request, { multiArgs: true })
 const logger = createLogger(LOGGER_GROUPS.MODELS)
 
 // NOTE: this extra functionality is when count limits are large
@@ -25,7 +23,7 @@ function breakArrayIntoChunks(array, limit = CHUNK_LIMIT) {
   return arrayOfChunks
 }
 
-module.exports = class NetworkPlan {
+export default class NetworkPlan {
 
   // FIXME: legacy code, transfer to service
   static async getTargetsAddresses (locationIds) {
@@ -127,7 +125,7 @@ module.exports = class NetworkPlan {
         const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json`
         logger.info(`Getting autocomplete results from ${url} with query parameters:`)
         logger.info(queryParameters)
-        return request({url: url, qs: queryParameters, json: true})
+        return requestPify({url: url, qs: queryParameters, json: true})
           .then((result) => {
             var compressedResults = []
             result[1].predictions.forEach((item) => {

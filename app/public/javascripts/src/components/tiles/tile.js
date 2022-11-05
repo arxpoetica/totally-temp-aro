@@ -1,8 +1,6 @@
 /**
  * Directive to load map data in the form of tiles
  */
-'use strict'
-
 import MapTileRenderer from './map-tile-renderer'
 import TileUtilities from './tile-utilities'
 import MapUtilities from '../common/plan/map-utilities'

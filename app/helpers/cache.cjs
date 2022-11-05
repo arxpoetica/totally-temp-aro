@@ -1,7 +1,7 @@
-var database = require('./database')
-const UIConfigurationClass = require('./ui_configuration')
+const database = require('./database.cjs')
+const UIConfigurationClass = require('./ui_configuration.cjs')
 const UIConfiguration = new UIConfigurationClass()
-const { createLogger, LOGGER_GROUPS } = require('./logger')
+const { createLogger, LOGGER_GROUPS } = require('./logger.cjs')
 const logger = createLogger(LOGGER_GROUPS.CACHE)
 
 exports.serviceLayers = []

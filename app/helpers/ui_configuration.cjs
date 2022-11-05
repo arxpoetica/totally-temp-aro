@@ -1,11 +1,9 @@
 // UI Configuration
 //
 // Configuration parameters used to customize the UI for different clients
-'use strict'
 
-var helpers = require('../helpers')
-var database = helpers.database
-const { createLogger, LOGGER_GROUPS } = require('./logger')
+const database = require('./database.cjs')
+const { createLogger, LOGGER_GROUPS } = require('./logger.cjs')
 const logger = createLogger(LOGGER_GROUPS.CONFIG)
 
 module.exports = class UIConfiguration {

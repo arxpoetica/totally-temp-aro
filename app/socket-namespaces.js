@@ -1,4 +1,4 @@
-module.exports.CHANNEL_NAMES = Object.freeze({
+export const CHANNEL_NAMES = Object.freeze({
   CLIENT: 'client',
   PLAN: 'plan',
   USER: 'user',
@@ -7,7 +7,7 @@ module.exports.CHANNEL_NAMES = Object.freeze({
   TILE_INVALIDATION: 'tileInvalidation',
 })
 
-module.exports.SOCKET_EVENTS = Object.freeze({
+export const SOCKET_EVENTS = Object.freeze({
   VECTOR_TILE_DATA: 'VECTOR_TILE_DATA',
   COMMIT_TRANSACTION: 'COMMIT_TRANSACTION',
   USER_TRANSACTION: 'USER_TRANSACTION',

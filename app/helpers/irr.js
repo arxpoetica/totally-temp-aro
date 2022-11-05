@@ -1,6 +1,6 @@
 // See https://gist.github.com/ghalimi/4591338
 
-module.exports = (values, guess) => {
+export default (values, guess) => {
   // Credits: algorithm inspired by Apache OpenOffice
 
   // Calculates the resulting amount

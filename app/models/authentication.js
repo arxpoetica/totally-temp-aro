@@ -1,7 +1,4 @@
-'use strict'
-
-var helpers = require('../helpers')
-var database = helpers.database
+import database from '../helpers/database.cjs'
 
 class Authentication {
 
@@ -22,4 +19,4 @@ class Authentication {
   }
 }
 
-module.exports = Authentication
+export default Authentication

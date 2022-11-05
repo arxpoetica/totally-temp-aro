@@ -1,9 +1,8 @@
-var helpers = require('../helpers')
-var models = require('../models')
-var config = helpers.config
-var database = helpers.database
+import AROService from '../models/aro_service.js'
+import database from '../helpers/database.cjs'
+import config from '../helpers/config.cjs'
 
-exports.configure = (api, middleware) => {
+export const configure = (api, middleware) => {
 
   // FIXME: legacy code, transfer to service
   api.get('/report-extended/:name/:plan_id/:type', (request, response, next) => {
@@ -14,7 +13,7 @@ exports.configure = (api, middleware) => {
       method: 'GET',
       url: config.aro_service_url + `/report-extended/${name}/${plan_id}.${type}`
     }
-    return models.AROService.request(req)
+    return AROService.request(req)
       .then((output) => response.send(output))
       .catch(next)
   })

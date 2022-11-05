@@ -1,12 +1,9 @@
 // Wirecenter
 //
-'use strict'
+import database from '../helpers/database.cjs'
+import _ from 'underscore'
 
-var helpers = require('../helpers')
-var database = helpers.database
-var _ = require('underscore')
-
-module.exports = class Wirecenter {
+export default class Wirecenter {
 
   static findServiceAreas (viewport, type) {
     var geom = viewport ? 'geom' : 'ST_AsGeoJSON(geom)::json AS geom'

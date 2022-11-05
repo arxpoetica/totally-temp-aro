@@ -1,8 +1,7 @@
-const expressProxy = require('express-http-proxy')
-var helpers = require('../helpers')
-var config = helpers.config
+import expressProxy from 'express-http-proxy'
+import config from '../helpers/config.cjs'
 
-exports.configure = (api, middleware) => {
+export const configure = (api, middleware) => {
   api.get('/status', (request, response, next) => {
     response.json({
       env: process.env.NODE_ENV || null,

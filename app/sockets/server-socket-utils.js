@@ -1,7 +1,7 @@
-const { createLogger, LOGGER_GROUPS } = require('../helpers/logger')
+import { createLogger, LOGGER_GROUPS } from '../helpers/logger.cjs'
 const logger = createLogger(LOGGER_GROUPS.SOCKET, 'yellow')
 
-module.exports.Consumer = class Consumer {
+export const Consumer = class Consumer {
   constructor (queue, exchange, messageHandler) {
     this.queue = queue
     this.exchange = exchange
@@ -9,7 +9,7 @@ module.exports.Consumer = class Consumer {
   }
 }
 
-module.exports.socketLogger = (message, payload) => {
+export const socketLogger = (message, payload) => {
   // return
   if (payload) {
     const toLog = JSON.stringify(payload, (key, value) => {

@@ -1,8 +1,6 @@
-var models = require('../models')
-var helpers = require('../helpers')
-var public_config = helpers.public_config
+import User from '../models/user.js'
 
-exports.configure = (app, middleware) => {
+export const configure = (app, middleware) => {
 
   app.post('/settings/update_settings', (request, response, next) => {
     var user = request.user
@@ -24,11 +22,11 @@ exports.configure = (app, middleware) => {
         return response
       }
 
-      promise = models.User.changePassword(user.id, oldPassword, password)
+      promise = User.changePassword(user.id, oldPassword, password)
     }
     promise
       .then(() => (
-        models.User.updateSettings(user.id, firstName, lastName, email)
+        User.updateSettings(user.id, firstName, lastName, email)
       ))
       .then(() => {
         response.json({

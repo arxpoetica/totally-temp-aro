@@ -1,7 +1,5 @@
-const helpers = require('../helpers')
-const cache = helpers.cache
-const public_config = helpers.public_config
-const uuidv4 = require('uuid/v4')
+import cache from '../helpers/cache.cjs'
+import public_config from '../helpers/public_config.js'
 
 const googleMapsLicensing = {
   API_KEY: process.env.GOOGLE_MAPS_API_KEY,
@@ -9,7 +7,7 @@ const googleMapsLicensing = {
   CHANNEL: process.env.GOOGLE_MAPS_CHANNEL
 }
 
-exports.configure = (api, middleware) => {
+export const configure = (api, middleware) => {
   let loggerExcludes
   try { loggerExcludes =  JSON.parse(process.env.REDUX_LOGGER_EXCLUDES) }
   catch (error) {} // no op

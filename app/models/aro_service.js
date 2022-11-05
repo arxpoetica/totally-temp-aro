@@ -1,10 +1,8 @@
-'use strict'
-
-var request = require('request')
-const { createLogger, LOGGER_GROUPS } = require('../helpers/logger')
+import request from 'request'
+import { createLogger, LOGGER_GROUPS } from '../helpers/logger.cjs'
 const logger = createLogger(LOGGER_GROUPS.ARO_SERVICE)
 
-module.exports = class AROService {
+export default class AROService {
 
   static request (req) {
     // TODO: how will we handle this in future testing?

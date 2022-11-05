@@ -1,8 +1,7 @@
-var models = require('../models')
-var helpers = require('../helpers')
-var config = helpers.config
+import config from '../helpers/config.cjs'
+import AROService from '../models/aro_service.js'
 
-exports.configure = (api, middleware) => {
+export const configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
 
   api.get('/competitors/*', (request, response, next) => {
@@ -15,7 +14,7 @@ exports.configure = (api, middleware) => {
       method: 'GET',
       url: `${config.aro_service_url}/${apiUrl}`
     }
-    return models.AROService.request(serviceRequest)
+    return AROService.request(serviceRequest)
       .then((output) => {
         response.send(JSON.parse(output)) // Not sure why "output" is coming back as a string
       })

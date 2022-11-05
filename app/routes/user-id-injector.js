@@ -1,5 +1,4 @@
-const URL = require('url').URL
-const URLSearchParams = require('url').URLSearchParams
+import { URL, URLSearchParams } from 'url'
 
 // Given a Express request and user id, replaces (if it exists) or appends the user_id
 // query parameter to the request URL and returns the URL
@@ -7,7 +6,7 @@ const URLSearchParams = require('url').URLSearchParams
 //      for userid=xxx, input url='/service/do_something?user_id=yyy', returns '/service/do_something?user_id=xxx'
 // This will also replace parts of the service url. So if you want '/service/v1/test' to become '/svc2/v1/test',
 // send urlPartialToRemove='/service', urlPartialToReplace='/svc2'
-module.exports = (request, urlPartialToRemove, urlPartialToReplace, userId) => {
+export default (request, urlPartialToRemove, urlPartialToReplace, userId) => {
   // First construct the full url (i.e. including the http(s)://<hostname>)
   const fullUrl = new URL(`${request.protocol}://${request.get('host')}${request.url}`)
 

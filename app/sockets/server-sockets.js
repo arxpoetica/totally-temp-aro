@@ -17,15 +17,18 @@
  *                    wants to send messages to all users.
  */
 
-const { config: { rabbitmq } } = require('../helpers')
-const MessageQueueManager = require('./message-queue-manager')
-const { socketLogger, Consumer } = require('./server-socket-utils')
-const { setSubscribers } = require('./server-subscribers')
-const { CHANNEL_NAMES, SOCKET_EVENTS } = require('../socket-namespaces')
+import config from '../helpers/config.cjs'
+import MessageQueueManager from './message-queue-manager.js'
+import { socketLogger, Consumer } from './server-socket-utils.js'
+import { setSubscribers } from './server-subscribers.js'
+import { CHANNEL_NAMES, SOCKET_EVENTS } from '../socket-namespaces.js'
+import socketIo from 'socket.io'
+
+const { rabbitmq } = config
 
 async function createServerSocketManager(server) {
 
-  const io = require('socket.io')(server)
+  const io = socketIo(server)
 
   // set up channels & logic to join/leave rooms
   // NOTE: channels are called namespaces in the docs
@@ -161,6 +164,6 @@ async function createServerSocketManager(server) {
 
 }
 
-module.exports.initServerSockets = async(server) => {
+export const initServerSockets = async(server) => {
   return await createServerSocketManager(server)
 }

@@ -1,16 +1,15 @@
-const expressProxy = require('express-http-proxy')
-const URL = require('url').URL
-const URLSearchParams = require('url').URLSearchParams
-var models = require('../models')
-var helpers = require('../helpers')
-var config = helpers.config
-var fs = require('fs')
-var multer = require('multer')
-var os = require('os')
-var upload = multer({ dest: os.tmpdir() })
-const userIdInjector = require('./user-id-injector')
+import fs from 'fs'
+import os from 'os'
+import multer from 'multer'
+import { URL, URLSearchParams } from 'url'
+import expressProxy from 'express-http-proxy'
+import AROService from '../models/aro_service.js'
+import config from '../helpers/config.cjs'
+import userIdInjector from './user-id-injector.js'
 
-exports.configure = (api, middleware, ServerSocketManager) => {
+var upload = multer({ dest: os.tmpdir() })
+
+export const configure = (api, middleware, ServerSocketManager) => {
   var jsonSuccess = middleware.jsonSuccess
 
   // Set up all our pass-through routes (e.g. urls starting with /service are routed to aro-service).
@@ -82,7 +81,7 @@ exports.configure = (api, middleware, ServerSocketManager) => {
       }
     }
 
-    models.AROService.request(req)
+    AROService.request(req)
       .then(jsonSuccess(response, next))
       .catch(next)
   }
@@ -108,7 +107,7 @@ exports.configure = (api, middleware, ServerSocketManager) => {
         'content-type': 'application/json;charset=UTF-8'
       }
     }
-    return models.AROService.request(req)
+    return AROService.request(req)
       .then((output) => {
         response.attachment(fileName)
         response.send(output)

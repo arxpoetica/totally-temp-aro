@@ -1,13 +1,15 @@
-var helpers = require('../helpers')
-var database = helpers.database
-const otplib = require('otplib')
-const qrcode = require('qrcode')
-const crypto = require('crypto')
-const base32Encode = require('base32-encode')
+import otplib from 'otplib'
+import qrcode from 'qrcode'
+import crypto from 'crypto'
+import base32Encode from 'base32-encode'
+import database from '../helpers/database.cjs'
+import { sendMail } from '../helpers/mail.js'
+
 otplib.authenticator.options = {
   window: [1, 0]  // Allow OTP from one previous timestep, in case it changes just as the user is typing it
 }
-module.exports = class MultiFactor {
+
+export default class MultiFactor {
 
   // Generates a QR code from an input string
   static getQrCodeForKeyUri(keyUri) {
@@ -108,7 +110,7 @@ module.exports = class MultiFactor {
           `If you want, you can reset your password by logging into the ARO application.`,
           `\n\nPlease do not reply to this email. It was automatically generated.`,
         ].join('')
-        helpers.mail.sendMail({
+        sendMail({
           subject: 'One time password (OTP): ARO Application',
           to: user.email,
           text: text

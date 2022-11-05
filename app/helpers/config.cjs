@@ -1,6 +1,6 @@
 const path = require('path')
 const deepmerge = require('deepmerge')
-const { createLogger, LOGGER_GROUPS } = require('./logger')
+const { createLogger, LOGGER_GROUPS } = require('./logger.cjs')
 const logger = createLogger(LOGGER_GROUPS.CONFIG)
 
 var aro_client = process.env.ARO_CLIENT || ''

@@ -1,8 +1,8 @@
-var nodemailer = require('nodemailer')
-var ses = require('nodemailer-ses-transport')
-var AWS = require('aws-sdk')
-var config = require('./config')
-const { createLogger, LOGGER_GROUPS } = require('./logger')
+import nodemailer from 'nodemailer'
+import ses from 'nodemailer-ses-transport'
+import AWS from 'aws-sdk'
+import config from './config.cjs'
+import { createLogger, LOGGER_GROUPS } from './logger.cjs'
 const logger = createLogger(LOGGER_GROUPS.EMAIL)
 
 // Find the URL hostname. Cant use the NodeJS URL class because our container is at v6.11
@@ -23,7 +23,7 @@ var transporter = process.env.NODE_ENV === 'production' || process.env.NODE_ENV 
   ? nodemailer.createTransport(ses({ ses: new AWS.SES() }))
   : nodemailer.createTransport() // direct
 
-exports.sendMail = (options) => {
+export const sendMail = (options) => {
   options.from = `ARO <admin@${APP_BASE_HOST}>`
   return new Promise((resolve, reject) => {
     transporter.sendMail(options, (err, info) => {
@@ -37,14 +37,3 @@ exports.sendMail = (options) => {
     })
   })
 }
-
-/*
-// setup e-mail data with unicode symbols
-var mailOptions = {
-  from: 'Fred Foo ✔ <foo@blurdybloop.com>', // sender address
-  to: 'bar@blurdybloop.com, baz@blurdybloop.com', // list of receivers
-  subject: 'Hello ✔', // Subject line
-  text: 'Hello world ✔', // plaintext body
-  html: '<b>Hello world ✔</b>' // html body
-};
-*/
