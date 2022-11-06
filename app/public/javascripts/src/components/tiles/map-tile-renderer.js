@@ -46,14 +46,14 @@ class MapTileRenderer {
         })
     }, MAX_CONCURRENT_VECTOR_TILE_RENDERS)
     this.latestTileRenderPriority = Number.MAX_SAFE_INTEGER
-    this.tileRenderThrottle.error = (err) => {
+    this.tileRenderThrottle.error((err) => {
       console.error('Error from the tile rendering throttle:')
       console.error(err)
-    }
+    })
 
     // Detect when the queue has drained (finished fetching data). If a callback function exists on the window, call it.
     // This is used by the PDF report generator to detect when we are finished fetching all vector tile data.
-    this.tileRenderThrottle.drain = () => PuppeteerMessages.vectorTilesRenderedCallback()
+    this.tileRenderThrottle.drain(() => PuppeteerMessages.vectorTilesRenderedCallback())
 
     this.modificationTypes = Object.freeze({
       UNMODIFIED: 'UNMODIFIED',
