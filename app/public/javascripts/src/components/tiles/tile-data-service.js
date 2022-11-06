@@ -38,7 +38,7 @@ class TileDataService {
 
     // Detect when the queue has drained (finished fetching data). If a callback function exists on the window, call it.
     // This is used by the PDF report generator to detect when we are finished fetching all vector tile data.
-    this.httpThrottle.drain = () => PuppeteerMessages.vectorTilesDataFetchedCallback()
+    this.httpThrottle.drain(() => PuppeteerMessages.vectorTilesDataFetchedCallback())
 
     this.locationStates = {
       LOCK_ICON_KEY: 'LOCK_ICON_KEY',

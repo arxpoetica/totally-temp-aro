@@ -5,6 +5,8 @@ var _ = require('underscore')
 var config = require('./config.cjs')
 var geojson = require('./geojson.cjs')
 
+var pool = new pg.Pool()
+
 module.exports = class Database {
 
   static _conString () {
@@ -37,7 +39,7 @@ module.exports = class Database {
   static _raw (sql, params) {
     params = params || []
     return new Promise((resolve, reject) => {
-      pg.connect(this._conString(), (err, client, done) => {
+      pool.connect((err, client, done) => {
         if (err) return reject(err)
         sql = this._processQuery(sql, params)
         client.query(sql, params, (err, result) => {
