@@ -14,7 +14,13 @@ const defaultState = {
   showSiteBoundary: false,
   selectedBoundaryType: new Map(),
   boundaryTypes: new List(),
-  filters: {},
+  filters: {
+    near_net: {
+      location_filters: {
+        multiSelect: []
+      }
+    }
+  },
   annotation: {
     showList: false,
     selectedIndex: 0,

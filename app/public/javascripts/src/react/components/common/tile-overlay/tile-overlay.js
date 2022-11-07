@@ -89,6 +89,7 @@ export default class TileOverlay {
   }
 
   getTileCanvas (ownerDocument, tileId) {
+    if (!this.tileCache) return null // just a bit of defense 
     let tile = this.tileCache.getTile(tileId)
     if (!tile) {
       // not in the cache so render it

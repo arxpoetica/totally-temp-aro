@@ -12,7 +12,7 @@ import { tileCaches } from './tile-cache'
 
 import TileOverlay from './tile-overlay'
 import { mapHitFeatures } from '../../sidebar/constants'
-import selectionActions from '../../selection/selection-actions'
+import SelectionActions from '../../selection/selection-actions'
 
 
 // needs to be a class instance becasue is needs to keep a scope for the getTile callback functions
@@ -186,6 +186,10 @@ class _TileOverlayComposer extends Component {
   //  this.props.subnetTileData and this.props.selectedSubnetId
   //  instead of the values at time of function declarition 
   overlayGetTileCallback = (coord, zoom, ownerDocument) => {
+    // FUTURE: each type may have different zoom cutoff levels
+    // TODO: once old Vector Tile is gone revisit the cut-off zoom
+    //  we're more performat so we can probably drop that to like zoom < 8 or 9 
+    if (zoom < 10) return null
     // ?should we cache the div as well?
     const div = ownerDocument.createElement("div")
     
@@ -200,6 +204,8 @@ class _TileOverlayComposer extends Component {
     // div.style.borderStyle = "solid"
     // div.style.borderWidth = "1px"
     // div.style.color = div.style.borderColor = "#AAAAAA"
+    
+    //let begin = window.performance.now()
 
     let tileId = TileUtils.coordToTileId(coord, zoom)
     for (let layer of this.tileOverlaysByZOrder) {
@@ -214,6 +220,8 @@ class _TileOverlayComposer extends Component {
 
     }
     
+    //let elapse = window.performance.now() - begin
+    //console.log(`${elapse} milliseconds`)
     return div;
   }
 
@@ -271,18 +279,22 @@ class _TileOverlayComposer extends Component {
 
   onClick = (event) => {
     let points = this.getFeaturesAtLatLng(event.latLng, this.getLayersForEvent('click'))
-    //if (points.length) event.stopPropagation()
+    console.log(event)
+    if (points.length) event.domEvent.stopPropagation()
     this.onClickNearnet(points, event)// TODO: generalize this
   }
   onClickNearnet (points, event) {
     console.log(points)
     console.log(this.props.nearnetEntityData)
-    let locations = []
-    for (const locationId of points) {
-      locations.push(this.props.nearnetEntityData[locationId])
-    }
-    console.log(locations)
-    //this.props.setMapFeaturesShim(locations, event)
+    // let locations = []
+    // for (const locationId of points) {
+    //   locations.push(this.props.nearnetEntityData[locationId])
+    // }
+    // console.log(locations)
+    //this.props.setLocationInfo(locationInfo)
+    if (!points.length) return
+    let locationInfo = this.props.nearnetEntityData[points[0]]
+    this.props.selectNearnetEntities([locationInfo])
   }
 
   addListeners () {
@@ -344,7 +356,6 @@ class _TileOverlayComposer extends Component {
 
 const defaultAlertLocationIds = {}
 const defaultLocationsById = {}
-const defaultNearnetLayers = []
 
 const mapStateToProps = (state) => {
   const selectedSubnetId = PlanEditorSelectors.getNearestSubnetIdOfSelected(state)
@@ -360,16 +371,6 @@ const mapStateToProps = (state) => {
     alertLocationIds = state.planEditor.subnets[selectedSubnetId].faultTree.rootNode.childNodes
     locationsById = state.planEditor.draftLocations.households
   }
-
-  // TODO: there has to be a better way to do this
-  let nearnetLayers = defaultNearnetLayers
-  if (
-    'near_net' in state.mapLayers.filters
-    && 'location_filters' in state.mapLayers.filters.near_net
-    && 'multiSelect' in state.mapLayers.filters.near_net.location_filters
-  ) {
-    nearnetLayers = state.mapLayers.filters.near_net.location_filters.multiSelect
-  }
   
   return {
     mapRef: state.map.googleMaps,
@@ -382,7 +383,7 @@ const mapStateToProps = (state) => {
     nearnetTileData: state.mapData.tileData.nearnet,
     nearnetEntityData: state.mapData.entityData.nearnet,
     nearnetFilters: state.mapLayers.filters.near_net,
-    nearnetLayers,
+    nearnetLayers: state.mapLayers.filters.near_net.location_filters.multiSelect,
     selectedDisplayMode: state.toolbar.rSelectedDisplayMode,
   }
 }
@@ -390,7 +391,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = dispatch => ({
   setCursorLocationIds: ids => dispatch(PlanEditorActions.setCursorLocationIds(ids)),
   clearCursorLocationIds: () => dispatch(PlanEditorActions.clearCursorLocationIds()),
-  setMapFeaturesShim: (locations, event) => dispatch(selectionActions.setMapFeaturesLocationsShim(locations, event)), // setIsMapClicked?
+  selectNearnetEntities: (locations) => dispatch(SelectionActions.selectNearnetEntities(locations)), // setIsMapClicked?
   showContextMenuForLocations: (featureIds, event) => dispatch(PlanEditorActions.showContextMenuForLocations(featureIds, event)),
 })
 

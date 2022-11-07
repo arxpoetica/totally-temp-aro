@@ -82,6 +82,7 @@ export class LocationInfo extends Component {
   }
 
   renderLocationDetails () {
+    console.log(this.props.locationInfoDetails)
     const locationDetails = this.props.locationInfoDetails
     return <table id='table-coverage-initializer' className='table table-sm table-striped sidebar-options-table'>
       <tbody>
@@ -140,11 +141,11 @@ export class LocationInfo extends Component {
   }
 }
 
-LocationInfo.propTypes = {
-  planId: PropTypes.number,
-  selectedLocations: PropTypes.object,
-  locationInfoDetails: PropTypes.object
-}
+// LocationInfo.propTypes = {
+//   planId: PropTypes.number,
+//   selectedLocations: PropTypes.object,
+//   locationInfoDetails: PropTypes.object
+// }
 
 const mapStateToProps = state => ({
   planId: state.plan.activePlan && state.plan.activePlan.id,

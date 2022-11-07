@@ -7,7 +7,8 @@ import { dequal } from 'dequal'
 import ToolBarActions from '../../header/tool-bar-actions'
 import SelectionActions from '../../selection/selection-actions'
 import AroSearch from './aro-search.jsx'
-import LocationInfo from '../../location-info/location-info.jsx'
+import LocationInfo from '../../location-info/location-info.jsx' // will depricate this with old Vector Tile
+import LocationView from './location-view.jsx' // will expand this beyond just Nernet 
 import EquipmentDetail from './equipment-info/equipment-detail.jsx'
 import BoundaryDetail from './boundary-detail.jsx'
 import RoadSegmentDetail from './road-segment-detail.jsx'
@@ -27,6 +28,7 @@ const ViewMode = (props) => {
     selectedDisplayMode,
     setActiveViewModePanel,
     selectedTargetSelectionMode,
+    nearnetLayers,
   } = props
 
   // #179702878
@@ -103,18 +105,25 @@ const ViewMode = (props) => {
           Location Info
         </CardHeader>
         <Collapse className="collapse-height" isOpen={checkIsActivePanel(viewModePanels.LOCATION_INFO)}>
-          <CardBody className="card-body-space">
-            {checkIsActivePanel(viewModePanels.LOCATION_INFO)
-              && <AroSearch
-                objectName='location'
-                labelId='objectId'
-                entityType='LocationObjectEntity'
-                select='id,objectId'
-                searchColumn='objectId'
-              />
-            }
-            <LocationInfo />
-          </CardBody>
+          {nearnetLayers.length // if Nearnet condition here 
+            ? 
+            <CardBody className="card-body-space">
+              <LocationView />
+            </CardBody>
+            : 
+            <CardBody className="card-body-space">
+              {checkIsActivePanel(viewModePanels.LOCATION_INFO)
+                && <AroSearch
+                  objectName='location'
+                  labelId='objectId'
+                  entityType='LocationObjectEntity'
+                  select='id,objectId'
+                  searchColumn='objectId'
+                />
+              }
+              <LocationInfo />
+            </CardBody>
+          }
         </Collapse>
       </Card>
 
@@ -259,6 +268,7 @@ const mapStateToProps = (state) => ({
   selectedDisplayMode: state.toolbar.rSelectedDisplayMode,
   selectedTargetSelectionMode: state.toolbar.selectedTargetSelectionMode,
   perspective: state.toolbar.appConfiguration.perspective,
+  nearnetLayers: state.mapLayers.filters.near_net.location_filters.multiSelect,
 })
 
 const mapDispatchToProps = (dispatch) => ({

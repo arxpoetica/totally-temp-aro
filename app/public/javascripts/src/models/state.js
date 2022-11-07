@@ -254,8 +254,11 @@ class State {
     service.mapFeaturesSelectedEvent.skip(1).subscribe(hitFeatures => {
       // ToDo: selection mechanism needs to be cerntalised 
       // set all mapFeatures in redux
-      if (service.selectedDisplayMode.getValue() == service.displayModes.VIEW
-        || service.selectedDisplayMode.getValue() == service.displayModes.ANALYSIS) {
+      if (
+        service.selectedDisplayMode.getValue() == service.displayModes.VIEW
+        || service.selectedDisplayMode.getValue() == service.displayModes.ANALYSIS
+      ){ 
+        // Nearnet TODO: we're going to need to hack this :(
         service.setMapFeatures(hitFeatures)
         // For tracking when map clicked by the user.
         service.setIsMapClicked(true)
@@ -1252,12 +1255,6 @@ class State {
   }
 
   mapStateToThis (reduxState) {
-    let nearnetLayers = []
-    if (reduxState.mapLayers.filters.near_net
-      && reduxState.mapLayers.filters.near_net.location_filters
-      && reduxState.mapLayers.filters.near_net.location_filters.multiSelect
-    ) nearnetLayers = reduxState.mapLayers.filters.near_net.location_filters.multiSelect
-
     return {
       plan: reduxState.plan.activePlan,
       mapLayersRedux: reduxState.mapLayers,
@@ -1277,7 +1274,7 @@ class State {
       rHeatmapOptions: reduxState.toolbar.heatmapOptions,
       isRecreateTiles: reduxState.viewSettings.isRecreateTiles,
       reduxMapTools: reduxState.map.map_tools,
-      rNearnetLayers: nearnetLayers,
+      rNearnetLayers: reduxState.mapLayers.filters.near_net.location_filters.multiSelect,
     }
   }
 

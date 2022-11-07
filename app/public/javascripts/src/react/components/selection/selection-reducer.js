@@ -44,6 +44,7 @@ const defaultState = {
   selectedMapObject: null,
   objectIdToMapObject: {},
   polygonCoordinates: [],
+  nearnetEntities: [],
 }
 
 function setActiveSelectionModeById (state, newSelectionModeId) {
@@ -211,6 +212,9 @@ function selectionReducer (state = defaultState, action) {
 
     case Actions.SELECTION_SET_POLYGON_COORDINATES:
       return { ...state, polygonCoordinates: action.payload }
+
+    case Actions.SELECTION_SET_NEARNET_ENTITIES: 
+      return { ...state, nearnetEntities: action.payload }
 
     default:
       return state

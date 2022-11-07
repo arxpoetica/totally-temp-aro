@@ -8,11 +8,15 @@ function getLocationInfo (planId, location) {
     AroHttp.get(`/locations/${planId}/${location.location_id || location}/show`)
       .then(result => {
         if (result.data) {
-          dispatch({ type: Actions.LOCATION_INFO_SET_DETAILS, payload: result.data })
+          dispatch(setLocationInfo(result.data))
         }
       })
       .catch(err => console.error(err))
   }
+}
+
+function setLocationInfo (locationInfo) {
+  return { type: Actions.LOCATION_INFO_SET_DETAILS, payload: locationInfo }
 }
 
 function clearLocationInfo () {
@@ -36,6 +40,7 @@ function getLocationAuditLog (planId, objectId) {
 
 export default {
   getLocationInfo,
+  setLocationInfo,
   clearLocationInfo,
   getLocationAuditLog
 }
