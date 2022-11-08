@@ -5,6 +5,9 @@ import WktUtils from '../../../shared-utils/wkt-utils'
 import MenuItemFeature from '../context-menu/menu-item-feature'
 import MenuItemAction from '../context-menu/menu-item-action'
 import ContextMenuActions from '../context-menu/actions'
+import { tileCaches } from '../common/tile-overlay/tile-cache'
+import TileUtils from '../common/tile-overlay/tile-overlay-utils'
+import TileDataMutator from '../common/tile-overlay/tile-data-mutator'
 
 
 function setActiveSelectionMode (selectionModeId) {
@@ -212,9 +215,33 @@ function requestPolygonSelect(polygonCoordinates) {
 }
 
 function selectNearnetEntities(nearnetEntities) {
-  return {
-    type: Actions.SELECTION_SET_NEARNET_ENTITIES,
-    payload: nearnetEntities, 
+  // TODO: clear ONLY effected tiles
+  // TODO: not sure clear cache belongs here
+  return (dispatch, getState) => {
+    //TODO: fix this so we don't have to use the wholesale reset
+    // console.log(tileCaches)
+    // const state = getState()
+    // let prevSelection = null
+    // if (state.selection.nearnetEntities.length) prevSelection = state.selection.nearnetEntities[0]
+    
+    // // get world coords for prev point and next clear cache for both if exist
+    // let nextSelection = null
+    // if (nearnetEntities.length) nextSelection = nearnetEntities[0]
+    // for (const selection of [prevSelection, nextSelection]) {
+    //   if (selection) {
+    //     let worldCoord = TileUtils.latLngToWorldCoord(
+    //       new google.maps.LatLng(selection.point.latitude, selection.point.longitude)
+    //     )
+    //     //TileDataMutator.clearCacheForWorldCoord(tileCaches['nearnet']['nearnet'], worldCoord)
+    //     TileDataMutator.clearCacheForWorldCoord(tileCaches['nearnet']['excluded'], worldCoord)
+    //   }
+    // }
+    tileCaches['nearnet']['nearnet'].clear()
+    tileCaches['nearnet']['excluded'].clear()
+    dispatch({
+      type: Actions.SELECTION_SET_NEARNET_ENTITIES,
+      payload: nearnetEntities, 
+    })
   }
 }
 

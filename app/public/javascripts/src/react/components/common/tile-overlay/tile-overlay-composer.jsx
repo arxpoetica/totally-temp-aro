@@ -65,6 +65,9 @@ class _TileOverlayComposer extends Component {
 
   refreshTiles () {
     // digest new data
+
+    //TODO: clear cache for badge change but ONLY effected tiles
+
     this.makeActiveOverlays()
     if (this.mapOverlayEle) {
       // we have initialized so refresh
@@ -129,6 +132,10 @@ class _TileOverlayComposer extends Component {
     }
 
     if ('VIEW' === this.props.selectedDisplayMode) {
+      let selectedList = {}
+      if (this.props.selectedNearnetEntities.length) {
+        selectedList[this.props.selectedNearnetEntities[0].objectId] = this.props.selectedNearnetEntities[0]
+      }
       
       if (
         this.props.nearnetLayers.includes('far_net')
@@ -140,6 +147,7 @@ class _TileOverlayComposer extends Component {
             this.props.nearnetTileData['excluded'],
             tileCaches.nearnet['excluded'],
             this.props.nearnetEntityData,
+            {selected: selectedList},
           ),
           'meta': {
             'zIndex': 3,
@@ -161,7 +169,7 @@ class _TileOverlayComposer extends Component {
             this.props.nearnetTileData['nearnet'],
             tileCaches.nearnet['nearnet'],
             this.props.nearnetEntityData,
-            {},
+            {selected: selectedList},
             ['nearnet'],
           ),
           'meta': {
@@ -405,6 +413,7 @@ const mapStateToProps = (state) => {
     nearnetEntityData: state.mapData.entityData.nearnet,
     nearnetFilters: state.mapLayers.filters.near_net,
     nearnetLayers: state.mapLayers.filters.near_net.location_filters.multiSelect,
+    selectedNearnetEntities: state.selection.nearnetEntities,
     selectedDisplayMode: state.toolbar.rSelectedDisplayMode,
   }
 }

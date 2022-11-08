@@ -28,6 +28,23 @@ export default class TileOverlay {
     this.defaultBadges = defaultBadges
   }
 
+  drawBadge (ctx, badgeId, badge, id, imageCoord, icon) {
+    if (
+      this.defaultBadges.includes(badgeId)
+      || (this.badgeLists[badgeId] && this.badgeLists[badgeId][id])
+    ) {
+      let badgeCoord = {
+        x: imageCoord.x + badge.offset.x + (icon.image.width * badge.offsetMult.w),
+        y: imageCoord.y + badge.offset.y + (icon.image.width * badge.offsetMult.h)
+      }
+      ctx.drawImage(
+        badge.image, 
+        badgeCoord.x, 
+        badgeCoord.y,
+      )
+    }
+  }
+
   renderTileCanvas (ownerDocument, points, tileId) {
     var canvas = ownerDocument.createElement('canvas')
     canvas.width = TileUtils.TILE_SIZE + (2 * TileUtils.TILE_MARGIN)
@@ -49,6 +66,11 @@ export default class TileOverlay {
         x: px.x - icon.offset.x,
         y: px.y - icon.offset.y,
       }
+
+      for (const [badgeId, badge] of Object.entries(iconBadges.back)) {
+        this.drawBadge (ctx, badgeId, badge, id, imageCoord, icon) // TODO: that's a lot of params lets revisit this when we have more time
+      }
+
       ctx.drawImage(
         icon.image, 
         imageCoord.x, 
@@ -56,7 +78,7 @@ export default class TileOverlay {
       )
       // figure badges
       // for each badge
-      for (const [badgeId, badge] of Object.entries(iconBadges)) {
+      for (const [badgeId, badge] of Object.entries(iconBadges.front)) {
         // badgeLists is a collection of id collectiions with the schema 
         //  badgeLists: {
         //    $badgeId: {
@@ -68,20 +90,21 @@ export default class TileOverlay {
         //    or if the value of badgeLists[badgeId][id] is false
         //    the badge will not be drawn for this point, all three are valid means and are usful in different scenarios 
         
-        if (
-          this.defaultBadges.includes(badgeId)
-          || (this.badgeLists[badgeId] && this.badgeLists[badgeId][id])
-        ) {
-          let badgeCoord = {
-            x: imageCoord.x + badge.offset.x + (icon.image.width * badge.offsetMult.w),
-            y: imageCoord.y + badge.offset.y + (icon.image.width * badge.offsetMult.h)
-          }
-          ctx.drawImage(
-            badge.image, 
-            badgeCoord.x, 
-            badgeCoord.y,
-          )
-        }
+        // if (
+        //   this.defaultBadges.includes(badgeId)
+        //   || (this.badgeLists[badgeId] && this.badgeLists[badgeId][id])
+        // ) {
+        //   let badgeCoord = {
+        //     x: imageCoord.x + badge.offset.x + (icon.image.width * badge.offsetMult.w),
+        //     y: imageCoord.y + badge.offset.y + (icon.image.width * badge.offsetMult.h)
+        //   }
+        //   ctx.drawImage(
+        //     badge.image, 
+        //     badgeCoord.x, 
+        //     badgeCoord.y,
+        //   )
+        // }
+        this.drawBadge (ctx, badgeId, badge, id, imageCoord, icon)
       }
     }
 
