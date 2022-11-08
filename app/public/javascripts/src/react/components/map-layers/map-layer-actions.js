@@ -467,6 +467,7 @@ function updateMapLayerFilters (layer, key, value) {
       console.log({
         'nearnet': Object.keys(filteredSets['nearnet']).length,
         'excluded': Object.keys(filteredSets['excluded']).length,
+        'prevLayers': state.mapLayers.filters.near_net.location_filters.multiSelect,
       })
       dispatch(mapDataActions.batchSetNearnetTileData(filteredSets))
     }

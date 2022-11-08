@@ -30,6 +30,7 @@ const AccordionCheckbox = (props) => {
   }
 
   useEffect(() => {
+    console.log(filters[layer][filter.attributeKey].multiSelect)
     if (filters[layer][filter.attributeKey].multiSelect !== checkboxValues) {
       setCheckboxValues(filters[layer][filter.attributeKey].multiSelect)
     }
