@@ -86,6 +86,7 @@ class _TileOverlayComposer extends Component {
     //  we check to see what layers are active, in what state, repopulate with new badge data etc
     // no need to de-init TileOverlays don't have listeners or state
     // ABS: I think badgeLists should be a selector
+    // TODO: mouseEvents should include function so we can do unique functions per layer
     this.tileOverlaysByID = {}
     this.tileOverlaysByZOrder = []
 
@@ -276,7 +277,12 @@ class _TileOverlayComposer extends Component {
 
   onRightClick = (event) => {
     let points = this.getFeaturesAtLatLng(event.latLng, this.getLayersForEvent('rightclick'))
-    this.props.showContextMenuForLocations(points, event)
+    // TODO: make this a dynamic system instead of hardcoded 'if'
+    if ('VIEW' === this.props.selectedDisplayMode) {
+      this.onRightClickNearnet(points, event)
+    } else {
+      this.props.showContextMenuForLocations(points, event)
+    }
   }
 
   onClick = (event) => {
@@ -295,6 +301,15 @@ class _TileOverlayComposer extends Component {
     if (!points.length) return
     let locationInfo = this.props.nearnetEntityData[points[0]]
     this.props.selectNearnetEntities([locationInfo])
+  }
+
+  onRightClickNearnet (points, event) {
+    if (!points.length) return
+    let locations = []
+    for (const locationId of points) {
+      locations.push(this.props.nearnetEntityData[locationId])
+    }
+    this.props.nearnetContextMenu(locations, event)
   }
 
   // stopEventPropigation (event) {
@@ -398,6 +413,7 @@ const mapDispatchToProps = dispatch => ({
   setCursorLocationIds: ids => dispatch(PlanEditorActions.setCursorLocationIds(ids)),
   clearCursorLocationIds: () => dispatch(PlanEditorActions.clearCursorLocationIds()),
   selectNearnetEntities: (locations) => dispatch(SelectionActions.selectNearnetEntities(locations)), // setIsMapClicked?
+  nearnetContextMenu: (locations, event) => dispatch(SelectionActions.nearnetContextMenu(locations, event)),
   showContextMenuForLocations: (featureIds, event) => dispatch(PlanEditorActions.showContextMenuForLocations(featureIds, event)),
 })
 

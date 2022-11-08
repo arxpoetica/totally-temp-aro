@@ -1,6 +1,11 @@
 import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
 import { Notifier } from '../../common/notifications'
+import WktUtils from '../../../shared-utils/wkt-utils'
+import MenuItemFeature from '../context-menu/menu-item-feature'
+import MenuItemAction from '../context-menu/menu-item-action'
+import ContextMenuActions from '../context-menu/actions'
+
 
 function setActiveSelectionMode (selectionModeId) {
   return {
@@ -213,6 +218,22 @@ function selectNearnetEntities(nearnetEntities) {
   }
 }
 
+function nearnetContextMenu (features, event) {
+  return (dispatch) => {
+    var menuItemFeatures = []
+    features.forEach(location => {
+      let menuActions = []
+      menuActions.push(new MenuItemAction('SELECT', 'Select', 'SelectionActions', 'selectNearnetEntities', [location]))
+      menuItemFeatures.push(new MenuItemFeature('LOCATION', 'Location', menuActions))
+    })
+
+    if (menuItemFeatures.length <= 0) return Promise.resolve()
+    const coords = WktUtils.getXYFromEvent(event)
+    dispatch(ContextMenuActions.setContextMenuItems(menuItemFeatures))
+    dispatch(ContextMenuActions.showContextMenu(coords.x, coords.y))
+  }
+}
+
 export default {
   setActiveSelectionMode,
   clearAllPlanTargets,
@@ -230,4 +251,5 @@ export default {
   setObjectIdToMapObject,
   requestPolygonSelect,
   selectNearnetEntities,
+  nearnetContextMenu,
 }
