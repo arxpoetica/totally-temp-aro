@@ -30,7 +30,6 @@ const AccordionCheckbox = (props) => {
   }
 
   useEffect(() => {
-    console.log(multVal)
     if (multVal !== checkboxValues) {
       setCheckboxValues(multVal)
     }
