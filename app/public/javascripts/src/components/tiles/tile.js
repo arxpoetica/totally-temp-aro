@@ -347,6 +347,7 @@ class TileComponentController {
     })
     
     this.overlayRightclickListener = this.mapRef.addListener('rightclick', (event) => {
+      if (this.nearnetLayers && this.nearnetLayers.length) return
       this.getFeaturesUnderLatLng(event.latLng)
       .then((hitFeatures) => {
         hitFeatures.event = event

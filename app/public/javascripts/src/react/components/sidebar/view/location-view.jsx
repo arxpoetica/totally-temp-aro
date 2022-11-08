@@ -12,7 +12,7 @@ const _LocationView = props => {
   let rows = []
   let entity = {}
   if (props.nearnetEntities.length) entity = props.nearnetEntities[0]
-  console.log(entity)
+  //console.log(entity)
   for (const [key, value] of Object.entries(entity)) {
     rows.push(
       <div className="ei-property-item" key={key}>

@@ -255,8 +255,12 @@ class State {
       // ToDo: selection mechanism needs to be cerntalised 
       // set all mapFeatures in redux
       if (
-        service.selectedDisplayMode.getValue() == service.displayModes.VIEW
-        || service.selectedDisplayMode.getValue() == service.displayModes.ANALYSIS
+        (
+          service.selectedDisplayMode.getValue() == service.displayModes.VIEW
+          || service.selectedDisplayMode.getValue() == service.displayModes.ANALYSIS
+        ) && (
+          !service.rNearnetLayers.length
+        )
       ){ 
         // Nearnet TODO: we're going to need to hack this :(
         service.setMapFeatures(hitFeatures)

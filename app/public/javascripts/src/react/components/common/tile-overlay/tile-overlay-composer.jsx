@@ -255,6 +255,8 @@ class _TileOverlayComposer extends Component {
     return layers
   }
 
+// --- //
+
   onMouseMove = (event) => {
     clearTimeout(this.mousemoveTimer)
     this.mousemoveTimer = setTimeout(async() => {
@@ -279,13 +281,11 @@ class _TileOverlayComposer extends Component {
 
   onClick = (event) => {
     let points = this.getFeaturesAtLatLng(event.latLng, this.getLayersForEvent('click'))
-    console.log(event)
-    if (points.length) event.domEvent.stopPropagation()
+    //console.log(event)
+    //if (points.length) this.stopEventPropigation(event)
     this.onClickNearnet(points, event)// TODO: generalize this
   }
   onClickNearnet (points, event) {
-    console.log(points)
-    console.log(this.props.nearnetEntityData)
     // let locations = []
     // for (const locationId of points) {
     //   locations.push(this.props.nearnetEntityData[locationId])
@@ -296,6 +296,12 @@ class _TileOverlayComposer extends Component {
     let locationInfo = this.props.nearnetEntityData[points[0]]
     this.props.selectNearnetEntities([locationInfo])
   }
+
+  // stopEventPropigation (event) {
+  //   event.stop()
+  //   event.domEvent.stopPropagation()
+  //   event.domEvent.cancelBubble = true;
+  // }
 
   addListeners () {
     this.removeListeners()
