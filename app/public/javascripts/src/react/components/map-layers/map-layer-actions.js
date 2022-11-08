@@ -59,6 +59,7 @@ function setLayerVisibility (layer, newVisibility) {
           }
         })
         // TODO: filter UI isn't tied to state, F!
+        console.log('local change')
         if (newVisibility) dispatch( updateMapLayerFilters("near_net", "location_filters", {"multiSelect":[]}) )
       }
     }

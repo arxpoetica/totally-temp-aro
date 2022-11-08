@@ -8,8 +8,8 @@ const AccordionCheckbox = (props) => {
     filter,
     values,
     updateMapLayerFilters,
-    filters,
-    layer
+    multVal,
+    layer,
   } = props
   const [checkboxValues, setCheckboxValues] = useState([])
 
@@ -30,11 +30,11 @@ const AccordionCheckbox = (props) => {
   }
 
   useEffect(() => {
-    console.log(filters[layer][filter.attributeKey].multiSelect)
-    if (filters[layer][filter.attributeKey].multiSelect !== checkboxValues) {
-      setCheckboxValues(filters[layer][filter.attributeKey].multiSelect)
+    console.log(multVal)
+    if (multVal !== checkboxValues) {
+      setCheckboxValues(multVal)
     }
-  }, [filters])
+  }, [multVal])
 
   return (
     <Checkbox.Group
@@ -70,10 +70,15 @@ const AccordionCheckbox = (props) => {
     </Checkbox.Group>
   )
 }
-
-const mapStateToProps = (state) => {
+let defaultMultVal = []
+const mapStateToProps = (state, ownProps) => {
+  // TODO: FIX THIS! 
+  let multVal = defaultMultVal
+  if (state.mapLayers.filters[ownProps.layer][ownProps.filter.attributeKey]) {
+    multVal = state.mapLayers.filters[ownProps.layer][ownProps.filter.attributeKey].multiSelect
+  }
   return {
-    filters: state.mapLayers.filters
+    multVal
   }
 }
 
