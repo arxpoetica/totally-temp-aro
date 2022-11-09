@@ -471,7 +471,7 @@ class TileComponentController {
 
         if (hitFeatures) {
           if (isShiftPressed && hasRoadSegments) {
-            const mapFeatures = this.state.mapFeaturesSelectedEvent.getValue()
+            const mapFeatures = this.mapFeatures
             const priorRoadSegments = [...mapFeatures.roadSegments || []]
 
             // capturing difference because shift + click should also remove
@@ -492,7 +492,7 @@ class TileComponentController {
           // BE SIMPLIFIED INTO A MUCH MORE DISCREET (SINGLE) SELECTION FUNCTION.
           // RIGHT NOW THERE'S 5 OR MORE FUNCTIONS PASSING ALONG THE DATA, BEFORE AND AFTER THIS
           // potential TODO: maybe we can fix it as part of vector tile 2.0
-          const prevHitFeatures = this.state.mapFeaturesSelectedEvent.getValue()
+          const prevHitFeatures = this.mapFeatures
           if (Object.keys(prevHitFeatures).length) {
             // unfortunately, because of data inconsistency,
             // this requires special casing. TODO: simplify the data
@@ -874,6 +874,7 @@ class TileComponentController {
       locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(reduxState),
       selectedSubnetLocations: PlanEditorSelectors.getLocationsForSelectedSubnet(reduxState), 
       selectionIds: reduxState.selection.planEditorFeatures,
+      mapFeatures: reduxState.selection.mapFeatures,
       polygonCoordinates: reduxState.selection.polygonCoordinates,
       rPlanState: reduxState.plan && reduxState.plan.activePlan && reduxState.plan.activePlan.planState,
     }

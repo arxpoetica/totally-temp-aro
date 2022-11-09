@@ -66,8 +66,19 @@ const LocationMapObjects = (props) => {
     removeMapObjects,
     isRulerEnabled,
     cloneSelection,
-    setMapSelection
+    setMapSelection,
+    setMapFeatures,
+    setSelectedLocations
   } = props
+  
+  useEffect(() => {
+    const newSelection = cloneSelection()
+    newSelection.editable.location = {}
+    setMapSelection(newSelection)
+    setMapFeatures({})
+    setSelectedLocations([])
+    return () => removeCreatedMapObjects()
+  }, [])
 
   const prevMapFeatures = usePrevious(mapFeatures)
   useEffect(() => {
@@ -76,13 +87,6 @@ const LocationMapObjects = (props) => {
     if (isRulerEnabled) { return } // disable any click action when ruler is enabled
     if (prevMapFeatures && !dequal(prevMapFeatures, mapFeatures)) { handleMapEntitySelected(mapFeatures) }
   }, [mapFeatures])
-
-  useEffect(() => {
-    const newSelection = cloneSelection()
-    newSelection.editable.location = {}
-    setMapSelection(newSelection)
-    return () => removeCreatedMapObjects()
-  }, [])
 
   useEffect(() => { updateSelectedMapObject(selectedMapObject) }, [selectedMapObject])
 
@@ -340,6 +344,8 @@ const mapDispatchToProps = (dispatch) => ({
   setPlanEditorFeatures: objectIds => dispatch(SelectionActions.setPlanEditorFeatures(objectIds)),
   setContextMenuItems: menuItemFeature => dispatch(ContextMenuActions.setContextMenuItems(menuItemFeature)),
   showContextMenu: (x, y) => dispatch(ContextMenuActions.showContextMenu(x, y)),
+  setMapFeatures: mapFeatures => dispatch(SelectionActions.setMapFeatures(mapFeatures)),
+  setSelectedLocations: locationIds => dispatch(SelectionActions.setLocations(locationIds)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(LocationMapObjects)
