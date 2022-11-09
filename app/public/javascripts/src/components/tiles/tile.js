@@ -521,6 +521,8 @@ class TileComponentController {
               // https://www.wikiwand.com/en/Difference_(set_theory)#/Relative_complement
               const prevFeatures = prevHitFeatures[featureName]
               hitFeatures[featureName] = hitFeatures[featureName].filter(feature => {
+                // safety check for feature existing in prevHitFeatures
+                if (!prevFeatures) return true
                 // FIXME: OH MY HECK GROSS: `prevFeatures.locations` is SOMETIMES an array
                 // and SOMETIMES a Set...WHHHHHUUUUUHHH???? Hence `[...prevFeatures]
                 const found = [...prevFeatures].find(prevItem => prevItem[idName] === feature[idName])
