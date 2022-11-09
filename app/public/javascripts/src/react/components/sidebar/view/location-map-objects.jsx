@@ -65,6 +65,8 @@ const LocationMapObjects = (props) => {
     onDeleteObject,
     removeMapObjects,
     isRulerEnabled,
+    cloneSelection,
+    setMapSelection
   } = props
 
   const prevMapFeatures = usePrevious(mapFeatures)
@@ -75,7 +77,12 @@ const LocationMapObjects = (props) => {
     if (prevMapFeatures && !dequal(prevMapFeatures, mapFeatures)) { handleMapEntitySelected(mapFeatures) }
   }, [mapFeatures])
 
-  useEffect(() => { return () => removeCreatedMapObjects() }, [])
+  useEffect(() => {
+    const newSelection = cloneSelection()
+    newSelection.editable.location = {}
+    setMapSelection(newSelection)
+    return () => removeCreatedMapObjects()
+  }, [])
 
   useEffect(() => { updateSelectedMapObject(selectedMapObject) }, [selectedMapObject])
 
@@ -128,7 +135,6 @@ const LocationMapObjects = (props) => {
       if (!eventXY) { return }
       updateContextMenu(event.latLng, eventXY.x, eventXY.y, mapObject)
     })
-
     createdMapObjects[mapObject.objectId] = mapObject
     setState((state) => ({ ...state, createdMapObjects }))
     setObjectIdToMapObject(createdMapObjects)
@@ -327,6 +333,8 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToProps = (dispatch) => ({
+  cloneSelection: () => dispatch(SelectionActions.cloneSelection()),
+  setMapSelection: (mapSelection) => dispatch(SelectionActions.setMapSelection(mapSelection)),
   setSelectedMapObject: mapObject => dispatch(SelectionActions.setSelectedMapObject(mapObject)),
   setObjectIdToMapObject: objectIdToMapObject => dispatch(SelectionActions.setObjectIdToMapObject(objectIdToMapObject)),
   setPlanEditorFeatures: objectIds => dispatch(SelectionActions.setPlanEditorFeatures(objectIds)),
