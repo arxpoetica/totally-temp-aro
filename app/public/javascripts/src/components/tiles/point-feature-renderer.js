@@ -55,13 +55,13 @@ class PointFeatureRenderer {
 
     // once again not really the right place for this
     //console.log({_data_type: feature.properties._data_type, nearnetLayers, len:nearnetLayers.length})
-    if (
-      feature.properties._data_type === 'location'
-      && selectedDisplayMode === displayModes.VIEW
-      && nearnetLayers.length
-    ) {
-      return
-    }
+    // if (
+    //   feature.properties._data_type === 'location'
+    //   && selectedDisplayMode === displayModes.VIEW
+    //   && nearnetLayers.length
+    // ) {
+    //   return
+    // }
     // this may not be in the right place but this whole system is a mess so ...
     if (selectedDisplayMode === displayModes.EDIT_PLAN) {
       let newGlobalAlpha = 0.333 // equipment

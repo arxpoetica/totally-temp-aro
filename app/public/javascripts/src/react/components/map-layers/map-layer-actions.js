@@ -59,10 +59,20 @@ function setLayerVisibility (layer, newVisibility) {
           }
         })
         // TODO: filter UI isn't tied to state, F!
-        console.log('local change')
         if (newVisibility) dispatch( updateMapLayerFilters("near_net", "location_filters", {"multiSelect":[]}) )
       }
     }
+  }
+}
+
+function turnOffAllLocations () {
+  return (dispatch, getState) => {
+    let locationLayers = getState().mapLayers.location
+    batch(() => {
+      locationLayers.forEach(layer => {
+        dispatch(setLayerVisibility(layer, false))
+      })
+    })
   }
 }
 
@@ -420,7 +430,6 @@ const nearnetFilterProps = {
 
 // helper, maybe make a utility
 function _filterEntitiesByProps (set, filters) {
-  console.log({filters, set})
   var filteredSets = {
     'nearnet': {},
     'excluded': {}
@@ -441,10 +450,7 @@ function _filterEntitiesByProps (set, filters) {
 
     if (doInclude) {
       filteredSets[entity.plannedType][id] = entity
-    }// else {
-    //   console.log('nope')
-    //   console.log(entity)
-    // }
+    }
   }
 
   return filteredSets
@@ -465,12 +471,17 @@ function updateMapLayerFilters (layer, key, value) {
       //  and state.mapData.tileData.nearnet.excluded
       //  OR should that happen in a component? (reducer doesn't work cause that shouldn't have side effects)
       let filteredSets = _filterEntitiesByProps(nearnetLocations, newNearnetFilters)
-      console.log({
-        'nearnet': Object.keys(filteredSets['nearnet']).length,
-        'excluded': Object.keys(filteredSets['excluded']).length,
-        'prevLayers': state.mapLayers.filters.near_net.location_filters.multiSelect,
+      
+      batch(() => {
+        dispatch(mapDataActions.batchSetNearnetTileData(filteredSets))
+        if ( // not a fan of this FIX later
+          layer === "near_net"
+          && key === "location_filters"
+          && value.multiSelect.length
+        ) {
+          dispatch(turnOffAllLocations())
+        }
       })
-      dispatch(mapDataActions.batchSetNearnetTileData(filteredSets))
     }
     if (key) {
       dispatch({
@@ -483,6 +494,7 @@ function updateMapLayerFilters (layer, key, value) {
 
 export default {
   setLayerVisibility,
+  turnOffAllLocations,
   setNetworkEquipmentLayerVisibility,
   setNetworkEquipmentSubtypeVisibility,
   setCableConduitVisibility,
