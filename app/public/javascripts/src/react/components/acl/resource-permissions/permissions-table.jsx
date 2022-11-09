@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
-import reduxStore from '../../../../redux-store'
-import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
-// import { PropTypes } from 'prop-types'
 import aclActions from '../acl-actions.js'
-// import { DropdownList } from 'react-widgets'
-
 import { Select, Group, Button } from '@mantine/core'
 
 const sortableColumns = { 'NAME': 'name', 'PERMISSIONS': 'permissions' }
@@ -15,89 +10,68 @@ export const PermissionsTable = (props) => {
   const [sortedRows, setSortedRows] = useState([])
   const [isOrderDesc, setIsOrderDesc] = useState(false)
   const [selectedActorId, setSelecedActorId] = useState('')
-  const [list, setList] = useState([])
+  const [actorList, setActorList] = useState([])
 
+  // runs on first render to make sure we have acl
   useEffect(() => {
-    console.log('get')
     props.getAcl(props.resource.identifier)
   }, [])
 
+  // runs on changes to order, column and props
+  // creates rows and columns to display
   useEffect(() => {
-    console.log('other')
-    formatSystemActors()
-    render()
-  }, [props.acl, isOrderDesc, selectedColumn])
-
-  // useEffect(() => {
-  //   render()
-  // })
-
-  const render = () => {
-    console.log('render', props.acl)
-    var userLists = {}
-    if (props.isOwner) {
-      // filterSystemActors(Object.values(props.systemActors))
-      Object.values(props.systemActors).forEach(systemActor => {
-        // filter out users already in the list
-        var index = props.acl.findIndex(element => element.systemActorId === systemActor.id)
-        if (index === -1) {
-          var actorClone = { ...systemActor }
-
-          if (!userLists.hasOwnProperty(actorClone.type)) userLists[actorClone.type] = []
-          if (!actorClone.hasOwnProperty('name')) {
-            actorClone.name = actorClone.id // default
-            if (actorClone.hasOwnProperty('firstName') && actorClone.hasOwnProperty('lastName')) actorClone.name = `${actorClone.firstName} ${actorClone.lastName}`
-          }
-          userLists[actorClone.type].push(actorClone)
+    const createRows = () => {
+      const rows = props.acl.slice(0)
+      
+      rows.sort((a, b) => {
+        var aVal = ''
+        var bVal = ''
+        if (selectedColumn === sortableColumns.NAME) {
+          aVal = getActorNameById(a.systemActorId)
+          bVal = getActorNameById(b.systemActorId)
+        } else if (selectedColumn === sortableColumns.PERMISSIONS) {
+          aVal = props.authRolesByPermission[a.rolePermissions] ? props.authRolesByPermission[a.rolePermissions].displayName : ''
+          bVal = props.authRolesByPermission[b.rolePermissions] ? props.authRolesByPermission[b.rolePermissions].displayName : ''
         }
+        if (isOrderDesc) {
+          var holder = aVal
+          aVal = bVal
+          bVal = holder
+        }
+        return aVal.toLowerCase() > bVal.toLowerCase() ? 1 : -1
       })
+      setSortedRows(rows)
     }
-    const rows = props.acl.slice(0)
-    
-    rows.sort((a, b) => {
-      var aVal = ''
-      var bVal = ''
-      if (selectedColumn === sortableColumns.NAME) {
-        aVal = getActorNameById(a.systemActorId)
-        bVal = getActorNameById(b.systemActorId)
-      } else if (selectedColumn === sortableColumns.PERMISSIONS) {
-        aVal = props.authRolesByPermission[a.rolePermissions] ? props.authRolesByPermission[a.rolePermissions].displayName : ''
-        bVal = props.authRolesByPermission[b.rolePermissions] ? props.authRolesByPermission[b.rolePermissions].displayName : ''
-        // aVal = props.authRolesByPermission[a.rolePermissions].displayName
-        // bVal = props.authRolesByPermission[b.rolePermissions].displayName
-      }
-      if (isOrderDesc) {
-        var holder = aVal
-        aVal = bVal
-        bVal = holder
-      }
-      return aVal.toLowerCase() > bVal.toLowerCase() ? 1 : -1
-    })
-    setSortedRows(rows)
-  }
 
-  const formatSystemActors = () => {
-    const newList = Object.values(props.systemActors).filter((actor) => {
-      const index = props.acl.findIndex((permission) => permission.systemActorId === actor.id)
-      return index === -1 ? true : false
-    }).map((actor) => {
-      const newActor = {}
-      newActor.value = String(actor.id); //convert to string for mantine
-      newActor.group = actor.type
-      if (actor.type === 'group') {
-        newActor.label = actor.name
+    createRows()
+  }, [props.acl, props.systemActors, isOrderDesc, selectedColumn])
+
+  // runs on changes to acl and system actors
+  // creates format to be used in select for adding
+  useEffect(() => {
+    const formatSystemActors = () => {
+      const newList = Object.values(props.systemActors).filter((actor) => {
+        const index = props.acl.findIndex((permission) => permission.systemActorId === actor.id)
+        return index === -1 ? true : false
+      }).map((actor) => {
+        const newActor = {}
+        newActor.value = String(actor.id); //convert to string for mantine
+        newActor.group = actor.type
+        if (actor.type === 'group') {
+          newActor.label = actor.name
+          
+          return newActor
+        }
+        newActor.label = actor.firstName + ' ' + actor.lastName
         
         return newActor
-      }
-      newActor.label = actor.firstName + ' ' + actor.lastName
-      
-      return newActor
-    })
+      })
+  
+      setActorList(newList)
+    }
 
-
-
-    setList(newList)
-  }
+    formatSystemActors()
+  }, [props.systemActors, props.acl])
 
   const renderDataRows = () => {
     var jsx = []
@@ -164,9 +138,8 @@ export const PermissionsTable = (props) => {
   }
 
   const addAuthItem = (systemActorId) => {
-
     var permissionsBit = props.authRoles['RESOURCE_VIEWER'].permissions
-    props.setUserAcl(props.resource.identifier, systemActorId, permissionsBit)
+    props.setUserAcl(props.resource.identifier, Number(systemActorId), permissionsBit)
   }
 
 
@@ -202,14 +175,10 @@ export const PermissionsTable = (props) => {
         </tbody>
       </table>
       <div>
-        {/* {props.isOwner
-          ? <SearchableSelect optionLists={{ ...userLists }} resultsMax={10} onButton={item => { addAuthItem(item.id) }} btnLabel='Add' />
-          : null
-        } */}
         {props.isOwner
           ? <Group>
               <Select
-                data={list}
+                data={actorList}
                 value={selectedActorId}
                 onChange={(value) => setSelecedActorId(value)}
                 searchable
