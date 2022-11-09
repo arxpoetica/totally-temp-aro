@@ -448,7 +448,7 @@ function _filterEntitiesByProps (set, filters) {
       }
     }
 
-    if (doInclude) {
+    if (doInclude && entity.plannedType in filteredSets) {
       filteredSets[entity.plannedType][id] = entity
     }
   }
