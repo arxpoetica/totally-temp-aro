@@ -182,6 +182,28 @@ class _TileOverlayComposer extends Component {
         this.tileOverlaysByZOrder.push(this.tileOverlaysByID['NEARNET_NEARNET'])
       }
 
+      if (
+        this.props.nearnetLayers.length
+        && 'routed' in this.props.nearnetTileData
+      ) {
+        this.tileOverlaysByID['NEARNET_ROUTED'] = {
+          'id': 'NEARNET_ROUTED',
+          'overlay': new TileOverlay(
+            this.props.nearnetTileData['routed'],
+            tileCaches.nearnet['routed'],
+            this.props.nearnetEntityData,
+            {selected: selectedList},
+          ),
+          'meta': {
+            'zIndex': 5,
+            //'isOn': false,
+            'opacity': 1.0,
+            'mouseEvents': ['click', 'rightclick'],
+          },
+        }
+        this.tileOverlaysByZOrder.push(this.tileOverlaysByID['NEARNET_ROUTED'])
+      }
+
     }
   }
 
