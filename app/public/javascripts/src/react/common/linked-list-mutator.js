@@ -47,7 +47,7 @@ let removeLinkage = (linkedList, id) => {
     // it's the head
     linkedList._head = linkedList[id].next
   }
-
+  
   if (linkedList[id].next) {
     linkedList[ linkedList[id].next ].prev = linkedList[id].prev // could be null if it's the head, we're fine with that
   } else {
@@ -152,6 +152,12 @@ LinkedListMutator.removeTail = (linkedList) => {
 }
 
 LinkedListMutator.shiftToHead = (linkedList, id) => {
+  // console.log(` ${id} - shift to head - `)
+  // let llClone = JSON.parse(JSON.stringify(linkedList))
+  // console.log(llClone)
+  // console.log(llClone[id])
+  // console.log(llClone[ llClone[id].prev ])
+  // console.log(llClone[ llClone[id].next ])
   return LinkedListMutator.shiftTo(linkedList, linkedList._head, id)
 }
 

@@ -18,11 +18,6 @@ TileDataMutator.getNewTileData = () => {return {}} // just here for expansibilit
 //   return tileData
 // }
 
-TileDataMutator.clearCacheForWorldCoord = (tileCache, worldCoord) => {
-  let allTileIds = TileUtils.getAllTileIdsForWorldCoord(worldCoord)
-  tileCache.deleteTiles(allTileIds)
-}
-
 TileDataMutator.addPoint = (tileData, tileCache, pointId, worldCoord) => {
   //get tile id from worldCoord
   let allTileIds = TileUtils.getAllTileIdsForWorldCoord(worldCoord)

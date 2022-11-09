@@ -1,6 +1,6 @@
 import {LinkedListMutator as LLM} from "../../../common/linked-list-mutator"
 import { klona } from 'klona'
-
+import TileUtils from './tile-overlay-utils' // I'm not sure this belongsa here
 /*
 there will be a global cache object that will store caches as such
 tileCache: {
@@ -89,6 +89,11 @@ class TileCache {
       }
       this._cullItems = LLM.remove(this._cullItems, this._tileIdToCacheId(tileId))
     })
+  }
+
+  deleteTilesForWorldCoord = (worldCoord) => {
+    let allTileIds = TileUtils.getAllTileIdsForWorldCoord(worldCoord)
+    this.deleteTiles(allTileIds)
   }
 
   addTile (tile, tileId) {

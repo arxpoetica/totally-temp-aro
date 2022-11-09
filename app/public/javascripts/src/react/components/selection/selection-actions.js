@@ -7,7 +7,6 @@ import MenuItemAction from '../context-menu/menu-item-action'
 import ContextMenuActions from '../context-menu/actions'
 import { tileCaches } from '../common/tile-overlay/tile-cache'
 import TileUtils from '../common/tile-overlay/tile-overlay-utils'
-import TileDataMutator from '../common/tile-overlay/tile-data-mutator'
 
 
 function setActiveSelectionMode (selectionModeId) {
@@ -145,8 +144,6 @@ function setLocations (locationIds) {
 }
 
 function setMapFeatures (mapFeatures) {
-  console.log(mapFeatures)
-  //return { type: null } // Nearnet TODO: TEMP: for testing nearnet map click DELETE THIS
   return {
     type: Actions.SELECTION_SET_MAP_FEATURES,
     payload: mapFeatures
@@ -220,10 +217,10 @@ function selectNearnetEntities(nearnetEntities) {
   return (dispatch, getState) => {
     //TODO: fix this so we don't have to use the wholesale reset
     // console.log(tileCaches)
+
     // const state = getState()
     // let prevSelection = null
     // if (state.selection.nearnetEntities.length) prevSelection = state.selection.nearnetEntities[0]
-    
     // // get world coords for prev point and next clear cache for both if exist
     // let nextSelection = null
     // if (nearnetEntities.length) nextSelection = nearnetEntities[0]
@@ -232,12 +229,14 @@ function selectNearnetEntities(nearnetEntities) {
     //     let worldCoord = TileUtils.latLngToWorldCoord(
     //       new google.maps.LatLng(selection.point.latitude, selection.point.longitude)
     //     )
-    //     //TileDataMutator.clearCacheForWorldCoord(tileCaches['nearnet']['nearnet'], worldCoord)
-    //     TileDataMutator.clearCacheForWorldCoord(tileCaches['nearnet']['excluded'], worldCoord)
+    //     tileCaches['nearnet']['nearnet'].deleteTilesForWorldCoord(worldCoord)
+    //     tileCaches['nearnet']['excluded'].deleteTilesForWorldCoord(worldCoord)
     //   }
     // }
-    tileCaches['nearnet']['nearnet'].clear()
-    tileCaches['nearnet']['excluded'].clear()
+
+    //tileCaches['nearnet']['nearnet'].clear()
+    //tileCaches['nearnet']['excluded'].clear()
+    
     dispatch({
       type: Actions.SELECTION_SET_NEARNET_ENTITIES,
       payload: nearnetEntities, 
