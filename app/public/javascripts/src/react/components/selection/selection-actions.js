@@ -234,8 +234,8 @@ function selectNearnetEntities(nearnetEntities) {
     //   }
     // }
 
-    //tileCaches['nearnet']['nearnet'].clear()
-    //tileCaches['nearnet']['excluded'].clear()
+    tileCaches['nearnet']['nearnet'].clear()
+    tileCaches['nearnet']['excluded'].clear()
     
     dispatch({
       type: Actions.SELECTION_SET_NEARNET_ENTITIES,
