@@ -185,7 +185,10 @@ export const PermissionsTable = (props) => {
                 nothingFound="No Matches"
                 clearable
               />
-              <Button type='button' onClick={() => addAuthItem(selectedActorId)}>Add</Button> 
+              <Button type='button' onClick={() => {
+                addAuthItem(selectedActorId)
+                setSelecedActorId('')
+              }}>Add</Button> 
             </Group>
           : null
         }
