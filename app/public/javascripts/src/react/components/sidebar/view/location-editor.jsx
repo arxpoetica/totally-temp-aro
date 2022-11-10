@@ -125,6 +125,7 @@ export const LocationEditor = (props) => {
     clearSelectedLocations,
     cloneSelection,
     setMapSelection,
+    setMapFeatures,
     setPlanEditorFeatures,
     selectedDisplayMode,
     setDeletedMapObjects,
@@ -142,6 +143,7 @@ export const LocationEditor = (props) => {
       const newSelection = cloneSelection()
       newSelection.editable.location = {}
       setMapSelection(newSelection)
+      setMapFeatures({})
       mapRef.setOptions({ draggableCursor: null })
     }
   }, [])
@@ -1024,6 +1026,7 @@ const mapDispatchToProps = (dispatch) => ({
   deleteLocationWithId: objectId => dispatch(ViewSettingsActions.deleteLocationWithId(objectId)),
   activeViewModePanel: displayPanel => dispatch(ToolBarActions.activeViewModePanel(displayPanel)),
   setDeletedMapObjects: (mapObject) => dispatch(ToolBarActions.setDeletedMapObjects(mapObject)),
+  setMapFeatures: mapFeatures => dispatch(SelectionActions.setMapFeatures(mapFeatures)),
 })
 
 export default wrapComponentWithProvider(reduxStore, LocationEditor, mapStateToProps, mapDispatchToProps)
