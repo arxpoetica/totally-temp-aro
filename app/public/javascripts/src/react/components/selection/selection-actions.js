@@ -234,9 +234,13 @@ function selectNearnetEntities(nearnetEntities) {
     //   }
     // }
 
-    tileCaches['nearnet']['nearnet'].clear()
-    tileCaches['nearnet']['excluded'].clear()
-    
+    //tileCaches['nearnet']['nearnet'].clear()
+    //tileCaches['nearnet']['excluded'].clear()
+    for (let cache of Object.values(tileCaches['nearnet'])) {
+      cache.clear()
+    }
+
+
     dispatch({
       type: Actions.SELECTION_SET_NEARNET_ENTITIES,
       payload: nearnetEntities, 
