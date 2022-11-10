@@ -385,7 +385,7 @@ class _TileOverlayComposer extends Component {
   }
 
   componentDidUpdate(/*prevProps, prevState*/) {
-    console.log(' ------- TOS updated ------- ')
+    //console.log(' ------- TOS updated ------- ')
     this.refreshTiles() // will init if it can and hasn't yet
   }
 
