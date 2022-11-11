@@ -54,6 +54,9 @@ let removeLinkage = (linkedList, id) => {
     // it's the tail
     linkedList._tail = linkedList[id].prev // could be null if it's the onlt one, we're fine with that
   }
+
+  linkedList[id].prev = null
+  linkedList[id].next = null
   return linkedList
 }
 
@@ -86,6 +89,7 @@ let insertLinkage = (linkedList, atId, id) => {
       linkedList[id].prev = null
       linkedList._head = id
     }
+    linkedList[id].next = atId
     linkedList[atId].prev = id
   }
   return linkedList
@@ -113,7 +117,7 @@ LinkedListMutator.insertAt = (linkedList, atId, insertId, insertData) => {
     return LinkedListMutator.shiftTo(linkedList, atId, insertId)
   }
   // new entry
-  if (!atId || linkedList[atId]) atId = null // if blank or invalid atId: add to end
+  if (!atId || !linkedList[atId]) atId = null // if blank or invalid atId: add to end
   linkedList[insertId] = getNewLink(null, null, insertData)
   linkedList = insertLinkage(linkedList, atId, insertId)
   linkedList._count++
@@ -121,7 +125,11 @@ LinkedListMutator.insertAt = (linkedList, atId, insertId, insertData) => {
 }
 
 LinkedListMutator.shiftTo = (linkedList, atId, id) => {
-  if (!linkedList[id] || !linkedList[atId]) return linkedList
+  if (
+    !linkedList[id] 
+    || !linkedList[atId]
+    || id === atId
+  ) return linkedList
   linkedList = removeLinkage(linkedList, id)
   linkedList = insertLinkage(linkedList, atId, id)
   return linkedList
@@ -152,6 +160,7 @@ LinkedListMutator.removeTail = (linkedList) => {
 }
 
 LinkedListMutator.shiftToHead = (linkedList, id) => {
+  //debugger
   // console.log(` ${id} - shift to head - `)
   // let llClone = JSON.parse(JSON.stringify(linkedList))
   // console.log(llClone)
