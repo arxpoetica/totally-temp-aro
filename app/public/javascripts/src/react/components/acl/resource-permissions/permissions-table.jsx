@@ -6,6 +6,19 @@ import { Select, Group, Button } from '@mantine/core'
 const sortableColumns = { NAME: 'name', PERMISSIONS: 'permissions' }
 
 export const PermissionsTable = (props) => {
+  const {
+    isOwner,
+    acl,
+    resource,
+    authRolesByPermission,
+    systemActors,
+    authRoles,
+    filteredAuthRoles,
+    getAcl,
+    setUserAcl,
+    deleteUserAcl,
+  } = props
+  
   const [selectedColumn, setSelectedColumn] = useState(
     sortableColumns.PERMISSIONS,
   )
@@ -16,14 +29,14 @@ export const PermissionsTable = (props) => {
 
   // runs on first render to make sure we have acl
   useEffect(() => {
-    props.getAcl(props.resource.identifier)
+    getAcl(resource.identifier)
   }, [])
 
   // runs on changes to order, column and props
   // creates rows and columns to display
   useEffect(() => {
     const createRows = () => {
-      const rows = props.acl.slice(0)
+      const rows = acl.slice(0)
 
       rows.sort((a, b) => {
         var aVal = ''
@@ -32,11 +45,11 @@ export const PermissionsTable = (props) => {
           aVal = getActorNameById(a.systemActorId)
           bVal = getActorNameById(b.systemActorId)
         } else if (selectedColumn === sortableColumns.PERMISSIONS) {
-          aVal = props.authRolesByPermission[a.rolePermissions]
-            ? props.authRolesByPermission[a.rolePermissions].displayName
+          aVal = authRolesByPermission[a.rolePermissions]
+            ? authRolesByPermission[a.rolePermissions].displayName
             : ''
-          bVal = props.authRolesByPermission[b.rolePermissions]
-            ? props.authRolesByPermission[b.rolePermissions].displayName
+          bVal = authRolesByPermission[b.rolePermissions]
+            ? authRolesByPermission[b.rolePermissions].displayName
             : ''
         }
         if (isOrderDesc) {
@@ -50,15 +63,15 @@ export const PermissionsTable = (props) => {
     }
 
     createRows()
-  }, [props.acl, props.systemActors, isOrderDesc, selectedColumn])
+  }, [acl, systemActors, isOrderDesc, selectedColumn])
 
   // runs on changes to acl and system actors
   // creates format to be used in select for adding
   useEffect(() => {
     const formatSystemActors = () => {
-      const newList = Object.values(props.systemActors)
+      const newList = Object.values(systemActors)
         .filter((actor) => {
-          const index = props.acl.findIndex(
+          const index = acl.findIndex(
             (permission) => permission.systemActorId === actor.id,
           )
           return index === -1 ? true : false
@@ -81,7 +94,7 @@ export const PermissionsTable = (props) => {
     }
 
     formatSystemActors()
-  }, [props.systemActors, props.acl])
+  }, [systemActors, acl])
 
   const renderDataRows = () => {
     var jsx = []
@@ -92,7 +105,7 @@ export const PermissionsTable = (props) => {
   }
 
   const renderDataRow = (dataItem) => {
-    const systemActor = props.systemActors[dataItem.systemActorId]
+    const systemActor = systemActors[dataItem.systemActorId]
     if (!systemActor) return
     if (!systemActor.hasOwnProperty('name'))
       systemActor.name = `${systemActor.firstName} ${systemActor.lastName}`
@@ -100,7 +113,7 @@ export const PermissionsTable = (props) => {
       <tr key={dataItem.systemActorId}>
         <td>{systemActor.name}</td>
         <td>
-          {props.isOwner ? (
+          {isOwner ? (
             <select
               className="form-control"
               onChange={(event) => {
@@ -108,7 +121,7 @@ export const PermissionsTable = (props) => {
               }}
               value={dataItem.rolePermissions}
             >
-              {Object.values(props.filteredAuthRoles).map((role) => (
+              {Object.values(filteredAuthRoles).map((role) => (
                 <option
                   key={`data-item-${dataItem.systemActorId}-dropdown-option-${role.id}`}
                   value={role.permissions}
@@ -118,7 +131,7 @@ export const PermissionsTable = (props) => {
               ))}
             </select>
           ) : (
-            Object.values(props.filteredAuthRoles).filter(
+            Object.values(filteredAuthRoles).filter(
               (role) => role.permissions === dataItem.rolePermissions,
             )[0].displayName
           )}
@@ -133,7 +146,7 @@ export const PermissionsTable = (props) => {
             data-toggle="tooltip"
             data-placement="bottom"
             title="Delete"
-            disabled={props.isOwner ? null : 'disabled'}
+            disabled={isOwner ? null : 'disabled'}
           >
             <i className="fa ei-button-icon fa-trash-alt" />
           </button>
@@ -143,7 +156,7 @@ export const PermissionsTable = (props) => {
   }
 
   const getActorNameById = (id) => {
-    const systemActor = props.systemActors[id]
+    const systemActor = systemActors[id]
     if (!systemActor) return ''
     return (
       systemActor.name || `${systemActor.firstName} ${systemActor.lastName}`
@@ -161,20 +174,16 @@ export const PermissionsTable = (props) => {
 
   const onSelectRoll = (event, systemActorId) => {
     var permissionsBit = parseInt(event.target.value)
-    props.setUserAcl(props.resource.identifier, systemActorId, permissionsBit)
+    setUserAcl(resource.identifier, systemActorId, permissionsBit)
   }
 
   const deleteAuthItem = (event, systemActorId) => {
-    props.deleteUserAcl(props.resource.identifier, systemActorId)
+    deleteUserAcl(resource.identifier, systemActorId)
   }
 
   const addAuthItem = (systemActorId) => {
-    var permissionsBit = props.authRoles['RESOURCE_VIEWER'].permissions
-    props.setUserAcl(
-      props.resource.identifier,
-      Number(systemActorId),
-      permissionsBit,
-    )
+    var permissionsBit = authRoles['RESOURCE_VIEWER'].permissions
+    setUserAcl(resource.identifier, Number(systemActorId), permissionsBit)
   }
 
   return (
@@ -239,12 +248,13 @@ export const PermissionsTable = (props) => {
         <tbody>{renderDataRows()}</tbody>
       </table>
       <div>
-        {props.isOwner ? (
+        {isOwner ? (
           <Group>
             <Select
               data={actorList}
               value={selectedActorId}
               onChange={(value) => setSelecedActorId(value)}
+              placeholder="Select"
               searchable
               nothingFound="No Matches"
               clearable
