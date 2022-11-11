@@ -63,7 +63,6 @@ import ResourcePermissions from '../react/components/acl/resource-permissions/re
 import ProjectPermissions from '../react/components/project-template/project-permissions.jsx'
 import EtlTemplates from '../react/components/etl-templates/etl-templates.jsx'
 import PermissionsTable from '../react/components/acl/resource-permissions/permissions-table.jsx'
-import SearchableSelect from '../react/components/common/searchable-select.jsx'
 import PlanningConstraintsEditor from '../react/components/resource-manager/planning-constraints-editor.jsx'
 import FusionEditor from '../react/components/resource-manager/fusion-editor.jsx'
 import NetworkArchitectureEditor from '../react/components/resource-manager/network-architecture-editor.jsx'
@@ -147,7 +146,6 @@ app
   .component('rPermissionsTable', react2angular(PermissionsTable))
   .component('rProjectPermissions', react2angular(ProjectPermissions))
   .component('rEtlTemplates', react2angular(EtlTemplates))
-  .component('rSearchableSelect', react2angular(SearchableSelect))
   .component('rPlanningConstraintsEditor', react2angular(PlanningConstraintsEditor, ['onDiscard']))
   .component('rFusionEditor', react2angular(FusionEditor, ['onDiscard']))
   .component('rNetworkArchitectureEditor', react2angular(NetworkArchitectureEditor, ['onDiscard']))
