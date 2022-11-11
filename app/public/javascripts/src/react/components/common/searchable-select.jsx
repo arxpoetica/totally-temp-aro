@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 
+// TODO: This isn't being used anywhere anymore. Should it just be deleted?
+
 export class SearchableSelect extends Component {
   constructor (props) {
     super(props)
