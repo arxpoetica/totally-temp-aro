@@ -316,6 +316,7 @@ class _TileOverlayComposer extends Component {
   }
 
   onClick = (event) => {
+    // TODO: at the moment only nearnet layers use click - but this is cooincidental, fix
     let points = this.getFeaturesAtLatLng(event.latLng, this.getLayersForEvent('click'))
     //console.log(event)
     //if (points.length) this.stopEventPropigation(event)

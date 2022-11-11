@@ -212,12 +212,8 @@ function requestPolygonSelect(polygonCoordinates) {
 }
 
 function selectNearnetEntities(nearnetEntities) {
-  // TODO: clear ONLY effected tiles
   // TODO: not sure clear cache belongs here
   return (dispatch, getState) => {
-    //TODO: fix this so we don't have to use the wholesale reset
-    // console.log(tileCaches)
-
     const state = getState()
     let prevSelection = null
     if (state.selection.nearnetEntities.length) prevSelection = state.selection.nearnetEntities[0]
@@ -229,17 +225,11 @@ function selectNearnetEntities(nearnetEntities) {
         let worldCoord = TileUtils.latLngToWorldCoord(
           new google.maps.LatLng(selection.point.latitude, selection.point.longitude)
         )
-        //tileCaches['nearnet']['nearnet'].deleteTilesForWorldCoord(worldCoord)
-        //tileCaches['nearnet']['excluded'].deleteTilesForWorldCoord(worldCoord)
         for (let cache of Object.values(tileCaches['nearnet'])) {
           cache.deleteTilesForWorldCoord(worldCoord)
         }
       }
     }
-
-    // for (let cache of Object.values(tileCaches['nearnet'])) {
-    //   cache.clear()
-    // }
 
     dispatch({
       type: Actions.SELECTION_SET_NEARNET_ENTITIES,
