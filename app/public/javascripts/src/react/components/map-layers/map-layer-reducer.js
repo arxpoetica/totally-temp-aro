@@ -350,12 +350,15 @@ function setAngularMapLayerSubject(state, mapLayerSubject) {
 }
 
 function updateMapLayerFilters(state, { layer, key, value }) {
-  const newState = { ...state }
-  if (!newState.filters[layer]) newState.filters[layer] = {}
-  newState.filters[layer][key] = value
   return {
     ...state,
-    filters: newState.filters
+    filters: {
+      ...state.filters,
+      [layer]: {
+        ...state.filters[layer],
+        [key]: value
+      } 
+    }
   }
 }
 

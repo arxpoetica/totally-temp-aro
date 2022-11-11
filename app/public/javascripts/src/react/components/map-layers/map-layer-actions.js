@@ -492,6 +492,24 @@ function updateMapLayerFilters (layer, key, value) {
   }
 }
 
+function setAndRequestPCM () {
+  return (dispatch, getState) => {
+    const state = getState()
+    const PCM = state.plan.resourceItems.planning_constraints_manager
+    AroHttp.get(`service/v2/resource-manager/${PCM.selectedManager.id}/planning_constraints_manager`)
+      .then((response) => {
+        dispatch({
+          type: Actions.RESOURCE_MANAGER_SET_MANAGER_DEFINITION,
+          payload: {
+            resourceManagerId: PCM.selectedManager.id,
+            resourceManagerName: PCM.selectedManager.name,
+            definition: response.data
+          }
+        })
+      })
+  }
+}
+
 export default {
   setLayerVisibility,
   turnOffAllLocations,
@@ -522,5 +540,6 @@ export default {
   setActiveMapLayers,
   setAngularMapLayerSubject,
   setMapReadyPromise,
-  updateMapLayerFilters
+  updateMapLayerFilters,
+  setAndRequestPCM,
 }

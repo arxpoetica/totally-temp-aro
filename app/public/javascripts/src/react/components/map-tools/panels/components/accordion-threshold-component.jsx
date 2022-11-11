@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import { klona } from 'klona'
 import { connect } from 'react-redux'
-import { Slider, RangeSlider, Switch } from '@mantine/core';
-import MapLayerActions from '../../../map-layers/map-layer-actions'
+import { Slider, RangeSlider } from '@mantine/core';
 
 const AccordionThreshold = (props) => {
   const {
     filter,
-    updateMapLayerFilters,
-    layer
+    onChange,
+    data
   } = props
-  const [sliderValue, setSliderValue] = useState(filter.value)
-  const [noMax, setNoMax] = useState(true)
-  const [noMin, setNoMin] = useState(true)
+
   const [Component, setComponent] = useState(RangeSlider)
+  const [nonDebouncedValue, setNonDebouncedValue] = useState(filter.value)
 
   const marks = [.25, .5, .75].map(markSteps => {
     const value = filter.maxValue * markSteps
@@ -22,15 +20,18 @@ const AccordionThreshold = (props) => {
 
   const createLabel = (value) => {
     let newValue = klona(value);
-    let isNoMax = false;
-    let isNoMin = false;
-    if (Array.isArray(sliderValue)) {
-      isNoMax = !!(noMax && newValue === sliderValue[1] && filter.unboundedMax)
-      isNoMin = !!(noMin && newValue === sliderValue[0] && filter.unboundedMin)
-      if (isNoMax) newValue = "No Max"
-      if (isNoMin) newValue = "No Min"
+    let customValue = false
+    if (Array.isArray(data[filter.type])) {
+      if (data.noMax && value === data[filter.type][1] && filter.unboundedMax) {
+        newValue = "No Max"
+        customValue = true
+      }
+      if (data.noMin && value === data[filter.type][0] && filter.unboundedMin) {
+        newValue = "No Min"
+        customValue = true
+      }
     }
-    return (isNoMax || isNoMin)
+    return customValue
       ? newValue
       : `${filter.labelPrefix ? filter.labelPrefix : ''}${value.toLocaleString('en-US')}${filter.labelSuffix ? filter.labelSuffix : ''}`
   }
@@ -51,53 +52,58 @@ const AccordionThreshold = (props) => {
 
   useEffect(() => {
     setComponent(filter.type === 'rangeThreshold' ? RangeSlider : Slider)
-    const payload = createPayload(sliderValue, noMax, noMin)
-    updateMapLayerFilters(layer, filter.attributeKey, payload)
+    const payload = createPayload(filter.value, true, true)
+    onChange(filter.attributeKey, filter.type, filter.value, payload)
   }, [])
 
   const calculateStep = () => {
     return filter.step || (filter.maxValue - filter.minValue) / 100
   }
+
+  const useNonDebouncedValue = () => {
+    return filter.type === 'rangeThreshold'
+      ? data[filter.type][0] !== nonDebouncedValue[0] || data[filter.type][1] !== nonDebouncedValue[1]
+      : data[filter.type] !== nonDebouncedValue
+  }
   
   const onFilterChange = (value) => {
     // Check if max value is set or min value is set
-    const newNoMax = !!(value[1] === filter.maxValue && filter.unboundedMax)
     const newNoMin = !!(value[0] === filter.minValue && filter.unboundedMin)
-
-    setSliderValue(value)
-    setNoMax(newNoMax)
-    setNoMin(newNoMin)
+    const newNoMax = !!(value[1] === filter.maxValue && filter.unboundedMax)
     const payload = createPayload(value, newNoMax, newNoMin)
-    debounceDispatch(layer, filter.attributeKey, payload)
+    setNonDebouncedValue(value)
+    debounceOnChange(filter.attributeKey, filter.type, value, payload)
   }
 
-  const debounceDispatch = _.debounce(updateMapLayerFilters, 250)
+  const debounceOnChange = _.debounce(onChange, 250)
 
   return (
     <div>
-      <Component
-        min={filter.minValue}
-        max={filter.maxValue}
-        step={calculateStep()}
-        label={(value) => createLabel(value || 0)}
-        marks={filter.marks || marks}
-        value={sliderValue}
-        onChange={(value) => {
-          onFilterChange(value)
-        }}
-        labelAlwaysOn
-        styles={{
-          root: {
-            marginTop: '1.5em',
-            width: '95%',
-            marginLeft: '5px'
-          },
-          label: {
-            backgroundColor: '#228be6',
-            color: '#fff'
-          },
-        }}
-      />
+      {data &&
+        <Component
+          min={filter.minValue}
+          max={filter.maxValue}
+          step={calculateStep()}
+          label={(value) => createLabel(value || 0)}
+          marks={filter.marks || marks}
+          value={useNonDebouncedValue() ? nonDebouncedValue : data[filter.type]}
+          onChange={(value) => {
+            onFilterChange(value)
+          }}
+          labelAlwaysOn
+          styles={{
+            root: {
+              marginTop: '1.5em',
+              width: '95%',
+              marginLeft: '5px'
+            },
+            label: {
+              backgroundColor: '#228be6',
+              color: '#fff'
+            },
+          }}
+        />
+      }
     </div>
   )
 }
@@ -106,9 +112,7 @@ const mapStateToProps = () => {
   return {}
 }
 
-const mapDispatchToProps = (dispatch) => ({
-  updateMapLayerFilters: (layer, key, value) => dispatch(MapLayerActions.updateMapLayerFilters(layer, key, value)),
-})
+const mapDispatchToProps = () => ({})
 
 const AccordionThresholdComponent = connect(mapStateToProps, mapDispatchToProps)(AccordionThreshold)
 export default AccordionThresholdComponent

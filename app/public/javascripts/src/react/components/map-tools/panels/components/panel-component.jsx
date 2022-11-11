@@ -1,8 +1,5 @@
 import React, { useState, useContext } from 'react'
 import { connect } from 'react-redux'
-import { Accordion } from '@mantine/core';
-import { IconPlus } from '@tabler/icons';
-import AccordionComponent from './accordion-component.jsx';
 import { CardBody } from '../../card-body.jsx'
 import { CardHeader } from '../../card-header.jsx'
 import { MapToolContext } from "../../map-display-tools.jsx"
@@ -14,23 +11,11 @@ const Panel = (props) => {
   const { mapToolState, globalMethods, dispatch } = useContext(MapToolContext)
   const { visible, disabled, collapsed } = mapToolState
   const { MapToolActions, isMapToolExpanded, isMapToolVisible } = globalMethods
-  const [expandedAccords, setExpandedAccords] = useState(['location_filters', 'entity_type'])
 
   const {
-    configuration,
     panelKey,
     panelLabel
   } = props
-
-  const orderedFilters = () => {
-    if (!configuration.ui.perspective.mapTools) return []
-
-    const configurationFilters = configuration.ui.perspective.mapTools.toolDetails[panelKey].filters
-    return [
-      ...configurationFilters.filter(filter => filter.top),
-      ...configurationFilters.filter(filter => !filter.top)
-    ]
-  }
 
   return (
     <MapTool className="location">
@@ -47,44 +32,8 @@ const Panel = (props) => {
       <div className="location-maptool-card">
         <MapToolCard mapToolName={panelKey}>
           <CardHeader mapToolName={panelLabel} />
-
           <CardBody showCardBody={isMapToolExpanded(collapsed, panelKey)} padding="0">
-            <Accordion
-              multiple
-              value={expandedAccords}
-              onChange={setExpandedAccords}
-              chevron={<IconPlus size={16} />}
-              styles={{
-                control: {
-                  backgroundColor: "#dddddd",
-                  padding: '8px 8px',
-                  ':hover': {
-                    backgroundColor: "#dddddd"
-                  }
-                },
-                chevron: {
-                  backgroundColor: "white",
-                  height: "1.5em",
-                  width: "1.5em",
-                  borderRadius: "5px",
-                },
-                content: {
-                  paddingTop: '16px'
-                }
-              }}
-            >
-              {orderedFilters().map(oFilter => {
-                return (
-                  <div key={oFilter.attributeKey} style={{ paddingBottom: '1px' }}>
-                    <AccordionComponent 
-                      filter={oFilter}
-                      isExpanded={expandedAccords.includes(oFilter.attributeKey)}
-                      layer={panelKey}
-                    />
-                  </div>
-                )
-              })}
-            </Accordion>
+            {props.children}
           </CardBody>
         </MapToolCard>
       </div>
@@ -94,9 +43,9 @@ const Panel = (props) => {
   )
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = () => {
   return {
-    configuration: state.configuration,
+    
   }
 }
 

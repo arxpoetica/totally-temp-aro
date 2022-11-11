@@ -1,42 +1,58 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { connect } from 'react-redux'
 import { Accordion as MantineAccordion } from '@mantine/core';
-import { IconMinus } from '@tabler/icons';
-import AccordionCheckboxComponent from './accordion-checkbox-component.jsx';
-import AccordionThresholdComponent from './accordion-threshold-component.jsx';
-import AccordionRadioComponent from './accordion-radio-component.jsx';
-import AccordionMultiInputComponent from './accordion-multi-input-component.jsx'
-import AccordionMultiSelectComponent from './accordion-multi-select-component.jsx'
-
-const compDictonary = {
-  threshold: AccordionThresholdComponent,
-  rangeThreshold: AccordionThresholdComponent,
-  multiSelect: AccordionCheckboxComponent,
-  singleSelect: AccordionRadioComponent,
-  multiInput: AccordionMultiInputComponent,
-  multiSelectDropdown: AccordionMultiSelectComponent
-}
+import { IconPlus, IconMinus } from '@tabler/icons';
 
 const Accordion = (props) => {
   const {
-    filter,
-    isExpanded,
-    layer
+    data,
+    defaultValues = []
   } = props
 
-  const Component = compDictonary[filter.type]
+  const [expandedAccords, setExpandedAccords] = useState(defaultValues)
 
   return (
-    <MantineAccordion.Item value={filter.attributeKey}>
-      <MantineAccordion.Control
-        chevron={ isExpanded && <IconMinus size={16} /> }
-      >
-        {filter.label}
-      </MantineAccordion.Control>
-      <MantineAccordion.Panel>
-        <Component layer={layer} filter={filter} values={filter.values} />
-      </MantineAccordion.Panel>
-    </MantineAccordion.Item>
+    <MantineAccordion
+      multiple
+      value={expandedAccords}
+      onChange={setExpandedAccords}
+      chevron={<IconPlus size={16} />}
+      styles={{
+        control: {
+          backgroundColor: "#dddddd",
+          padding: '8px 8px',
+          ':hover': {
+            backgroundColor: "#dddddd"
+          }
+        },
+        chevron: {
+          backgroundColor: "white",
+          height: "1.5em",
+          width: "1.5em",
+          borderRadius: "5px",
+        },
+        content: {
+          paddingTop: '16px'
+        }
+      }}
+    >
+      {data.map(dataItem => {
+        return (
+          <div key={dataItem.attributeKey} style={{ paddingBottom: '1px' }}>
+            <MantineAccordion.Item value={dataItem.attributeKey}>
+              <MantineAccordion.Control
+                chevron={expandedAccords.includes(dataItem.attributeKey) && <IconMinus size={16} /> }
+              >
+                {dataItem.label}
+              </MantineAccordion.Control>
+              <MantineAccordion.Panel>
+                {dataItem.body}
+              </MantineAccordion.Panel>
+            </MantineAccordion.Item>
+          </div>
+        )
+      })}
+    </MantineAccordion>
   )
 }
 

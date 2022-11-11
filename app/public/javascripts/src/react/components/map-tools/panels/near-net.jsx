@@ -1,26 +1,71 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
+import MapLayerActions from '../../map-layers/map-layer-actions'
+import MapLayerSelectors from '../../map-layers/map-layer-selectors'
+import AccordionComponent from './components/accordion-component.jsx';
 import PanelComponent from './components/panel-component.jsx';
-import AroHttp from '../../../common/aro-http'
+import AccordionCheckboxComponent from './components/accordion-checkbox-component.jsx';
+import AccordionThresholdComponent from './components/accordion-threshold-component.jsx';
+import AccordionRadioComponent from './components/accordion-radio-component.jsx';
+import AccordionMultiInputComponent from './components/accordion-multi-input-component.jsx'
+import AccordionMultiSelectComponent from './components/accordion-multi-select-component.jsx'
 
-const NearNet = ({ PCM, pcmDefinitionNearNet }) => {
+const compDictonary = {
+  threshold: AccordionThresholdComponent,
+  rangeThreshold: AccordionThresholdComponent,
+  multiSelect: AccordionCheckboxComponent,
+  singleSelect: AccordionRadioComponent,
+  multiInput: AccordionMultiInputComponent,
+  multiSelectDropdown: AccordionMultiSelectComponent
+}
+
+const NearNet = ({
+  PCM,
+  pcmDefinitionNearNet,
+  configuration,
+  filterValues,
+  updateMapLayerFilters,
+  setAndRequestPCM,
+  definition,
+  hasResourceItems
+}) => {
   const [showNearNet, setShowNearNet] = useState(false)
+
   useEffect(() => {
-    // If a pcmDefinition is not already in the store grab it and check the
-    // generateNearNetAnalysis flag
-    if (!pcmDefinitionNearNet && PCM && PCM.selectedManager) {
-      AroHttp.get(`service/v2/resource-manager/${PCM.selectedManager.id}/planning_constraints_manager`)
-        .then((response) => {
-          if (response.data && 'generateNearNetAnalysis' in response.data) {
-            setShowNearNet(response.data.generateNearNetAnalysis)
-          }
-        })
-    // If a pcmDefinition is in the store and it has changed
-    // Ensure this check is up to date with that
-    } else if (pcmDefinitionNearNet) {
-      setShowNearNet(pcmDefinitionNearNet)
+    !definition && hasResourceItems
+      ? setAndRequestPCM()
+      : setShowNearNet(pcmDefinitionNearNet)
+  }, [PCM, pcmDefinitionNearNet, hasResourceItems])
+
+  const onFilterChange = (key, type, value, payload) => {
+    const newValue = payload || {};
+    if (!payload) {
+      newValue[type] = value
     }
-  }, [PCM, pcmDefinitionNearNet])
+    updateMapLayerFilters('near_net', key, newValue)
+  }
+
+  const accordionData = () => {
+    if (!configuration.ui.perspective.mapTools) return []
+
+    const configurationFilters = configuration.ui.perspective.mapTools.toolDetails.near_net.filters
+    const accordionData = [
+      ...configurationFilters.filter(filter => filter.top),
+      ...configurationFilters.filter(filter => !filter.top)
+    ]
+
+    return accordionData.map(filter => {
+      const Component = compDictonary[filter.type]
+      filter.body = <Component
+          filter={filter}
+          values={filter.values}
+          onChange={(key, type, value, payload = null) => onFilterChange(key, type, value, payload)}
+          data={filterValues.near_net[filter.attributeKey] && filterValues.near_net[filter.attributeKey]}
+        />
+
+      return filter;
+    })
+  }
 
   return (
     <>
@@ -28,7 +73,12 @@ const NearNet = ({ PCM, pcmDefinitionNearNet }) => {
         <PanelComponent
           panelKey='near_net'
           panelLabel='Near Net'
-        />
+        >
+          <AccordionComponent
+            data={accordionData()}
+            defaultValues={['location_filters', 'entity_type']}
+          />          
+        </PanelComponent>
       }
     </>
   )
@@ -39,11 +89,18 @@ const mapStateToProps = (state) => {
   const definition = state.resourceManager.managers[PCM && PCM.id] && state.resourceManager.managers[PCM.id].definition
   return {
     PCM,
-    pcmDefinitionNearNet: !!definition && definition.generateNearNetAnalysis
+    definition: !!definition,
+    pcmDefinitionNearNet: !!definition && definition.generateNearNetAnalysis,
+    configuration: state.configuration,
+    filterValues: MapLayerSelectors.getFilterValues(state),
+    hasResourceItems: Object.keys(state.plan.resourceItems).length > 0
   }
 }
 
-const mapDispatchToProps = () => ({})
+const mapDispatchToProps = (dispatch) => ({
+  updateMapLayerFilters: (layer, key, value) => dispatch(MapLayerActions.updateMapLayerFilters(layer, key, value)),
+  setAndRequestPCM: () => dispatch(MapLayerActions.setAndRequestPCM())
+})
 
 const NearNetComponent = connect(mapStateToProps, mapDispatchToProps)(NearNet)
 export default NearNetComponent

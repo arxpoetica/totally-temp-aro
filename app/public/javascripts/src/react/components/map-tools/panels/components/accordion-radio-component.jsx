@@ -1,30 +1,26 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
 import { Radio } from '@mantine/core';
-import MapLayerActions from '../../../map-layers/map-layer-actions'
 
 const AccordionRadio = (props) => {
   const {
     filter,
     values,
-    updateMapLayerFilters,
-    layer
-  } = props
-  const [radioValue, setRadioValue] = useState(values[0].key);
-  
+    onChange,
+    data
+  } = props  
   useEffect(() => {
-    updateMapLayerFilters(layer, filter.attributeKey, { singleSelect: radioValue })
+    onChange(filter.attributeKey, filter.type, values[0].key)
   }, [])
 
   const onFilterChange = (value) => {
-    setRadioValue(value)
-    updateMapLayerFilters(layer, filter.attributeKey, { singleSelect: value })
+    onChange(filter.attributeKey, filter.type, value)
   }
 
   return (
     <Radio.Group
       classNames={{ root: 'group-root' }}
-      value={radioValue}
+      value={data[filter.type]}
       onChange={(value) => onFilterChange(value)}
     >
       {values.filter(value => value.shown).map(value => {
@@ -49,15 +45,11 @@ const AccordionRadio = (props) => {
   )
 }
 
-const mapStateToProps = (state) => {
-  return {
-    nearNetFilters: state.mapLayers.filters.near_net
-  }
+const mapStateToProps = () => {
+  return {}
 }
 
-const mapDispatchToProps = (dispatch) => ({
-  updateMapLayerFilters: (layer, key, value) => dispatch(MapLayerActions.updateMapLayerFilters(layer, key, value)),
-})
+const mapDispatchToProps = () => ({})
 
 const AccordionRadioComponent = connect(mapStateToProps, mapDispatchToProps)(AccordionRadio)
 export default AccordionRadioComponent

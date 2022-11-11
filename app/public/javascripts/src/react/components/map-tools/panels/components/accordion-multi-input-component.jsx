@@ -1,30 +1,25 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import { Chip, TextInput, Button } from '@mantine/core';
-import MapLayerActions from '../../../map-layers/map-layer-actions'
 
 const AccordionMultiInput = (props) => {
   const {
-    nearNetFilters,
     filter,
-    updateMapLayerFilters,
-    layer
+    onChange,
+    data
   } = props
   const [savedInputs, setSavedInputs] = useState([])
-  const [activeChips, setActiveChips] = useState([])
   const [textInput, setTextInput] = useState('')
   
   const setChips = () => {
     setSavedInputs(savedInputs.concat(textInput))
-    setActiveChips(activeChips.concat(textInput))
-    // Async issue where the value isn't added to state before we call action
-    updateMapLayerFilters(layer, filter.attributeKey, { multiInput: activeChips.concat(textInput) })
+    onChange(filter.attributeKey, filter.type, data[filter.type].concat(textInput))
 
     setTextInput("")
   }
 
   useEffect(() => {
-    updateMapLayerFilters(layer, filter.attributeKey, { multiInput: activeChips })
+    onChange(filter.attributeKey, filter.type, [])
   }, [])
   
   return (
@@ -55,10 +50,9 @@ const AccordionMultiInput = (props) => {
       </div>
       <Chip.Group
         multiple
-        value={activeChips}
+        value={data[filter.type]}
         onChange={(value) => {
-          setActiveChips(value)
-          updateMapLayerFilters(layer, filter.attributeKey, { multiInput: value })
+          onChange(filter.attributeKey, filter.type, value)
         }}
         styles={{
           root: {
@@ -74,15 +68,11 @@ const AccordionMultiInput = (props) => {
   )
 }
 
-const mapStateToProps = (state) => {
-  return {
-    nearNetFilters: state.mapLayers.filters.near_net
-  }
+const mapStateToProps = () => {
+  return {}
 }
 
-const mapDispatchToProps = (dispatch) => ({
-  updateMapLayerFilters: (layer, key, value) => dispatch(MapLayerActions.updateMapLayerFilters(layer, key, value)),
-})
+const mapDispatchToProps = () => ({})
 
 const AccordionMultiInputComponent = connect(mapStateToProps, mapDispatchToProps)(AccordionMultiInput)
 export default AccordionMultiInputComponent

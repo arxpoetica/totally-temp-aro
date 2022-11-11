@@ -1,18 +1,15 @@
 
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
 import { MultiSelect, CloseButton, Tooltip } from '@mantine/core';
-import MapLayerActions from '../../../map-layers/map-layer-actions'
 
 const AccordionCheckbox = (props) => {
   const {
     filter,
     values,
-    updateMapLayerFilters,
-    filters,
-    layer
+    onChange,
+    data
   } = props
-  const [multiSelectValues, setMultiSelectValues] = useState([])
 
   useEffect(() => {
     const defaultValues = []
@@ -22,20 +19,12 @@ const AccordionCheckbox = (props) => {
       delete value.selected
     })
 
-    updateMapLayerFilters(layer, filter.attributeKey, { multiSelect: defaultValues })
-    setMultiSelectValues(defaultValues)
+    onChange(filter.attributeKey, filter.type, defaultValues)
   }, [])
 
   const onFilterChange = (value) => {
-    setMultiSelectValues(value)
-    updateMapLayerFilters(layer, filter.attributeKey, { multiSelect: value })
+    onChange(filter.attributeKey, filter.type, value)
   }
-
-  useEffect(() => {
-    if (filters[layer][filter.attributeKey].multiSelect !== multiSelectValues) {
-      setMultiSelectValues(filters[layer][filter.attributeKey].multiSelect)
-    }
-  }, [filters])
 
   const truncate = (string) => {
     if (string.length < 16) return string
@@ -87,7 +76,7 @@ const MultiSelectValue = ({
 
   return (
     <MultiSelect
-      value={multiSelectValues}
+      value={data[filter.type]}
       data={values}
       onChange={(value) => onFilterChange(value)}
       classNames={{ root: 'group-root' }}
@@ -99,15 +88,11 @@ const MultiSelectValue = ({
   )
 }
 
-const mapStateToProps = (state) => {
-  return {
-    filters: state.mapLayers.filters
-  }
+const mapStateToProps = () => {
+  return {}
 }
 
-const mapDispatchToProps = (dispatch) => ({
-  updateMapLayerFilters: (layer, key, value) => dispatch(MapLayerActions.updateMapLayerFilters(layer, key, value)),
-})
+const mapDispatchToProps = () => ({})
 
 const AccordionCheckboxComponent = connect(mapStateToProps, mapDispatchToProps)(AccordionCheckbox)
 export default AccordionCheckboxComponent
