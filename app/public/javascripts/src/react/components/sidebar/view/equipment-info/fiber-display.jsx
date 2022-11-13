@@ -4,6 +4,7 @@ import { fiberTypes } from '../../constants'
 
 const fiberInfo = [
   { key: 'cable_size', label: 'Cable Size'},
+  { key: 'cable_count', label: 'Count of Cables'},
   { key: 'fiber_strands', label: 'Fiber Strand Demand' },
   { key: 'atomic_units', label: 'Atomic Units' },
   { key: 'spatial_edge_type', label: 'Spatial Edge Type' },
