@@ -29,6 +29,16 @@ export default class TileOverlay {
   }
 
   drawBadge (ctx, badgeId, badge, id, imageCoord, icon) {
+    // badgeLists is a collection of id collectiions with the schema 
+    //  badgeLists: {
+    //    $badgeId: {
+    //      $pointId: bool
+    //    }
+    //  }
+    //  if the badgeLists isn't present
+    //    or if the pointId isn't in the list 
+    //    or if the value of badgeLists[badgeId][id] is false
+    //    the badge will not be drawn for this point, all three are valid means and are usful in different scenarios 
     if (
       this.defaultBadges.includes(badgeId)
       || (this.badgeLists[badgeId] && this.badgeLists[badgeId][id])
@@ -67,6 +77,7 @@ export default class TileOverlay {
         y: px.y - icon.offset.y,
       }
 
+      // background badges 
       for (const [badgeId, badge] of Object.entries(iconBadges.back)) {
         this.drawBadge (ctx, badgeId, badge, id, imageCoord, icon) // TODO: that's a lot of params lets revisit this when we have more time
       }
@@ -79,31 +90,6 @@ export default class TileOverlay {
       // figure badges
       // for each badge
       for (const [badgeId, badge] of Object.entries(iconBadges.front)) {
-        // badgeLists is a collection of id collectiions with the schema 
-        //  badgeLists: {
-        //    $badgeId: {
-        //      $pointId: bool
-        //    }
-        //  }
-        //  if the badgeLists isn't present
-        //    or if the pointId isn't in the list 
-        //    or if the value of badgeLists[badgeId][id] is false
-        //    the badge will not be drawn for this point, all three are valid means and are usful in different scenarios 
-        
-        // if (
-        //   this.defaultBadges.includes(badgeId)
-        //   || (this.badgeLists[badgeId] && this.badgeLists[badgeId][id])
-        // ) {
-        //   let badgeCoord = {
-        //     x: imageCoord.x + badge.offset.x + (icon.image.width * badge.offsetMult.w),
-        //     y: imageCoord.y + badge.offset.y + (icon.image.width * badge.offsetMult.h)
-        //   }
-        //   ctx.drawImage(
-        //     badge.image, 
-        //     badgeCoord.x, 
-        //     badgeCoord.y,
-        //   )
-        // }
         this.drawBadge (ctx, badgeId, badge, id, imageCoord, icon)
       }
     }

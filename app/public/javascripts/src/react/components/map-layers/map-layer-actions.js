@@ -58,7 +58,6 @@ function setLayerVisibility (layer, newVisibility) {
             isIncluded: newVisibility,
           }
         })
-        // TODO: filter UI isn't tied to state, F!
         if (newVisibility) dispatch( updateMapLayerFilters("near_net", "location_filters", {"multiSelect":[]}) )
       }
     }

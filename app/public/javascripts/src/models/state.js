@@ -262,8 +262,7 @@ class State {
         ) && (
           !service.rNearnetLayers.length
         )
-      ){ 
-        // Nearnet TODO: we're going to need to hack this :(
+      ){
         service.setMapFeatures(hitFeatures)
         // For tracking when map clicked by the user.
         service.setIsMapClicked(true)

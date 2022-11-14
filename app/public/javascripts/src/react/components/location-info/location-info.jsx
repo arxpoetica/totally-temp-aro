@@ -82,7 +82,6 @@ export class LocationInfo extends Component {
   }
 
   renderLocationDetails () {
-    console.log(this.props.locationInfoDetails)
     const locationDetails = this.props.locationInfoDetails
     return <table id='table-coverage-initializer' className='table table-sm table-striped sidebar-options-table'>
       <tbody>
