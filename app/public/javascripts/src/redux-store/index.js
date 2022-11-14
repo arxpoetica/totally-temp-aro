@@ -20,7 +20,8 @@ import plan from '../react/components/plan/plan-reducer'
 import projectTemplate from '../react/components/project-template/project-template-reducer'
 import etlTemplates from '../react/components/etl-templates/etl-templates-reducer'
 import planEditor from '../react/components/plan-editor/plan-editor-reducer'
-import subnetTileData from '../react/components/plan-editor/subnet-tile-reducer'
+import mapData from '../react/components/common/tile-overlay/map-data-reducer'
+
 import selection from '../react/components/selection/selection-reducer'
 import tool from '../react/components/tool/tool-reducer'
 import user from '../react/components/user/user-reducer'
@@ -64,7 +65,7 @@ let reducer = combineReducers({
   plan,
   projectTemplate,
   planEditor,
-  subnetTileData,
+  mapData,
   selection,
   tool,
   user,

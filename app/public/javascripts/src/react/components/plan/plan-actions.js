@@ -13,13 +13,16 @@ import ToolBarActions from '../header/tool-bar-actions.js'
 import AroHttp from '../../common/aro-http'
 import fetch from 'cross-fetch'
 import { Notifier } from '../../common/notifications'
-import subnetTileActions from '../plan-editor/subnet-tile-actions'
+import mapDataActions from '../common/tile-overlay/map-data-actions'
 import RoicReportsActions from '../sidebar/analysis/roic-reports/roic-reports-actions'
+import mapLayerActions from '../map-layers/map-layer-actions'
 
 function setActivePlanState (planState) {
-  return dispatch => {
+  return (dispatch, getState) => {
     if (planState === "COMPLETED" || planState === "FAILED") {
+      const planId = getState().plan.activePlan.id
       dispatch(setActivePlanErrors())
+      dispatch(loadNearnetData(planId))
     }
 
     dispatch({
@@ -159,13 +162,121 @@ function loadPlanDataSelectionFromServer (planId) {
   }
 }
 
+// TODO: this should move to nearnet-actions
+function _parseNearnet (nearnetData) {
+  // TODO: BIG fix this! 
+  //  get rid of 'small_businesses' etc and replace with 'small'
+  //  unify all entity types 
+  //  replace the property 'locationEntityType' with more generic entityType
+  //  here, plan-editor-actions, tile-overlay, some JSON in the DB, probably plan edit ...  
+  let enumPatch = {
+    'small': 'small_businesses', 
+    'medium': 'medium_businesses',
+    'large': 'large_businesses',
+  }
+  let entityData = {}
+  let tileDataEntities = {}
+
+  nearnetData.forEach(location => {
+    let objectId = location.object_id
+    location.objectId = objectId
+    delete location.object_id
+
+    let plannedType = location.planned_type
+    location.plannedType = plannedType
+    delete location.planned_type
+    
+    // TODO: in the future we should use a standard geom for all map entities 
+    location.point = {
+      latitude: location.latitude,
+      longitude: location.longitude,
+    }
+    delete location.latitude
+    delete location.longitude
+
+    location.locationEntityType = location.entity_type
+    if (location.locationEntityType in enumPatch) {
+      location.locationEntityType = enumPatch[location.locationEntityType]
+    }
+    location.entity_type = location.locationEntityType
+    entityData[objectId] = location
+
+    if (!(plannedType in tileDataEntities)) {
+      tileDataEntities[plannedType] = {}
+    }
+    tileDataEntities[plannedType][objectId] = {point:location.point}
+  })
+  
+  return {entityData, tileDataEntities}
+}
+
+function setNearnetData (nearnetData) {
+  // clear nearnet data
+  return (dispatch) => {
+    if ('undefined' === typeof nearnetData) {
+      // clear near net
+      dispatch(mapDataActions.clearNearnetTileData())
+    } else {
+      let {entityData, tileDataEntities} = _parseNearnet(nearnetData)
+      batch(() => {
+        dispatch(mapDataActions.setNearnetEntityData(entityData))
+        dispatch(mapDataActions.batchSetNearnetTileData(tileDataEntities))
+        //  filter by filters map-layer-actions
+        dispatch(mapLayerActions.updateMapLayerFilters('near_net'))
+      })
+    }
+  }
+}
+
+function loadNearnetData (planId) {
+  return (dispatch) => {
+    if ('undefined' === typeof planId) {
+      dispatch(setNearnetData())
+    } else {
+      // AroHttp.post(`/service/nearnet-query/${planId}`)
+      //   .then(nearnetResult => {
+      //     dispatch(setNearnetData(nearnetResult.data))
+      //   }).catch(error => Notifier.error(error))
+
+
+      AroHttp.get('/service/v3/installed/report/meta-data')
+        .then(reportResult => {
+          let nearnetReportId = null
+          let foundId = reportResult.data.some(report => {
+            if ("SYSTEM_NEARNET" === report.name) {
+              nearnetReportId = report.oid
+              return true // return true breaks the loop
+            }
+            return false
+          })
+          if (foundId) {
+            AroHttp.get(`/service/v3/report-extended/${nearnetReportId}/${planId}.json`)
+              .then(nearnetResult => {
+                dispatch(setNearnetData(nearnetResult.data))
+              }).catch(error => Notifier.error(error))
+          } else {
+            dispatch(setNearnetData())
+          }
+        }).catch(error => Notifier.error(error))
+    }
+  }
+}
+
+
 // Set the currently active plan
 function setActivePlan (plan) {
   return (dispatch, getState) => {
     getState().plan.activePlan && getState().plan.activePlan.id &&
       ClientSocketManager.leaveRoom('plan', getState().plan.activePlan.id) // leave previous plan
+
     batch(() => {
-      dispatch(subnetTileActions.clearSubnetDataAndCache())
+      // clear ALL tile data
+      dispatch(mapDataActions.clearAllSubnetData())
+      dispatch(mapDataActions.clearAllNearnetData())
+      // load new near net
+      // TODO: if plan type
+      dispatch(loadNearnetData(plan.id))
+
       dispatch({
         type: Actions.PLAN_SET_ACTIVE_PLAN,
         payload: {
@@ -593,6 +704,8 @@ function setSelectedProjectId (selectedProjectId){
   }
 }
 
+// TODO: this needs to go away
+// how about we ask for them when we need them instead of constantly screaming them out
 function updateDefaultPlanCoordinates (payload) {
   return {
     type: Actions.PLAN_UPDATE_DEFAULT_PLAN_COORDINATES,

@@ -278,6 +278,13 @@ export class PlanningConstraints extends Component {
                 </td>
               </tr>
               <tr>
+                <td>Run Near Net</td>
+                <td>
+                  <Field name='generateNearNetAnalysis'
+                    className='checkboxfill' component='input' type='checkbox' />
+                </td>
+              </tr>
+              <tr>
                 <td>Feeder Fiber Cable Codes</td>
                 <td>
                   <Field name='cableCodeConfig.cableCodeMap.FEEDER'

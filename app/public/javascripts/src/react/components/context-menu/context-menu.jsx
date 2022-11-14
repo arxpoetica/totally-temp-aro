@@ -5,6 +5,7 @@ import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import ContextMenuActions from '../context-menu/actions'
 import PlanEditorActions from '../plan-editor/plan-editor-actions'
 import ViewSettingsActions from '../view-settings/view-settings-actions'
+import SelectionActions from '../selection/selection-actions'
 import MenuItemFeature from './menu-item-feature'
 import './context-menu.css'
 
@@ -16,6 +17,7 @@ export class ContextMenu extends Component {
     this.actionModules = {
       PlanEditorActions: PlanEditorActions,
       ViewSettingsActions: ViewSettingsActions,
+      SelectionActions: SelectionActions,
     }
   }
 

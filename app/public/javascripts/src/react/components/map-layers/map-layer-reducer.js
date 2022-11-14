@@ -14,6 +14,13 @@ const defaultState = {
   showSiteBoundary: false,
   selectedBoundaryType: new Map(),
   boundaryTypes: new List(),
+  filters: {
+    near_net: {
+      location_filters: {
+        multiSelect: []
+      }
+    }
+  },
   annotation: {
     showList: false,
     selectedIndex: 0,
@@ -342,6 +349,19 @@ function setAngularMapLayerSubject(state, mapLayerSubject) {
   }
 }
 
+function updateMapLayerFilters(state, { layer, key, value }) {
+  return {
+    ...state,
+    filters: {
+      ...state.filters,
+      [layer]: {
+        ...state.filters[layer],
+        [key]: value
+      } 
+    }
+  }
+}
+
 function mapLayersReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.LAYERS_SET_LOCATION:
@@ -427,6 +447,8 @@ function mapLayersReducer (state = defaultState, action) {
 
     case Actions.LAYERS_SET_ANGULAR_MAP_LAYER_SUBSCRIBER:
       return setAngularMapLayerSubject(state, action.payload)
+    case Actions.LAYERS_SET_MAP_FILTERS:
+      return updateMapLayerFilters(state, action.payload)
 
     case Actions.LAYERS_SET_ACTIVE_MAP_LAYERS:
       return { ...state, activeMapLayers: action.payload }

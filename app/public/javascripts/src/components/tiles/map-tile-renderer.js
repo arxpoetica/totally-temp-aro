@@ -10,7 +10,7 @@ import StrokeStyle from '../../shared-utils/stroke-styles'
 
 class MapTileRenderer {
   constructor (tileSize, tileDataService, mapTileOptions, layerCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, stateMapLayers, displayModes,
-    viewModePanels, state, getPixelCoordinatesWithinTile, selectedSubnetLocations, locationAlerts, rShowFiberSize, rViewSetting, selectionIds, mapLayers = []) {
+    viewModePanels, state, getPixelCoordinatesWithinTile, selectedSubnetLocations, locationAlerts, rShowFiberSize, rViewSetting, selectionIds, nearnetLayers, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -32,6 +32,7 @@ class MapTileRenderer {
     this.rShowFiberSize = rShowFiberSize
     this.rViewSetting = rViewSetting
     this.selectionIds = selectionIds
+    this.nearnetLayers = nearnetLayers
 
     const MAX_CONCURRENT_VECTOR_TILE_RENDERS = 5
     this.tileRenderThrottle = new AsyncPriorityQueue((task, callback) => {
@@ -110,6 +111,11 @@ class MapTileRenderer {
 
   setSelectionIds (selectionIds) {
     this.selectionIds = selectionIds
+  }
+
+  setNearnetLayers (nearnetLayers) {
+    this.nearnetLayers = nearnetLayers
+    this.tileDataService.markHtmlCacheDirty()
   }
 
   // - plan edit - //
@@ -754,7 +760,7 @@ class MapTileRenderer {
     )
 
     // render point feature
-    PointFeatureRenderer.renderFeatures(pointFeatureRendererList, this.state.configuration.ARO_CLIENT, this.selectedSubnetLocations, this.locationAlerts)
+    PointFeatureRenderer.renderFeatures(pointFeatureRendererList, this.state.configuration.ARO_CLIENT, this.selectedSubnetLocations, this.locationAlerts, this.nearnetLayers)
     // render polygon feature
     PolygonFeatureRenderer.renderFeatures(closedPolygonFeatureLayersList, featureData, this.selection, this.oldSelection)
   }

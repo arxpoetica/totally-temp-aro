@@ -3,6 +3,7 @@ import { createSelector } from 'reselect'
 const getLocationTypes = state => state.mapLayers.location
 const getEquipmentTypes = state => state.mapLayers.networkEquipment.equipments
 const getConstructionAreaTypes = state => state.mapLayers.constructionAreas.construction_areas
+const getFilterValues = state => state.mapLayers.filters
 
 const getIconsByType = createSelector(
   [getLocationTypes, getEquipmentTypes, getConstructionAreaTypes],
@@ -35,6 +36,7 @@ const getIconsByType = createSelector(
 
 const MapLayerSelectors = Object.freeze({
   getIconsByType,
+  getFilterValues
 })
 
 export default MapLayerSelectors

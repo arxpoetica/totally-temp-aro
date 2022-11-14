@@ -7,8 +7,8 @@ import MenuItemFeature from '../context-menu/menu-item-feature'
 import MenuItemAction from '../context-menu/menu-item-action'
 import ContextMenuActions from '../context-menu/actions'
 import ResourceActions from '../resource-editor/resource-actions'
-import SubnetTileActions from './subnet-tile-actions'
 import { ClientSocketManager } from '../../common/client-sockets'
+import mapDataActions from '../common/tile-overlay/map-data-actions'
 import { batch } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import PlanEditorSelectors from './plan-editor-selectors'
@@ -312,7 +312,7 @@ function subscribeToSocket() {
               type: Actions.PLAN_EDITOR_SET_DRAFT_LOCATIONS,
               payload: locations,
             })
-            dispatch(SubnetTileActions.setSubnetData('all', locations.groups))
+            dispatch(mapDataActions.setSubnetTileData(locations.groups, 'all'))
             break
           case DRAFT_STATES.ERROR_SUBNET_TREE:
             message = `Type ${data.subnetNodeUpdateType} for SUBNET_DATA socket channel with `
@@ -1770,7 +1770,7 @@ function parseAddApiSubnets (apiSubnets) {
       })
       // dispatch add subnets and add subnetFeatures
       return batch(() => {
-        dispatch(SubnetTileActions.setSubnetsData(tileDataBySubnet))
+        dispatch(mapDataActions.batchSetSubnetTileData(tileDataBySubnet))
         dispatch({
           type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
           payload: allFeatures,

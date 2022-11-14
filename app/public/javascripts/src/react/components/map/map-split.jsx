@@ -34,6 +34,7 @@ import { setAppcuesQuery } from '../../common/view-utils'
 import { OptimizationModal } from '../common/optimization-modal.jsx'
 import { NotificationsProvider } from '@mantine/notifications'
 import { ModalsProvider } from '@mantine/modals'
+import TileOverlayComposer from '../common/tile-overlay/tile-overlay-composer.jsx'
 import { RfpModal } from '../optimization/rfp/modal/rfp-modal.jsx'
 
 const transitionTimeMsec = 100
@@ -63,6 +64,7 @@ const MapSplit = (props) => {
     areTilesRendering,
     selectedDisplayMode,
     selectedTargetSelectionMode,
+    displayModeButtons
   } = props
 
   const { meters_to_length_units, length_units } = appConfigUnits
@@ -92,6 +94,12 @@ const MapSplit = (props) => {
     }
     if (map) { map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(mapViewToggle.current) }
   }, [map])
+  
+  useEffect(() => {    
+    if (displayModeButtons && splitterObj && displayModeButtons.IS_COLLAPSED) {
+      toggleCollapseSideBar()
+    }
+  }, [displayModeButtons, splitterObj])
 
   useEffect(() => {
     window.addEventListener('measuredDistance', (measuredDistance) => { 
@@ -148,162 +156,165 @@ const MapSplit = (props) => {
   }
 
   return (
-    <NotificationsProvider position="top-center">
-    {/* NOTE TO FUTURE ENGINEER: please avoid top-level modals as much as possible */}
-    <ModalsProvider modals={{ OptimizationModal }}>
-      {/* First define the container for both the map and the sidebar. */}
-      <div className={`app_wrapper_container ${ARO_CLIENT === 'frontier' ? 'footer' : ''}`}>
+    <>
+      <NotificationsProvider position="top-center">
+        {/* NOTE TO FUTURE ENGINEER: please avoid top-level modals as much as possible */}
+        <ModalsProvider modals={{ OptimizationModal }}>
+          {/* First define the container for both the map and the sidebar. */}
+          <div className={`app_wrapper_container ${ARO_CLIENT === 'frontier' ? 'footer' : ''}`}>
 
-        {/* Define the canvas that will hold the map. */}
-        <div id="map-canvas-container" className="map-split-container" style={{ transition: transitionCSS }}>
-          <div id="map-canvas" className={`map-canvas map-split ${!isReportMode ? 'map-canvas-drop-shadow' : ''}`} />
-          {/* Technically the toolbar, etc should be a child of the map canvas, but putting these elements in the map canvas
-            causes the map to not show up */}
+            {/* Define the canvas that will hold the map. */}
+            <div id="map-canvas-container" className="map-split-container" style={{ transition: transitionCSS }}>
+              <div id="map-canvas" className={`map-canvas map-split ${!isReportMode ? 'map-canvas-drop-shadow' : ''}`} />
+              {/* Technically the toolbar, etc should be a child of the map canvas, but putting these elements in the map canvas
+                causes the map to not show up */}
 
-          <div className="header-bar-container">
-            <div className="header-space" />
-            {/* Created a 'toolbar-container' to get the ToolBar component elements in tool-bar.jsx */}
-            <div className="toolbar-container">
-              <ErrorBoundary>
-                <ToolBar />
-              </ErrorBoundary>
-            </div>
-            <div className="sidebar-icon-space" />
-            { showToolBox && <ToolBox /> }
-          </div>
-          {/* Plan target map selector should be active only if we are in analysis mode */}
-          {/* Map Selector Plan Target */}
-          {
-            checkSelectedDisplayMode(displayModes.ANALYSIS) && !isRulerEnabled &&
-            <MapSelectorPlanTarget />
-          }
-          {/* Map Selector Export Locations */}
-          { checkSelectedDisplayMode(displayModes.VIEW)
-            && selectedTargetSelectionMode === targetSelectionModes.POLYGON_EXPORT_TARGET &&
-            <MapSelectorExportLocations />
-          }
-          <ToastContainer />
-          {/* A div that overlays on the map to denote disabled state. When shown, it will prevent any keyboard/mouse
-              interactions with the map. Useful when you have made a slow-ish request to service and want to prevent
-              further map interactions till you get a response. */}
-          {disableMap &&
-            <div className="map-spinner-container">
-              <div className="d-flex map-spinner">
-                <i className="fa fa-5x fa-spinner fa-spin spin-icon" />
+              <div className="header-bar-container">
+                <div className="header-space" />
+                {/* Created a 'toolbar-container' to get the ToolBar component elements in tool-bar.jsx */}
+                <div className="toolbar-container">
+                  <ErrorBoundary>
+                    <ToolBar />
+                  </ErrorBoundary>
+                </div>
+                <div className="sidebar-icon-space" />
+                { showToolBox && <ToolBox /> }
               </div>
-            </div>
-          }
-          <EquipmentDropTarget />
-          <ContextMenu />
-        </div>
-
-        {/* Define the sidebar */}
-        {!isReportMode &&
-          <div id="sidebar" className="sidebar-container" style={{ transition: transitionCSS }}>
-            {/* Define the "expander widget" that can be clicked to collapse/uncollapse the sidebar. Note that putting
-            the expander in one div affects the flow of elements in the sidebar, so we create a 0px by 0px div, and
-            use this div to position the contents of the expander. This makes sure we don't affect flow. */}
-            <div className="expander-position">
-              <div
-                className="expander-content"
-                onClick={() => toggleCollapseSideBar()}
-                onMouseEnter={() => setHovering(true)}
-                onMouseLeave={() => setHovering(false)}
-              >
-                {/* Why so complicated? The use case is:
-                  1. When expanded, it should show an arrow pointing right
-                  2. When collapsed and not hovering, it should show the display mode that is currently active
-                  3. When collapsed and hovering, it should show an arrow pointing left */}
-                <i
-                  className={`fa fa-2x 
-                    ${(!hovering && isCollapsed && checkSelectedDisplayMode(displayModes.VIEW)) ? 'fa-eye' : ''}
-                    ${(!hovering && isCollapsed && checkSelectedDisplayMode(displayModes.ANALYSIS)) ? 'fa-gavel' : ''}
-                    ${(!hovering && isCollapsed && checkSelectedDisplayMode(displayModes.EDIT_RINGS)) ? 'fa-project-diagram' : ''}
-                    ${(!hovering && isCollapsed && checkSelectedDisplayMode(displayModes.EDIT_PLAN)) ? 'fa-pencil-alt' : ''}
-                    ${(!hovering && isCollapsed && checkSelectedDisplayMode(displayModes.DEBUG)) ? 'fa-bug' : ''}
-                    ${(!hovering && isCollapsed && checkSelectedDisplayMode(displayModes.PLAN_SETTINGS)) ? 'fa-cog' : ''}
-                    ${!isCollapsed ? 'fa-arrow-circle-right' : ''}
-                    ${(hovering && isCollapsed) ? 'fa-arrow-circle-left' : ''}
-                  `}
-                />
-              </div>
-            </div>
-            {/* Add a wrapping div because the expander changes the layout even though it is outside the panel */}
-            {!isCollapsed &&
-              <>
-                <div className="display-mode-container">
-                  <div className="display-mode-buttons">
-                    {/* this is necessary to make the display-mode-buttons flow correctly */}
-                    <DisplayModeButtons />
-                  </div>
-                  <NetworkPlan />
-                  <div className="display-modes">
-                    {/* Error boundaries are React components that catch JavaScript errors anywhere in their child component tree, 
-                      log those errors, and display a fallback UI instead of the component tree that crashed.
-                      https://reactjs.org/docs/error-boundaries.html
-                    */}
-                    <ErrorBoundary>
-                      {checkSelectedDisplayMode(displayModes.VIEW) && <ViewMode /> }
-                    </ErrorBoundary>
-                    <ErrorBoundary>
-                      {checkSelectedDisplayMode(displayModes.ANALYSIS) && planType !== 'RING' && <AnalysisMode /> }
-                    </ErrorBoundary>
-                    <ErrorBoundary>
-                      {checkSelectedDisplayMode(displayModes.EDIT_RINGS) && <RingEditor /> }
-                    </ErrorBoundary>
-                    <ErrorBoundary>
-                      {checkSelectedDisplayMode(displayModes.EDIT_PLAN) && <PlanEditor /> }
-                    </ErrorBoundary>
-                    <ErrorBoundary>
-                      {checkSelectedDisplayMode(displayModes.DEBUG) && <AroDebug /> }
-                    </ErrorBoundary>
-                    <ErrorBoundary>
-                      {checkSelectedDisplayMode(displayModes.PLAN_SETTINGS) && <PlanSettings /> }
-                    </ErrorBoundary>
+              {/* Plan target map selector should be active only if we are in analysis mode */}
+              {/* Map Selector Plan Target */}
+              {
+                checkSelectedDisplayMode(displayModes.ANALYSIS) && !isRulerEnabled &&
+                <MapSelectorPlanTarget />
+              }
+              {/* Map Selector Export Locations */}
+              { checkSelectedDisplayMode(displayModes.VIEW)
+                && selectedTargetSelectionMode === targetSelectionModes.POLYGON_EXPORT_TARGET &&
+                <MapSelectorExportLocations />
+              }
+              <ToastContainer />
+              {/* A div that overlays on the map to denote disabled state. When shown, it will prevent any keyboard/mouse
+                  interactions with the map. Useful when you have made a slow-ish request to service and want to prevent
+                  further map interactions till you get a response. */}
+              {disableMap &&
+                <div className="map-spinner-container">
+                  <div className="d-flex map-spinner">
+                    <i className="fa fa-5x fa-spinner fa-spin spin-icon" />
                   </div>
                 </div>
-              </>
+              }
+              <EquipmentDropTarget />
+              <ContextMenu />
+            </div>
+
+            {/* Define the sidebar */}
+            {!isReportMode &&
+              <div id="sidebar" className="sidebar-container" style={{ transition: transitionCSS }}>
+                {/* Define the "expander widget" that can be clicked to collapse/uncollapse the sidebar. Note that putting
+                the expander in one div affects the flow of elements in the sidebar, so we create a 0px by 0px div, and
+                use this div to position the contents of the expander. This makes sure we don't affect flow. */}
+                <div className="expander-position">
+                  <div
+                    className="expander-content"
+                    onClick={() => toggleCollapseSideBar()}
+                    onMouseEnter={() => setHovering(true)}
+                    onMouseLeave={() => setHovering(false)}
+                  >
+                    {/* Why so complicated? The use case is:
+                      1. When expanded, it should show an arrow pointing right
+                      2. When collapsed and not hovering, it should show the display mode that is currently active
+                      3. When collapsed and hovering, it should show an arrow pointing left */}
+                    <i
+                      className={`fa fa-2x 
+                        ${(!hovering && isCollapsed && checkSelectedDisplayMode(displayModes.VIEW)) ? 'fa-eye' : ''}
+                        ${(!hovering && isCollapsed && checkSelectedDisplayMode(displayModes.ANALYSIS)) ? 'fa-gavel' : ''}
+                        ${(!hovering && isCollapsed && checkSelectedDisplayMode(displayModes.EDIT_RINGS)) ? 'fa-project-diagram' : ''}
+                        ${(!hovering && isCollapsed && checkSelectedDisplayMode(displayModes.EDIT_PLAN)) ? 'fa-pencil-alt' : ''}
+                        ${(!hovering && isCollapsed && checkSelectedDisplayMode(displayModes.DEBUG)) ? 'fa-bug' : ''}
+                        ${(!hovering && isCollapsed && checkSelectedDisplayMode(displayModes.PLAN_SETTINGS)) ? 'fa-cog' : ''}
+                        ${!isCollapsed ? 'fa-arrow-circle-right' : ''}
+                        ${(hovering && isCollapsed) ? 'fa-arrow-circle-left' : ''}
+                      `}
+                    />
+                  </div>
+                </div>
+                {/* Add a wrapping div because the expander changes the layout even though it is outside the panel */}
+                {!isCollapsed &&
+                  <>
+                    <div className="display-mode-container">
+                      <div className="display-mode-buttons">
+                        {/* this is necessary to make the display-mode-buttons flow correctly */}
+                        <DisplayModeButtons />
+                      </div>
+                      <NetworkPlan />
+                      <div className="display-modes">
+                        {/* Error boundaries are React components that catch JavaScript errors anywhere in their child component tree, 
+                          log those errors, and display a fallback UI instead of the component tree that crashed.
+                          https://reactjs.org/docs/error-boundaries.html
+                        */}
+                        <ErrorBoundary>
+                          {checkSelectedDisplayMode(displayModes.VIEW) && <ViewMode /> }
+                        </ErrorBoundary>
+                        <ErrorBoundary>
+                          {checkSelectedDisplayMode(displayModes.ANALYSIS) && planType !== 'RING' && <AnalysisMode /> }
+                        </ErrorBoundary>
+                        <ErrorBoundary>
+                          {checkSelectedDisplayMode(displayModes.EDIT_RINGS) && <RingEditor /> }
+                        </ErrorBoundary>
+                        <ErrorBoundary>
+                          {checkSelectedDisplayMode(displayModes.EDIT_PLAN) && <PlanEditor /> }
+                        </ErrorBoundary>
+                        <ErrorBoundary>
+                          {checkSelectedDisplayMode(displayModes.DEBUG) && <AroDebug /> }
+                        </ErrorBoundary>
+                        <ErrorBoundary>
+                          {checkSelectedDisplayMode(displayModes.PLAN_SETTINGS) && <PlanSettings /> }
+                        </ErrorBoundary>
+                      </div>
+                    </div>
+                  </>
+                }
+              </div>
             }
           </div>
-        }
-      </div>
-      <div className="ui-note ui-note-container">
-        {/* There used to be a "spinner" icon here, which has been removed. On profiling, we found that the
-            spinning animation caused the tile rendering to be two times slower (e.g. 200ms with spinner vs 100 ms without)
-            Do NOT add any kind of animated element in this control unless you suppress it when tiles are rendering */}
-        <div className="ui-note-notes-contain">
-          {areTilesRendering && <div className="ui-note-noteline">Rendering Tiles</div> }
-          <UINotifications />
-        </div>
-      </div>
-      {/* Custom Footer */}
-      <CustomFooter />
-      {/* Remove the Visiblity and Push it into the googlemap */}
-      {map &&
-        <div style={{ visibility: 'hidden' }} ref={mapViewToggle}>
-          <MapViewToggle />
-        </div>
-      }
-      {/* Ruler dispaly panel */}
-      {showPanel &&
-        <div className="map-tool panel panel-primary" id="measuring-stick-result">
-          <div className="panel-heading">
-            Measured distance: {(measuredDistance * meters_to_length_units).toFixed(0)} {length_units}
+          <div className="ui-note ui-note-container">
+            {/* There used to be a "spinner" icon here, which has been removed. On profiling, we found that the
+                spinning animation caused the tile rendering to be two times slower (e.g. 200ms with spinner vs 100 ms without)
+                Do NOT add any kind of animated element in this control unless you suppress it when tiles are rendering */}
+            <div className="ui-note-notes-contain">
+              {areTilesRendering && <div className="ui-note-noteline">Rendering Tiles</div> }
+              <UINotifications />
+            </div>
           </div>
-        </div>
-      }
+          {/* Custom Footer */}
+          <CustomFooter />
+          {/* Remove the Visiblity and Push it into the googlemap */}
+          {map &&
+            <div style={{ visibility: 'hidden' }} ref={mapViewToggle}>
+              <MapViewToggle />
+            </div>
+          }
+          {/* Ruler dispaly panel */}
+          {showPanel &&
+            <div className="map-tool panel panel-primary" id="measuring-stick-result">
+              <div className="panel-heading">
+                Measured distance: {(measuredDistance * meters_to_length_units).toFixed(0)} {length_units}
+              </div>
+            </div>
+          }
 
-      {/* TODO: this is a modal, and should be moved into our modal system */}
-      <RfpModal/>
+          {/* TODO: this is a modal, and should be moved into our modal system */}
+          <RfpModal/>
 
-      <style jsx>{`
-        :global(.mantine-Modal-title) {
-          font-size: 18px;
-          font-weight: bold;
-        }
-      `}</style>
-    </ModalsProvider>
-    </NotificationsProvider>
+          <style jsx>{`
+            :global(.mantine-Modal-title) {
+              font-size: 18px;
+              font-weight: bold;
+            }
+          `}</style>
+        </ModalsProvider>
+      </NotificationsProvider>
+      <TileOverlayComposer />
+    </>
   )
 }
 
@@ -324,6 +335,9 @@ const mapStateToProps = (state) => ({
   isRulerEnabled: state.toolbar.isRulerEnabled,
   appConfigUnits: Object.keys(state.toolbar.appConfiguration).length
     && state.toolbar.appConfiguration.units,
+  displayModeButtons: Object.keys(state.toolbar.appConfiguration).length
+    && state.toolbar.appConfiguration.perspective.showDisplayModeButtons,
+
 })
 
 const mapDispatchToProps = (dispatch) => ({

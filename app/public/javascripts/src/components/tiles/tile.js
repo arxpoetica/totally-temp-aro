@@ -105,8 +105,8 @@ class TileComponentController {
     // Subscribe to changes in the map tile options
     this.unsubMapTileOptions = rxState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
       this.mapTileOptions = JSON.parse(JSON.stringify(mapTileOptions))
-      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapTileOptions(mapTileOptions)
+      if (this.mapTileRenderer) {
+        this.mapTileRenderer.setMapTileOptions(mapTileOptions)
       }
     })
 
@@ -123,15 +123,24 @@ class TileComponentController {
 
     // If selected layer category map changes or gets loaded, set that in the tile data road
     this.unsubCategories = state.layerCategories.subscribe((layerCategories) => {
-      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setLayerCategories(layerCategories)
+      if (this.mapTileRenderer) {
+        this.mapTileRenderer.setLayerCategories(layerCategories)
       }
     })
 
     // If Display Mode change, set that in the tile data
     this.unsubDisplayMode = state.selectedDisplayMode.subscribe((selectedDisplayMode) => {
-      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedDisplayMode(selectedDisplayMode)
+      if (this.mapTileRenderer) {
+        this.mapTileRenderer.setselectedDisplayMode(selectedDisplayMode)
+      }
+    })
+
+    // If setselectedDisplayMode changed
+    this.unsubRXNearnetLayers = state.nearnetLayers.subscribe((nearnetLayers) => {
+      if (this.mapTileRenderer) {
+        this.nearnetLayers = nearnetLayers
+        this.mapTileRenderer.setNearnetLayers(nearnetLayers)
+        this.refreshMapTiles()
       }
     })
 
@@ -284,6 +293,7 @@ class TileComponentController {
     this.unsubRXSetMapZoom.unsubscribe()
     this.unsubSetMapZoom.unsubscribe()
     this.unsubDisplayMode.unsubscribe()
+    this.unsubRXNearnetLayers.unsubscribe()
     this.unsubCategories.unsubscribe()
     this.unsubRXMapLayerRefresh.unsubscribe()
     this.unsubMapLayerRefresh.unsubscribe()
@@ -298,13 +308,7 @@ class TileComponentController {
   createMapOverlay () {
     this.rootSubscribeAll()
 
-    if (this.mapRef.overlayMapTypes.length > 0) {
-      console.error('ERROR: Creating a map overlay, but we already have overlays defined')
-      console.error(this.mapRef.overlayMapTypes)
-      return
-    }
-
-    this.mapRef.overlayMapTypes.push(new MapTileRenderer(new google.maps.Size(Constants.TILE_SIZE, Constants.TILE_SIZE),
+    this.mapTileRenderer = new MapTileRenderer(new google.maps.Size(Constants.TILE_SIZE, Constants.TILE_SIZE),
       this.tileDataService,
       this.mapTileOptions,
       this.state.layerCategories.getValue(),
@@ -320,15 +324,17 @@ class TileComponentController {
       this.locationAlerts,
       this.rShowFiberSize,
       this.rViewSetting,
-      this.selectionIds
-    ))
-    this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
+      this.selectionIds,
+      this.nearnetLayers,
+    )
+    this.mapRef.overlayMapTypes.push(this.mapTileRenderer)
+    
     //this.state.isShiftPressed = false // make this per-overlay or move it somewhere more global
     
     // Update the selection in the renderer. We should have a bound "this.oldSelection" at this point
-    if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setOldSelection(this.state && this.state.selection)
-      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelection(this.selection)
+    if (this.mapTileRenderer) {
+      this.mapTileRenderer.setOldSelection(this.state && this.state.selection)
+      this.mapTileRenderer.setSelection(this.selection)
     }
     
     // listener for shift key
@@ -341,6 +347,7 @@ class TileComponentController {
     })
     
     this.overlayRightclickListener = this.mapRef.addListener('rightclick', (event) => {
+      if (this.nearnetLayers && this.nearnetLayers.length) return
       this.getFeaturesUnderLatLng(event.latLng)
       .then((hitFeatures) => {
         hitFeatures.event = event
@@ -734,8 +741,11 @@ class TileComponentController {
       this.keyupListener = null
     }
     
-    this.mapRef.overlayMapTypes.clear()
-    this.OVERLAY_MAP_INDEX = null
+    let index = this.mapRef.overlayMapTypes.indexOf(this.mapTileRenderer)
+    if (-1 < index) {
+      this.mapRef.overlayMapTypes.removeAt(index)
+      delete this.mapTileRenderer
+    }
 
     this.rootUnsubscribeAll()
   }
@@ -746,15 +756,13 @@ class TileComponentController {
       console.warn('Suppressing map tile refresh')
       return
     }
-    if (!this.mapRef || !this.mapRef.getBounds()) {
+    if (!this.mapTileRenderer || !this.mapRef || !this.mapRef.getBounds()) {
       return
     }
 
     if (tilesToRefresh) {
       // First, redraw the tiles that are outside the viewport AND at the current zoom level.
-      this.mapRef.overlayMapTypes.forEach((overlayMap) => {
-        overlayMap.redrawCachedTiles(tilesToRefresh)
-      })
+      this.mapTileRenderer.redrawCachedTiles(tilesToRefresh)
       return
     }
     // // First get a list of tiles that are visible on the screen.
@@ -783,23 +791,19 @@ class TileComponentController {
       }
     })
     // First, redraw the tiles that are outside the viewport AND at the current zoom level.
-    this.mapRef.overlayMapTypes.forEach((overlayMap) => {
-      overlayMap.redrawCachedTiles(tilesOutOfViewport)
-    })
+    this.mapTileRenderer.redrawCachedTiles(tilesOutOfViewport)
     // Next, redraw the visible tiles. We do it this way because tiles that are redrawn most recently are given a higher priority.
-    this.mapRef.overlayMapTypes.forEach((overlayMap) => {
-      overlayMap.redrawCachedTiles(visibleTiles)
-    })
+    this.mapTileRenderer.redrawCachedTiles(visibleTiles)
   }
 
   // Handles map layer events
   handleMapEvents (oldMapLayers, newMapLayers, mapLayerActions) {
-    if (!this.mapRef || this.mapRef.overlayMapTypes.getLength() <= this.OVERLAY_MAP_INDEX) {
+    if (!this.mapTileRenderer) {
       // Map not initialized yet
       return
     }
     this.setActiveMapLayers(newMapLayers)
-    this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapLayers(newMapLayers)
+    this.mapTileRenderer.setMapLayers(newMapLayers)
     this.refreshMapTiles()
   }
 
@@ -828,8 +832,8 @@ class TileComponentController {
 
     if (this.cachedOldSelection !== this.state.selection) {
       // Update the selection in the renderer
-      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setOldSelection(this.state.selection)
+      if (this.mapTileRenderer) {
+        this.mapTileRenderer.setOldSelection(this.state.selection)
         // If the selection has changed, redraw the tiles
         this.tileDataService.markHtmlCacheDirty()
         this.refreshMapTiles()
@@ -840,8 +844,8 @@ class TileComponentController {
     // For React boundries-info
     if (this.rCachedOldSelection !== this.rSelection) {
       // Update the selection in the renderer
-      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setOldSelection(this.rSelection)
+      if (this.mapTileRenderer) {
+        this.mapTileRenderer.setOldSelection(this.rSelection)
         // If the selection has changed, redraw the tiles
         this.tileDataService.markHtmlCacheDirty()
         this.refreshMapTiles()
@@ -893,7 +897,7 @@ class TileComponentController {
   }
 
   mergeToTarget (nextState, actions) {
-    if (null === this.OVERLAY_MAP_INDEX) return
+    if (!this.mapTileRenderer) return
     // store the previous values before Object.assign
     const currentSelectionModeId = this.activeSelectionModeId
     const oldPlanTargets = this.selection && this.selection.planTargets
@@ -911,35 +915,33 @@ class TileComponentController {
     // merge state and actions onto controller
     Object.assign(this, nextState)
     Object.assign(this, actions)
-
-    let overlayMap = this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX)
     
     if (doConduitUpdate) {
-      overlayMap.setStateMapLayers(nextState.stateMapLayers)
+      this.mapTileRenderer.setStateMapLayers(nextState.stateMapLayers)
     }
 
     if (currentSelectionModeId !== nextState.activeSelectionModeId ||
         this.hasPlanTargetSelectionChanged(oldPlanTargets, nextState.selection && nextState.selection.planTargets)) {
-      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        overlayMap.setAnalysisSelectionMode(nextState.activeSelectionModeId)
-        overlayMap.setSelection(nextState.selection)
+      if (this.mapTileRenderer) {
+        this.mapTileRenderer.setAnalysisSelectionMode(nextState.activeSelectionModeId)
+        this.mapTileRenderer.setSelection(nextState.selection)
         needRefresh = true
       }
     }
 
     // Edit Locations
     if (!dequal(currentSelectionIds, nextState.selectionIds)) {
-      overlayMap.setSelectionIds(nextState.selectionIds)
+      this.mapTileRenderer.setSelectionIds(nextState.selectionIds)
       needRefresh = true
     }
 
     // - plan edit - //
     if (!dequal(selectedSubnetLocations, nextState.selectedSubnetLocations)) {
-      overlayMap.setSelectedSubnetLocations(nextState.selectedSubnetLocations)
+      this.mapTileRenderer.setSelectedSubnetLocations(nextState.selectedSubnetLocations)
       needRefresh = true
     }
     if (!dequal(locationAlerts, nextState.locationAlerts)) {
-      overlayMap.setLocationAlerts(nextState.locationAlerts)
+      this.mapTileRenderer.setLocationAlerts(nextState.locationAlerts)
       needRefresh = true
     }
     // - //
@@ -947,13 +949,13 @@ class TileComponentController {
     // Set the current state in rShowFiberSize
     // If this is not set, the redux state does not change, it shows only the initial state, so current state is set in rShowFiberSize.
     if (rShowFiberSize !== nextState.rShowFiberSize) {
-      overlayMap.setReactShowFiberSize(nextState.rShowFiberSize)
+      this.mapTileRenderer.setReactShowFiberSize(nextState.rShowFiberSize)
       needRefresh = true
     }
 
     // Set the current state in rViewSetting
     if (rViewSetting !== nextState.rViewSetting) {
-      overlayMap.setReactViewSetting(nextState.rViewSetting)
+      this.mapTileRenderer.setReactViewSetting(nextState.rViewSetting)
       needRefresh = true
     }
 

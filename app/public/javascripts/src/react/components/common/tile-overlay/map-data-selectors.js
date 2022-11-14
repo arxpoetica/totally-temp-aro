@@ -15,8 +15,8 @@ const getUnselectedLocationGroups = createSelector(
   }
 )
 
-const SubnetTileSelectors = Object.freeze({
+const MapDataSelectors = Object.freeze({
   getUnselectedLocationGroups,
 })
 
-export default SubnetTileSelectors
+export default MapDataSelectors

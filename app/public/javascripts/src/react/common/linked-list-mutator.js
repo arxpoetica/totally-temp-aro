@@ -7,7 +7,7 @@ linkedList: {
   ${UUID}: {
     prev: UUID,
     next: UUID,
-    data: UUID,
+    data: UUID of element in dictionary where element is stored,
   },
 }
 */
@@ -33,7 +33,7 @@ let getNewLink = (prev = null, next = null, data = null) => {
   }
 }
 
-// all the ifs could be avoided if we had variable-variables 
+// all the ifs could be avoided if we had variable-variables / pointers
 
 // private function, depends on remove, insert, shift to handle values and count
 // id MUST already be added to linkedList
@@ -45,15 +45,18 @@ let removeLinkage = (linkedList, id) => {
     linkedList[ linkedList[id].prev ].next = linkedList[id].next // could be null if it's the tail, we're fine with that
   } else {
     // it's the head
-    linkedList._head = linkedList[id].next
+    linkedList._head = linkedList[id].next // could be null if it's the only one, we're fine with that
   }
-
+  
   if (linkedList[id].next) {
     linkedList[ linkedList[id].next ].prev = linkedList[id].prev // could be null if it's the head, we're fine with that
   } else {
     // it's the tail
-    linkedList._tail = linkedList[id].prev // could be null if it's the onlt one, we're fine with that
+    linkedList._tail = linkedList[id].prev // could be null if it's the only one, we're fine with that
   }
+
+  linkedList[id].prev = null
+  linkedList[id].next = null
   return linkedList
 }
 
@@ -83,9 +86,10 @@ let insertLinkage = (linkedList, atId, id) => {
       linkedList[ linkedList[atId].prev ].next = id
     } else {
       // head
-      linkedList[id].prev = null
+      linkedList[id].prev = null // just to be sure
       linkedList._head = id
     }
+    linkedList[id].next = atId
     linkedList[atId].prev = id
   }
   return linkedList
@@ -113,7 +117,7 @@ LinkedListMutator.insertAt = (linkedList, atId, insertId, insertData) => {
     return LinkedListMutator.shiftTo(linkedList, atId, insertId)
   }
   // new entry
-  if (!atId || linkedList[atId]) atId = null // if blank or invalid atId: add to end
+  if (!atId || !linkedList[atId]) atId = null // if blank or invalid atId: add to end
   linkedList[insertId] = getNewLink(null, null, insertData)
   linkedList = insertLinkage(linkedList, atId, insertId)
   linkedList._count++
@@ -121,7 +125,10 @@ LinkedListMutator.insertAt = (linkedList, atId, insertId, insertData) => {
 }
 
 LinkedListMutator.shiftTo = (linkedList, atId, id) => {
-  if (!linkedList[id] || !linkedList[atId]) return linkedList
+  if (
+    !linkedList[id]
+    || id === atId
+  ) return linkedList
   linkedList = removeLinkage(linkedList, id)
   linkedList = insertLinkage(linkedList, atId, id)
   return linkedList

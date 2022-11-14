@@ -1,6 +1,13 @@
 import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
 import { Notifier } from '../../common/notifications'
+import WktUtils from '../../../shared-utils/wkt-utils'
+import MenuItemFeature from '../context-menu/menu-item-feature'
+import MenuItemAction from '../context-menu/menu-item-action'
+import ContextMenuActions from '../context-menu/actions'
+import { tileCaches } from '../common/tile-overlay/tile-cache'
+import TileUtils from '../common/tile-overlay/tile-overlay-utils'
+
 
 function setActiveSelectionMode (selectionModeId) {
   return {
@@ -204,6 +211,49 @@ function requestPolygonSelect(polygonCoordinates) {
   }
 }
 
+function selectNearnetEntities(nearnetEntities) {
+  // TODO: not sure clear cache belongs here
+  return (dispatch, getState) => {
+    const state = getState()
+    let prevSelection = null
+    if (state.selection.nearnetEntities.length) prevSelection = state.selection.nearnetEntities[0]
+    // get world coords for prev point and next clear cache for both if exist
+    let nextSelection = null
+    if (nearnetEntities.length) nextSelection = nearnetEntities[0]
+    for (const selection of [prevSelection, nextSelection]) {
+      if (selection) {
+        let worldCoord = TileUtils.latLngToWorldCoord(
+          new google.maps.LatLng(selection.point.latitude, selection.point.longitude)
+        )
+        for (let cache of Object.values(tileCaches['nearnet'])) {
+          cache.deleteTilesForWorldCoord(worldCoord)
+        }
+      }
+    }
+
+    dispatch({
+      type: Actions.SELECTION_SET_NEARNET_ENTITIES,
+      payload: nearnetEntities, 
+    })
+  }
+}
+
+function nearnetContextMenu (features, event) {
+  return (dispatch) => {
+    var menuItemFeatures = []
+    features.forEach(location => {
+      let menuActions = []
+      menuActions.push(new MenuItemAction('SELECT', 'Select', 'SelectionActions', 'selectNearnetEntities', [location]))
+      menuItemFeatures.push(new MenuItemFeature('LOCATION', 'Location', menuActions))
+    })
+
+    if (menuItemFeatures.length <= 0) return Promise.resolve()
+    const coords = WktUtils.getXYFromEvent(event)
+    dispatch(ContextMenuActions.setContextMenuItems(menuItemFeatures))
+    dispatch(ContextMenuActions.showContextMenu(coords.x, coords.y))
+  }
+}
+
 export default {
   setActiveSelectionMode,
   clearAllPlanTargets,
@@ -220,4 +270,6 @@ export default {
   setSelectedMapObject,
   setObjectIdToMapObject,
   requestPolygonSelect,
+  selectNearnetEntities,
+  nearnetContextMenu,
 }

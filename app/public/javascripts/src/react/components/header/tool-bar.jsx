@@ -212,308 +212,343 @@ export class ToolBar extends Component {
           </button>
         }
         {showGlobalSettings &&
-          <GlobalSettings />
+          <>
+            <GlobalSettings />
+            <div className="separator"></div>
+          </>
         }
 
-        <div className="separator"></div>
 
-        <button className="btn" title="Create a new plan" style={{ display: isEphemeralPlan ? 'block' : 'none' }}
-          onClick={() => this.createEphemeralPlan()}>
-          <i className="fa fa-file"></i>
-        </button>
+        {isEphemeralPlan && 
+          <button
+            className="btn"
+            title="Create a new plan"
+            onClick={() => this.createEphemeralPlan()}
+          >
+            <i className="fa fa-file"></i>
+          </button>
+        }
 
-        <button className="btn" title="Save plan as..." style={{ display: isSavePlanAs ? 'block' : 'none' }}
-          onClick={() => this.savePlanAs()}>
-          <i className="far fa-save"></i>
-        </button>
+        {isSavePlanAs && 
+          <button
+            className="btn"
+            title="Save plan as..."
+            onClick={() => this.savePlanAs()}
+          >
+            <i className="far fa-save"></i>
+          </button>
+        }
         <PlanInputsModal></PlanInputsModal>
 
-        <button className="btn" title="Open an existing plan..." style={{ display: isPlanModel ? 'block' : 'none' }}
-          onClick={() => this.openViewModeExistingPlan()}>
-          <i className="fa fa-folder-open"></i>
-        </button>
-
-        <div className="separator"></div>
-
-        {/* Ruler */}
-        <div className="rulerDropdown" style={{ display: isMeasuringStick ? 'block' : 'none' }}>
-          <button className={`btn ${isRulerEnabled ? 'btn-selected' : ''}`}
-            type="button" onClick={() => this.rulerAction()}
-            aria-haspopup="true" aria-expanded="false" title="Ruler">
-            <i className="fa fa-ruler"></i>
-          </button>
-          <div
-            className="dropdown-menu dropdown-menu-right ruler-dropdown"
-            style={{ display: isRulerEnabled ? 'block' : 'none' }}
-          >
-            <div className="ruler-container">
-              <select
-                className="form-control"
-                value={currentRulerAction.id}
-                onChange={(event) => {this.onChangeRulerDropdown(event)}}
-              >
-                {this.rulerActions.map((item, index) =>
-                  <option key={index} value={item.id} label={item.label}></option>
-                )}
-              </select>
-              {showRemoveRulerButton &&
-                <button type="button" className="btn btn-primary ruler-undo-btn form-control"
-                  onClick={() => this.removeLastRulerMarker()}>
-                  <i className="fa fa-minus"></i>
-                </button>  
-              }
-            </div>
-          </div>
-        </div>
-
-        {/* Show View Settings */}
-        <div className="myDropdown1">
-          <button className={`btn ${isViewSettingsEnabled ? 'btn-selected' : ''}`}
-            style={{ display: isViewSettings ? 'block' : 'none' }}
-            type="button" onClick={() => this.viewSettingsAction()}
-            aria-haspopup="true" aria-expanded="false" title="Show view settings...">
-            <i className="fa fa-eye"></i>
-          </button>
-
-          <div
-            className="dropdown-menu dropdown-menu-right view-dropdown"
-            style={{ display: isViewSettingsEnabled ? 'block' : 'none' }}
-          >
-            {/* Location Heat Map */}
-            <input
-              type="checkbox"
-              className="checkboxfill"
-              checked={heatMapOption}
-              style={{marginLeft: '2px'}}
-              onChange={() => this.toggleHeatMapOptions()}
-            />
-            <span>Location Heatmap On</span>
-            {heatMapOption &&
-              <>
-                <div className="dropdown-divider"></div>
-                <span>Heatmap Intensity</span>
-                <div style={{padding: '0px 10px'}}>
-                  <input
-                    type="range"
-                    min={this.min}
-                    max={this.max}
-                    value={sliderValue}
-                    className="aro-slider"
-                    onChange={(event) => {this.changeHeatMapOptions(event); this.refreshSlidertrack()}}
-                  />
-                </div>
-              </>
-            }
-
-            {/* Location Labels */}
-            <div className="dropdown-divider"></div>
-            <input
-              type="checkbox"
-              className="checkboxfill"
-              checked={showLocationLabels}
-              style={{marginLeft: '2px'}}
-              onChange={() => this.showLocationLabelsChanged()}
-            />
-            <span>Location Labels</span>
-
-            {/* Equipment Boundaries */}
-            {configuration.toolbar.showSiteBoundaries && configuration.toolbar !== undefined &&
-            <>
-              <div className="dropdown-divider"></div>
-              <input
-                type="checkbox"
-                className="checkboxfill"
-                checked={showSiteBoundary}
-                style={{marginLeft: '2px'}}
-                onChange={() => this.toggleSiteBoundary()}
-              />
-              {/* TODO: See https://www.pivotaltracker.com/n/projects/2468285/stories/177344788 */}
-              <span>{isFrontier ? 'Site' : 'Equipment'} Boundaries</span>
-              {showSiteBoundary &&
-                <select className="form-control" value={selectedBoundaryType.description}
-                  onChange={(event) => this.onChangeSiteBoundaries(event)}>
-                  {boundaryTypes.map((item, index) =>
-                    <option key={index} value={item.description} label={item.description}></option>
-                  )}
-                </select>
-              }
-            </>
-            }
-
-            {/* Directed Cable */}
-            {configuration.toolbar.showDirectedCables && configuration.toolbar !== undefined &&
-            <>
-              <div className="dropdown-divider"></div>
-              <input
-                type="checkbox"
-                className="checkboxfill"
-                checked={showDirectedCable}
-                style={{marginLeft: '2px'}}
-                onChange={(event) => this.showCableDirection(event)}
-              />
-              <span>Directed Cable</span>
-            </>
-            }
-
-            {/* Equipment Labels */}
-            {configuration.perspective.viewSettings.showSiteLabels &&
-            <>
-              <div className="dropdown-divider"></div>
-              <input
-                type="checkbox"
-                className="checkboxfill"
-                checked={showEquipmentLabels}
-                style={{marginLeft: '2px'}}
-                onChange={(event) => this.showEquipmentLabelsChanged(event)}
-              />
-              {/* TODO: See https://www.pivotaltracker.com/n/projects/2468285/stories/177344788 */}
-              <span>{isFrontier ? 'Site' : 'Equipment'} Labels</span>
-            </>
-            }
-
-            {/* Fiber Size */}
-            {configuration.perspective.viewSettings.showFiberSize &&
-            <>
-              <div className="dropdown-divider"></div>
-              <input
-                type="checkbox"
-                className="checkboxfill"
-                checked={showFiberSize}
-                style={{marginLeft: '2px'}}
-                onChange={(event) => this.setShowFiberSize(event)}
-              />
-              <span>Fiber Size</span>
-              {showFiberSize &&
-                <select className="form-control" value={viewSetting.selectedFiberOption.name}
-                  onChange={(event) => this.onChangeSelectedFiberOption(event)}>
-                  {viewFiberOptions.map((item, index) =>
-                    <option key={index} value={item.name} label={item.name}></option>
-                  )}
-                </select>
-              }
-            </>
-            }
-          </div>
-        </div>
-
-        <div
-          style={{ display: selectedDisplayMode === this.displayModes.ANALYSIS
-            || selectedDisplayMode === this.displayModes.VIEW? 'block' : 'none' }}
-          className="separator" 
-        />
-
-        <button style={{ display: selectedIndividualLocation ? 'block' : 'none' }}
-          className={
-            `btn ${selectedTargetSelectionMode === this.targetSelectionModes.SINGLE_PLAN_TARGET ? 'btn-selected' : ''}
-            ${selectedIndividualLocation === true ? 'ng-hide-remove' : 'ng-hide-add'}`
-          }
-          onClick={() => this.setSelectionSingle()}
-          title="Select individual locations">
-          <i className="fa fa-mouse-pointer"></i>
-        </button>
-
-        <button
-          style={{
-            display:
-              selectedMultipleLocation
-              && selectedDisplayMode === this.displayModes.ANALYSIS
-              ? 'block' : 'none',
-          }}
-          className={
-            `btn ${selectedTargetSelectionMode === this.targetSelectionModes.POLYGON_PLAN_TARGET ? 'btn-selected' : ''}
-            ${selectedMultipleLocation === true ? 'ng-hide-remove' : 'ng-hide-add'}`
-          }
-          onClick={() => this.setSelectionPolygon()}
-          title="Select multiple locations"
-        >
-          <i className="fa fa-draw-polygon"></i>
-        </button>
-
-        <button className={`btn ${isAnnotationsListVisible ? 'btn-selected' : ''}`}
-          title="Annotation" onClick={() => this.openAnnotationListVisibility()}>
-          <i className="fa fa-paint-brush"></i>
-        </button>
-
-        <button className={`btn ${isMapReportsVisible ? 'btn-selected' : ''}`}
-          title="PDF Reports" onClick={() => this.openMapReportsVisibility()}>
-          <i className="fas fa-print"></i>
-        </button>
-
-        {showMapReportMapObjects &&
-          <MapReportsListMapObjects />
+        {isPlanModel && 
+          <>
+            <button
+              className="btn"
+              title="Open an existing plan..."
+              onClick={() => this.openViewModeExistingPlan()}
+            >
+              <i className="fa fa-folder-open"></i>
+            </button>
+            <div className="separator"></div>
+          </>
         }
 
-        <div className="separator"></div>
+        {/* Ruler */}
+        {isMeasuringStick && 
+          <div className="rulerDropdown">
+            <button className={`btn ${isRulerEnabled ? 'btn-selected' : ''}`}
+              type="button" onClick={() => this.rulerAction()}
+              aria-haspopup="true" aria-expanded="false" title="Ruler">
+              <i className="fa fa-ruler"></i>
+            </button>
+            <div
+              className="dropdown-menu dropdown-menu-right ruler-dropdown"
+              style={{ display: isRulerEnabled ? 'block' : 'none' }}
+            >
+              <div className="ruler-container">
+                <select
+                  className="form-control"
+                  value={currentRulerAction.id}
+                  onChange={(event) => {this.onChangeRulerDropdown(event)}}
+                >
+                  {this.rulerActions.map((item, index) =>
+                    <option key={index} value={item.id} label={item.label}></option>
+                  )}
+                </select>
+                {showRemoveRulerButton &&
+                  <button type="button" className="btn btn-primary ruler-undo-btn form-control"
+                    onClick={() => this.removeLastRulerMarker()}>
+                    <i className="fa fa-minus"></i>
+                  </button>  
+                }
+              </div>
+            </div>
+          </div>
+        }
 
-        {configuration.perspective.showToolbarButtons.openCoverageBoundary &&
-          <button style={{ display: calculateCoverageBoundry ? 'block' : 'none' }}
+        {/* Show View Settings */}
+        {isViewSettings &&
+          <>
+            <div className="myDropdown1">
+              <button className={`btn ${isViewSettingsEnabled ? 'btn-selected' : ''}`}
+                type="button" onClick={() => this.viewSettingsAction()}
+                aria-haspopup="true" aria-expanded="false" title="Show view settings...">
+                <i className="fa fa-eye"></i>
+              </button>
+
+              <div
+                className="dropdown-menu dropdown-menu-right view-dropdown"
+                style={{ display: isViewSettingsEnabled ? 'block' : 'none' }}
+              >
+                {/* Location Heat Map */}
+                <input
+                  type="checkbox"
+                  className="checkboxfill"
+                  checked={heatMapOption}
+                  style={{marginLeft: '2px'}}
+                  onChange={() => this.toggleHeatMapOptions()}
+                />
+                <span>Location Heatmap On</span>
+                {heatMapOption &&
+                  <>
+                    <div className="dropdown-divider"></div>
+                    <span>Heatmap Intensity</span>
+                    <div style={{padding: '0px 10px'}}>
+                      <input
+                        type="range"
+                        min={this.min}
+                        max={this.max}
+                        value={sliderValue}
+                        className="aro-slider"
+                        onChange={(event) => {this.changeHeatMapOptions(event); this.refreshSlidertrack()}}
+                      />
+                    </div>
+                  </>
+                }
+
+                {/* Location Labels */}
+                <div className="dropdown-divider"></div>
+                <input
+                  type="checkbox"
+                  className="checkboxfill"
+                  checked={showLocationLabels}
+                  style={{marginLeft: '2px'}}
+                  onChange={() => this.showLocationLabelsChanged()}
+                />
+                <span>Location Labels</span>
+
+                {/* Equipment Boundaries */}
+                {configuration.toolbar.showSiteBoundaries && configuration.toolbar !== undefined &&
+                <>
+                  <div className="dropdown-divider"></div>
+                  <input
+                    type="checkbox"
+                    className="checkboxfill"
+                    checked={showSiteBoundary}
+                    style={{marginLeft: '2px'}}
+                    onChange={() => this.toggleSiteBoundary()}
+                  />
+                  {/* TODO: See https://www.pivotaltracker.com/n/projects/2468285/stories/177344788 */}
+                  <span>{isFrontier ? 'Site' : 'Equipment'} Boundaries</span>
+                  {showSiteBoundary &&
+                    <select className="form-control" value={selectedBoundaryType.description}
+                      onChange={(event) => this.onChangeSiteBoundaries(event)}>
+                      {boundaryTypes.map((item, index) =>
+                        <option key={index} value={item.description} label={item.description}></option>
+                      )}
+                    </select>
+                  }
+                </>
+                }
+
+                {/* Directed Cable */}
+                {configuration.toolbar.showDirectedCables && configuration.toolbar !== undefined &&
+                <>
+                  <div className="dropdown-divider"></div>
+                  <input
+                    type="checkbox"
+                    className="checkboxfill"
+                    checked={showDirectedCable}
+                    style={{marginLeft: '2px'}}
+                    onChange={(event) => this.showCableDirection(event)}
+                  />
+                  <span>Directed Cable</span>
+                </>
+                }
+
+                {/* Equipment Labels */}
+                {configuration.perspective.viewSettings.showSiteLabels &&
+                <>
+                  <div className="dropdown-divider"></div>
+                  <input
+                    type="checkbox"
+                    className="checkboxfill"
+                    checked={showEquipmentLabels}
+                    style={{marginLeft: '2px'}}
+                    onChange={(event) => this.showEquipmentLabelsChanged(event)}
+                  />
+                  {/* TODO: See https://www.pivotaltracker.com/n/projects/2468285/stories/177344788 */}
+                  <span>{isFrontier ? 'Site' : 'Equipment'} Labels</span>
+                </>
+                }
+
+                {/* Fiber Size */}
+                {configuration.perspective.viewSettings.showFiberSize &&
+                <>
+                  <div className="dropdown-divider"></div>
+                  <input
+                    type="checkbox"
+                    className="checkboxfill"
+                    checked={showFiberSize}
+                    style={{marginLeft: '2px'}}
+                    onChange={(event) => this.setShowFiberSize(event)}
+                  />
+                  <span>Fiber Size</span>
+                  {showFiberSize &&
+                    <select className="form-control" value={viewSetting.selectedFiberOption.name}
+                      onChange={(event) => this.onChangeSelectedFiberOption(event)}>
+                      {viewFiberOptions.map((item, index) =>
+                        <option key={index} value={item.name} label={item.name}></option>
+                      )}
+                    </select>
+                  }
+                </>
+                }
+              </div>
+            </div>
+            <div
+              className="separator" 
+            />
+          </>
+        }
+        
+        {selectedIndividualLocation && configuration.perspective.showToolbarButtons.showSelectLocations &&
+          <button
+            className={
+              `btn ${selectedTargetSelectionMode === this.targetSelectionModes.SINGLE_PLAN_TARGET ? 'btn-selected' : ''}
+              ${selectedIndividualLocation ? 'ng-hide-remove' : 'ng-hide-add'}`
+            }
+            onClick={() => this.setSelectionSingle()}
+            title="Select individual locations"
+          >
+            <i className="fa fa-mouse-pointer"></i>
+          </button>
+        }
+
+        {selectedMultipleLocation && selectedDisplayMode === this.displayModes.ANALYSIS &&
+          <button
+            className={
+              `btn ${selectedTargetSelectionMode === this.targetSelectionModes.POLYGON_PLAN_TARGET ? 'btn-selected' : ''}
+              ${selectedMultipleLocation === true ? 'ng-hide-remove' : 'ng-hide-add'}`
+            }
+            onClick={() => this.setSelectionPolygon()}
+            title="Select multiple locations"
+          >
+            <i className="fa fa-draw-polygon"></i>
+          </button>
+        }
+
+        {configuration.perspective.showToolbarButtons.showAnnotations &&
+          <button className={`btn ${isAnnotationsListVisible ? 'btn-selected' : ''}`}
+            title="Annotation" onClick={() => this.openAnnotationListVisibility()}>
+            <i className="fa fa-paint-brush"></i>
+          </button>
+        }
+
+        {configuration.perspective.showToolbarButtons.showMapReports &&
+          <button className={`btn ${isMapReportsVisible ? 'btn-selected' : ''}`}
+            title="PDF Reports" onClick={() => this.openMapReportsVisibility()}>
+            <i className="fas fa-print"></i>
+          </button>
+        }
+
+        {showMapReportMapObjects &&
+          <>
+            <MapReportsListMapObjects />
+            <div className="separator"></div>
+          </>
+        }
+
+
+        {calculateCoverageBoundry && configuration.perspective.showToolbarButtons.openCoverageBoundary &&
+          <button
             className={
               `btn ${selectedTargetSelectionMode === this.targetSelectionModes.COVERAGE_BOUNDARY
               && activeViewModePanel === this.viewModePanels.COVERAGE_BOUNDARY ? 'btn-selected' : ''}
-              ${calculateCoverageBoundry === true ? 'ng-hide-remove' : 'ng-hide-add'}`
+              ${calculateCoverageBoundry ? 'ng-hide-remove' : 'ng-hide-add'}`
             }
             onClick={() => this.openViewModeCoverageBoundry()}
-            title="Calculate coverage boundary">
+            title="Calculate coverage boundary"
+          >
             <i className="fa fa-crosshairs fa-rotate-180"></i>
           </button>
         }
 
-        <button
-          style={{ display: exportSelectedPolygon ? 'block' : 'none' }}
-          className={
-            `btn ${selectedTargetSelectionMode === this.targetSelectionModes.POLYGON_EXPORT_TARGET
-              ? 'btn-selected'
-              : ''
-            } ${exportSelectedPolygon === true ? 'ng-hide-remove' : 'ng-hide-add'}`
-          }
-          onClick={() => this.setSelectionExport()}
-          title="Export selected polygon">
-          <i className="fa fa-cube"></i>
-        </button>
+        {exportSelectedPolygon &&
+          <button
+            style={{ display: exportSelectedPolygon ? 'block' : 'none' }}
+            className={
+              `btn ${selectedTargetSelectionMode === this.targetSelectionModes.POLYGON_EXPORT_TARGET
+                ? 'btn-selected'
+                : ''
+              } ${exportSelectedPolygon === true ? 'ng-hide-remove' : 'ng-hide-add'}`
+            }
+            onClick={() => this.setSelectionExport()}
+            title="Export selected polygon">
+            <i className="fa fa-cube"></i>
+          </button>
+        }
 
-        <button
-          className={cx(
-            'btn', (
-              selectedDisplayMode === this.displayModes.EDIT_PLAN
-              || selectedDisplayMode === this.displayModes.EDIT_RINGS
-            ) && 'hide'
-          )}
-          title="Show RFP status"
-          onClick={() => this.showRfpWindow()}
-        >
-          <i className="fa fa-cloud"></i>
-        </button>
+        {configuration.perspective.showToolbarButtons.showRFPWindow &&
+          <button
+            className={cx(
+              'btn', (
+                selectedDisplayMode === this.displayModes.EDIT_PLAN
+                || selectedDisplayMode === this.displayModes.EDIT_RINGS
+              ) && 'hide'
+            )}
+            title="Show RFP status"
+            onClick={() => this.showRfpWindow()}
+          >
+            <i className="fa fa-cloud"></i>
+          </button>
+        }
 
         {/* Dynamic Dropdown for Toolbar icons */}
-        <div
-          className="dropdown"
-          style={{ display: !showDropDown ? 'none' : 'block',
-            borderLeft: '#eee 1px dotted', width: dropdownWidthPixels }}
-        >
-          <button style={{backgroundColor: configuration.toolbar.toolBarColor}}
-            className="btn btn-light" type="button" id="dropdownMenu1" data-toggle="dropdown"
-            aria-haspopup="true" aria-expanded="true">
-            <i className="fa fa-angle-double-down"></i>
-          </button>
-          {/* <!-- Override some styles on the dropdown-menu UL below to remove margins, padding, etc --> */}
-          <ul className="dropdown-menu tool-bar-dropdown" aria-labelledby="dropdownMenu1"
-            style={{padding: '0px', minWidth: '0px', backgroundColor: configuration.toolbar.toolBarColor}}>
-          </ul>
-        </div>
+        <>
+          <div
+            className="dropdown"
+            style={{ display: !showDropDown ? 'none' : 'block', borderLeft: '#eee 1px dotted', width: dropdownWidthPixels }}
+          >
+            <button style={{backgroundColor: configuration.toolbar.toolBarColor}}
+              className="btn btn-light" type="button" id="dropdownMenu1" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="true">
+              <i className="fa fa-angle-double-down"></i>
+            </button>
+            {/* <!-- Override some styles on the dropdown-menu UL below to remove margins, padding, etc --> */}
+            <ul className="dropdown-menu tool-bar-dropdown" aria-labelledby="dropdownMenu1"
+              style={{padding: '0px', minWidth: '0px', backgroundColor: configuration.toolbar.toolBarColor}}>
+            </ul>
+          </div>
+          <div className="separator"></div>
+        </>
 
-        <div className="separator"></div>
 
-        <button className="btn" onClick={() => this.refreshTiles()}
-          data-toggle="tooltip"
-          data-placement="bottom"
-          title="Refresh tiles">
-          <i className="fa fa-sync-alt"></i>
-        </button>
+        {configuration.perspective.showToolbarButtons.showRefreshTiles &&
+          <>
+            <button className="btn" onClick={() => this.refreshTiles()}
+              data-toggle="tooltip"
+              data-placement="bottom"
+              title="Refresh tiles">
+              <i className="fa fa-sync-alt"></i>
+            </button>
+            <div className="separator"></div>
+          </>
+        }
 
-        <div className="separator"></div>
 
-         {/* Account Settings */}
-         <div className="accountDropdown" onMouseLeave={() => this.setState({ isAccountSettingsEnabled: false})}>
+        {/* Account Settings */}
+        <div className="accountDropdown" onMouseLeave={() => this.setState({ isAccountSettingsEnabled: false})}>
           <button className={`btn ${this.state.isAccountSettingsEnabled ? 'btn-selected' : ''}`}
             type="button"
             onClick={() => this.openAccountSettingsDropDown()}

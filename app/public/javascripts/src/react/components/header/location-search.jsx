@@ -1,36 +1,60 @@
 import React, { useState } from 'react'
 import { connect } from 'react-redux'
-import Select from 'react-select'
-import { selectStyles } from '../../common/view-utils.js'
+import { Select, Avatar } from '@mantine/core'
 import AroHttp from '../../common/aro-http'
 import uuidStore from '../../../shared-utils/uuid-store'
 import PlanActions from '../plan/plan-actions.js'
+import ToolBarActions from './tool-bar-actions.js'
 
 const ToolBarSearch = (props) => {
 
   const [options, setOptions] = useState([])
-  const { defaultPlanCoordinates, mapRef, currentView, plan } = props
+  const [searchTerm, setSearchTerm] = useState('')
+  const { defaultPlanCoordinates, mapRef, currentView, plan, loadPlan } = props
 
   let timer
-  const handleInputChange = (searchTerm, { action }) => {
-    if (action === 'input-change') {
-      clearTimeout(timer)
-      timer = setTimeout(() => {
-        const params = new URLSearchParams({
-          text: searchTerm,
-          sessionToken: uuidStore.getInsecureV4UUID(),
-          biasLatitude: defaultPlanCoordinates.latitude,
-          biasLongitude: defaultPlanCoordinates.longitude,
-        })
-        AroHttp.get(`/search/addresses?${params.toString()}`)
-          .then(({ data }) => {
-            setOptions(data.map(option => {
-              option.label = option.displayText
-              return option
-            }))
-          })
-      }, 250)
-    }
+  const handleInputChange = (newSearchTerm) => {
+    setSearchTerm(newSearchTerm)
+    clearTimeout(timer)
+    const promises = []
+    timer = setTimeout(() => {
+      const params = new URLSearchParams({
+        text: newSearchTerm,
+        sessionToken: uuidStore.getInsecureV4UUID(),
+        biasLatitude: defaultPlanCoordinates.latitude,
+        biasLongitude: defaultPlanCoordinates.longitude,
+      })
+      if (!newSearchTerm) {
+        setOptions([])
+        return
+      }
+      const esc = encodeURIComponent
+      promises.push(AroHttp.get(`/search/addresses?${params.toString()}`))
+      promises.push(AroHttp.get(`/service/v1/plan?search="${esc(newSearchTerm)}"`))
+      Promise.all(promises).then((searchData) => {
+        setOptions([
+          ...searchData[0].data.map(option => {
+            option.label = option.displayText
+            option.image = '/images/map_icons/aro/crosshairs-solid.svg'
+            option.selectType = 'location'
+            
+            delete option.displayText
+            return option
+          }),
+          ...searchData[1].data.map(option => {
+            const newOption = {
+              label: option.name,
+              value: option.name,
+              image: '/images/map_icons/aro/folder-open-regular.svg',
+              selectType: 'plan',
+              id: option.id
+            }
+
+            return newOption
+          }),
+        ])
+      })
+    }, 250)
   }
 
   const handleChange = change => {
@@ -53,7 +77,7 @@ const ToolBarSearch = (props) => {
         // While Editing the existing plan, if user modified the location details then update the plan,
         // When location change from top tool-bar search box, update the 'lat', 'lag' to change the marker values.
         if (currentView && currentView === 'viewModePlanInfo') {
-          plan.areaName = change.displayText
+          plan.areaName = change.label
           plan.latitude = results[0].geometry.location.lat()
           plan.longitude = results[0].geometry.location.lng()
           AroHttp.put(`/service/v1/plan`, plan)
@@ -64,6 +88,8 @@ const ToolBarSearch = (props) => {
       })
     } else if (change.type === 'latlng') {
       if (currentView && currentView !== 'viewModePlanInfo') { setMarker(+change.value[0], +change.value[1]) }
+    } else if (change.selectType === 'plan') {
+      loadPlan(change.id)
     }
   }
 
@@ -80,26 +106,39 @@ const ToolBarSearch = (props) => {
     setTimeout(() => { marker.setMap(null) }, 5000)
   }
 
-  const setDefaultLocation = () => {
-    if (currentView && currentView === 'viewModePlanInfo') {
-      return plan && { label: plan.areaName }
-    } else {
-      return []
-    }
-  }  
+  const SelectItem = (props) => {
+    return (
+      <div
+        onClick={() => {
+          handleInputChange('')
+          handleChange(props)
+        }}
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}
+      >
+        {props.label}
+        <Avatar src={props.image} size='xs' />
+      </div>
+    )
+  }
   
   return (
     <div className="aro-toolbar-search" style={{ flex: '0 0 250px', margin: 'auto', width: '250px' }}>
       <Select
-        options={options}
-        placeholder="Search for a location..."
-        filterOption={() => true}
-        onInputChange={handleInputChange}
-        onChange={handleChange}
-        onFocus={() => setOptions([])}
-        onBlur={() => setOptions([])}
-        styles={selectStyles}
-        defaultValue={setDefaultLocation()}
+        searchable
+        data={options}
+        placeholder="Search for a location or plan..."
+        onSearchChange={(value) => handleInputChange(value)}
+        searchvalue={searchTerm}
+        itemComponent={SelectItem}
+        styles={{
+          wrapper: {
+            margin: '2px'
+          }
+        }}
       />
     </div>
   )
@@ -112,5 +151,6 @@ const mapStateToProps = (state) => ({
 })
 const mapDispatchToProps = dispatch => ({
   editActivePlan: (plan) => dispatch(PlanActions.editActivePlan(plan)),
+  loadPlan: (planId) => dispatch(ToolBarActions.loadPlan(planId)),
 })
 export default connect(mapStateToProps, mapDispatchToProps)(ToolBarSearch)
