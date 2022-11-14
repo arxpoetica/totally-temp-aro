@@ -34,7 +34,7 @@ const deleteTemplate = async templateId => {
 
 const _RfpTemplateManager = props => {
 
-  const { templates, loadRfpTemplates } = props
+  const { templates, configuration, loadRfpTemplates } = props
 
   useEffect(() => { loadRfpTemplates() }, [])
 
@@ -84,10 +84,13 @@ const _RfpTemplateManager = props => {
 
     <h4>Upload new template</h4>
     <Grid align="center">
-      <RfpVersionRadioGroup
-        value={rfpVersion}
-        onChange={value => setRfpVersion(+value)}
-      />
+
+      {configuration.system.ARO_CLIENT !== 'frontier' &&
+        <RfpVersionRadioGroup
+          value={rfpVersion}
+          onChange={value => setRfpVersion(+value)}
+        />
+      }
 
       <Grid.Col lg={4} md={12}>Template name</Grid.Col>
       <Grid.Col lg={8} md={12}>
@@ -130,6 +133,7 @@ const _RfpTemplateManager = props => {
 
 const mapStateToProps = state => ({
   templates: state.optimization.rfp.templates,
+  configuration: state.configuration,
 })
 
 const mapDispatchToProps = dispatch => ({

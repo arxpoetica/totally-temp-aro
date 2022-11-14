@@ -12,11 +12,12 @@ import { klona } from 'klona'
 const _RfpSubmit = props => {
 
   const {
-    loadRfpTemplates,
-    templates,
-    submitRfpReport,
     isSubmittingRfp,
     submitResult,
+    templates,
+    configuration,
+    loadRfpTemplates,
+    submitRfpReport,
   } = props
 
   useEffect(() => { loadData() }, [])
@@ -74,14 +75,16 @@ const _RfpSubmit = props => {
 
       : <Grid align="center">
 
-          <RfpVersionRadioGroup
-            value={rfpVersion}
-            onChange={value => {
-              const { id } = templates.find(({ version }) => (+value) === version)
-              setSelectedTemplateId(+id)
-              setRfpVersion(+value)
-            }}
-          />
+          {configuration.system.ARO_CLIENT !== 'frontier' &&
+            <RfpVersionRadioGroup
+              value={rfpVersion}
+              onChange={value => {
+                const { id } = templates.find(({ version }) => (+value) === version)
+                setSelectedTemplateId(+id)
+                setRfpVersion(+value)
+              }}
+            />
+          }
 
           <Grid.Col lg={4} md={12}>RFP plan name</Grid.Col>
           <Grid.Col lg={8} md={12}>
@@ -164,6 +167,7 @@ const mapStateToProps = state => ({
   isSubmittingRfp: state.optimization.rfp.isSubmittingRfp,
   submitResult: state.optimization.rfp.submitResult,
   templates: state.optimization.rfp.templates,
+  configuration: state.configuration,
 })
 
 const mapDispatchToProps = dispatch => ({
