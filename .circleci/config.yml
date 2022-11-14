@@ -50,14 +50,6 @@ jobs:
                 docker push ${ECR_IMAGE_NAME}:dev
                 python3 docker/publish_version.py qa-${BRANCH} app $CIRCLE_BUILD_NUM
             fi
-            if [ $CIRCLE_BRANCH == "sales-ux/main-4989090" ]
-              then
-                docker tag ${IMAGE_TAG} ${IMAGE_NAME}:sales-ux
-                docker push ${IMAGE_NAME}:sales-ux
-                docker tag ${IMAGE_TAG} ${ECR_IMAGE_NAME}:sales-ux
-                docker push ${ECR_IMAGE_NAME}:sales-ux
-                python3 docker/publish_version.py qa-${BRANCH} app $CIRCLE_BUILD_NUM
-            fi
 
   deploy:
     docker:
@@ -82,8 +74,6 @@ workflows:
                 - dev
                 - uat
                 - main-183115939
-                - sales-ux/main-4989090
-                - 183466975-rfp/main
       - deploy:
           context: aro_qa_builds
           requires:
