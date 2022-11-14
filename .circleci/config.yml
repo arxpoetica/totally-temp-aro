@@ -73,7 +73,6 @@ workflows:
                 - master
                 - dev
                 - uat
-                - main
       - deploy:
           context: aro_qa_builds
           requires:
