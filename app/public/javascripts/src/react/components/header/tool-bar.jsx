@@ -515,19 +515,6 @@ export class ToolBar extends Component {
         }
 
         {/* Dynamic Dropdown for Toolbar icons */}
-        <div
-          className="dropdown"
-          style={{ display: !showDropDown ? 'none' : 'block',
-            borderLeft: '#eee 1px dotted', width: dropdownWidthPixels }}
-        >
-          <button style={{backgroundColor: configuration.toolbar.toolBarColor}}
-            className="btn btn-light" type="button" id="dropdownMenu1" data-toggle="dropdown"
-            aria-haspopup="true" aria-expanded="true">
-            <i className="fa fa-angle-double-down"></i>
-          </button>
-        </div>
-
-        {/* Dynamic Dropdown for Toolbar icons */}
         <>
           <div
             className="dropdown"
