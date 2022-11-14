@@ -13,21 +13,11 @@ const defaultState = {
   selectedTarget: null,
   status: RfpStatusTypes.UNINITIALIZED,
   showAllRfpStatus: false,
-  tabs: [
-    { id: 'LIST_PLANS', description: 'List all plans' },
-    { id: 'SUBMIT_RFP', description: 'Submit RFP' },
-    { id: 'MANAGE_RFP_TEMPLATES', description: 'Manage RFP templates' }
-  ],
-  selectedTabId: 'LIST_PLANS',
   templates: [],
-  selectedTemplateId: null,
   isSubmittingRfp: false,
   submitResult: null,
   rfpPlans: [],
-  rfpReportDefinitions: [],
   isLoadingRfpPlans: false,
-  planListOffset: 0,
-  planListLimit: 10,
   progress: 0,
   reportsBeingDownloaded: new Set(), // A set of URLs that are being downloaded (the server can take time to generate reports)
   showFullScreenContainer: false,
@@ -87,13 +77,10 @@ function setShowAllRfpStatus (state, showAllRfpStatus) {
   }
 }
 
-function setRfpPlans (state, rfpPlans, rfpReportDefinitions, isLoadingRfpPlans) {
+function setRfpPlans (state, rfpPlans, isLoadingRfpPlans) {
   return { ...state,
     rfpPlans: rfpPlans,
-    rfpReportDefinitions: rfpReportDefinitions,
     isLoadingRfpPlans: isLoadingRfpPlans,
-    planListOffset: defaultState.planListOffset,
-    planListLimit: defaultState.planListLimit
   }
 }
 
@@ -103,28 +90,9 @@ function setIsLoadingRfpPlans (state, isLoadingRfpPlans) {
   }
 }
 
-function setPlanListOffset (state, planListOffset) {
-  return { ...state,
-    planListOffset: planListOffset
-  }
-}
-
-function setSelectedTabId (state, selectedTabId) {
-  return { ...state,
-    selectedTabId: selectedTabId
-  }
-}
-
 function setRfpTemplates (state, rfpTemplates) {
   return { ...state,
     templates: rfpTemplates,
-    selectedTemplateId: rfpTemplates[0].id
-  }
-}
-
-function setSelectedTemplateId (state, selectedTemplateId) {
-  return { ...state,
-    selectedTemplateId: selectedTemplateId
   }
 }
 
@@ -186,7 +154,7 @@ function rfpReducer (state = defaultState, action) {
       return setShowAllRfpStatus(state, action.payload)
 
     case Actions.RFP_SET_PLANS:
-      return setRfpPlans(state, action.payload.rfpPlans, action.payload.rfpReportDefinitions, action.payload.isLoadingRfpPlans)
+      return setRfpPlans(state, action.payload.rfpPlans, action.payload.isLoadingRfpPlans)
 
     case Actions.RFP_SET_CLICK_MAP_TO_ADD_TARGET:
       return setClickMapToAddTarget(state, action.payload)
@@ -194,17 +162,8 @@ function rfpReducer (state = defaultState, action) {
     case Actions.RFP_SET_IS_LOADING_RFP_PLANS:
       return setIsLoadingRfpPlans(state, action.payload)
 
-    case Actions.RFP_SET_PLAN_LIST_OFFSET:
-      return setPlanListOffset(state, action.payload)
-
-    case Actions.RFP_SET_SELECTED_TAB_ID:
-      return setSelectedTabId(state, action.payload)
-
     case Actions.RFP_SET_TEMPLATES:
       return setRfpTemplates(state, action.payload)
-
-    case Actions.RFP_SET_SELECTED_TEMPLATE_ID:
-      return setSelectedTemplateId(state, action.payload)
 
     case Actions.RFP_SET_IS_SUBMITTING_RESULT:
       return setIsSubmittingRfp(state, action.payload)

@@ -51,16 +51,17 @@ module.exports = class UiSettings {
     return database.query(sql)
   }
 
-  static createRfpTemplate (name, value) {
+  static createRfpTemplate ({ templateName, template, rfpVersion }) {
     const sql = `
-      INSERT INTO ui.rfp_template(name, value, service_request_schema_id)
+      INSERT INTO ui.rfp_template(name, value, service_request_schema_id, version)
       VALUES(
         $1,
         $2,
-        (SELECT id FROM ui.service_request_schema WHERE name='/rfp/process')
+        (SELECT id FROM ui.service_request_schema WHERE name='/rfp/process'),
+        $3
       );
     `
-    return database.query(sql, [name, value])
+    return database.query(sql, [templateName, template, rfpVersion])
   }
 
   static deleteRfpTemplate (id) {

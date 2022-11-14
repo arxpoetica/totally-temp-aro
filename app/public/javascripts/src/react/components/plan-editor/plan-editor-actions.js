@@ -569,15 +569,6 @@ function createConstructionArea(constructionArea) {
   }
 }
 
-function deleteBoundaryVertex (mapObject, vertex) {
-  return dispatch => {
-    // checks it is a valid vertex and that there are at least 3 other vertices left
-    if (mapObject.getPath().getLength() > 3) {
-      mapObject.getPath().removeAt(vertex)
-    }
-  }
-}
-
 function deleteBoundaryVertices (mapObject, vertices, callBack) {
   return dispatch => {
       // We are tracking the multiple selected verticies to delete by markers created.
@@ -585,9 +576,10 @@ function deleteBoundaryVertices (mapObject, vertices, callBack) {
       vertices.sort((a, b) => {
         return Number(b.title) - Number(a.title)
       })
-
+      const length = mapObject.getPath().getLength()
       for (let marker of vertices) {
-        if (marker && marker.title && mapObject.getPath().getLength() > 3) {
+        if (marker && marker.title && length > 3) {
+          if (Number(marker.title) >= length) marker.title = '0';
           mapObject.getPath().removeAt(Number(marker.title))
         }
       }     
@@ -623,7 +615,7 @@ function showContextMenuForList (features, coords) {
     mergableTypes.forEach(mergableType => {
       if (mergableType in featuresByType && featuresByType[mergableType].length > 1) {
         let label = `${featuresByType[mergableType].length} ${toLabel(mergableType)}s`
-        let menuAction = new MenuItemAction('MERGE', 'Merge All', 'PlanEditorActions', 'mergeTerminals', klona(featuresByType[mergableType]))
+        let menuAction = new MenuItemAction('MERGE', 'Merge All', 'PlanEditorActions', 'mergeTerminals', false, klona(featuresByType[mergableType]))
         let menuItemFeature = new MenuItemFeature(null, label, [menuAction])
         featuresByType[mergableType].unshift(
           {
@@ -656,12 +648,12 @@ function showContextMenuForList (features, coords) {
       if (feature.dataType === 'GROUP_HEADER') { // this is a little hacky, we'll clean it up later ... probably
         menuItemFeatures.push(feature.menuItemFeature)
       } else if (feature.dataType === "edge_construction_area") {
-        menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteConstructionArea', feature.objectId))
+        menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteConstructionArea', false, feature.objectId))
         menuItemFeatures.push(new MenuItemFeature('CONSTRUCTION_AREA', 'Construction Area', menuActions))
       } else {
         let label = 'Equipment'
         if (feature.dataType) label = toLabel(feature.dataType)
-        menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteFeature', feature.objectId))
+        menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteFeature', false, feature.objectId))
         menuItemFeatures.push(new MenuItemFeature('EQUIPMENT', label, menuActions))
       }
     })
@@ -713,15 +705,15 @@ function showContextMenuForLocations (featureIds, event) {
             && state.planEditor.subnets[subnetId].subnetLocationsById[locationId].parentEquipmentId
           ) {
             // TODO: avoid duplicate unassignLocation code
-            menuActions.push(new MenuItemAction('REMOVE', 'Unassign from terminal', 'PlanEditorActions', 'unassignLocation', locationId, subnetId))
+            menuActions.push(new MenuItemAction('REMOVE', 'Unassign from terminal', 'PlanEditorActions', 'unassignLocation', false, locationId, subnetId))
           }
         } else {
           // there IS a location connector type selected so filter for add remove
           if (terminalLocations[locationId]) {
-            menuActions.push(new MenuItemAction('REMOVE', 'Unassign from terminal', 'PlanEditorActions', 'unassignLocation', locationId, subnetId))
+            menuActions.push(new MenuItemAction('REMOVE', 'Unassign from terminal', 'PlanEditorActions', 'unassignLocation', false, locationId, subnetId))
           } else {
             // either there is not a location connector type choosen OR the location isn't a part
-            menuActions.push(new MenuItemAction('ADD', 'Assign to terminal', 'PlanEditorActions', 'assignLocation', locationId, terminalId))
+            menuActions.push(new MenuItemAction('ADD', 'Assign to terminal', 'PlanEditorActions', 'assignLocation', false, locationId, terminalId))
           }
         }
 
@@ -920,15 +912,16 @@ function mergeTerminals (terminals) {
   }
 }
 
-function showContextMenuForBoundary (mapObject, x, y, vertex, callBack) {
+function showContextMenuForBoundary (mapObject, x, y, vertex, callBack) {  
   return (dispatch) => {
     const menuActions = []
     menuActions.push(
       new MenuItemAction(
-        Array.isArray(vertex) ? 'DELETE_ALL' : 'DELETE',
-        'Delete',
+        vertex.length > 1 ? 'DELETE_ALL' : 'DELETE',
+        vertex.length > 1 ? 'Delete All' : 'Delete',
         'PlanEditorActions',
-        Array.isArray(vertex) ? 'deleteBoundaryVertices' : 'deleteBoundaryVertex',
+        'deleteBoundaryVertices',
+        vertex.length === 1, // makes action repeatable if one vertex
         mapObject,
         vertex,
         // Callback is utilized to update the local state of the react class if it is a multi-delete.
@@ -938,7 +931,7 @@ function showContextMenuForBoundary (mapObject, x, y, vertex, callBack) {
 
     const menuItemFeature = new MenuItemFeature(
       'BOUNDARY',
-      `Boundary ${Array.isArray(vertex) ? 'Vertices' : 'Vertex' }`,
+      `Boundary ${vertex.length > 1 ? 'Vertices' : 'Vertex' }`,
       menuActions
     )
 
@@ -1815,6 +1808,7 @@ function parseSubnet (subnet) {
       // TOS: does this make a list for each household? 
       // if subnet.subnetLocationsById[objectId] doesn't exist something has fallen out of sync
       subnet.subnetLocationsById[objectId] = { ...location, parentEquipmentId: null}
+      delete subnet.subnetLocationsById[objectId].objectIds
     })
   })
   delete subnet.subnetLocations
@@ -1944,7 +1938,6 @@ export default {
   deleteFeature,
   createConstructionArea,
   moveConstructionArea,
-  deleteBoundaryVertex,
   deleteBoundaryVertices,
   addTransactionFeatures,
   showContextMenuForList,

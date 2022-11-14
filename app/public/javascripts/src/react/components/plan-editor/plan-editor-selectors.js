@@ -386,14 +386,13 @@ const getLocationCounts = createSelector(
 
       // TODO: not a fan of hardcoding by type
       if (subnet && type === 'fiber_distribution_hub') {
-        const locations = Object.values(subnet.subnetLocationsById)
         const uniqueConnected = new Set()
         const uniqueTotal = new Set()
-        for (const location of locations) {
+        for (const [id, location] of Object.entries(subnet.subnetLocationsById)) {
           if(!!location.parentEquipmentId) {
-            location.objectIds.forEach(id => uniqueConnected.add(id))
+            uniqueConnected.add(id)
           }
-          location.objectIds.forEach(id => uniqueTotal.add(id))
+          uniqueTotal.add(id)
         }
         locationCountsById[id] = {
           connected: uniqueConnected.size,

@@ -4,7 +4,6 @@ import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import './tool-bar.css'
 import LocationSearch from './location-search.jsx'
 import Tools from '../tool/tools'
-import MapActions from '../map/map-actions'
 import ToolBarActions from './tool-bar-actions'
 import MapReportsActions from '../map-reports/map-reports-actions'
 import ToolActions from '../tool/tool-actions'
@@ -20,6 +19,7 @@ import GlobalsettingsActions from '../global-settings/globalsettings-action'
 import GlobalSettings from '../global-settings/global-settings.jsx'
 import { logoutApp, setAppcuesQuery } from '../../common/view-utils'
 import PlanEditorActions from '../plan-editor/plan-editor-actions'
+import cx from 'clsx'
 
 export class ToolBar extends Component {
   constructor (props) {
@@ -486,6 +486,7 @@ export class ToolBar extends Component {
 
         {exportSelectedPolygon &&
           <button
+            style={{ display: exportSelectedPolygon ? 'block' : 'none' }}
             className={
               `btn ${selectedTargetSelectionMode === this.targetSelectionModes.POLYGON_EXPORT_TARGET
                 ? 'btn-selected'
@@ -499,11 +500,32 @@ export class ToolBar extends Component {
         }
 
         {configuration.perspective.showToolbarButtons.showRFPWindow &&
-          <button className="btn" title="Show RFP status"
-            onClick={() => this.showRfpWindow()}>
+          <button
+            className={cx(
+              'btn', (
+                selectedDisplayMode === this.displayModes.EDIT_PLAN
+                || selectedDisplayMode === this.displayModes.EDIT_RINGS
+              ) && 'hide'
+            )}
+            title="Show RFP status"
+            onClick={() => this.showRfpWindow()}
+          >
             <i className="fa fa-cloud"></i>
           </button>
         }
+
+        {/* Dynamic Dropdown for Toolbar icons */}
+        <div
+          className="dropdown"
+          style={{ display: !showDropDown ? 'none' : 'block',
+            borderLeft: '#eee 1px dotted', width: dropdownWidthPixels }}
+        >
+          <button style={{backgroundColor: configuration.toolbar.toolBarColor}}
+            className="btn btn-light" type="button" id="dropdownMenu1" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="true">
+            <i className="fa fa-angle-double-down"></i>
+          </button>
+        </div>
 
         {/* Dynamic Dropdown for Toolbar icons */}
         <>
@@ -562,6 +584,9 @@ export class ToolBar extends Component {
             openAccountSettingsModal={this.openAccountSettingsModal}
           />
         }
+        <style jsx>{`
+          .hide { display: none; }
+        `}</style>
       </div>
     )
   }

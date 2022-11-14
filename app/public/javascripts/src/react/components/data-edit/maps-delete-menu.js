@@ -15,6 +15,8 @@ function DeleteMenu() {
     event.stopPropagation()
     menu.removeVertex();
   });
+  // needed to prevent clicks passing through div
+  google.maps.OverlayView.preventMapHitsAndGesturesFrom(this.div_)
 }
 DeleteMenu.prototype = new google.maps.OverlayView();
 
@@ -72,13 +74,15 @@ DeleteMenu.prototype.draw = function() {
 /**
  * Opens the menu at a vertex of a given path.
  */
-DeleteMenu.prototype.open = function(map, path, position, vertexPayload, callBack) {
+DeleteMenu.prototype.open = function(map, path, position, vertexPayload, callBack, repeatable=false) {
   this.close()
   this.set('position', position);
   this.set('path', path);
   this.set('vertexPayload', vertexPayload);
   this.set('callBack', callBack);
-  if (Array.isArray(vertexPayload)) {
+  this.set('repeatable', repeatable)
+
+  if (vertexPayload.length > 1) {
     this.div_.innerHTML = "Delete All"
   } else {
     this.div_.innerHTML = "Delete"
@@ -94,6 +98,7 @@ DeleteMenu.prototype.removeVertex = function() {
   var path = this.get('path');
   var vertexPayload = this.get('vertexPayload');
   let callBack = this.get('callBack')
+  const repeatable = this.get('repeatable')
 
   if (!path || (vertexPayload == undefined || vertexPayload.length === 0)) {
     this.close();
@@ -116,7 +121,7 @@ DeleteMenu.prototype.removeVertex = function() {
     if (path.getLength() > 3) path.removeAt(vertexPayload);
   }
 
-  this.close();
+  if (!repeatable) this.close();
 };
 
 export default DeleteMenu

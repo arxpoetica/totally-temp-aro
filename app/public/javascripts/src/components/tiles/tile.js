@@ -478,7 +478,7 @@ class TileComponentController {
 
         if (hitFeatures) {
           if (isShiftPressed && hasRoadSegments) {
-            const mapFeatures = this.state.mapFeaturesSelectedEvent.getValue()
+            const mapFeatures = this.mapFeatures
             const priorRoadSegments = [...mapFeatures.roadSegments || []]
 
             // capturing difference because shift + click should also remove
@@ -499,7 +499,7 @@ class TileComponentController {
           // BE SIMPLIFIED INTO A MUCH MORE DISCREET (SINGLE) SELECTION FUNCTION.
           // RIGHT NOW THERE'S 5 OR MORE FUNCTIONS PASSING ALONG THE DATA, BEFORE AND AFTER THIS
           // potential TODO: maybe we can fix it as part of vector tile 2.0
-          const prevHitFeatures = this.state.mapFeaturesSelectedEvent.getValue()
+          const prevHitFeatures = this.mapFeatures
           if (Object.keys(prevHitFeatures).length) {
             // unfortunately, because of data inconsistency,
             // this requires special casing. TODO: simplify the data
@@ -528,6 +528,8 @@ class TileComponentController {
               // https://www.wikiwand.com/en/Difference_(set_theory)#/Relative_complement
               const prevFeatures = prevHitFeatures[featureName]
               hitFeatures[featureName] = hitFeatures[featureName].filter(feature => {
+                // safety check for feature existing in prevHitFeatures
+                if (!prevFeatures) return true
                 // FIXME: OH MY HECK GROSS: `prevFeatures.locations` is SOMETIMES an array
                 // and SOMETIMES a Set...WHHHHHUUUUUHHH???? Hence `[...prevFeatures]
                 const found = [...prevFeatures].find(prevItem => prevItem[idName] === feature[idName])
@@ -878,6 +880,7 @@ class TileComponentController {
       locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(reduxState),
       selectedSubnetLocations: PlanEditorSelectors.getLocationsForSelectedSubnet(reduxState), 
       selectionIds: reduxState.selection.planEditorFeatures,
+      mapFeatures: reduxState.selection.mapFeatures,
       polygonCoordinates: reduxState.selection.polygonCoordinates,
       rPlanState: reduxState.plan && reduxState.plan.activePlan && reduxState.plan.activePlan.planState,
     }

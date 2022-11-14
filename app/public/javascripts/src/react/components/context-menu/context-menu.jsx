@@ -176,7 +176,7 @@ export class ContextMenu extends Component {
     } else {
       console.error(`Menu item was clicked but action creator not found: ${menuItemAction.actionCreatorClass}.${menuItemAction.actionCreatorMethod}`)
     }
-    this.props.hideContextMenu()
+    if (!menuItemAction.repeatable) this.props.hideContextMenu()
     event.stopPropagation()
   }
 }

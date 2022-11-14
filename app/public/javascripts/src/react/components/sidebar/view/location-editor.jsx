@@ -125,6 +125,7 @@ export const LocationEditor = (props) => {
     clearSelectedLocations,
     cloneSelection,
     setMapSelection,
+    setMapFeatures,
     setPlanEditorFeatures,
     selectedDisplayMode,
     setDeletedMapObjects,
@@ -142,6 +143,7 @@ export const LocationEditor = (props) => {
       const newSelection = cloneSelection()
       newSelection.editable.location = {}
       setMapSelection(newSelection)
+      setMapFeatures({})
       mapRef.setOptions({ draggableCursor: null })
     }
   }, [])
@@ -547,6 +549,26 @@ export const LocationEditor = (props) => {
     AroHttp.delete(`/service/library/transaction/${currentTransaction.id}/features/${mapObject.objectId}`)
   }
 
+  const getDisabled = (value) => {
+    if (!userCanChangeWorkflowState) return true 
+
+    // The below limitations should only apply to frontier details below
+    // https://www.pivotaltracker.com/story/show/183536801
+    if (ARO_CLIENT !== 'frontier') return false
+
+    const workflowStateId = objectIdToProperties[selectedMapObject.objectId].workflowStateId
+    // if state is created don't allow switching to locked or invalidated
+    if (workflowStateId ===  WorkflowState.CREATED.id
+        && value !== WorkflowState.CREATED.id) return true
+
+    // if state is invalid or locked only allow switching between those options
+    if (workflowStateId === WorkflowState.INVALIDATED.id 
+        || workflowStateId === WorkflowState.LOCKED.id) {
+        if (value === WorkflowState.CREATED.id) return true
+    }
+    return false
+  }
+
   return (
     <div className="edit-locations">
       <div className="container">
@@ -680,7 +702,7 @@ export const LocationEditor = (props) => {
                             className="radiofill"
                             value={1}
                             name='workflowStateId'
-                            disabled={!userCanChangeWorkflowState && 'disabled'}
+                            disabled={getDisabled(WorkflowState.CREATED.id)}
                             checked={objectIdToProperties[selectedMapObject.objectId].workflowStateId === 1}
                             onChange={(event) => {
                               onChangeLocProp(event)
@@ -696,7 +718,7 @@ export const LocationEditor = (props) => {
                             className="radiofill"
                             value={2}
                             name='workflowStateId'
-                            disabled={!userCanChangeWorkflowState && 'disabled'}
+                            disabled={getDisabled(WorkflowState.LOCKED.id)}
                             checked={objectIdToProperties[selectedMapObject.objectId].workflowStateId === 2}
                             onChange={(event) => {
                               onChangeLocProp(event)
@@ -718,13 +740,18 @@ export const LocationEditor = (props) => {
                             className="radiofill"
                             value={4}
                             name='workflowStateId'
-                            disabled={!userCanChangeWorkflowState && 'disabled'}
+                            disabled={getDisabled(WorkflowState.INVALIDATED.id)}
                             checked={objectIdToProperties[selectedMapObject.objectId].workflowStateId === 4}
                             onChange={(event) => {
                               onChangeLocProp(event)
                               markSelectedLocationPropertiesDirty()
                             }}
                           />
+                          <style jsx>{`
+                            .radiofill:disabled {
+                              background-color: lightgray;
+                            }
+                          `}</style>
                           <span>
                             <img
                               className="overlay-close"
@@ -999,6 +1026,7 @@ const mapDispatchToProps = (dispatch) => ({
   deleteLocationWithId: objectId => dispatch(ViewSettingsActions.deleteLocationWithId(objectId)),
   activeViewModePanel: displayPanel => dispatch(ToolBarActions.activeViewModePanel(displayPanel)),
   setDeletedMapObjects: (mapObject) => dispatch(ToolBarActions.setDeletedMapObjects(mapObject)),
+  setMapFeatures: mapFeatures => dispatch(SelectionActions.setMapFeatures(mapFeatures)),
 })
 
 export default wrapComponentWithProvider(reduxStore, LocationEditor, mapStateToProps, mapDispatchToProps)

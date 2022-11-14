@@ -65,7 +65,20 @@ const LocationMapObjects = (props) => {
     onDeleteObject,
     removeMapObjects,
     isRulerEnabled,
+    cloneSelection,
+    setMapSelection,
+    setMapFeatures,
+    setSelectedLocations
   } = props
+  
+  useEffect(() => {
+    const newSelection = cloneSelection()
+    newSelection.editable.location = {}
+    setMapSelection(newSelection)
+    setMapFeatures({})
+    setSelectedLocations([])
+    return () => removeCreatedMapObjects()
+  }, [])
 
   const prevMapFeatures = usePrevious(mapFeatures)
   useEffect(() => {
@@ -74,8 +87,6 @@ const LocationMapObjects = (props) => {
     if (isRulerEnabled) { return } // disable any click action when ruler is enabled
     if (prevMapFeatures && !dequal(prevMapFeatures, mapFeatures)) { handleMapEntitySelected(mapFeatures) }
   }, [mapFeatures])
-
-  useEffect(() => { return () => removeCreatedMapObjects() }, [])
 
   useEffect(() => { updateSelectedMapObject(selectedMapObject) }, [selectedMapObject])
 
@@ -128,7 +139,6 @@ const LocationMapObjects = (props) => {
       if (!eventXY) { return }
       updateContextMenu(event.latLng, eventXY.x, eventXY.y, mapObject)
     })
-
     createdMapObjects[mapObject.objectId] = mapObject
     setState((state) => ({ ...state, createdMapObjects }))
     setObjectIdToMapObject(createdMapObjects)
@@ -144,7 +154,7 @@ const LocationMapObjects = (props) => {
       const menuActions = []
       const { objectId } = clickedMapObject
       menuActions.push(
-        new MenuItemAction('DELETE', 'Delete', 'ViewSettingsActions', 'deleteLocationWithId', objectId))
+        new MenuItemAction('DELETE', 'Delete', 'ViewSettingsActions', 'deleteLocationWithId', false, objectId))
       const menuItems = new MenuItemFeature('LOCATION', 'Location', menuActions)
       openContextMenu(x, y, [menuItems])
     }
@@ -327,11 +337,15 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToProps = (dispatch) => ({
+  cloneSelection: () => dispatch(SelectionActions.cloneSelection()),
+  setMapSelection: (mapSelection) => dispatch(SelectionActions.setMapSelection(mapSelection)),
   setSelectedMapObject: mapObject => dispatch(SelectionActions.setSelectedMapObject(mapObject)),
   setObjectIdToMapObject: objectIdToMapObject => dispatch(SelectionActions.setObjectIdToMapObject(objectIdToMapObject)),
   setPlanEditorFeatures: objectIds => dispatch(SelectionActions.setPlanEditorFeatures(objectIds)),
   setContextMenuItems: menuItemFeature => dispatch(ContextMenuActions.setContextMenuItems(menuItemFeature)),
   showContextMenu: (x, y) => dispatch(ContextMenuActions.showContextMenu(x, y)),
+  setMapFeatures: mapFeatures => dispatch(SelectionActions.setMapFeatures(mapFeatures)),
+  setSelectedLocations: locationIds => dispatch(SelectionActions.setLocations(locationIds)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(LocationMapObjects)

@@ -70,12 +70,40 @@ export class MultiSelectVertices {
     removedMarker.setMap(null)
   }
 
+  // this is for creating markers not directly from an event
+  // the return from this can be passed to this.addMarker()
+  createSyntheticVertexEvent(marker) {
+    return {
+      vertex: marker.title,
+      latLng: marker.position
+    }
+  }
+
   clearMapObjectOverlay() {
     for (const marker of this.mapObjectOverlay) {
       this.googleUtil.maps.event.clearInstanceListeners(marker);
       marker.setMap(null)
     }
-  
     this.mapObjectOverlay = []
   }
+
+  // clears existing markers and tries to select subsequent vertex
+  finishDeletion() {
+    const sortedObjects = this.mapObjectOverlay.sort((a, b) => {
+      return Number(b.title) - Number(a.title)
+    })
+    this.clearMapObjectOverlay()
+    if (sortedObjects.length === 1 && sortedObjects[0].title) this.selectNextVertex(sortedObjects[0])
+  }
+
+  selectNextVertex(marker) {
+    if (!marker.title) return
+    const nextVertexEvent = this.createSyntheticVertexEvent(marker)
+
+    const length = this.mapObject.getPath().getLength();
+    if (nextVertexEvent.vertex >= length ) nextVertexEvent.vertex = '0';
+
+    this.addMarker(nextVertexEvent)
+  }
 }
+

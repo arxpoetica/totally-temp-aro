@@ -42,7 +42,6 @@ import ConfigurationEditor from '../react/components/configuration/ui/configurat
 import ContextMenu from '../react/components/context-menu/context-menu.jsx'
 import CoverageInitializer from '../react/components/coverage/coverage-initializer.jsx'
 import CoverageButton from '../react/components/coverage/coverage-button.jsx'
-import RfpButton from '../react/components/optimization/rfp/rfp-button.jsx'
 import NetworkAnalysisConstraints from '../react/components/optimization/network-analysis/network-analysis-constraints.jsx'
 import NetworkAnalysisConnectivityDefinition from '../react/components/optimization/network-analysis/network-analysis-connectivity-definition.jsx'
 import NetworkAnalysisOutput from '../react/components/optimization/network-analysis/network-analysis-output.jsx'
@@ -53,8 +52,8 @@ import PlanEditor from '../react/components/plan-editor/plan-editor.jsx'
 import EquipmentDropTarget from '../react/components/plan-editor/equipment-drop-target.jsx'
 import ReportModuleList from '../react/components/configuration/report/report-module-list.jsx'
 import ReportsDownloadModal from '../react/components/optimization/reports/reports-download-modal.jsx'
+import RfpButton from '../react/components/optimization/rfp/rfp-button.jsx'
 import RfpAnalyzer from '../react/components/optimization/rfp/rfp-analyzer.jsx'
-import RfpStatus from '../react/components/optimization/rfp/status/rfp-status.jsx'
 import RingEdit from '../react/components/ring-edit/ring-edit.jsx'
 import RingButton from '../react/components/ring-edit/ring-button.jsx'
 import DuctEdit from '../react/components/data-edit/duct-edit.jsx'
@@ -64,7 +63,6 @@ import ResourcePermissions from '../react/components/acl/resource-permissions/re
 import ProjectPermissions from '../react/components/project-template/project-permissions.jsx'
 import EtlTemplates from '../react/components/etl-templates/etl-templates.jsx'
 import PermissionsTable from '../react/components/acl/resource-permissions/permissions-table.jsx'
-import SearchableSelect from '../react/components/common/searchable-select.jsx'
 import PlanningConstraintsEditor from '../react/components/resource-manager/planning-constraints-editor.jsx'
 import FusionEditor from '../react/components/resource-manager/fusion-editor.jsx'
 import NetworkArchitectureEditor from '../react/components/resource-manager/network-architecture-editor.jsx'
@@ -126,7 +124,6 @@ app
   .component('rConfigurationEditor', react2angular(ConfigurationEditor))
   .component('rCoverageInitializer', react2angular(CoverageInitializer))
   .component('rCoverageButton', react2angular(CoverageButton))
-  .component('rRfpButton', react2angular(RfpButton))
   .component('rNetworkAnalysisConnectivityDefinition', react2angular(NetworkAnalysisConnectivityDefinition))
   .component('rNetworkAnalysisConstraints', react2angular(NetworkAnalysisConstraints, ['initialValues', 'enableReinitialize']))
   .component('rNetworkAnalysisOutput', react2angular(NetworkAnalysisOutput))
@@ -137,8 +134,8 @@ app
   .component('rEquipmentDropTarget', react2angular(EquipmentDropTarget))
   .component('rReportModuleList', react2angular(ReportModuleList))
   .component('rReportsDownloadModal', react2angular(ReportsDownloadModal, ['reportTypes', 'title'])) // Some properties are passed in manually, not through redux.
+  .component('rRfpButton', react2angular(RfpButton))
   .component('rRfpAnalyzer', react2angular(RfpAnalyzer))
-  .component('rRfpStatus', react2angular(RfpStatus))
   .component('rRingEdit', react2angular(RingEdit))
   .component('rRingButton', react2angular(RingButton, ['onModify']))
   .component('rDuctEdit', react2angular(DuctEdit, ['displayOnly']))
@@ -149,7 +146,6 @@ app
   .component('rPermissionsTable', react2angular(PermissionsTable))
   .component('rProjectPermissions', react2angular(ProjectPermissions))
   .component('rEtlTemplates', react2angular(EtlTemplates))
-  .component('rSearchableSelect', react2angular(SearchableSelect))
   .component('rPlanningConstraintsEditor', react2angular(PlanningConstraintsEditor, ['onDiscard']))
   .component('rFusionEditor', react2angular(FusionEditor, ['onDiscard']))
   .component('rNetworkArchitectureEditor', react2angular(NetworkArchitectureEditor, ['onDiscard']))

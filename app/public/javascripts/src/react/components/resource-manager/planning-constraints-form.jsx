@@ -263,7 +263,8 @@ export class PlanningConstraints extends Component {
                 <td>Polygonizer Road Edge Types</td>
                 <td>
                   <Field name='polygonizerRoadEdgeTypes'
-                    component={polygonizerMultiSelect} 
+                    component={genericMultiSelect} 
+                    props={{data: ['primary', 'secondary', 'tertiary']}}
                     type='select-multiple' /> 
                 </td>
               </tr>
@@ -283,6 +284,24 @@ export class PlanningConstraints extends Component {
                     className='checkboxfill' component='input' type='checkbox' />
                 </td>
               </tr>
+              <tr>
+                <td>Feeder Fiber Cable Codes</td>
+                <td>
+                  <Field name='cableCodeConfig.cableCodeMap.FEEDER'
+                    component={genericMultiSelect}
+                    props={{data: this.props.cableSizeList}}
+                    type='select-multiple' />
+                </td>
+              </tr>
+              <tr>
+                <td>Distribution Fiber Cable Codes</td>
+                <td>
+                  <Field name='cableCodeConfig.cableCodeMap.DISTRIBUTION'
+                    component={genericMultiSelect}
+                    props={{data: this.props.cableSizeList}}
+                    type='select-multiple' />
+                </td>
+              </tr>
             </tbody>
           </table>
         </form>
@@ -295,14 +314,14 @@ export class PlanningConstraints extends Component {
     )
   }
 }
-
 // this is a workaround to fit a new mantine form into the current system
-const polygonizerMultiSelect = (props) => {
+// To use pass props with a data value that works with mantine multi select
+const genericMultiSelect = (props) => {
   // I am just passing value and onChange down to the input from Field
   // onBlur was clearing out the form in redux-form
   return (
     <MultiSelect 
-      data={['primary', 'secondary', 'tertiary']}
+      data={props.data}
       value={props.input.value} 
       onChange={props.input.onChange}
     />

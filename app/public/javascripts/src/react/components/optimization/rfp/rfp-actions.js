@@ -103,26 +103,15 @@ function loadRfpPlans (userId, searchTerm = '', runRfpPlan) {
     })
     const searchTermWithQuotes = searchTerm ? ` "${searchTerm}"` : ''
     let rfpPlans = []
-    Promise.all([
-      AroHttp.get(`/service/v1/plan?search=type:"RFP"${searchTermWithQuotes}&user_id=${userId}`),
-      AroHttp.get(`/service/rfp/report-definition`)
-    ])
+    AroHttp.get(`/service/v1/plan?search=type:"RFP"${searchTermWithQuotes}&user_id=${userId}`)
       .then(results => {
-        rfpPlans = results[0].data
+        rfpPlans = results.data
         rfpPlans.sort((a, b) => a.id > b.id ? -1 : 1) // Sort plans in descending order by ID (so newest plans appear first)
-
-        const rfpReportDefinitions = results[1].data.length 
-        ? results[1].data.filter(reportDefinition =>
-          (reportDefinition.reportData.reportType === 'COVERAGE'
-          || reportDefinition.reportData.reportType === 'RFP')
-        )
-        : []
 
         dispatch({
           type: Actions.RFP_SET_PLANS,
           payload: {
             rfpPlans: rfpPlans,
-            rfpReportDefinitions: rfpReportDefinitions,
             isLoadingRfpPlans: false
           }
         })
@@ -137,16 +126,6 @@ function loadRfpPlans (userId, searchTerm = '', runRfpPlan) {
           payload: false
         })
       })
-  }
-}
-
-function clearRfpPlans () {
-  return {
-    type: Actions.RFP_SET_PLANS,
-    payload: {
-      rfpPlans: [],
-      isLoadingRfpPlans: false
-    }
   }
 }
 
@@ -181,7 +160,6 @@ export default {
   addTargets,
   clearRfpState,
   initializeRfpReport,
-  clearRfpPlans,
   loadRfpPlans,
   modifyRfpReport,
   removeTarget,

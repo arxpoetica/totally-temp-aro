@@ -12,15 +12,14 @@ let deleteKeyListener
 let mapObject
 let multiSelectVertices
 let clearMapObjectOverlay
+let finishDeletion
 
 const EquipmentBoundaryMapObjects = props => {
 
   // any changes to state props should cause a rerender
   const {
     subnets,
-    subnetFeatures,
     selectedSubnetId,
-    planType,
     googleMaps,
     showContextMenuForBoundary,
     boundaryChange,
@@ -60,6 +59,7 @@ const EquipmentBoundaryMapObjects = props => {
       fillOpacity: 0.05,
     })
     setupListenersForMapObject(mapObject)
+    if (multiSelectVertices) multiSelectVertices.clearMapObjectOverlay()
     multiSelectVertices = new MultiSelectVertices(
       mapObject,
       googleMaps,
@@ -71,6 +71,7 @@ const EquipmentBoundaryMapObjects = props => {
       invalidBoundaryHandling.stashMapObject(mapObject.subnetId, mapObject)
     }
     clearMapObjectOverlay = multiSelectVertices.clearMapObjectOverlay.bind(multiSelectVertices)
+    finishDeletion = multiSelectVertices.finishDeletion.bind(multiSelectVertices)
   }
 
   function deleteMapObject() {
@@ -103,11 +104,12 @@ const EquipmentBoundaryMapObjects = props => {
     mapObject.addListener('contextmenu', event => contextMenuClick(event))
     
     mapObject.addListener('click', event => {
-      if (event.vertex) {
+      if (event.vertex || event.vertex === 0) {
         event.domEvent.stopPropagation()
-        if (event.domEvent.shiftKey) {
-          multiSelectVertices.addOrRemoveMarker(event)
+        if (!event.domEvent.shiftKey) {
+          multiSelectVertices.clearMapObjectOverlay()
         }
+        multiSelectVertices.addOrRemoveMarker(event)
       }
     })
 
@@ -128,7 +130,7 @@ const EquipmentBoundaryMapObjects = props => {
         // Sort is necessary to ensure that indexes will not be reassigned while deleting more than one vertex.
         const mapObjectOverlayClone = [...multiSelectVertices.mapObjectOverlay]
         // Using mapObject as the argument being passed instead of the one in the parent function is the only way this consistently works.
-        deleteBoundaryVertices(mapObject, mapObjectOverlayClone, clearMapObjectOverlay)
+        deleteBoundaryVertices(mapObject, mapObjectOverlayClone, finishDeletion)
       }
     })
   }
@@ -156,18 +158,18 @@ const EquipmentBoundaryMapObjects = props => {
         // Add vertex to array if it doesn't already exist there.
         multiSelectVertices.addMarker(event)
       }
-      vertexPayload = overlay
     } else {
-      vertexPayload = event.vertex
+      multiSelectVertices.addMarker(event)
     }
 
+    vertexPayload = multiSelectVertices.mapObjectOverlay
     const eventXY = WktUtils.getXYFromEvent(event)
     showContextMenuForBoundary(
       mapObject,
       eventXY.x,
       eventXY.y,
       vertexPayload,
-      clearMapObjectOverlay,
+      finishDeletion,
     )
   }
 
@@ -181,8 +183,6 @@ const mapStateToProps = state => ({
   googleMaps: state.map.googleMaps,
   subnets: state.planEditor.subnets,
   selectedSubnetId: state.planEditor.selectedSubnetId,
-  subnetFeatures: state.planEditor.subnetFeatures,
-  planType: state.plan.activePlan.planType
 })
 
 const mapDispatchToProps = dispatch => ({
