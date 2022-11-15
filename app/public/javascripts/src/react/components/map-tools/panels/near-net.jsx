@@ -20,22 +20,26 @@ const compDictonary = {
 }
 
 const NearNet = ({
-  PCM,
-  pcmDefinitionNearNet,
+  selectedManager,
+  listedManager,
   configuration,
   filterValues,
   updateMapLayerFilters,
   setAndRequestPCM,
-  definition,
   hasResourceItems
 }) => {
   const [showNearNet, setShowNearNet] = useState(false)
 
   useEffect(() => {
-    !definition && hasResourceItems
+    if (!selectedManager) return
+    !listedManager && hasResourceItems
       ? setAndRequestPCM()
-      : setShowNearNet(pcmDefinitionNearNet)
-  }, [PCM, pcmDefinitionNearNet, hasResourceItems])
+      : setShowNearNet(listedManager.definition.generateNearNetAnalysis)
+  }, [
+    hasResourceItems,
+    (selectedManager && selectedManager.id),
+    JSON.stringify(listedManager && listedManager.definition)
+  ])
 
   const onFilterChange = (key, type, value, payload) => {
     const newValue = payload || {};
@@ -85,12 +89,11 @@ const NearNet = ({
 }
 
 const mapStateToProps = (state) => {
-  const PCM = state.plan.resourceItems.planning_constraints_manager
-  const definition = state.resourceManager.managers[PCM && PCM.id] && state.resourceManager.managers[PCM.id].definition
+  const selectedManager = state.plan.resourceItems.planning_constraints_manager && state.plan.resourceItems.planning_constraints_manager.selectedManager
+  const listedManager = state.resourceManager.managers[selectedManager && selectedManager.id]
   return {
-    PCM,
-    definition: !!definition,
-    pcmDefinitionNearNet: !!definition && definition.generateNearNetAnalysis,
+    selectedManager,
+    listedManager,
     configuration: state.configuration,
     filterValues: MapLayerSelectors.getFilterValues(state),
     hasResourceItems: Object.keys(state.plan.resourceItems).length > 0
