@@ -353,10 +353,21 @@ class TileComponentController {
         hitFeatures.event = event
         this.state.mapFeaturesRightClickedEvent.next(hitFeatures)
       })
+      const displayMode = this.rSelectedDisplayMode
+      const viewModePanel = this.rActiveViewModePanel
+      const planState = this.rPlanState
+      const { VIEW, ANALYSIS } = this.state.displayModes
+      const { START_STATE } = rConstants.PLAN_STATE
+      const { EDIT_SERVICE_LAYER } = this.state.viewModePanels
 
-      if (this.rSelectedDisplayMode !== this.state.displayModes.VIEW
-        || this.rActiveViewModePanel === this.state.viewModePanels.EDIT_SERVICE_LAYER
-      ) return
+      // Disable if not in view or analysis
+      if (displayMode !== VIEW && displayMode !== ANALYSIS) return
+      
+      // Disable if editing sevice layer in view
+      if (displayMode === VIEW && viewModePanel === EDIT_SERVICE_LAYER) return
+
+      // Disable in analysis unless in start_state to select locations
+      if (displayMode === ANALYSIS && planState !== START_STATE) return
 
       this.getFilteredFeaturesUnderLatLng(event.latLng)
         .then((hitFeatures) => {
