@@ -12,50 +12,50 @@ const ToolBarSearch = (props) => {
   const [searchTerm, setSearchTerm] = useState('')
   const { defaultPlanCoordinates, mapRef, currentView, plan, loadPlan } = props
 
-  let timer
   const handleInputChange = (newSearchTerm) => {
-    setSearchTerm(newSearchTerm)
-    clearTimeout(timer)
     const promises = []
-    timer = setTimeout(() => {
-      const params = new URLSearchParams({
-        text: newSearchTerm,
-        sessionToken: uuidStore.getInsecureV4UUID(),
-        biasLatitude: defaultPlanCoordinates.latitude,
-        biasLongitude: defaultPlanCoordinates.longitude,
-      })
-      if (!newSearchTerm) {
-        setOptions([])
-        return
-      }
-      const esc = encodeURIComponent
-      promises.push(AroHttp.get(`/search/addresses?${params.toString()}`))
-      promises.push(AroHttp.get(`/service/v1/plan?search="${esc(newSearchTerm)}"`))
-      Promise.all(promises).then((searchData) => {
-        setOptions([
-          ...searchData[0].data.map(option => {
-            option.label = option.displayText
-            option.image = '/images/map_icons/aro/crosshairs-solid.svg'
-            option.selectType = 'location'
-            
-            delete option.displayText
-            return option
-          }),
-          ...searchData[1].data.map(option => {
-            const newOption = {
-              label: option.name,
-              value: option.name,
-              image: '/images/map_icons/aro/folder-open-regular.svg',
-              selectType: 'plan',
-              id: option.id
-            }
+    const params = new URLSearchParams({
+      text: newSearchTerm,
+      sessionToken: uuidStore.getInsecureV4UUID(),
+      biasLatitude: defaultPlanCoordinates.latitude,
+      biasLongitude: defaultPlanCoordinates.longitude,
+    })
+    if (!newSearchTerm) {
+      setOptions([])
+      return
+    }
+    const esc = encodeURIComponent
+    promises.push(AroHttp.get(`/search/addresses?${params.toString()}`))
+    promises.push(AroHttp.get(`/service/v1/plan?search="${esc(newSearchTerm)}"`))
+    Promise.all(promises).then((searchData) => {
+      setOptions([
+        ...searchData[0].data.map(option => {
+          option.label = option.displayText
+          if (option.type === 'latlng') {
+            option.label = newSearchTerm
+            option.customLabel = `Lat: ${option.value[0]}, Long: ${option.value[1]}`
+          }
+          option.image = '/images/map_icons/aro/crosshairs-solid.svg'
+          delete option.displayText
+          
+          return option
+        }),
+        ...searchData[1].data.map(option => {
+          const newOption = {
+            label: option.name,
+            value: option.name,
+            image: '/images/map_icons/aro/folder-open-regular.svg',
+            selectType: 'plan',
+            id: option.id
+          }
 
-            return newOption
-          }),
-        ])
-      })
-    }, 250)
+          return newOption
+        }),
+      ])
+    })
   }
+
+  const debounceHandleInputChange = _.debounce(handleInputChange, 250)
 
   const handleChange = change => {
     if (change.type === 'error') {
@@ -105,10 +105,12 @@ const ToolBarSearch = (props) => {
     })
     setTimeout(() => { marker.setMap(null) }, 5000)
   }
-
-  const SelectItem = (props) => {
+  // this forward ref junk is to prevent an error on mantine's end
+  // that causes a giant red error message to show in console.
+  const SelectItem = React.forwardRef((props, ref) => {
     return (
       <div
+        ref={ref}
         onClick={() => {
           handleInputChange('')
           handleChange(props)
@@ -116,14 +118,15 @@ const ToolBarSearch = (props) => {
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
+          cursor: 'pointer'
         }}
       >
-        {props.label}
+        {props.customLabel || props.label}
         <Avatar src={props.image} size='xs' />
       </div>
     )
-  }
+  })
   
   return (
     <div className="aro-toolbar-search" style={{ flex: '0 0 250px', margin: 'auto', width: '250px' }}>
@@ -131,7 +134,10 @@ const ToolBarSearch = (props) => {
         searchable
         data={options}
         placeholder="Search for a location or plan..."
-        onSearchChange={(value) => handleInputChange(value)}
+        onSearchChange={(value) => {
+          setSearchTerm(value)
+          debounceHandleInputChange(value)
+        }}
         searchvalue={searchTerm}
         itemComponent={SelectItem}
         styles={{
