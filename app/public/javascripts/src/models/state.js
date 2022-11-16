@@ -256,12 +256,8 @@ class State {
       // ToDo: selection mechanism needs to be cerntalised 
       // set all mapFeatures in redux
       if (
-        //(
-          service.selectedDisplayMode.getValue() == service.displayModes.VIEW
-          || service.selectedDisplayMode.getValue() == service.displayModes.ANALYSIS
-        //) && (
-        //  !service.rNearnetLayers.length
-        //)
+        service.selectedDisplayMode.getValue() == service.displayModes.VIEW
+        || service.selectedDisplayMode.getValue() == service.displayModes.ANALYSIS
       ){
         service.setMapFeatures(hitFeatures)
         // For tracking when map clicked by the user.

@@ -1,5 +1,5 @@
 class MenuAction {
-  constructor (type, label, actionCreatorClass, actionCreatorMethod, repeatable, ...payload) {
+  constructor (type, label, actionCreatorClass, actionCreatorMethod, repeatable=false, ...payload) {
     this.type = type
     this.label = label
     this.actionCreatorClass = actionCreatorClass

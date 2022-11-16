@@ -318,8 +318,15 @@ class _TileOverlayComposer extends Component {
   onClick = (event) => {
     // TODO: at the moment only nearnet layers use click - but this is cooincidental, fix
     let points = this.getFeaturesAtLatLng(event.latLng, this.getLayersForEvent('click'))
-    //console.log(event)
-    //if (points.length) this.stopEventPropigation(event)
+
+    // vtIgnore is SUCH a HACK - it's a literal hack, 
+    //  stop propigation / cancel doesn't work on google map event
+    //  the old vector tile system will receive this event and override our location selection 
+    //  so I add this stow-away property that vector tile checks for 
+    //  in tile.js -> overlayClickListener
+    //  the old VT system will soon be replaced by a good system
+    if (points.length) event.vtIgnore = true //this.stopEventPropigation(event)
+    
     this.onClickNearnet(points, event)// TODO: generalize this
   }
   onClickNearnet (points, event) {
@@ -346,7 +353,8 @@ class _TileOverlayComposer extends Component {
   // stopEventPropigation (event) {
   //   event.stop()
   //   event.domEvent.stopPropagation()
-  //   event.domEvent.cancelBubble = true;
+  //   event.domEvent.cancelBubble = true
+  //   //event.defaultPrevented = true
   // }
 
   addListeners () {
