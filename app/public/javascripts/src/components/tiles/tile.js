@@ -449,6 +449,7 @@ class TileComponentController {
     })
 
     this.overlayClickListener = this.mapRef.addListener('click', async(event) => {
+      if (event.vtIgnore) return // this is a HACK to stop propigation, see note in tile-overlay-composer
       const displayMode = this.state.selectedDisplayMode.getValue()
       const { ANALYSIS, EDIT_PLAN } = this.state.displayModes
       const { rPlanState } = this

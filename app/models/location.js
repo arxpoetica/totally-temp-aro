@@ -153,7 +153,7 @@ module.exports = class Location {
         const locationInfo = await database.findOne(`
           SELECT address,zipcode,city, ST_AsGeojson(geog)::json AS geog,cb.tabblock_id, cb.name
           FROM locations 
-          JOIN aro.census_blocks cb ON ST_Contains(cb.geom, locations.geom)
+          LEFT JOIN aro.census_blocks cb ON ST_Contains(cb.geom, locations.geom)
           WHERE locations.id=$1
         `, [location_id])
 

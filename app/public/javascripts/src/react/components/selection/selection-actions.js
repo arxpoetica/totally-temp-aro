@@ -243,7 +243,7 @@ function nearnetContextMenu (features, event) {
     var menuItemFeatures = []
     features.forEach(location => {
       let menuActions = []
-      menuActions.push(new MenuItemAction('SELECT', 'Select', 'SelectionActions', 'selectNearnetEntities', [location]))
+      menuActions.push(new MenuItemAction('SELECT', 'Select', 'SelectionActions', 'selectNearnetEntities', false, [location]))
       menuItemFeatures.push(new MenuItemFeature('LOCATION', 'Location', menuActions))
     })
 
