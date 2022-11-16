@@ -78,7 +78,7 @@ function check_admin (request, response, next) {
   next()
 }
 function check_loggedin(request, response, next) {
-  if(!request.user){
+  if(!request.user) {
     response.status(403).json({
       error: 'Forbidden'
     })

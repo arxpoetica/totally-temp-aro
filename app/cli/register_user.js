@@ -14,7 +14,7 @@ var argv = require('yargs')
   .alias('p', 'password')
   .alias('r', 'rol')
   .alias('c', 'companyName')
-  .demand(['f', 'l', 'e'])
+  .demandOption(['f', 'l', 'e'])
   .argv
 
 var models = require('../models')
