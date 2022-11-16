@@ -1,11 +1,14 @@
-import React, { Component } from 'react'
+import React, { useEffect } from 'react'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from "../../../common/provider-wrapped-component"
+import ToolBarActions from '../../header/tool-bar-actions'
 
 
 const _LocationView = props => {
 
-  //useEffect(() => {})
+  useEffect(() => {
+    props.setActiveViewModePanel('LOCATION_INFO')
+  }, [props.nearnetEntities])
 
   // FUTURE: replace this with a generic object viewer (I've built that like three times haven't I?)
   // iterate object props build rows
@@ -63,7 +66,7 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = dispatch => ({
-
+  setActiveViewModePanel: displayPanel => dispatch(ToolBarActions.activeViewModePanel(displayPanel)),
 })
 
 const LocationView = wrapComponentWithProvider(reduxStore, _LocationView, mapStateToProps, mapDispatchToProps)
